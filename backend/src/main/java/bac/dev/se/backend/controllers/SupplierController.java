@@ -15,6 +15,7 @@ public class SupplierController {
 
     @GetMapping
     public List<Supplier> getSuppliers(){
+        System.out.println("Get all suppliers...");
         return supplierRepository.findAll();
     }
     @GetMapping("/{id}")
@@ -29,6 +30,7 @@ public class SupplierController {
     @DeleteMapping("/{id}")
     public String deleteSupplier(@PathVariable("id") Long id){
         supplierRepository.deleteById(id);
+        
         return "Supplier deleted";
     }
 }
