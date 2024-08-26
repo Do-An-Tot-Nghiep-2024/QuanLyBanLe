@@ -29,8 +29,8 @@ public class SupplierController {
 
     @DeleteMapping("/{id}")
     public String deleteSupplier(@PathVariable("id") Long id){
+        System.out.println("Delete supplier with id = " + id + "...");
         supplierRepository.deleteById(id);
-        
         return "Supplier deleted";
     }
 }
