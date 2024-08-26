@@ -1,13 +1,13 @@
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/retail-shop?createDatabaseIfNotExist=true
-    username: ${MYSQL_USER:vietbac}
-    password: y${MYSQL_PASSWORD:vietbac}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
-        show_sql: true
+#spring:
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3307/retail-shop?createDatabaseIfNotExist=true
+#    username: ${MYSQL_USER:vietbac}
+#    password: ${MYSQL_PASSWORD:vietbac}
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    properties:
+#      hibernate:
+#        format_sql: true
+#        show_sql: true
