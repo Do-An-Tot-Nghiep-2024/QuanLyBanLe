@@ -25,4 +25,10 @@ public class SupplierController {
     public Supplier createSupplier(@RequestBody Supplier supplier){
         return supplierRepository.save(supplier);
     }
+
+    @DeleteMapping("/{id}")
+    public String deleteSupplier(@PathVariable("id") Long id){
+        supplierRepository.deleteById(id);
+        return "Supplier deleted";
+    }
 }
