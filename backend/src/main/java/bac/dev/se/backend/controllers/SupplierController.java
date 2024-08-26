@@ -15,7 +15,7 @@ public class SupplierController {
 
     @GetMapping
     public List<Supplier> getSuppliers(){
-        System.out.println("Get all suppliers...");
+    
         return supplierRepository.findAll();
     }
     @GetMapping("/{id}")
