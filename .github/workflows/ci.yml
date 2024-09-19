@@ -66,7 +66,7 @@ jobs:
             -Dsonar.exclusions=frontend/node_modules/**
             -Dsonar.tests=frontend
             -Dsonar.test.inclusions=frontend/**/*.spec.js
-            -Dsonar.javascript.lcov.reportPaths=client/coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
             -Dsonar.verbose=true
 
   build-docker-images:
