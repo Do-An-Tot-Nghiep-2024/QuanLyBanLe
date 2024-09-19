@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  analyze:
+  sonar-scan-backend:
     name: Build and analyze
     runs-on: ubuntu-latest
     defaults:
@@ -71,7 +71,7 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.host.url=https://sonarcloud.io
 
-  build:
+  build-docker-images:
     runs-on: ubuntu-latest
     steps:
       # Checkout the repository
