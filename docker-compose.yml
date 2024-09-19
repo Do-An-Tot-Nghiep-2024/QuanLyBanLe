@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  backend:
+    image: vietbac2002/retail-store-backend:latest
+    ports:
+      - 8080:8080
+    environment:
+      - spring.profiles.active=prod
+    restart: always
+  frontend:
+    image: vietbac2002/retail-store-frontend:latest
+    ports:
+      - 80:80
+    depends_on:
+      - server
+    restart: always

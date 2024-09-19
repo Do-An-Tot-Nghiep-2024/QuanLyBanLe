@@ -1,0 +1,20 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: backend
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/retail-store?createDatabaseIfNotExist=true
+    username: vietbac
+    password: vietbac
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  output:
+    ansi:
+      enabled: always
+
+
+
