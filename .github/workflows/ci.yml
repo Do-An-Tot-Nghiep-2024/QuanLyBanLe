@@ -10,7 +10,6 @@ on:
 
 jobs:
   sonar-scan-backend:
-    name: Build and analyze
     runs-on: ubuntu-latest
     defaults:
       run:
