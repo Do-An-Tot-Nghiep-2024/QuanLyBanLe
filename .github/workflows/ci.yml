@@ -9,99 +9,99 @@ on:
       - main
 
 jobs:
-  # analyze:
-  #   name: Build and analyze
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       working-directory: ./server
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-  #     - name: Set up JDK 17
-  #       uses: actions/setup-java@v4
-  #       with:
-  #         java-version: 17
-  #         distribution: "zulu" # Alternative distribution options are available
-  #     - name: Cache SonarCloud packages
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: ~/.sonar/cache
-  #         key: ${{ runner.os }}-sonar
-  #         restore-keys: ${{ runner.os }}-sonar
-  #     - name: Cache Gradle packages
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: ~/.gradle/caches
-  #         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-  #         restore-keys: ${{ runner.os }}-gradle
-  #     - name: Make gradlew executable
-  #       run: chmod +x ./gradlew
-  #     - name: Build and analyze
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }} # Needed to get PR information, if any
-  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  #       run: ./gradlew build sonar --info
-
-  sonarcloud:
-    name: SonarCloud
+  sonar-scan-backend:
+    name: Build and analyze
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./frontend
+        working-directory: ./backend
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: "zulu" # Alternative distribution options are available
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+      - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=do-an-tot-nghiep-2024_retail-store-frontend
-            -Dsonar.organization=do-an-tot-nghiep-2024
-            -Dsonar.sources=frontend
-            -Dsonar.exclusions=frontend/node_modules/**
-            -Dsonar.tests=frontend
-            -Dsonar.test.inclusions=frontend/**/*.spec.js
-            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
-            -Dsonar.verbose=true
-            -Dsonar.host.url=https://sonarcloud.io
+        run: ./gradlew build sonar --info
 
-  # build:
+  # sonarcloud:
+  #   name: SonarCloud
   #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ./frontend
   #   steps:
-  #     # Checkout the repository
-  #     - name: Checkout VCS
-  #       uses: actions/checkout@v3
-
-  #     - name: Set up QEMU
-  #       uses: docker/setup-qemu-action@v3
-
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v3
-
-  #     # Log in to DockerHub
-  #     - name: Login with DockerHub
-  #       uses: docker/login-action@v3
+  #     - uses: actions/checkout@v4
   #       with:
-  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
-  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  #     # Build and push the Docker image
-  #     - name: Build and push Docker image server
-  #       uses: docker/build-push-action@v6
+  #         fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+  #     - name: SonarCloud Scan
+  #       uses: SonarSource/sonarcloud-github-action@master
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }} # Needed to get PR information, if any
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   #       with:
-  #         context: ./server
-  #         push: true
-  #         tags: ${{ secrets.DOCKERHUB_USERNAME }}/full-stack-demo-server:latest
+  #         args: >
+  #           -Dsonar.projectKey=do-an-tot-nghiep-2024_retail-store-frontend
+  #           -Dsonar.organization=do-an-tot-nghiep-2024
+  #           -Dsonar.sources=frontend
+  #           -Dsonar.exclusions=frontend/node_modules/**
+  #           -Dsonar.tests=frontend
+  #           -Dsonar.test.inclusions=frontend/**/*.spec.js
+  #           -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
+  #           -Dsonar.verbose=true
+  #           -Dsonar.host.url=https://sonarcloud.io
 
-  #     - name: Build and push Docker image client
-  #       uses: docker/build-push-action@v6
-  #       with:
-  #         context: ./client
-  #         push: true
-  #         tags: ${{ secrets.DOCKERHUB_USERNAME }}/full-stack-demo-client:latest
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - name: Checkout VCS
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Log in to DockerHub
+      - name: Login with DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build and push the Docker image
+      - name: Build and push Docker image server
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/retail-store-backend:latest
+
+      - name: Build and push Docker image client
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/retail-store-frontend:latest

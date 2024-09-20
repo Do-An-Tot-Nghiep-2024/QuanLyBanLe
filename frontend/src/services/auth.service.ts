@@ -23,7 +23,7 @@ const loginService = async (login: LoginSchema) => {
 };
 const getAccountService = async () => {
   try {
-    const response = await axios.get("http://localhost:8085/api/v1/auth/account",{
+    const response = await axios.get("http://localhost/api/v1/auth/account",{
       headers: {
         Authorization: `Bearer ${Cookies.get("accessToken")}`,
       },
