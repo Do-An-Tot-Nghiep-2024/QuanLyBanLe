@@ -9,6 +9,6 @@ public class ValidateInput {
     }
 
     public boolean isValidPhoneNumber(String phoneNumber) {
-        return !phoneNumber.matches("^[0-9]{10}$");
+        return !phoneNumber.matches("^\\d{10}$");
     }
 }

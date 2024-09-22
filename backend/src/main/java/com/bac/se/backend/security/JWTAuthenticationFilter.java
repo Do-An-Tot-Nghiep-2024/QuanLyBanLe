@@ -45,15 +45,16 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         } catch (JwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write(e.getMessage() + " : Invalid or expired token, you may login and try again!");
-            return;
+//            return;
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(e.getMessage());
-            return;
+//            return;
+        }finally {
+            filterChain.doFilter(request, response);
         }
 //        } finally {
 //        }
-        filterChain.doFilter(request, response);
     }
 
 

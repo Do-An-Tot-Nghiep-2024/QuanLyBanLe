@@ -39,6 +39,8 @@ class EmployeeServiceTest {
     @Mock
     private ValidateInput validateInput;
 
+    private final String EMPLOYEE_NOT_FOUND = "Employee not found";
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -50,7 +52,6 @@ class EmployeeServiceTest {
     int pageNumber = 0;
         int pageSize = 10;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-
         // Mocking a sample Employee data
         Object[] employeeData1 = {"John Doe", "john@example.com", "1234567890"};
         Object[] employeeData2 = {"Jane Smith", "jane@example.com", "9876543210"};
@@ -77,6 +78,7 @@ class EmployeeServiceTest {
         assertEquals(pageNumber, result.pageNumber());
         assertEquals(1, result.totalPages());  // Only one page since the size matches
         assertEquals(2, result.totalElements());
+        assertEquals(employeeResponseList, result.responseList());
         assertEquals(employeeResponse1, result.responseList().get(0));
         assertEquals(employeeResponse2, result.responseList().get(1));
         assertTrue(result.isLastPage());  // It's the last page since all data fits in one page
@@ -123,7 +125,7 @@ class EmployeeServiceTest {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> employeeService.getEmployee(employeeId));
 
-        assertEquals("Employee not found", exception.getMessage());  // Ensure the exception message is correct
+        assertEquals(EMPLOYEE_NOT_FOUND, exception.getMessage());  // Ensure the exception message is correct
         verify(employeeRepository).findById(employeeId);  // Verify if the repository's findById was called
         verify(employeeMapper, never()).mapToEmployeeResponse(any()); // Verify if the mapper's mapToEmployeeResponse was not called
     }
@@ -184,7 +186,7 @@ class EmployeeServiceTest {
 
 
     @Test
-    void createEmployeeInvalidInput() throws BadRequestUserException {
+    void createEmployeeInvalidInput(){
         // Arrange
         EmployeeRequest employeeRequest = new EmployeeRequest("", "0123456789", "showdown@gmail.com", new Date());
         when(validateInput.isValidEmail(employeeRequest.email())).thenReturn(true);
@@ -198,7 +200,7 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void createEmployeeEmailAlreadyExists() throws BadRequestUserException {
+    void createEmployeeEmailAlreadyExists(){
         // Arrange
         EmployeeRequest employeeRequest = new EmployeeRequest("John Doe", "0123456789", "john@gmail.com", new Date());
         when(validateInput.isValidEmail(employeeRequest.email())).thenReturn(true);
@@ -215,7 +217,7 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void createEmployeePhoneAlreadyExists() throws BadRequestUserException {
+    void createEmployeePhoneAlreadyExists() {
         // Arrange
         EmployeeRequest employeeRequest = new EmployeeRequest("John Doe", "0123456789", "john@gmail.com", new Date());
         when(validateInput.isValidEmail(employeeRequest.email())).thenReturn(true);
@@ -259,7 +261,7 @@ class EmployeeServiceTest {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> employeeService.deleteEmployee(employeeId));
 
-        assertEquals("Employee not found", exception.getMessage());  // Ensure the exception message is correct
+        assertEquals(EMPLOYEE_NOT_FOUND, exception.getMessage());  // Ensure the exception message is correct
         verify(employeeRepository).findById(employeeId);  // Verify that findById was called
         verify(employeeRepository, never()).save(any());  // Ensure save was never called when employee doesn't exis
     }
@@ -336,7 +338,7 @@ class EmployeeServiceTest {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> employeeService.updateEmployee(employeeId, employeeRequest));
 
-        assertEquals("Employee not found", exception.getMessage());  // Ensure the exception message is correct
+        assertEquals(EMPLOYEE_NOT_FOUND, exception.getMessage());  // Ensure the exception message is correct
         verify(employeeRepository).findById(employeeId);  // Verify that findById was called
         verify(employeeRepository, never()).existsByEmail(any());  // Ensure existsByEmail was never called
         verify(employeeRepository, never()).existsByPhone(any());  // Ensure existsByPhone was never called

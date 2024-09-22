@@ -5,7 +5,6 @@ import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.models.Customer;
 import com.bac.se.backend.payload.response.ApiResponse;
 import com.bac.se.backend.payload.response.CustomerResponse;
-import com.bac.se.backend.security.JWTService;
 import com.bac.se.backend.services.CustomerService;
 import com.bac.se.backend.utils.JwtParse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +25,9 @@ import java.util.List;
 public class CustomerController {
     private final CustomerService customerService;
     private final JwtParse jwtParse;
+    private final String REQUEST_SUCCESS = "success";
+
+
     @GetMapping
     @PreAuthorize("hasAuthority('MANAGER')")
     public List<CustomerResponse> getCustomers() {
@@ -38,7 +40,7 @@ public class CustomerController {
         try {
             String accessToken  = jwtParse.decodeTokenWithRequest(request);
             CustomerResponse customerResponse = customerService.getCustomer(accessToken);
-            return ResponseEntity.ok(new ApiResponse("success", customerResponse));
+            return ResponseEntity.ok(new ApiResponse(REQUEST_SUCCESS, customerResponse));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse(e.getMessage(), null));
@@ -50,7 +52,7 @@ public class CustomerController {
     public ResponseEntity<ApiResponse> deleteCustomer(@PathVariable("id") Long id) {
         try {
             customerService.deleteCustomer(id);
-            return ResponseEntity.ok(new ApiResponse("success", id));
+            return ResponseEntity.ok(new ApiResponse(REQUEST_SUCCESS, id));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse(e.getMessage(), null));
