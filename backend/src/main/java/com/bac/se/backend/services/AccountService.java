@@ -95,39 +95,11 @@ public class AccountService {
     }
 
     public EmployeeAccountResponse createAccountEmployee(EmployeeAccountRequest accountRequest) throws BadRequestUserException {
-        String name = accountRequest.name();
-        String password = accountRequest.password();
-        String phone = accountRequest.phone();
-        String email = accountRequest.email();
-        if(name.isEmpty() || password.isEmpty() || phone.isEmpty() || email.isEmpty()){
-            throw new BadRequestUserException("Input is required");
-        }
-        if (validateInput.isValidEmail(email)) {
-            throw new BadRequestUserException("Email is not valid");
-        }
-        if (validateInput.isValidPhoneNumber(phone)) {
-            throw new BadRequestUserException("Phone is not valid");
-        }
-        log.info("Email already is {}",customerRepository.existsByEmail(email));
-        if(employeeRepository.existsByEmail(email)){
-            throw new AlreadyExistsException("Email already in use");
-        }
-        if(employeeRepository.existsByPhone(phone)){
-            throw new AlreadyExistsException("Phone already in use");
-        }
         Account account = createAccountWithRole(
                 accountRequest.email(),
                 accountRequest.password(),
                 Role.EMPLOYEE);
         accountRepository.save(account);
-        Employee employee = Employee.builder()
-                .name(accountRequest.name())
-                .email(accountRequest.email())
-                .phone(accountRequest.phone())
-                .dob(accountRequest.dob())
-                .account(account)
-                .build();
-        employeeRepository.save(employee);
         return new EmployeeAccountResponse(accountRequest.name(), accountRequest.email());
     }
 

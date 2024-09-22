@@ -35,3 +35,5 @@ EXPOSE 8080
 
 # Set the command to run the application
 CMD ["java", "-jar", "/app.jar"]
+
+# how to run the container

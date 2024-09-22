@@ -79,12 +79,6 @@ public class AccountController {
     }
 
 
-    @ModelAttribute("accessToken")
-    public String getToken(HttpServletRequest request) {
-        return (String) request.getAttribute("accessToken");
-    }
-
-
     @GetMapping("/account")
     public ResponseEntity<ApiResponse> getAccount(HttpServletRequest request) {
         try {
