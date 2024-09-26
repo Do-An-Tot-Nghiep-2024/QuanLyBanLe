@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
+    private final String REQUEST_SUCCESS = "success";
 
     @PostMapping
     public ResponseEntity<ApiResponse> createCategory(@RequestBody Category category) {
@@ -23,7 +24,7 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> deleteCategory(@PathVariable("id") Long id) {
         try {
-            return ResponseEntity.ok(new ApiResponse("success", id));
+            return ResponseEntity.ok(new ApiResponse(REQUEST_SUCCESS, id));
         }catch (ResourceNotFoundException e){
             return ResponseEntity.status(404)
                     .body(new ApiResponse(e.getMessage(), null));
@@ -33,7 +34,7 @@ public class CategoryController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getCategory(@PathVariable("id") Long id) {
        try{
-           return ResponseEntity.ok(new ApiResponse("success",
+           return ResponseEntity.ok(new ApiResponse(REQUEST_SUCCESS,
                    categoryService.getCategory(id)));
        }catch (ResourceNotFoundException e){
            return ResponseEntity.status(404)
@@ -44,7 +45,7 @@ public class CategoryController {
     @PutMapping
     public ResponseEntity<ApiResponse> updateCategory(@RequestBody Category category, @RequestBody Long id) {
         try{
-            return ResponseEntity.ok(new ApiResponse("success",
+            return ResponseEntity.ok(new ApiResponse(REQUEST_SUCCESS,
                     categoryService.updateCategory(category, id)));
         }catch (BadRequestUserException e) {
             return ResponseEntity.status(400)

@@ -20,12 +20,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginService } from "../../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import { useAppDispatch, useAppSelector } from "../../redux/hook";
+import { useAppDispatch} from "../../redux/hook";
 import { getAccount } from "../../redux/auth/authSlice";
 export default function LoginEmployeePage() {
   const navigation = useNavigate();
   const dispatch = useAppDispatch();
-  const auth = useAppSelector((state) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
   // event handlers
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -59,7 +58,7 @@ export default function LoginEmployeePage() {
         const { accessToken } = response.data as { accessToken: string };
         Cookies.set("accessToken", accessToken);
         dispatch(getAccount());
-        console.log("Auth at login employee page", auth?.role); 
+        // console.log("Auth at login employee page", auth?.role); 
         navigation("/");
       } else {
         console.log("Login failed");
@@ -69,7 +68,6 @@ export default function LoginEmployeePage() {
     }
   };
 
-  console.log("auth at login employee page", auth?.role);
 
   return (
     <Box

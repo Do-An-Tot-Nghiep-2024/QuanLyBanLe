@@ -16,9 +16,10 @@ const initialState: Auth = {
 const getAccount = createAsyncThunk("auth/get-user-token", async () => {
   try {
     const res = await getAccountService();
+    const reponseData = res.data.data;
     if (res?.status) {
       console.log('account is ',res.data.data);
-      return res.data.data as Account;
+      return reponseData as Account;
     }
     return {} as Account;
   } catch (error) {
@@ -40,6 +41,7 @@ export const authSlice = createSlice({
         state.isLogin = false;
         state.role = "";
       });
+      
   },
 });
 export { getAccount };

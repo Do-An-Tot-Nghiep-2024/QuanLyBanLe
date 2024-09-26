@@ -6,7 +6,6 @@ import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.models.Account;
 import com.bac.se.backend.models.Customer;
-import com.bac.se.backend.models.Employee;
 import com.bac.se.backend.payload.request.EmployeeAccountRequest;
 import com.bac.se.backend.payload.request.LoginRequest;
 import com.bac.se.backend.payload.request.RegisterRequest;
@@ -95,12 +94,21 @@ public class AccountService {
     }
 
     public EmployeeAccountResponse createAccountEmployee(EmployeeAccountRequest accountRequest) throws BadRequestUserException {
+        if (accountRequest.email().isEmpty() || accountRequest.password().isEmpty() || accountRequest.confirmPassword().isEmpty()) {
+            throw new BadRequestUserException("Input is required");
+        }
+        if (!accountRequest.password().equals(accountRequest.confirmPassword())) {
+            throw new BadRequestUserException("Password and confirm password is not match");
+        }
+        if (employeeRepository.existsByEmail(accountRequest.email())) {
+            throw new AlreadyExistsException("Email already in use");
+        }
         Account account = createAccountWithRole(
                 accountRequest.email(),
                 accountRequest.password(),
                 Role.EMPLOYEE);
         accountRepository.save(account);
-        return new EmployeeAccountResponse(accountRequest.name(), accountRequest.email());
+        return new EmployeeAccountResponse(accountRequest.email(), accountRequest.email());
     }
 
 

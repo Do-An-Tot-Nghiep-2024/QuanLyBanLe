@@ -7,6 +7,7 @@ import Cookies from "js-cookie";
 const loginService = async (login: LoginSchema) => {
   try {
     const response: ApiResponse = await api.post("/auth/login", login);
+    console.log(response);
     if (response?.message !== "success") {
       return {
         status: false,
@@ -23,12 +24,15 @@ const loginService = async (login: LoginSchema) => {
 };
 const getAccountService = async () => {
   try {
-    const response = await axios.get("http://localhost/api/v1/auth/account",{
-      headers: {
-        Authorization: `Bearer ${Cookies.get("accessToken")}`,
-      },
-      
-    });
+    const response = await axios.get(
+      `${import.meta.env.VITE_URL_BE}/auth/account`,
+      {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("accessToken")}`,
+        },
+      }
+    );
+    console.log("Get Account Response at auth service: ", response.data.data);
     if (response.status !== 200) {
       return {
         status: false,
@@ -37,7 +41,7 @@ const getAccountService = async () => {
     }
     return {
       status: true,
-      data: response.data,
+      data: response.data.data,
     };
   } catch (error) {
     console.log(error);

@@ -1,10 +1,11 @@
 import axios from "axios";
-
+import Cookies from "js-cookie";
 // Set config defaults when creating the instance
 const api = axios.create({
   baseURL: import.meta.env.VITE_URL_BE,
   headers: {
     "Content-Type": "application/json",
+    "Authorization": `Bearer ${Cookies.get("accessToken")}`,
   },
 });
 

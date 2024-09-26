@@ -24,40 +24,40 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AccountController {
     private final AccountService accountService;
     private final JwtParse jwtParse;
+    private final String REQUEST_SUCCESS = "success";
 
     // Register account customer controller
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@RequestBody RegisterRequest request) {
-       try {
-           RegisterResponse registerResponse = accountService.registerCustomer(request);
-           return ResponseEntity.ok()
-                   .body(new ApiResponse("success",registerResponse));
-       } catch (BadRequestUserException e) {
-           return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                   .body(new ApiResponse(e.getMessage(),null));
-       }catch (AlreadyExistsException e){
-           return ResponseEntity.status(HttpStatus.CONFLICT)
-                   .body(new ApiResponse(e.getMessage(),null));
-       }
+        try {
+            RegisterResponse registerResponse = accountService.registerCustomer(request);
+            return ResponseEntity.ok()
+                    .body(new ApiResponse(REQUEST_SUCCESS, registerResponse));
+        } catch (BadRequestUserException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse(e.getMessage(), null));
+        } catch (AlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse(e.getMessage(), null));
+        }
     }
 
     @PostMapping("/createAccount")
-    public ResponseEntity<ApiResponse> createAccountEmployee(@RequestBody EmployeeAccountRequest accountRequest)  {
+    public ResponseEntity<ApiResponse> createAccountEmployee(@RequestBody EmployeeAccountRequest accountRequest) {
         log.info("Request is {}", accountRequest);
         try {
             EmployeeAccountResponse accountEmployee = accountService.createAccountEmployee(accountRequest);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ApiResponse("success",accountEmployee));
+                    .body(new ApiResponse(REQUEST_SUCCESS, accountEmployee));
         } catch (BadRequestUserException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse(e.getMessage(),null));
-        }catch (AlreadyExistsException e){
+                    .body(new ApiResponse(e.getMessage(), null));
+        } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse(e.getMessage(),null));
+                    .body(new ApiResponse(e.getMessage(), null));
         }
     }
 
@@ -68,7 +68,7 @@ public class AccountController {
             return ResponseEntity
                     .ok()
 //                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                    .body(new ApiResponse("success", login));
+                    .body(new ApiResponse(REQUEST_SUCCESS, login));
         } catch (BadRequestUserException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse(e.getMessage(), null));
@@ -84,7 +84,8 @@ public class AccountController {
         try {
             String accessToken = jwtParse.decodeTokenWithRequest(request);
             log.info("token user is {}", accessToken);
-            return ResponseEntity.ok(accountService.getAccountResponse(accessToken));
+            return ResponseEntity.ok(new ApiResponse(REQUEST_SUCCESS,
+                    accountService.getAccountResponse(accessToken)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse(e.getMessage(), null));

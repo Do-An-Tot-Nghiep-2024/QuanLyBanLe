@@ -11,8 +11,10 @@ import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Box from "@mui/material/Box";
-import { useEffect, useMemo, useState } from "react";
-import { getAccountService } from "../../services/auth.service";
+import { useMemo, useState } from "react";
+import Cookies from "js-cookie";
+import { useAppDispatch } from "../../../redux/hook";
+import { getAccount } from "../../../redux/auth/authSlice";
 
 const NAVIGATION: Navigation = [
   {
@@ -113,6 +115,7 @@ interface DemoProps {
 
 export default function EmployeeMainPage(props: DemoProps) {
   const { window } = props;
+  const dispatch = useAppDispatch();
 
   const [session, setSession] = useState<Session | null>({
     user: {
@@ -135,6 +138,8 @@ export default function EmployeeMainPage(props: DemoProps) {
       },
       signOut: () => {
         setSession(null);
+        Cookies.remove("accessToken");
+        dispatch(getAccount());
       },
     };
   }, []);
@@ -150,23 +155,6 @@ export default function EmployeeMainPage(props: DemoProps) {
 
   // Remove this const when copying and pasting into your project.
   const demoWindow = window !== undefined ? window() : undefined;
-
-  useEffect(() => {
-    const getAccount = async () => {
-      try {
-        const response = await getAccountService();
-        if (response.status) {
-          console.log(response.data);
-          // dispatch(setAuth(response.data as any));
-        } else {
-          console.log("Get account failed");
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getAccount();
-  }, []);
 
   return (
     // preview-start

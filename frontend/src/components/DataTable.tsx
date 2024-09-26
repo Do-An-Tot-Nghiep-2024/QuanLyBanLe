@@ -1,4 +1,3 @@
-import * as React from "react";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
@@ -14,8 +13,18 @@ import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
-import { TableHead } from "@mui/material";
-
+import { Stack, TableHead, TextField } from "@mui/material";
+import { useState } from "react";
+import { SearchIcon } from "../assets/svg/Icon";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import EditIcon from "@mui/icons-material/Edit";
+import DialogDetail from "./DialogDetail";
+import AddBoxIcon from "@mui/icons-material/AddBox";
+import GetAppIcon from "@mui/icons-material/GetApp";
+import { useNavigate } from "react-router-dom";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import Column from "../types/column";
+import ResponsePagination from "../types/responsePagination";
 interface TablePaginationActionsProps {
   count: number;
   page: number;
@@ -96,46 +105,43 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
   );
 }
 
-function createData(name: string, calories: number, fat: number) {
-  return { name, calories, fat };
-}
-interface Column {
-  id: "name" | "calories" | "fat";
-  label: string;
-  minWidth?: number;
-  align?: "right";
-  format?: (value: number) => string;
-}
-
-const columns: readonly Column[] = [
-  { id: "name", label: "Dessert (100g serving)", minWidth: 100 },
-  { id: "calories", label: "Calories", minWidth: 100 },
-  { id: "fat", label: "Fat (g)", minWidth: 100 },
+const employees = [
+  {
+    id: 1,
+    name: "John Doe",
+    phone: "1234567890",
+    email: "johndoe@example.com",
+    dob: "01/01/1990",
+  },
+  {
+    id: 2,
+    name: "Jane Doe",
+    phone: "1234567890",
+    email: "janedoe@example.com",
+    dob: "01/01/1990",
+  },
 ];
 
-const rows = [
-  createData("Cupcake", 305, 3.7),
-  createData("Donut", 452, 25.0),
-  createData("Eclair", 262, 16.0),
-  createData("Frozen yoghurt", 159, 6.0),
-  createData("Gingerbread", 356, 16.0),
-  createData("Honeycomb", 408, 3.2),
-  createData("Ice cream sandwich", 237, 9.0),
-  createData("Jelly Bean", 375, 0.0),
-  createData("KitKat", 518, 26.0),
-  createData("Lollipop", 392, 0.2),
-  createData("Marshmallow", 318, 0),
-  createData("Nougat", 360, 19.0),
-  createData("Oreo", 437, 18.0),
-].sort((a, b) => (a.calories < b.calories ? -1 : 1));
+interface DataTableProps<T> {
+  columns: Column[];
+  data: ResponsePagination<T>;
+  caseType: string;
+}
 
-export default function DataTable() {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+export default function DataTable<T>({
+  columns,
+  data,
+  caseType,
+}: DataTableProps<T>) {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  console.log(data);
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+    page > 0
+      ? Math.max(0, (1 + page) * rowsPerPage - data.responseList.length)
+      : 0;
 
   const handleChangePage = (
     _event: React.MouseEvent<HTMLButtonElement> | null,
@@ -150,70 +156,182 @@ export default function DataTable() {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [selectedValue, setSelectedValue] = useState(employees[0]);
+  const columnsMap = new Map([
+    ["name", "Họ và tên"],
+    ["phone", "Số điện thoại"],
+    ["email", "Email"],
+    ["dob", "Ngày sinh"],
+  ]);
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const getKeys = function (obj: T) {
+    return Object.keys(obj as object) as (keyof T)[];
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleCreate = () => {
+    if (caseType === "employee") {
+      navigate("/create-employee");
+    }
+    if (caseType === "customer") {
+      navigate("/create-customer");
+    }
+    if (caseType === "product") {
+      navigate("/create-product");
+    }
+    if (caseType === "provider") {
+      navigate("/create-provider");
+    }
+  };
 
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{}} aria-label="custom pagination table">
-        <TableHead>
-          <TableRow>
-            {columns.map((column) => (
-              <TableCell
-                key={column.id}
-                align={"center"}
-                style={{ minWidth: column.minWidth }}
-              >
-                {column.label}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {(rowsPerPage > 0
-            ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            : rows
-          ).map((row) => (
-            <TableRow hover key={row.name}>
-              {columns.map((column) => {
-                const value = row[column.id];
-                return (
-                  <TableCell key={column.id} align="center">
-                    {column.format && typeof value === "number"
-                      ? column.format(value)
-                      : value}
+    <Box sx={{ width: "100%" }}>
+      <Stack
+        mb={2}
+        display="flex"
+        flexDirection={"row"}
+        justifyContent={"space-between"}
+        sx={{ width: "100%" }}
+      >
+        {/* create textfield  with search icon*/}
+        <TextField
+          id="search"
+          label="Tìm kiếm"
+          variant="filled"
+          size="small"
+          slotProps={{
+            input: {
+              endAdornment: (
+                <IconButton type="button" aria-label="Tìm kiếm" size="small">
+                  <SearchIcon />
+                </IconButton>
+              ),
+              sx: { pr: 0.5 },
+            },
+          }}
+          sx={{
+            display: { xs: "none", md: "inline-block", sm: "flex" },
+            mr: 1,
+            width: "90%",
+          }}
+        />
+
+        {/* create import and export button */}
+        <Stack direction="row" spacing={2}>
+          <IconButton
+            type="button"
+            aria-label="export"
+            size="small"
+            color="default"
+          >
+            <GetAppIcon />
+          </IconButton>
+
+          <IconButton
+            onClick={handleCreate}
+            type="button"
+            aria-label="import"
+            size="small"
+            color="success"
+          >
+            <AddBoxIcon />
+          </IconButton>
+        </Stack>
+      </Stack>
+
+      <TableContainer component={Paper} sx={{ width: "100%" }}>
+        <Table aria-label="custom pagination table">
+          <TableHead>
+            <TableRow>
+              {columns.map((column, index) => (
+                <TableCell
+                  colSpan={column.id === "action" ? 3 : 1}
+                  key={index}
+                  align={"center"}
+                >
+                  {column.label}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {(rowsPerPage > 0
+              ? (data?.responseList ?? []).slice(
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                )
+              : (data?.responseList ?? [])
+            ).map((row: T, index: number) => (
+              <TableRow hover key={index}>
+                {getKeys(row).map((key) => (
+                  <TableCell align={"center"}>
+                    {row[key] !== undefined ? String(row[key]) : "N/A"}
                   </TableCell>
-                );
-              })}
-            </TableRow>
-          ))}
-          {emptyRows > 0 && (
-            <TableRow style={{}}>
-              <TableCell colSpan={6} />
-            </TableRow>
-          )}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-              colSpan={3}
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              slotProps={{
-                select: {
-                  inputProps: {
-                    "aria-label": "rows per page",
-                  },
-                  native: true,
-                },
-              }}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              ActionsComponent={TablePaginationActions}
+                ))}
+                <TableCell align={"center"}>
+                  <IconButton color="success" onClick={handleClickOpen}>
+                    <RemoveRedEyeIcon />
+                  </IconButton>
+                </TableCell>
+
+                <TableCell align={"center"}>
+                  <IconButton color="error">
+                    <DeleteForeverIcon />
+                  </IconButton>
+                </TableCell>
+
+                <TableCell align={"center"}>
+                  <IconButton color="warning">
+                    <EditIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+            {emptyRows > 0 && (
+              <TableRow>
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
+            <DialogDetail
+              selectedValue={selectedValue}
+              open={open}
+              onClose={handleClose}
+              columns={columnsMap}
             />
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </TableContainer>
+          </TableBody>
+
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                colSpan={3}
+                count={data.totalElements}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                slotProps={{
+                  select: {
+                    inputProps: {
+                      "aria-label": "rows per page",
+                    },
+                    native: true,
+                  },
+                }}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+              />
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 }

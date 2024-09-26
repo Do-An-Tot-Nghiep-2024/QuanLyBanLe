@@ -33,15 +33,15 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PreAuthorize("hasAuthority('EMPLOYEE') or hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse> getEmployee(@PathVariable("id") Long id) {
-       try {
-           EmployeeResponse employee = employeeService.getEmployee(id);
-           log.info("get employee success");
-           return ResponseEntity.ok(new ApiResponse(SUCCESS, employee));
-       }catch (ResourceNotFoundException e){
-           return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(),null));
-       }
+        try {
+            EmployeeResponse employee = employeeService.getEmployee(id);
+            log.info("get employee success");
+            return ResponseEntity.ok(new ApiResponse(SUCCESS, employee));
+        }catch (ResourceNotFoundException e){
+            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(),null));
+        }
     }
 
     @PostMapping
@@ -80,6 +80,9 @@ public class EmployeeController {
             return ResponseEntity.ok(new ApiResponse(SUCCESS,employee));
         }catch (BadRequestUserException e){
             return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(),null));
+        }catch (AlreadyExistsException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse(e.getMessage(), null));
         }
     }
 }
