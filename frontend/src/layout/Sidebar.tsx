@@ -13,17 +13,16 @@ import {
   ShoppingBag as ShoppingBagIcon,
   Inventory as InventoryIcon,
   Settings as SettingsIcon,
-  Search as SearchIcon,
 } from "@mui/icons-material";
 import { AppProvider, DashboardLayout } from "@toolpad/core";
 import type { Router, Navigation, Session } from "@toolpad/core";
+import AddAlertIcon from "@mui/icons-material/AddAlert";
 
-import { IconButton, TextField, Tooltip } from "@mui/material";
-import React from "react";
 import Cookies from "js-cookie";
-import { getAccount } from "../redux/auth/authSlice";
+import {logout } from "../redux/auth/authSlice";
 import { useAppDispatch } from "../redux/hook";
 import { Outlet, useNavigate } from "react-router-dom";
+import colors from "../constants/color";
 const NAVIGATION: Navigation = [
   {
     segment: "dashboard",
@@ -49,6 +48,11 @@ const NAVIGATION: Navigation = [
     segment: "employees",
     title: "Nhân viên",
     icon: <BadgeOutlinedIcon />,
+  },
+  {
+    segment: "notifications",
+    title: "Thông báo",
+    icon: <AddAlertIcon />,
   },
   {
     segment: "customers",
@@ -100,8 +104,8 @@ const demoTheme = createTheme({
     dark: {
       palette: {
         background: {
-          default: "#464667",
-          paper: "#464667",
+          default: colors.dark,
+          paper: colors.dark,
         },
       },
     },
@@ -117,54 +121,8 @@ const demoTheme = createTheme({
   },
 });
 
-function Search() {
-  return (
-    <React.Fragment>
-      <Tooltip title="Search" enterDelay={1000}>
-        <div>
-          <IconButton
-            type="button"
-            aria-label="search"
-            size="small"
-            sx={{
-              display: { xs: "inline-block", md: "none" },
-            }}
-          >
-            <SearchIcon />
-          </IconButton>
-        </div>
-      </Tooltip>
-      <TextField
-        id="search"
-        label="Search"
-        variant="outlined"
-        size="small"
-        slotProps={{
-          input: {
-            endAdornment: (
-              <IconButton type="button" aria-label="search" size="small">
-                <SearchIcon />
-              </IconButton>
-            ),
-            sx: { pr: 0.5 },
-          },
-        }}
-        sx={{ display: { xs: "none", md: "inline-block" }, mr: 1 }}
-      />
-    </React.Fragment>
-  );
-}
-interface DemoProps {
-  /**
-   * Injected by the documentation to work in an iframe.
-   * Remove this when copying and pasting into your project.
-   */
-  window?: () => Window;
-}
-
-export default function Sidebar(props: DemoProps) {
+export default function Sidebar() {
   const dispatch = useAppDispatch();
-  const { window } = props;
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>({
     user: {
@@ -188,7 +146,8 @@ export default function Sidebar(props: DemoProps) {
       signOut: () => {
         setSession(null);
         Cookies.remove("accessToken");
-        dispatch(getAccount());
+        navigate("/login");
+        dispatch(logout());
       },
     };
   }, []);
@@ -205,8 +164,6 @@ export default function Sidebar(props: DemoProps) {
     };
   }, [pathname]);
 
-  const demoWindow = window !== undefined ? window() : undefined;
-
   return (
     // preview-start
     <AppProvider
@@ -215,9 +172,12 @@ export default function Sidebar(props: DemoProps) {
       navigation={NAVIGATION}
       router={router}
       theme={demoTheme}
-      window={demoWindow}
+      branding={{
+        // logo: "https://avatars.githubusercontent.com/u/19550456",
+        title: "Retail Store",
+      }}
     >
-      <DashboardLayout slots={{ toolbarActions: Search }}>
+      <DashboardLayout>
         <Box
           component={"main"}
           sx={{

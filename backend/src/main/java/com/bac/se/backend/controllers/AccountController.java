@@ -10,7 +10,6 @@ import com.bac.se.backend.payload.response.EmployeeAccountResponse;
 import com.bac.se.backend.payload.response.LoginResponse;
 import com.bac.se.backend.payload.response.RegisterResponse;
 import com.bac.se.backend.services.AccountService;
-import com.bac.se.backend.utils.JwtParse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class AccountController {
     private final AccountService accountService;
-    private final JwtParse jwtParse;
     private final String REQUEST_SUCCESS = "success";
 
     // Register account customer controller
@@ -65,6 +63,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
             LoginResponse login = accountService.loginUser(loginRequest);
+            log.info("Login user is {}", login);
             return ResponseEntity
                     .ok()
 //                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -82,10 +81,9 @@ public class AccountController {
     @GetMapping("/account")
     public ResponseEntity<ApiResponse> getAccount(HttpServletRequest request) {
         try {
-            String accessToken = jwtParse.decodeTokenWithRequest(request);
-            log.info("token user is {}", accessToken);
+            log.info("token user is {}", request.getHeader("Authorization"));
             return ResponseEntity.ok(new ApiResponse(REQUEST_SUCCESS,
-                    accountService.getAccountResponse(accessToken)));
+                    accountService.getAccountResponse(request)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse(e.getMessage(), null));

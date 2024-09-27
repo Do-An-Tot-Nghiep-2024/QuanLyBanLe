@@ -5,7 +5,7 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_URL_BE,
   headers: {
     "Content-Type": "application/json",
-    "Authorization": `Bearer ${Cookies.get("accessToken")}`,
+    // Authorization: `Bearer ${Cookies.get("accessToken")}`,
   },
 });
 
@@ -16,6 +16,10 @@ api.defaults.withCredentials = true;
 api.interceptors.request.use(
   function (config) {
     // Do something before request is sent
+    const token = Cookies.get("accessToken");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
     return config;
   },
   function (error) {
@@ -32,6 +36,22 @@ api.interceptors.response.use(
     return response.data;
   },
   function (error) {
+    const originalRequest = error.config;
+    if (error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      if (error.response.status === 403 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        try {
+          const newAccessToken = Cookies.get("accessToken");
+          axios.defaults.headers.common["Authorization"] =
+            `Bearer ${newAccessToken}`;
+          originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+          return api(originalRequest);
+        } catch (refreshError) {
+          return Promise.reject(refreshError);
+        }
+      }
+    }
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error
     return Promise.reject(error);

@@ -14,7 +14,9 @@ import com.bac.se.backend.repositories.AccountRepository;
 import com.bac.se.backend.repositories.CustomerRepository;
 import com.bac.se.backend.repositories.EmployeeRepository;
 import com.bac.se.backend.security.JWTService;
+import com.bac.se.backend.utils.JwtParse;
 import com.bac.se.backend.utils.ValidateInput;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,6 +35,7 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final EmployeeRepository employeeRepository;
     private final ValidateInput validateInput;
+    private final JwtParse jwtParse;
 
     private Account createAccountWithRole(String username, String password, Role role) {
         return Account.builder()
@@ -43,12 +46,14 @@ public class AccountService {
     }
 
 
-    public ApiResponse getAccountResponse(String token) {
-        Account account = accountRepository.findByUsername(token)
+    public ApiResponse getAccountResponse(HttpServletRequest request) {
+        String token = jwtParse.parseJwt(request);
+        String accessToken = jwtParse.decodeTokenWithRequest(request);
+        Account account = accountRepository.findByUsername(accessToken)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found user"));
         AccountResponse accountResponse = new AccountResponse(
                 account.getUsername(),
-                account.getRole().name());
+                account.getRole().name(),token);
         return new ApiResponse(
                 "success",
                 accountResponse

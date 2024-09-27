@@ -56,7 +56,6 @@ export default function LoginManagerPage() {
         const { accessToken } = response.data as { accessToken: string };
         Cookies.set("accessToken", accessToken);
         dispatch(getAccount());
-        // dispatch(getAccount());
         navigation("/dashboard");
       } else {
         console.log("Login failed");

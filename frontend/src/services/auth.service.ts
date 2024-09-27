@@ -2,8 +2,8 @@ import { LoginSchema } from "../types/loginSchema";
 import api from "../config/axios";
 import ApiResponse from "../types/apiResponse";
 import LoginResponse from "../types/loginResponse";
-import axios from "axios";
 import Cookies from "js-cookie";
+
 const loginService = async (login: LoginSchema) => {
   try {
     const response: ApiResponse = await api.post("/auth/login", login);
@@ -24,16 +24,18 @@ const loginService = async (login: LoginSchema) => {
 };
 const getAccountService = async () => {
   try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_URL_BE}/auth/account`,
-      {
-        headers: {
-          Authorization: `Bearer ${Cookies.get("accessToken")}`,
-        },
-      }
-    );
-    console.log("Get Account Response at auth service: ", response.data.data);
-    if (response.status !== 200) {
+    // const response = await axios.get(
+    //   `${import.meta.env.VITE_URL_BE}/auth/account`,
+    //   {
+    //     headers: {
+    //       Authorization: `Bearer ${Cookies.get("accessToken")}`,
+    //     },
+    //   }
+    // );
+    console.log("Token at getAccountService: ", Cookies.get("accessToken"));
+    const response: any = await api.get("/auth/account");
+    console.log("Get Account Response at auth service: ", response);
+    if (response.message !== "success") {
       return {
         status: false,
         data: {},
@@ -41,7 +43,7 @@ const getAccountService = async () => {
     }
     return {
       status: true,
-      data: response.data.data,
+      data: response.data,
     };
   } catch (error) {
     console.log(error);

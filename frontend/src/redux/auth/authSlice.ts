@@ -10,16 +10,17 @@ export interface Auth {
 }
 const initialState: Auth = {
   isLogin: false,
-  token: Cookies.get("accessToken") || "",
+  token: Cookies.get("accessToken")?.toString() ?? "",
   role: "",
 };
 const getAccount = createAsyncThunk("auth/get-user-token", async () => {
   try {
     const res = await getAccountService();
-    const reponseData = res.data.data;
+    console.log("Get Account Response at auth slice: ", res);
+    const responseData = res.data.data;
     if (res?.status) {
-      console.log('account is ',res.data.data);
-      return reponseData as Account;
+      console.log("account is ", res.data.data);
+      return responseData as Account;
     }
     return {} as Account;
   } catch (error) {
@@ -29,21 +30,29 @@ const getAccount = createAsyncThunk("auth/get-user-token", async () => {
 export const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    logout: (state) => {
+      state.isLogin = false;
+      state.token = "";
+    },
+  },
   extraReducers: (builder) => {
     builder
-      .addCase(getAccount.fulfilled, (state, action:PayloadAction<Account>) => {
-        console.log("Get Account Fulfilled: ", action.payload);
-        state.isLogin = true;
-        state.role = action.payload.role;
-      })
+      .addCase(
+        getAccount.fulfilled,
+        (state, action: PayloadAction<Account>) => {
+          console.log("Get Account Fulfilled: ", action.payload);
+          state.isLogin = true;
+          state.role = action.payload.role;
+        }
+      )
       .addCase(getAccount.rejected, (state) => {
         state.isLogin = false;
         state.role = "";
       });
-      
   },
 });
 export { getAccount };
+export const { logout } = authSlice.actions;
 
 export default authSlice.reducer;

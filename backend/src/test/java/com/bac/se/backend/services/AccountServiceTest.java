@@ -6,6 +6,8 @@ import com.bac.se.backend.models.Account;
 import com.bac.se.backend.payload.response.AccountResponse;
 import com.bac.se.backend.payload.response.ApiResponse;
 import com.bac.se.backend.repositories.AccountRepository;
+import com.bac.se.backend.utils.JwtParse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -23,78 +25,49 @@ class AccountServiceTest {
     private AccountRepository accountRepository;
     @InjectMocks
     private AccountService accountService;
+    @Mock
+    private JwtParse jwtParse;
+    @Mock
+    private HttpServletRequest request;
 
+    private Account account;
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        account = new Account();
+        account.setUsername("testUser");
+        account.setRole(Role.EMPLOYEE);
     }
     @Test
     void getAccountResponseSuccess() {
-        String token = "validUsername";
-        Account mockAccount = new Account();
-        mockAccount.setUsername("validUsername");
-        mockAccount.setRole(Role.EMPLOYEE); // Assuming Role is an enum
-        when(accountRepository.findByUsername(token)).thenReturn(Optional.of(mockAccount));
-
-        // Act
-        ApiResponse response = accountService.getAccountResponse(token);
-        // Assert
+        String token = "testToken";
+        String accessToken = "testUser";
+        when(jwtParse.parseJwt(request)).thenReturn(token);
+        when(jwtParse.decodeTokenWithRequest(request)).thenReturn(accessToken);
+        when(accountRepository.findByUsername(accessToken)).thenReturn(Optional.of(account));
+        ApiResponse response = accountService.getAccountResponse(request);
+        assertNotNull(response);
         assertEquals("success", response.message());
-        assertNotNull(response.data());
-        AccountResponse accountResponse = (AccountResponse) response.data();
-        assertEquals("validUsername", accountResponse.username());
-        assertEquals(Role.EMPLOYEE.name(), accountResponse.role());
+        assertEquals("testUser", ((AccountResponse) response.data()).username());
+        assertEquals("EMPLOYEE", ((AccountResponse) response.data()).role());
+        assertEquals(token, ((AccountResponse) response.data()).token());
     }
 
     @Test
     void testGetAccountResponse_AccountNotFound() {
         // Arrange
         String token = "invalidUsername";
+        when(jwtParse.decodeTokenWithRequest(request)).thenReturn(token);
         when(accountRepository.findByUsername(token)).thenReturn(Optional.empty());
 
         // Act & Assert
         ResourceNotFoundException thrown = assertThrows(
                 ResourceNotFoundException.class,
-                () -> accountService.getAccountResponse(token),
+                () -> accountService.getAccountResponse(request),
                 "Expected getAccountResponse() to throw ResourceNotFoundException"
         );
         assertEquals("Not found user", thrown.getMessage());
     }
-
-    // @Test
-    // void testRegisterCustomer_Success() throws BadRequestUserException {
-    //     // Arrange
-    //     RegisterRequest registerRequest = new RegisterRequest("validemail@example.com", "password", "John Doe", "1234567890");
-    //     Account account = Account.builder()
-    //             .username("validemail@example.com")
-    //             .password(passwordEncoder.encode("password"))
-    //             .role(Role.CUSTOMER)
-    //             .build();
-    //     Customer customer = Customer.builder()
-    //             .email("validemail@example.com")
-    //             .name("John Doe")
-    //             .phone("1234567890")
-    //             .account(account)
-    //             .build();
-
-    //     when(validateInput.isValidEmail("validemail@example.com")).thenReturn(false); // valid email
-    //     when(validateInput.isValidPhoneNumber("1234567890")).thenReturn(false); // valid phone number
-    //     when(customerRepository.existsByEmail("validemail@example.com")).thenReturn(false);
-    //     when(customerRepository.existsByPhone("1234567890")).thenReturn(false);
-    //     when(accountRepository.save(any(Account.class))).thenReturn(account);
-    //     when(customerRepository.save(any(Customer.class))).thenReturn(customer);
-    //     when(jwtService.generateToken(account)).thenReturn("generatedToken");
-
-    //     // Act
-    //     RegisterResponse response = accountService.registerCustomer(registerRequest);
-
-    //     // Assert
-    //     assertEquals("generatedToken", jwtService.extractUsername(response.accessToken()));
-    //     assertEquals("validemail@example.com", response.email());
-    //     verify(accountRepository, times(1)).save(any(Account.class));
-    //     verify(customerRepository, times(1)).save(any(Customer.class));
-    //     verify(jwtService, times(1)).generateToken(account);
-    // }
 
     @Test
     void registerCustomer() {
