@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 public class EmployeeController {
-    private final String SUCCESS = "success";
+    static final String SUCCESS = "success";
     private final EmployeeService employeeService;
 
     @GetMapping
@@ -39,21 +39,21 @@ public class EmployeeController {
             EmployeeResponse employee = employeeService.getEmployee(id);
             log.info("get employee success");
             return ResponseEntity.ok(new ApiResponse(SUCCESS, employee));
-        }catch (ResourceNotFoundException e){
-            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(),null));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), null));
         }
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse> createEmployee(@RequestBody EmployeeRequest employeeRequest){
+    public ResponseEntity<ApiResponse> createEmployee(@RequestBody EmployeeRequest employeeRequest) {
         try {
             EmployeeResponse employee = employeeService.createEmployee(employeeRequest);
             log.info("create employee success");
-            return ResponseEntity.ok(new ApiResponse(SUCCESS,employee));
-        }catch (BadRequestUserException e){
-            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(),null));
-        }catch (AlreadyExistsException e) {
+            return ResponseEntity.ok(new ApiResponse(SUCCESS, employee));
+        } catch (BadRequestUserException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), null));
+        } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ApiResponse(e.getMessage(), null));
         }
@@ -61,26 +61,26 @@ public class EmployeeController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse> deleteEmployee(@PathVariable("id") Long id){
+    public ResponseEntity<ApiResponse> deleteEmployee(@PathVariable("id") Long id) {
         try {
             employeeService.deleteEmployee(id);
             log.info("delete employee success");
-            return ResponseEntity.ok(new ApiResponse(SUCCESS,null));
-        }catch (ResourceNotFoundException e){
-            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(),null));
+            return ResponseEntity.ok(new ApiResponse(SUCCESS, null));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), null));
         }
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse> updateEmployee(@PathVariable("id") Long id, @RequestBody EmployeeRequest employeeRequest){
+    public ResponseEntity<ApiResponse> updateEmployee(@PathVariable("id") Long id, @RequestBody EmployeeRequest employeeRequest) {
         try {
-            EmployeeResponse employee = employeeService.updateEmployee(id,employeeRequest);
+            EmployeeResponse employee = employeeService.updateEmployee(id, employeeRequest);
             log.info("update employee success");
-            return ResponseEntity.ok(new ApiResponse(SUCCESS,employee));
-        }catch (BadRequestUserException e){
-            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(),null));
-        }catch (AlreadyExistsException e){
+            return ResponseEntity.ok(new ApiResponse(SUCCESS, employee));
+        } catch (BadRequestUserException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), null));
+        } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ApiResponse(e.getMessage(), null));
         }

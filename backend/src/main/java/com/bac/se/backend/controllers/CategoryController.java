@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
-    private final String REQUEST_SUCCESS = "success";
+    static final String REQUEST_SUCCESS = "success";
 
     @PostMapping
     public ResponseEntity<ApiResponse> createCategory(@RequestBody Category category) {
-        return ResponseEntity.ok(new ApiResponse("success", category));
+        return ResponseEntity.ok(new ApiResponse(REQUEST_SUCCESS, category));
     }
 
     @DeleteMapping("/{id}")

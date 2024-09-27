@@ -29,6 +29,7 @@ public class EmployeeService {
     private final ValidateInput validateInput;
     private final EmployeeMapper employeeMapper;
 
+    private final String EMPLOYEE_NOT_FOUND = "Employee not found";
     
     public EmployeePageResponse getEmployees(Integer pageNumber,Integer pageSize){
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -44,7 +45,7 @@ public class EmployeeService {
     
     public EmployeeResponse getEmployee(Long id){
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(()-> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         return employeeMapper.mapToEmployeeResponse(employee);
     }
 
@@ -63,14 +64,14 @@ public class EmployeeService {
 
     public void deleteEmployee(Long id){
         Employee employeeNotFound = employeeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         employeeNotFound.setEmployeeStatus(EmployeeStatus.ABSENT);
         employeeRepository.save(employeeNotFound);
     }
 
     public EmployeeResponse updateEmployee(Long id, EmployeeRequest employeeRequest) throws BadRequestUserException {
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(()-> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         extracted(employeeRequest);
         if(!employee.getEmail().equals(employeeRequest.email())
                 && employeeRepository.existsByEmail(employeeRequest.email())){

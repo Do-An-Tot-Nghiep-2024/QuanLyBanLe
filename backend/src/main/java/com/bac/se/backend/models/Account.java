@@ -10,9 +10,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -32,9 +31,11 @@ public class Account implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.stream(this.role.name().split(","))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+//        return Arrays.stream(this.role.name().split(","))
+//                .map(SimpleGrantedAuthority::new)
+//                .collect(Collectors.toList()); //Replace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()' and ensure that the list is unmodified.
+         return List.of(new SimpleGrantedAuthority(this.role.name()));
+                // return Arrays.asList(new SimpleGrantedAuthority(this.role.name()));
     }
 
     @Override

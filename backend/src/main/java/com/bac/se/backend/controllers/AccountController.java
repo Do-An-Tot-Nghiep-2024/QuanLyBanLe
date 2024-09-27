@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class AccountController {
     private final AccountService accountService;
-    private final String REQUEST_SUCCESS = "success";
+    static final String REQUEST_SUCCESS = "success";
 
     // Register account customer controller
     @PostMapping("/register")

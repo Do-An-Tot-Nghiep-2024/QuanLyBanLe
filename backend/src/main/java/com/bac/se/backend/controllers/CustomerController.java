@@ -25,20 +25,20 @@ import java.util.List;
 public class CustomerController {
     private final CustomerService customerService;
     private final JwtParse jwtParse;
-    private final String REQUEST_SUCCESS = "success";
+    static final String REQUEST_SUCCESS = "success";
 
 
     @GetMapping
     @PreAuthorize("hasAuthority('MANAGER')")
     public List<CustomerResponse> getCustomers() {
-       return customerService.getCustomers();
+        return customerService.getCustomers();
     }
 
     @GetMapping("/detail")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<ApiResponse> getCustomer(HttpServletRequest request) {
         try {
-            String accessToken  = jwtParse.decodeTokenWithRequest(request);
+            String accessToken = jwtParse.decodeTokenWithRequest(request);
             CustomerResponse customerResponse = customerService.getCustomer(accessToken);
             return ResponseEntity.ok(new ApiResponse(REQUEST_SUCCESS, customerResponse));
         } catch (ResourceNotFoundException e) {

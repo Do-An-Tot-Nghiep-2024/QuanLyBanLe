@@ -37,7 +37,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             String jwt = jwtParse.parseJwt(request);
             if (StringUtils.hasText(jwt) && SecurityContextHolder.getContext().getAuthentication() == null) {
                 String username = jwtService.extractUsername(jwt);
-                request.setAttribute("accessToken",username);
+                request.setAttribute("accessToken", username);
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
                 var auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
@@ -45,16 +45,12 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         } catch (JwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write(e.getMessage() + " : Invalid or expired token, you may login and try again!");
-//            return;
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(e.getMessage());
-//            return;
-        }finally {
+        } finally {
             filterChain.doFilter(request, response);
         }
-//        } finally {
-//        }
     }
 
 
