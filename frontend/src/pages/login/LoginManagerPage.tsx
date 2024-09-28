@@ -71,7 +71,7 @@ export default function LoginManagerPage() {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#292C2F",
+        backgroundColor: "#fff",
       }}
     >
       <Stack
@@ -87,7 +87,7 @@ export default function LoginManagerPage() {
           sx={{ width: "50px", height: "50px", justifyContent: "center" }}
           color="success"
         ></GppGoodIcon>
-        <Typography align="center" sx={{ color: "white", fontSize: "30px" }}>
+        <Typography align="center" sx={{ color: "black", fontSize: "30px" }}>
           TRANG DÀNH CHO QUẢN TRỊ VIÊN
         </Typography>
 
@@ -96,7 +96,7 @@ export default function LoginManagerPage() {
           sx={{
             m: 1,
             width: "300px",
-            backgroundColor: "#5D5D98",
+            backgroundColor: "#fff",
             borderRadius: "5px",
           }}
           variant="outlined"
@@ -129,7 +129,7 @@ export default function LoginManagerPage() {
           sx={{
             m: 1,
             width: "300px",
-            backgroundColor: "#5D5D98",
+            backgroundColor: "#fff",
             borderRadius: "5px",
           }}
           variant="outlined"

@@ -165,6 +165,9 @@ export default function EmployeeMainPage(props: DemoProps) {
       router={router}
       theme={demoTheme}
       window={demoWindow}
+      branding={{
+        title: "Retail Store",
+      }}
     >
       <DashboardLayout>
         <DemoPageContent pathname={pathname} />

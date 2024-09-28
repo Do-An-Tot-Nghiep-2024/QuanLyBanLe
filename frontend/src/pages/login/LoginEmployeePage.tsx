@@ -20,8 +20,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginService } from "../../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import { useAppDispatch} from "../../redux/hook";
+import { useAppDispatch } from "../../redux/hook";
 import { getAccount } from "../../redux/auth/authSlice";
+import colors from "../../constants/color";
 export default function LoginEmployeePage() {
   const navigation = useNavigate();
   const dispatch = useAppDispatch();
@@ -58,7 +59,7 @@ export default function LoginEmployeePage() {
         const { accessToken } = response.data as { accessToken: string };
         Cookies.set("accessToken", accessToken);
         dispatch(getAccount());
-        // console.log("Auth at login employee page", auth?.role); 
+        // console.log("Auth at login employee page", auth?.role);
         navigation("/");
       } else {
         console.log("Login failed");
@@ -68,14 +69,13 @@ export default function LoginEmployeePage() {
     }
   };
 
-
   return (
     <Box
       sx={{
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#626288",
+        backgroundColor: "#fff",
       }}
     >
       <Grid container spacing={2}>
@@ -92,7 +92,7 @@ export default function LoginEmployeePage() {
           >
             WELCOME
           </Typography>
-          <Stack
+          {/* <Stack
             onSubmit={handleSubmit(onSubmit)}
             component="form"
             spacing={2}
@@ -146,6 +146,83 @@ export default function LoginEmployeePage() {
                 fontWeight: "bold",
                 background:
                   "linear-gradient(to right bottom, #579AFF, #345D99)",
+              }}
+              variant="contained"
+              type="submit"
+            >
+              ĐĂNG NHẬP
+            </Button>
+          </Stack> */}
+          <Stack
+            onSubmit={handleSubmit(onSubmit)}
+            component="form"
+            spacing={2}
+            sx={{
+              width: "500px",
+              marginTop: "100px",
+              marginLeft: "250px",
+              marginRight: "auto",
+              backgroundColor: "#ffffff",
+              padding: "50px",
+              height: "70%",
+              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.5)",
+              borderRadius: "10px",
+              textAlign: "center",
+            }}
+            alignItems="center"
+          >
+            <Typography
+              variant="h5"
+              color="black"
+              sx={{ marginBottom: "20px" }}
+            >
+              ĐĂNG NHẬP
+            </Typography>
+
+            <TextField
+              {...register("username")}
+              label="Tài khoản"
+              variant="outlined"
+              sx={{ width: "300px", color: "white" }}
+              type="text"
+              name="username"
+              error={!!errors.username}
+              helperText={errors.username?.message}
+            />
+
+            <FormControl sx={{ m: 1, width: "300px" }} variant="outlined">
+              <InputLabel htmlFor="outlined-adornment-password" color="error">
+                Password
+              </InputLabel>
+              <OutlinedInput
+                {...register("password")}
+                error={!!errors.password}
+                id="outlined-adornment-password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      onMouseUp={handleMouseUpPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+                label="Mật khẩu"
+              />
+              <FormHelperText error>{errors.password?.message}</FormHelperText>
+            </FormControl>
+
+            <Button
+              sx={{
+                width: "300px",
+                fontWeight: "bold",
+                background: colors.accentColor,
               }}
               variant="contained"
               type="submit"
