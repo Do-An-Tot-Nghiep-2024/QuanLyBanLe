@@ -5,7 +5,7 @@ export const EmployeeSchema = z.object({
   name: z.string().min(1, { message: "Tên nhân viên là bắt buộc" }),
   email: z
     .string()
-    .min(1, { message: "Mật khẩu là bắt buộc" })
+    .min(1, { message: "Email là bắt buộc" })
     .refine((value) => /.+@.+/.test(value), { message: "Email không hợp lệ" }),
   phone: z
     .string()

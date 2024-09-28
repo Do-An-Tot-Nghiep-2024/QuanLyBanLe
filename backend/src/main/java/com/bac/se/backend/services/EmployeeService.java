@@ -1,14 +1,17 @@
 package com.bac.se.backend.services;
 
 import com.bac.se.backend.enums.EmployeeStatus;
+import com.bac.se.backend.enums.Role;
 import com.bac.se.backend.exceptions.AlreadyExistsException;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.mapper.EmployeeMapper;
+import com.bac.se.backend.models.Account;
 import com.bac.se.backend.models.Employee;
 import com.bac.se.backend.payload.request.EmployeeRequest;
 import com.bac.se.backend.payload.response.EmployeePageResponse;
 import com.bac.se.backend.payload.response.EmployeeResponse;
+import com.bac.se.backend.repositories.AccountRepository;
 import com.bac.se.backend.repositories.EmployeeRepository;
 import com.bac.se.backend.utils.ValidateInput;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -28,7 +32,8 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final ValidateInput validateInput;
     private final EmployeeMapper employeeMapper;
-
+    private final AccountRepository accountRepository;
+    private final PasswordEncoder passwordEncoder;
     private final String EMPLOYEE_NOT_FOUND = "Employee not found";
     
     public EmployeePageResponse getEmployees(Integer pageNumber,Integer pageSize){
@@ -58,7 +63,14 @@ public class EmployeeService {
             throw new AlreadyExistsException("Phone already in use");
         }
         Employee employee = employeeMapper.mapToEmployeeRequest(employeeRequest);
+
         Employee save = employeeRepository.save(employee);
+        Account account = Account.builder()
+                .username(employeeRequest.email())
+                .password(passwordEncoder.encode("123456"))
+                .role(Role.EMPLOYEE)
+                .build();
+        accountRepository.save(account);
         return employeeMapper.mapToEmployeeResponse(save);
     }
 

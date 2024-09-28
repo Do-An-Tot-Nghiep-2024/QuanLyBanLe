@@ -35,7 +35,9 @@ export default function CreateEmployee() {
       const response = await createEmployeeService(data);
       if (response.message == "success") {
         console.log("Create employee success");
-        navigate("/employees");
+        navigate("/employees", {
+          state: { createdSuccess: "Thêm mới nhân viên thành công" },
+        });
       } else {
         setError(response.message);
       }

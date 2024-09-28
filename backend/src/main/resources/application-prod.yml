@@ -1,13 +1,11 @@
 server:
-  port: 8080
+  port: 8085
 spring:
-  application:
-    name: backend
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/retail-store?createDatabaseIfNotExist=true
-    username: vietbac
-    password: vietbac
+    url: jdbc:mysql://database-1.cvwqmag8002v.ap-southeast-1.rds.amazonaws.com:3306/retail-store?createDatabaseIfNotExist=true
+    username: admin
+    password: admin_091979818
   jpa:
     hibernate:
       ddl-auto: update
@@ -15,6 +13,10 @@ spring:
   output:
     ansi:
       enabled: always
-
-
-
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 86400000 # 1 day
+      refresh-token:
+        expiration: 604800000 # 1 week
