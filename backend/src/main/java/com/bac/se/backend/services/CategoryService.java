@@ -3,17 +3,28 @@ package com.bac.se.backend.services;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.models.Category;
+import com.bac.se.backend.payload.response.CategoryResponse;
 import com.bac.se.backend.repositories.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
+
+    public List<CategoryResponse> getCategories() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(category -> new CategoryResponse(category.getId(), category.getName()))
+                .toList();
+    }
+
     public void createCategory(Category category) throws BadRequestUserException {
-        if(category.getName().isEmpty()){
+        if (category.getName().isEmpty()) {
             throw new BadRequestUserException("Name is required");
         }
         categoryRepository.save(category);
@@ -35,7 +46,7 @@ public class CategoryService {
     }
 
     public Category updateCategory(Category category, Long id) throws BadRequestUserException {
-        if(category.getName().isEmpty()){
+        if (category.getName().isEmpty()) {
             throw new BadRequestUserException("Name is required");
         }
         categoryRepository.findById(id)
