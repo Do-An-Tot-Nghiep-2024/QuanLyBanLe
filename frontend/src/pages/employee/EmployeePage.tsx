@@ -58,7 +58,6 @@ export default function EmployeePage() {
   ): Promise<ResponsePagination<EmployeeSchema>> => {
     try {
       const response = await getEmployeesService(page, limit);
-      console.log(response);
       if (!response.status) {
         throw new Error("Error fetching employees");
       }
