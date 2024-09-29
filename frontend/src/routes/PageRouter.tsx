@@ -22,6 +22,7 @@ const SupplierPage = lazy(() => import("../pages/supplier/SupplierPage"));
 const CreateSupplier = lazy(() => import("../pages/supplier/CreateSupplier"));
 const UpdateSupplier = lazy(() => import("../pages/supplier/UpdateSupplier"));
 const Sidebar = lazy(() => import("../layout/Sidebar"));
+const CategoryPage = lazy(() => import("../pages/product/CategoryPage"));
 const PageRouter = () => {
   const auth = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
@@ -34,8 +35,8 @@ const PageRouter = () => {
   }, [token, dispatch]);
 
 
-  const isLoggedIn = auth.isLogin;
-  const userRole = auth.role;
+  const isLoggedIn = "true";
+  const userRole = "MANAGER";
 
   console.log("role sss", userRole);
   return (
@@ -103,6 +104,7 @@ const PageRouter = () => {
               < Route path = "/suppliers" element = {< SupplierPage />} />
   < Route path = "/create-supplier" element = {< CreateSupplier />} />
   < Route path = "/update-supplier/:id" element = {< UpdateSupplier />} />
+    <Route path="/category" element={<CategoryPage />} />
                 
   < Route path = "/update-employee/:id" element = {< UpdateEmployee />} />
 

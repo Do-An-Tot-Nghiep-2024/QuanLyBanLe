@@ -36,10 +36,9 @@ import DialogDetail from "../../components/DialogDetail";
 const MessageAlert = lazy(() => import("../../components/MessageAlert"));
 
 export default function EmployeePage() {
-  const updateSuccess:string = useLocation().state?.updateSuccess ?? "";
-  const createdSuccess:string = useLocation().state?.createdSuccess ?? "";
+  const updateSuccess: string = useLocation().state?.updateSuccess ?? "";
   const [deleteSuccess, setDeleteSuccess] = useState<string>("");
-  const [page, setPage] = useState(0); // Removed setPage since it's not used
+  const [page, setPage] = useState(1); // Removed setPage since it's not used
   const [limit, setLimit] = useState(10);
   const navigate = useNavigate(); // Removed setLimit since it's not used
   const [employee, setEmployee] = useState<EmployeeSchema | null>(null);
@@ -59,6 +58,7 @@ export default function EmployeePage() {
   ): Promise<ResponsePagination<EmployeeSchema>> => {
     try {
       const response = await getEmployeesService(page, limit);
+      console.log(response);
       if (!response.status) {
         throw new Error("Error fetching employees");
       }
@@ -87,7 +87,7 @@ export default function EmployeePage() {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setLimit(parseInt(event.target.value, 10));
-    setPage(0);
+    setPage(1);
   };
   const handleOpenAlert = () => {
     setOpenAlert(false);
@@ -113,7 +113,6 @@ export default function EmployeePage() {
       console.error(error);
     },
   });
-  
   const [open, setOpen] = useState(false);
   const handleClose = () => {
     setOpen(false);
@@ -126,13 +125,6 @@ export default function EmployeePage() {
           open={openAlert}
           setOpen={handleOpenAlert}
           message={updateSuccess}
-        />
-      )}
-      {createdSuccess && (
-        <MessageAlert
-          open={openAlert}
-          setOpen={handleOpenAlert}
-          message={createdSuccess}
         />
       )}
       {deleteSuccess && (
