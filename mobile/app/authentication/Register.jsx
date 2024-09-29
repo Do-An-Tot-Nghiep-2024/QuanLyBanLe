@@ -242,23 +242,23 @@ const Register = ({ }) => {
         >
             <View style={styles.container}>
                 <View style={styles.text}>
-                    <Title style={styles.title}>Register</Title>
+                    <Title style={styles.title}>Đăng ký</Title>
                 </View>
                 <View style={styles.signupContainer}>
                     <Paragraph style={styles.signupText}>
-                        Do not have an account yet?{" "}
+                        Đã có tài khoản?{" "}
                         <Text
                             style={stylessheet.accentText}
                             onPress={() => navigation.navigate("authentication/Login")}
                         >
-                            Log in
+                            Đăng nhập
                         </Text>
                     </Paragraph>
                 </View>
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={[styles.input, isSignUpError && styles.errorInput]}
-                        label="Name"
+                        label="Họ và tên"
                         underlineColorAndroid="transparent"
                         keyboardType="default"
                         value={name}
@@ -272,7 +272,7 @@ const Register = ({ }) => {
                             marginLeft: 5,
                         }}
                     >
-                        Gender
+                        Giới tính
                     </Text>
                     <RadioButton
                         status={
@@ -280,9 +280,9 @@ const Register = ({ }) => {
                         }
                         onPress={() => setGender("male")}
 
-                        value="Male"
+                        value="Nam"
                     />
-                    <Text style={styles.checkboxLabel}>Male</Text>
+                    <Text style={styles.checkboxLabel}>Nam</Text>
                     <RadioButton
                         status={
                             gender === "Female" || gender === "female"
@@ -291,9 +291,9 @@ const Register = ({ }) => {
                         }
                         onPress={() => setGender("female")}
 
-                        value="Female"
+                        value="Nữ"
                     />
-                    <Text style={styles.checkboxLabel}>Female</Text>
+                    <Text style={styles.checkboxLabel}>Nữ</Text>
                 </View>
 
                 <View style={styles.inputContainer}>
@@ -310,7 +310,7 @@ const Register = ({ }) => {
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={[styles.input, isSignUpError && styles.errorInput]}
-                        label="Phone number"
+                        label="Số điện thoại"
                         underlineColorAndroid="transparent"
                         keyboardType="number-pad"
                         value={phone}
@@ -328,7 +328,7 @@ const Register = ({ }) => {
                 >
                     <TextInput
                         style={[styles.input, isSignUpError && styles.errorInput]}
-                        label="Password"
+                        label="Mật khẩu"
                         underlineColorAndroid="transparent"
                         secureTextEntry={!showNewPassword}
                         value={password}
@@ -354,7 +354,7 @@ const Register = ({ }) => {
                 >
                     <TextInput
                         style={[styles.input, isSignUpError && styles.errorInput]}
-                        label="Confirm Password"
+                        label="Nhập lại mật khẩu"
                         underlineColorAndroid="transparent"
                         secureTextEntry={!showConfirmNewPassword}
                         value={confirmPassword}
@@ -374,7 +374,7 @@ const Register = ({ }) => {
 
                 <View style={styles.btnContainer}>
                     <Button mode="contained" style={stylessheet.button}>
-                        Register
+                        Đăng ký
                     </Button>
                 </View>
             </View>

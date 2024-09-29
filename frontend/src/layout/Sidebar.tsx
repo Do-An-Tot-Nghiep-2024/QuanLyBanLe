@@ -13,6 +13,7 @@ import {
   ShoppingBag as ShoppingBagIcon,
   Inventory as InventoryIcon,
   Settings as SettingsIcon,
+  NoteAddOutlined,
 } from "@mui/icons-material";
 import { AppProvider, DashboardLayout } from "@toolpad/core";
 import type { Router, Navigation, Session } from "@toolpad/core";
@@ -40,9 +41,14 @@ const NAVIGATION: Navigation = [
     icon: <InventoryIcon />,
   },
   {
-    segment: "product",
+    segment: "category",
     title: "Sản phẩm",
     icon: <StoreIcon />,
+  },
+  {
+    segment: "suppliers",
+    title: "Nhà cung cấp",
+    icon: <NoteAddOutlined />,
   },
   {
     segment: "employees",

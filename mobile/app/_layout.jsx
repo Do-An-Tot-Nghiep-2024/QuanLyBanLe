@@ -30,7 +30,7 @@ function App() {
       headerTitleStyle: {
         fontWeight: 'bold', // Optional: set the header title style
       },
-      title: 'LaLa shop',
+      title: 'Retail Shop',
     }
 
     }>

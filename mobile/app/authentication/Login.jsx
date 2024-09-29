@@ -192,16 +192,16 @@ const Login = ({ }) => {
     return (
         <ScrollView style={styles.container}>
             <View style={styles.text}>
-                <Title style={styles.title}>Login</Title>
+                <Title style={styles.title}>Đăng nhập</Title>
             </View>
             <Paragraph style={styles.signupText}>
-                Do not have an account yet?{" "}
+               Chưa có tài khoản?{" "}
 
                 <Text
                     style={stylessheet.accentText} onPress={() => {
                         navigation.navigate("authentication/Register");
                     }}                    >
-                    Sign up
+                    Đăng ký
                 </Text>
 
 
@@ -225,7 +225,7 @@ const Login = ({ }) => {
             >
                 <TextInput
                     style={[styles.input, loginError && styles.errorInput]}
-                    label="Password"
+                    label="Mật khẩu"
                     underlineColorAndroid="transparent"
                     secureTextEntry={!showNewPassword}
                     value={password}
@@ -248,7 +248,7 @@ const Login = ({ }) => {
                 <Button mode="contained" style={stylessheet.button} onPress={() => {
                     navigation.navigate("MyTabs");
                 }} >
-                    Login
+                    Đăng nhập
                 </Button>
             </View>
 

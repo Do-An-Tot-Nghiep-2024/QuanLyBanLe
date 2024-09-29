@@ -19,11 +19,11 @@ export default function MyTabs() {
       headerTitleStyle: {
         fontWeight: 'bold', // Optional: set the header title style
       },
-      title: 'LaLa shop',
+      title: 'Retail Shop',
     }
     }>
       <Tab.Screen name="promotion" component={Promotion} options={{
-        headerTitle: 'LaLa Shop',
+        headerTitle: 'Retail Shop',
         tabBarLabel: ({ focused }) => (
           <Text style={{ fontWeight: 'bold', fontSize: 13, color: focused ? colors.primaryColor : 'gray' }}>
             Khuyến mãi
@@ -32,7 +32,7 @@ export default function MyTabs() {
         tabBarIcon: ({ }) => <MaterialCommunityIcons name="package" size={24} color={colors.primaryColor} />
       }} />
       <Tab.Screen name="category" component={Category} options={{
-        headerTitle: 'LaLa shop',
+        headerTitle: 'Retail Shop',
         title: 'Danh mục',
         tabBarLabel: ({ focused }) => (
           <Text style={{ fontWeight: 'bold', fontSize: 13, color: focused ? colors.primaryColor : 'gray' }}>
@@ -43,7 +43,7 @@ export default function MyTabs() {
       }} />
 
       <Tab.Screen name="cart" component={Cart} options={{
-        headerTitle: 'LaLa shop',
+        headerTitle: 'Retail Shop',
         title: 'Giỏ hàng',
         tabBarLabel: ({ focused }) => (
           <Text style={{ fontWeight: 'bold', fontSize: 13, color: focused ? colors.primaryColor : 'gray' }}>

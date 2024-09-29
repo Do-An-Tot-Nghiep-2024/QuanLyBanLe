@@ -18,7 +18,11 @@ const NotFoundPage = lazy(() => import("../pages/error/NotFoundPage"));
 const Loading = lazy(() => import("../components/Loading"));
 const CreateEmployee = lazy(() => import("../pages/employee/CreateEmployee"));
 const UpdateEmployee = lazy(() => import("../pages/employee/UpdateEmployee"));
+const SupplierPage = lazy(() => import("../pages/supplier/SupplierPage"));
+const CreateSupplier = lazy(() => import("../pages/supplier/CreateSupplier"));
+const UpdateSupplier = lazy(() => import("../pages/supplier/UpdateSupplier"));
 const Sidebar = lazy(() => import("../layout/Sidebar"));
+const CategoryPage = lazy(() => import("../pages/product/CategoryPage"));
 const PageRouter = () => {
   const auth = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
@@ -31,8 +35,8 @@ const PageRouter = () => {
   }, [token, dispatch]);
 
 
-  const isLoggedIn = auth.isLogin;
-  const userRole = auth.role;
+  const isLoggedIn = "true";
+  const userRole = "MANAGER";
 
   console.log("role sss", userRole);
   return (
@@ -91,13 +95,21 @@ const PageRouter = () => {
           >
             {/* viết giao diện các chức năng của quản lý dưới sidebar */}
             <Route element={<Sidebar />}>
-              <Route path="/dashboard" element={<Dashboard />} />
+  <Route path="/dashboard" element = {< Dashboard />} />
               <Route path="/employees" element={<EmployeePage />} />
               <Route
                 path="/create-employee"
                 element={<CreateEmployee />}
-              ></Route>
-              <Route path="/update-employee/:id" element={<UpdateEmployee />} />
+              > </Route>
+              < Route path = "/suppliers" element = {< SupplierPage />} />
+  < Route path = "/create-supplier" element = {< CreateSupplier />} />
+  < Route path = "/update-supplier/:id" element = {< UpdateSupplier />} />
+    <Route path="/category" element={<CategoryPage />} />
+                
+  < Route path = "/update-employee/:id" element = {< UpdateEmployee />} />
+
+                
+ 
             </Route>
           </Route>
           {/* Not found page */}
