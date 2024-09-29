@@ -34,8 +34,8 @@ const PageRouter = () => {
   }, [token, dispatch]);
 
 
-  const isLoggedIn = true;
-  const userRole = auth.role || "MANAGER";
+  const isLoggedIn = auth.isLogin;
+  const userRole = auth.role;
 
   console.log("role sss", userRole);
   return (

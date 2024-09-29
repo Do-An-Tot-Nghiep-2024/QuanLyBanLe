@@ -5,7 +5,7 @@ import { EmployeeSchema } from "../types/employeeSchema";
 const getEmployeesService = async (page: number, limit: number) => {
   try {
     const response: any = await api.get(
-      `/employees?page=${page}&limit=${limit}`
+      `/employees?pageNumber=${page}&pageSize=${limit}`
     );
     const { message, data } = response;
     if (message !== "success") {
