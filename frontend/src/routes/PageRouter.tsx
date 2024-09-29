@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from "../redux/hook";
 import { getAccount } from "../redux/auth/authSlice";
 import { useEffect, Suspense, lazy } from "react";
 import Cookies from "js-cookie";
+import CreateProduct from '../pages/product/CreateProduct';
 const LoginEmployee = lazy(() => import("../pages/login/LoginEmployeePage")); // optimized import
 const LoginManager = lazy(() => import("../pages/login/LoginManagerPage"));
 const EmployeeMain = lazy(() => import("../pages/staff/home/EmployeeMainPage"));
@@ -33,7 +34,6 @@ const PageRouter = () => {
       dispatch(getAccount());
     }
   }, [token, dispatch]);
-
 
   const isLoggedIn = "true";
   const userRole = "MANAGER";
@@ -95,21 +95,19 @@ const PageRouter = () => {
           >
             {/* viết giao diện các chức năng của quản lý dưới sidebar */}
             <Route element={<Sidebar />}>
-  <Route path="/dashboard" element = {< Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/employees" element={<EmployeePage />} />
-              <Route
-                path="/create-employee"
-                element={<CreateEmployee />}
-              > </Route>
-              < Route path = "/suppliers" element = {< SupplierPage />} />
-  < Route path = "/create-supplier" element = {< CreateSupplier />} />
-  < Route path = "/update-supplier/:id" element = {< UpdateSupplier />} />
-    <Route path="/category" element={<CategoryPage />} />
-                
-  < Route path = "/update-employee/:id" element = {< UpdateEmployee />} />
+              <Route path="/create-employee" element={<CreateEmployee />}>
+                {" "}
+              </Route>
+              <Route path="/suppliers" element={<SupplierPage />} />
+              <Route path="/create-supplier" element={<CreateSupplier />} />
+              <Route path="/create-product" element={<CreateProduct />} />
 
-                
- 
+              <Route path="/update-supplier/:id" element={<UpdateSupplier />} />
+              <Route path="/category" element={<CategoryPage />} />
+
+              <Route path="/update-employee/:id" element={<UpdateEmployee />} />
             </Route>
           </Route>
           {/* Not found page */}

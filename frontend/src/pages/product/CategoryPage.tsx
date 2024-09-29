@@ -177,13 +177,7 @@ export default function CategoryPage() {
 
   return (
     <>
-      <Typography
-        variant="h5"
-        sx={{
-          padding: "10px",
-          textAlign: "center",
-        }}
-      >
+      <Typography variant="h5" align="center" padding={"5px"}>
         Danh mục sản phẩm
       </Typography>
       <Box sx={{ width: "80%" }}>

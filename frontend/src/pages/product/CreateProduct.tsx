@@ -9,12 +9,13 @@ import {
   Button,
   Container,
   Typography,
-  Box
-
+  Box,
+  Select,
+  Input,
+  Alert,
 } from "@mui/material";
 
-
-export default function CreateSupplier() {
+export default function CreateProduct() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate(); // Initialize useNavigate
 
@@ -26,7 +27,7 @@ export default function CreateSupplier() {
   };
 
   const handleBack = () => {
-    navigate("/suppliers"); // Navigate back to the supplier page
+    navigate("/category"); // Navigate back to the supplier page
   };
 
   return (
@@ -38,7 +39,7 @@ export default function CreateSupplier() {
           padding={"5px"}
           sx={{ mb: 3, fontWeight: "bold" }}
         >
-          Thêm mới nhà cung cấp
+          Thêm sản phẩm mới
         </Typography>
 
         <Container
@@ -60,28 +61,59 @@ export default function CreateSupplier() {
               <FormLabel htmlFor="name" sx={{ textAlign: "left" }}>
                 Tên nhà cung cấp:
               </FormLabel>
+              <Select
+                name="name"
+                variant="outlined"
+                displayEmpty
+                native // Sử dụng native để tạo dropdown menu
+              >
+                <option value="" disabled>
+                  Chọn nhà cung cấp
+                </option>
+                <option value="supplier1">Nhà cung cấp 1</option>
+                <option value="supplier2">Nhà cung cấp 2</option>
+                <option value="supplier3">Nhà cung cấp 3</option>
+                {/* Thêm các option khác tương ứng với các nhà cung cấp khác */}
+              </Select>
+            </FormControl>
+
+            <FormControl sx={{ width: "60%" }}>
+              <FormLabel htmlFor="name" sx={{ textAlign: "left" }}>
+                Danh mục sản phẩm:
+              </FormLabel>
+              <Select
+                name="name"
+                variant="outlined"
+                displayEmpty
+                native // Sử dụng native để tạo dropdown menu
+              >
+                <option value="" disabled>
+                  Chọn danh mục sản phẩm
+                </option>
+                <option value="supplier1">Danh mục 1</option>
+                <option value="supplier2">Danh mục 2</option>
+                <option value="supplier3">Danh mục 3</option>
+                {/* Thêm các option khác tương ứng với các nhà cung cấp khác */}
+              </Select>
+            </FormControl>
+
+            <FormControl sx={{ width: "60%" }}>
+              <FormLabel htmlFor="name" sx={{ textAlign: "left" }}>
+                Tên sản phẩm:
+              </FormLabel>
               <TextField name="name" variant="outlined" />
             </FormControl>
 
             <FormControl sx={{ width: "60%" }}>
-              <FormLabel htmlFor="phone" sx={{ textAlign: "left" }}>
-                Số điện thoại:
+              <FormLabel htmlFor="productImage" sx={{ textAlign: "left" }}>
+                Hình ảnh sản phẩm:
               </FormLabel>
-              <TextField name="phone" variant="outlined" />
-            </FormControl>
-
-            <FormControl sx={{ width: "60%" }}>
-              <FormLabel htmlFor="email" sx={{ textAlign: "left" }}>
-                Email:
-              </FormLabel>
-              <TextField name="email" variant="outlined" type="email" />
-            </FormControl>
-
-            <FormControl sx={{ width: "60%" }}>
-              <FormLabel htmlFor="address" sx={{ textAlign: "left" }}>
-                Địa chỉ:
-              </FormLabel>
-              <TextField name="address" variant="outlined" type="text" />
+              <Input
+                accept="image/*"
+                id="productImage"
+                name="productImage"
+                type="file"
+              />
             </FormControl>
           </Stack>
 
