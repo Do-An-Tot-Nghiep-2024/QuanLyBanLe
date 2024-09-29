@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -33,4 +34,6 @@ public class Employee {
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;
+    @OneToMany(mappedBy = "employee")
+    private List<Order> orders;
 }
