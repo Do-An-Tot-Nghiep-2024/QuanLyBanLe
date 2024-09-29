@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,4 +23,6 @@ public class Supplier {
     private String email;
     private String address;
     private boolean isActive;
+    @OneToMany(mappedBy = "supplier")
+    private List<Product> products;
 }

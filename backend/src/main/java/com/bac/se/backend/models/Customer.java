@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,5 +28,7 @@ public class Customer {
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;
+    @OneToMany(mappedBy = "customer")
+    private List<Order> orders;
 }
 

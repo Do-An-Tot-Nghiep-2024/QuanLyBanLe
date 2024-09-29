@@ -6,8 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -20,6 +20,8 @@ public class ProductPrice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_price_id")
     private Long id;
-    private BigDecimal price;
-    private Date date;
+    private double price;
+    private Date createdAt;
+    @OneToMany(mappedBy = "productPrice")
+    private List<Product> products;
 }

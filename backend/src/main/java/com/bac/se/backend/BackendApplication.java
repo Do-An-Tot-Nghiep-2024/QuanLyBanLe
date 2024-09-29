@@ -10,7 +10,7 @@ public class BackendApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(BackendApplication.class, args);
-        log.info("Program is running");
+        double b = 100000000;
+        log.info("Program is running {}",b);
     }
-
 }
