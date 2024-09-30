@@ -46,18 +46,14 @@ public class AccountService {
     }
 
 
-    public ApiResponse getAccountResponse(HttpServletRequest request) {
+    public AccountResponse getAccountResponse(HttpServletRequest request) {
         String token = jwtParse.parseJwt(request);
         String accessToken = jwtParse.decodeTokenWithRequest(request);
         Account account = accountRepository.findByUsername(accessToken)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found user"));
-        AccountResponse accountResponse = new AccountResponse(
+        return new AccountResponse(
                 account.getUsername(),
                 account.getRole().name(),token);
-        return new ApiResponse(
-                "success",
-                accountResponse
-        );
     }
 
     //    create new customer

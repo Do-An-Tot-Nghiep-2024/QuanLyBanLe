@@ -23,11 +23,15 @@ public class CategoryService {
                 .toList();
     }
 
-    public void createCategory(Category category) throws BadRequestUserException {
-        if (category.getName().isEmpty()) {
+    public CategoryResponse createCategory(String categoryName) throws BadRequestUserException {
+        if (categoryName.isEmpty()) {
             throw new BadRequestUserException("Name is required");
         }
-        categoryRepository.save(category);
+
+        var save = categoryRepository.save(Category.builder()
+                .name(categoryName)
+                .build());
+        return new CategoryResponse(save.getId(), save.getName());
     }
 
     public void deleteCategory(Long id) {
@@ -40,13 +44,14 @@ public class CategoryService {
                 );
     }
 
-    public Category getCategory(Long id) {
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found category"));
+    public CategoryResponse getCategory(Long id) {
+        var category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        return new CategoryResponse(category.getId(), category.getName());
     }
 
-    public Category updateCategory(Category category, Long id) throws BadRequestUserException {
-        if (category.getName().isEmpty()) {
+    public CategoryResponse updateCategory(String categoryName, Long id) throws BadRequestUserException {
+        if (categoryName.isEmpty()) {
             throw new BadRequestUserException("Name is required");
         }
         categoryRepository.findById(id)
@@ -56,6 +61,6 @@ public class CategoryService {
                             throw new ResourceNotFoundException("Category not found");
                         }
                 );
-        return category;
+        return new CategoryResponse(id, categoryName);
     }
 }

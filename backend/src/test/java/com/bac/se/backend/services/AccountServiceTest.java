@@ -45,12 +45,11 @@ class AccountServiceTest {
         when(jwtParse.parseJwt(request)).thenReturn(token);
         when(jwtParse.decodeTokenWithRequest(request)).thenReturn(accessToken);
         when(accountRepository.findByUsername(accessToken)).thenReturn(Optional.of(account));
-        ApiResponse response = accountService.getAccountResponse(request);
+        AccountResponse response = accountService.getAccountResponse(request);
         assertNotNull(response);
-        assertEquals("success", response.message());
-        assertEquals("testUser", ((AccountResponse) response.data()).username());
-        assertEquals("EMPLOYEE", ((AccountResponse) response.data()).role());
-        assertEquals(token, ((AccountResponse) response.data()).token());
+        assertEquals("testUser", response.username());
+        assertEquals("EMPLOYEE", response.role());
+        assertEquals(token, response.token());
     }
 
     @Test
@@ -69,15 +68,15 @@ class AccountServiceTest {
         assertEquals("Not found user", thrown.getMessage());
     }
 
-    @Test
-    void registerCustomer() {
-    }
-
-    @Test
-    void createAccountEmployee() {
-    }
-
-    @Test
-    void loginUser() {
-    }
+//    @Test
+//    void registerCustomer() {
+//    }
+//
+//    @Test
+//    void createAccountEmployee() {
+//    }
+//
+//    @Test
+//    void loginUser() {
+//    }
 }

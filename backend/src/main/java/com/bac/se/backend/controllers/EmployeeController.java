@@ -5,6 +5,7 @@ import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.payload.request.EmployeeRequest;
 import com.bac.se.backend.payload.response.ApiResponse;
+import com.bac.se.backend.payload.response.EmployeePageResponse;
 import com.bac.se.backend.payload.response.EmployeeResponse;
 import com.bac.se.backend.services.EmployeeService;
 import lombok.RequiredArgsConstructor;
@@ -24,65 +25,69 @@ public class EmployeeController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse> getEmployees(
+    public ResponseEntity<ApiResponse<EmployeePageResponse>> getEmployees(
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize) {
         var employees = employeeService.getEmployees(pageNumber, pageSize);
         log.info("get employees success");
-        return ResponseEntity.ok(new ApiResponse(SUCCESS, employees));
+        return ResponseEntity.ok(new ApiResponse<>(SUCCESS, employees));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('EMPLOYEE') or hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse> getEmployee(@PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse<EmployeeResponse>> getEmployee(@PathVariable("id") Long id) {
         try {
             EmployeeResponse employee = employeeService.getEmployee(id);
             log.info("get employee success");
-            return ResponseEntity.ok(new ApiResponse(SUCCESS, employee));
+            return ResponseEntity.ok(new ApiResponse<>(SUCCESS, employee));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), null));
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse> createEmployee(@RequestBody EmployeeRequest employeeRequest) {
+    public ResponseEntity<ApiResponse<EmployeeResponse>> createEmployee(@RequestBody EmployeeRequest employeeRequest) {
         try {
             EmployeeResponse employee = employeeService.createEmployee(employeeRequest);
             log.info("create employee success");
-            return ResponseEntity.ok(new ApiResponse(SUCCESS, employee));
+            return ResponseEntity.ok(new ApiResponse<>(SUCCESS, employee));
         } catch (BadRequestUserException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), null));
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(e.getMessage(), null));
         } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse(e.getMessage(), null));
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse> deleteEmployee(@PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse<Long>> deleteEmployee(@PathVariable("id") Long id) {
         try {
             employeeService.deleteEmployee(id);
             log.info("delete employee success");
-            return ResponseEntity.ok(new ApiResponse(SUCCESS, null));
+            return ResponseEntity.ok(new ApiResponse<>(SUCCESS, id));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), null));
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse> updateEmployee(@PathVariable("id") Long id, @RequestBody EmployeeRequest employeeRequest) {
+    public ResponseEntity<ApiResponse<EmployeeResponse>> updateEmployee(@PathVariable("id") Long id, @RequestBody EmployeeRequest employeeRequest) {
         try {
             EmployeeResponse employee = employeeService.updateEmployee(id, employeeRequest);
             log.info("update employee success");
-            return ResponseEntity.ok(new ApiResponse(SUCCESS, employee));
+            return ResponseEntity.ok(new ApiResponse<>(SUCCESS, employee));
         } catch (BadRequestUserException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), null));
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(e.getMessage(), null));
         } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse(e.getMessage(), null));
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 }
