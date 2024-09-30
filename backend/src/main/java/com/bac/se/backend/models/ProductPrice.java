@@ -20,7 +20,9 @@ public class ProductPrice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_price_id")
     private Long id;
+    private double originalPrice;
     private double price;
+    private double discountPrice;
     private Date createdAt;
     @OneToMany(mappedBy = "productPrice")
     private List<Product> products;

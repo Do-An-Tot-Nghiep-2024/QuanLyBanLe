@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,6 +23,7 @@ public class SupplierController {
     static final String REQUEST_SUCCESS = "success";
 
     @GetMapping
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<PageResponse<SupplierResponse>>> getSuppliers(
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize) {
@@ -36,6 +38,7 @@ public class SupplierController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<SupplierResponse>> getSupplier(@PathVariable("id") Long id) {
         try {
             return ResponseEntity
@@ -48,6 +51,7 @@ public class SupplierController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<SupplierResponse>> createSupplier(@RequestBody SupplierRequest supplierRequest) {
         try {
             return ResponseEntity
@@ -64,6 +68,7 @@ public class SupplierController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<Long>> deleteSupplier(@PathVariable("id") Long id) {
         try {
             supplierService.deleteSupplier(id);
@@ -77,6 +82,7 @@ public class SupplierController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<SupplierResponse>> updateSupplier(@RequestBody SupplierRequest supplierRequest, @PathVariable("id") Long id) {
         try {
             return ResponseEntity

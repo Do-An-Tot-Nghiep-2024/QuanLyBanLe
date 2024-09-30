@@ -22,4 +22,6 @@ public class Category {
     private String name;
     @OneToMany(mappedBy = "category")
     private List<Product> products;
+    // set default value
+    private boolean isActive;
 }

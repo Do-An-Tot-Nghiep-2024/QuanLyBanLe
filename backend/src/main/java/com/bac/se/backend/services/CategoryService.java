@@ -3,6 +3,7 @@ package com.bac.se.backend.services;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.models.Category;
+import com.bac.se.backend.payload.request.CategoryRequest;
 import com.bac.se.backend.payload.response.CategoryResponse;
 import com.bac.se.backend.repositories.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,31 +18,30 @@ public class CategoryService {
 
 
     public List<CategoryResponse> getCategories() {
-        return categoryRepository.findAll()
+        return categoryRepository.getCategories()
                 .stream()
-                .map(category -> new CategoryResponse(category.getId(), category.getName()))
+                .map(category -> new CategoryResponse(
+                        Long.parseLong(category[0].toString()),
+                        (String) category[1]))
                 .toList();
     }
 
-    public CategoryResponse createCategory(String categoryName) throws BadRequestUserException {
-        if (categoryName.isEmpty()) {
+    public CategoryResponse createCategory(CategoryRequest categoryRequest) throws BadRequestUserException {
+        if (categoryRequest.name().isEmpty()) {
             throw new BadRequestUserException("Name is required");
         }
-
         var save = categoryRepository.save(Category.builder()
-                .name(categoryName)
+                .name(categoryRequest.name())
+                .isActive(true)
                 .build());
         return new CategoryResponse(save.getId(), save.getName());
     }
 
     public void deleteCategory(Long id) {
-        categoryRepository.findById(id)
-                .ifPresentOrElse(
-                        categoryRepository::delete,
-                        () -> {
-                            throw new ResourceNotFoundException("Customer not found");
-                        }
-                );
+        var category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục nào"));
+        category.setActive(false);
+        categoryRepository.save(category);
     }
 
     public CategoryResponse getCategory(Long id) {
@@ -50,8 +50,8 @@ public class CategoryService {
         return new CategoryResponse(category.getId(), category.getName());
     }
 
-    public CategoryResponse updateCategory(String categoryName, Long id) throws BadRequestUserException {
-        if (categoryName.isEmpty()) {
+    public CategoryResponse updateCategory(CategoryRequest categoryRequest, Long id) throws BadRequestUserException {
+        if (categoryRequest.name().isEmpty()) {
             throw new BadRequestUserException("Name is required");
         }
         categoryRepository.findById(id)
@@ -61,6 +61,6 @@ public class CategoryService {
                             throw new ResourceNotFoundException("Category not found");
                         }
                 );
-        return new CategoryResponse(id, categoryName);
+        return new CategoryResponse(id, categoryRequest.name());
     }
 }
