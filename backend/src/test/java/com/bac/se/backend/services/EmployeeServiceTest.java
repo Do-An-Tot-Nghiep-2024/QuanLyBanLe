@@ -1,14 +1,17 @@
 package com.bac.se.backend.services;
 
 import com.bac.se.backend.enums.EmployeeStatus;
+import com.bac.se.backend.enums.Role;
 import com.bac.se.backend.exceptions.AlreadyExistsException;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.mapper.EmployeeMapper;
+import com.bac.se.backend.models.Account;
 import com.bac.se.backend.models.Employee;
 import com.bac.se.backend.payload.request.EmployeeRequest;
 import com.bac.se.backend.payload.response.EmployeePageResponse;
 import com.bac.se.backend.payload.response.EmployeeResponse;
+import com.bac.se.backend.repositories.AccountRepository;
 import com.bac.se.backend.repositories.EmployeeRepository;
 import com.bac.se.backend.utils.ValidateInput;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Date;
 import java.util.List;
@@ -38,6 +42,12 @@ class EmployeeServiceTest {
 
     @Mock
     private ValidateInput validateInput;
+
+    @Mock
+    private AccountRepository accountRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     private final String EMPLOYEE_NOT_FOUND = "Employee not found";
 
@@ -163,11 +173,17 @@ class EmployeeServiceTest {
                 "john@gmail.com",
                 new Date()
         );
+        Account account = Account.builder()
+                .username(employeeRequest.email())
+                .password(passwordEncoder.encode("123456"))
+                .role(Role.EMPLOYEE)
+                .build();
         when(employeeRepository.existsByEmail(employeeRequest.email())).thenReturn(false);
         when(employeeRepository.existsByPhone(employeeRequest.phone())).thenReturn(false);
         when(validateInput.isValidEmail(employeeRequest.email())).thenReturn(true);
         when(validateInput.isValidPhoneNumber(employeeRequest.phone())).thenReturn(true);
         when(employeeMapper.mapToEmployeeRequest(employeeRequest)).thenReturn(employee);
+        when(accountRepository.save(any(Account.class))).thenReturn(account);
         when(employeeRepository.save(employee)).thenReturn(savedEmployee);
         when(employeeMapper.mapToEmployeeResponse(savedEmployee)).thenReturn(employeeResponse);
 
@@ -180,6 +196,7 @@ class EmployeeServiceTest {
         verify(employeeRepository).existsByEmail(employeeRequest.email());
         verify(employeeRepository).existsByPhone(employeeRequest.phone());
         verify(employeeMapper).mapToEmployeeRequest(employeeRequest);
+        verify(accountRepository).save(any(Account.class));
         verify(employeeRepository).save(any(Employee.class));
         verify(employeeMapper).mapToEmployeeResponse(savedEmployee);
     }

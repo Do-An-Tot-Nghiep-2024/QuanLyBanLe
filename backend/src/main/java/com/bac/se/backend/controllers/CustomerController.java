@@ -36,33 +36,39 @@ public class CustomerController {
 
     @GetMapping("/detail")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<ApiResponse> getCustomer(HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<CustomerResponse>> getCustomer(HttpServletRequest request) {
         try {
             String accessToken = jwtParse.decodeTokenWithRequest(request);
             CustomerResponse customerResponse = customerService.getCustomer(accessToken);
-            return ResponseEntity.ok(new ApiResponse(REQUEST_SUCCESS, customerResponse));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, customerResponse));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse(e.getMessage(), null));
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse> deleteCustomer(@PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse<Long>> deleteCustomer(@PathVariable("id") Long id) {
         try {
             customerService.deleteCustomer(id);
-            return ResponseEntity.ok(new ApiResponse(REQUEST_SUCCESS, id));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, id));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse(e.getMessage(), null));
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
     @PutMapping("/update")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public CustomerResponse updateCustomer(Customer customer, Long id) {
-        return customerService.updateCustomer(customer, id);
+    public ResponseEntity<ApiResponse<CustomerResponse>> updateCustomer(Customer customer, Long id) {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS,
+                    customerService.updateCustomer(customer, id)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
     }
 
 }

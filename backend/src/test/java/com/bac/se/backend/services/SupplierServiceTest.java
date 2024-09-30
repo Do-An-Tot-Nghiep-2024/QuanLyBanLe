@@ -29,15 +29,15 @@ class SupplierServiceTest {
         supplierRequest = new SupplierRequest("John Doe", "0123456789", "john@gmail.com", "123 Main Street");
     }
 
-    @Test
-    void getSuppliersSuccess() {
-        int pageNumber = 0;
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        // Mocking a sample Employee data
-        Object[] supplierData1 = {"1","John Doe", "john@example.com", "1234567890"};
-        Object[] supplierData2 = {"2","Jane Smith", "jane@example.com", "9876543210"};
-        List<Object[]> supplierList = List.of(supplierData1, supplierData2);
+//    @Test
+//    void getSuppliersSuccess() {
+//        int pageNumber = 0;
+//        int pageSize = 10;
+//        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+//        // Mocking a sample Employee data
+//        Object[] supplierData1 = {"1","John Doe", "john@example.com", "1234567890"};
+//        Object[] supplierData2 = {"2","Jane Smith", "jane@example.com", "9876543210"};
+//        List<Object[]> supplierList = List.of(supplierData1, supplierData2);
 
         // Mocking the EmployeeResponse objects
 //        SupplierResponse supplierResponse1 = su
@@ -68,7 +68,7 @@ class SupplierServiceTest {
 //        verify(employeeMapper).mapObjectToEmployeeResponse(employeeData1);
 //        verify(employeeMapper).mapObjectToEmployeeResponse(employeeData2);
 
-    }
+//    }
 
     @Test
     void getSupplierSuccess() {
