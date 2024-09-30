@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class Supplier {
     private String phone;
     private String email;
     private String address;
+    @ColumnDefault(value = "true")
     private boolean isActive;
     @OneToMany(mappedBy = "supplier")
     private List<Product> products;

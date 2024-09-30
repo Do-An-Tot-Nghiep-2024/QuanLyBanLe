@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.List;
 
@@ -21,6 +22,8 @@ public class Product {
     private Long id;
     private String name;
     private String image;
+    @ColumnDefault(value = "true")
+    private boolean isActive;
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
