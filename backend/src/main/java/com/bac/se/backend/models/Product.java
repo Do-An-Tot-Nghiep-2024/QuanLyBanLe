@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.io.Serializable;
 import java.util.List;
 
 @NoArgsConstructor
@@ -15,7 +16,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "t_product")
-public class Product {
+public class Product implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")

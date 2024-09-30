@@ -41,12 +41,9 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // what is csrf and why is it disabled?
-        // https://www.baeldung.com/spring-security-csrf
         http
-
                 .cors(Customizer.withDefaults()) // allow cross origin requests
-//                .csrf(AbstractHttpConfigurer::disable) // disable csrf
+                .csrf(Customizer.withDefaults()) // disable csrf
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST_URL)
                                 .permitAll()

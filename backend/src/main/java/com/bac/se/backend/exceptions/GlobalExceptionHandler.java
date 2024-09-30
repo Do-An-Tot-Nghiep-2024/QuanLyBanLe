@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class )
-    public ResponseEntity<ApiResponse> handleAccessDeniedException(AccessDeniedException ex) {
+    public ResponseEntity<ApiResponse<String>> handleAccessDeniedException(AccessDeniedException ex) {
         String message = "You do not have permission to this action";
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(new ApiResponse(message,null));
+                .body(new ApiResponse<>(message,"access denied"));
     }
 }

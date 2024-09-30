@@ -31,6 +31,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final SupplierRepository supplierRepository;
     private final ProductPriceRepository productPriceRepository;
+    static final String NOT_FOUND_PRODUCT = "Không tìm thấy sản phẩm";
 
     // validate product input
     private void validateInput(ProductRequest productRequest) throws BadRequestUserException {
@@ -62,7 +63,7 @@ public class ProductService {
     // get product by id
     public ProductResponse getProductById(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_PRODUCT));
         return new ProductResponse(product.getId(),
                 product.getName(), product.getImage(),
                 product.getCategory().getName(),
@@ -108,7 +109,7 @@ public class ProductService {
     // delete product by id
     public void deleteProduct(Long productId)  {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_PRODUCT));
         product.setActive(false);
         productRepository.save(product);
     }
@@ -118,7 +119,7 @@ public class ProductService {
     public ProductResponse updateProduct(Long productId, ProductRequest productRequest) throws BadRequestUserException {
         validateInput(productRequest);
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new BadRequestUserException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new BadRequestUserException(NOT_FOUND_PRODUCT));
         validateInput(productRequest);
         product.setName(productRequest.name());
         product.setImage(productRequest.image());

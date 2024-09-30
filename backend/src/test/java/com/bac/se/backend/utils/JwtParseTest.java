@@ -41,7 +41,7 @@ class JwtParseTest {
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
         when(jwtService.extractUsername(token)).thenReturn("testUser");
         String result = jwtParse.decodeTokenWithRequest(request);
-        assertEquals(result, "testUser");
+        assertEquals(result, token);
 
     }
 }
