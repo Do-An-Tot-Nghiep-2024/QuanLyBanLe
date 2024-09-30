@@ -16,6 +16,7 @@ import com.bac.se.backend.repositories.EmployeeRepository;
 import com.bac.se.backend.utils.ValidateInput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,9 @@ public class EmployeeService {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
     private final String EMPLOYEE_NOT_FOUND = "Employee not found";
+
+    @Value("${application.security.password}")
+    private String defaultPassword;
     
     public EmployeePageResponse getEmployees(Integer pageNumber,Integer pageSize){
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -67,7 +71,7 @@ public class EmployeeService {
         Employee save = employeeRepository.save(employee);
         Account account = Account.builder()
                 .username(employeeRequest.email())
-                .password(passwordEncoder.encode("123456"))
+                .password(passwordEncoder.encode(defaultPassword))
                 .role(Role.EMPLOYEE)
                 .build();
         accountRepository.save(account);
