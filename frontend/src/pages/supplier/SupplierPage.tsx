@@ -18,6 +18,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { useNavigate } from "react-router-dom";
+import colors from "../../constants/color";
 
 export default function SupplierPage() {
   const navigate = useNavigate();
@@ -68,51 +69,51 @@ export default function SupplierPage() {
           </IconButton>
         </Stack>
 
-        <TableContainer component={Paper} sx={{ width: "100%" }}>
-          <Table aria-label="custom pagination table">
-            <TableHead>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell key={column} align={"center"}>
-                    {column}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {suppliers.map((supplier) => (
-                <TableRow hover key={supplier.id}>
-                  <TableCell align={"center"}>{supplier.name}</TableCell>
-                  <TableCell align={"center"}>{supplier.phone}</TableCell>
-                  <TableCell align={"center"}>{supplier.email}</TableCell>
-                  <TableCell align={"center"}>{supplier.address}</TableCell>
-                  <TableCell align={"center"}>
-                    <IconButton color="error">
-                      <DeleteForeverIcon />
-                    </IconButton>
-                    <IconButton color="warning" onClick={() => navigate(`/update-supplier/${supplier.id}`)}>
-                      <EditIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
+        <TableContainer component={Paper} sx={{ width: "100%", margin: "auto", backgroundColor: 'white', height: "100%"}}>
+        <Table aria-label="custom pagination table">
+          <TableHead sx={{ backgroundColor: colors.secondaryColor }}>
+            <TableRow>
+              {columns.map((column) => (
+                <TableCell key={column} align={"center"} sx={{ padding: "16px", fontSize: "1.2rem" }}>
+                  {column}
+                </TableCell>
               ))}
-            </TableBody>
-
-            <TableFooter>
-              <TableRow>
-                <TablePagination
-                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-                  colSpan={3}
-                  count={suppliers.length} // Total count of suppliers
-                  rowsPerPage={10}
-                  page={0} // Set current page
-                  onPageChange={() => {}} // Implement page change logic
-                  onRowsPerPageChange={() => {}} // Implement rows per page change logic
-                />
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {suppliers.map((supplier) => (
+              <TableRow hover key={supplier.id} sx={{ height: "60px" }}>
+                <TableCell align={"center"}>{supplier.name}</TableCell>
+                <TableCell align={"center"}>{supplier.phone}</TableCell>
+                <TableCell align={"center"}>{supplier.email}</TableCell>
+                <TableCell align={"center"}>{supplier.address}</TableCell>
+                <TableCell align={"center"}>
+                  <IconButton color="error">
+                    <DeleteForeverIcon />
+                  </IconButton>
+                  <IconButton color="warning" onClick={() => navigate(`/update-supplier/${supplier.id}`)}>
+                    <EditIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
-            </TableFooter>
-          </Table>
-        </TableContainer>
+            ))}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                colSpan={5}
+                count={suppliers.length}
+                rowsPerPage={10}
+                page={0}
+                onPageChange={() => {}} 
+                onRowsPerPageChange={() => {}} 
+              />
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TableContainer>
+      
       </Box>
     </>
   );
