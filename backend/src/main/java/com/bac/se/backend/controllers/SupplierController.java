@@ -8,8 +8,8 @@ import com.bac.se.backend.payload.response.ApiResponse;
 import com.bac.se.backend.payload.response.PageResponse;
 import com.bac.se.backend.payload.response.SupplierResponse;
 import com.bac.se.backend.services.SupplierService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/suppliers")
 @RequiredArgsConstructor
+@Slf4j
 public class SupplierController {
     private final SupplierService supplierService;
     static final String REQUEST_SUCCESS = "success";
@@ -54,6 +55,7 @@ public class SupplierController {
     @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<SupplierResponse>> createSupplier(@RequestBody SupplierRequest supplierRequest) {
         try {
+            log.info("create supplier request is {}", supplierRequest);
             return ResponseEntity
                     .ok(new ApiResponse<>(REQUEST_SUCCESS, supplierService.createSupplier(supplierRequest)));
         } catch (BadRequestUserException e) {

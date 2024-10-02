@@ -7,23 +7,25 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "t_product_price")
-public class ProductPrice {
+@Table(name = "t_promotion")
+public class Promotion {
     @Id
+    @Column(name = "promotion_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_price_id")
     private Long id;
-    private double originalPrice;
-    private double price;
-    private double discountPrice;
-    private Date createdAt;
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
+    private String name;
+    private String description;
+    private Date startDate;
+    private Date endDate;
+    private double discount;
+
+    @OneToMany(mappedBy = "promotion")
+    private List<Product> products;
 }

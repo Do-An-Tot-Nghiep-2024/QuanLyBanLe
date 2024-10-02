@@ -3,10 +3,10 @@ package com.bac.se.backend.utils;
 import com.bac.se.backend.security.JWTService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class JwtParse {
     private final JWTService jwtService;

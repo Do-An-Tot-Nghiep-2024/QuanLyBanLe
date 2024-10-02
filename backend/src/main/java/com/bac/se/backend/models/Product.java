@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
+import java.io.Serializable;
 import java.util.List;
 
 @NoArgsConstructor
@@ -15,24 +15,33 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "t_product")
-public class Product {
+public class Product implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
     private Long id;
     private String name;
     private String image;
-    @ColumnDefault(value = "true")
     private boolean isActive;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
-    @ManyToOne
-    @JoinColumn(name = "product_price_id")
-    private ProductPrice productPrice;
+
+
     @ManyToOne
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
+
+    @ManyToOne
+    @JoinColumn(name = "promotion_id")
+    private Promotion promotion;
+
+    @OneToMany(mappedBy = "product")
+    private List<ProductPrice> productPrices;
     @OneToMany(mappedBy = "product")
     private List<OrderItem> orderItems;
+    @OneToMany(mappedBy = "product")
+    private List<ShipmentItem> shipmentItems;
+
 }

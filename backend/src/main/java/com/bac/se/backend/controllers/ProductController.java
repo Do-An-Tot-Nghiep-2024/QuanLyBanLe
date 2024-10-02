@@ -24,7 +24,7 @@ public class ProductController {
             @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, productService.getEmployees(pageNumber, pageSize)));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, productService.getProducts(pageNumber, pageSize)));
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)

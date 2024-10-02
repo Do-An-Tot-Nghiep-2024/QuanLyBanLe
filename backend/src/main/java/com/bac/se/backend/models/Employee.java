@@ -29,11 +29,14 @@ public class Employee {
     private String email;
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date dob;
+
     @Enumerated(EnumType.STRING)
-    private EmployeeStatus employeeStatus;
+    private EmployeeStatus status;
+
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;
+
     @OneToMany(mappedBy = "employee")
     private List<Order> orders;
 }
