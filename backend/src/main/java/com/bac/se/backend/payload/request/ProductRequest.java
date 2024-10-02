@@ -1,6 +1,6 @@
 package com.bac.se.backend.payload.request;
 
-public record ProductRequest(String name, String image,
+public record ProductRequest(String name,
                              Long categoryId,
                              Long supplierId,
                              double originalPrice,

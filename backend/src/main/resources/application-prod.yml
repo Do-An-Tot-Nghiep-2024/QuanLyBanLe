@@ -13,6 +13,10 @@ spring:
   output:
     ansi:
       enabled: always
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 application:
   security:
     jwt:
@@ -22,3 +26,7 @@ application:
         expiration: 604800000 # 1 week
     password: 123456
     url-client: http://localhost:5173
+  cloudinary:
+    cloud-name: dujylxkra
+    api-key: 228233235289595
+    api-secret: h7yBSJ0KOHB1Cglz7eCbwig5QXU
