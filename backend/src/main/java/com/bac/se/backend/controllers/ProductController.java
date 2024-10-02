@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,11 +42,12 @@ public class ProductController {
         }
     }
 
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
-            @RequestBody ProductRequest productRequest) {
+            @RequestPart("productRequest") ProductRequest productRequest,
+            @RequestPart("file") MultipartFile filePath) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, productService.createProduct(productRequest)));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, productService.createProduct(productRequest,filePath)));
         } catch (BadRequestUserException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)

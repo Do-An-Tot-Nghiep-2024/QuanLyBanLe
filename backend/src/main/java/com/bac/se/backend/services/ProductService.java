@@ -16,12 +16,14 @@ import com.bac.se.backend.repositories.CategoryRepository;
 import com.bac.se.backend.repositories.ProductPriceRepository;
 import com.bac.se.backend.repositories.ProductRepository;
 import com.bac.se.backend.repositories.SupplierRepository;
+import com.bac.se.backend.utils.UploadImage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -37,20 +39,23 @@ public class ProductService {
     private final ProductPriceRepository productPriceRepository;
     private final ProductPriceMapper productPriceMapper;
     static final String NOT_FOUND_PRODUCT = "Không tìm thấy sản phẩm";
+    private final UploadImage uploadImage;
 
     // validate product input
     private void validateInput(ProductRequest productRequest) throws BadRequestUserException {
         String name = productRequest.name();
-        String image = productRequest.image();
         Long categoryId = productRequest.categoryId();
         Long supplierId = productRequest.supplierId();
         double price = productRequest.price();
         double originalPrice = productRequest.originalPrice();
-        if (name.isEmpty() || image.isEmpty() || categoryId == null || supplierId == null) {
+        if (name.isEmpty() || categoryId == null || supplierId == null) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
         }
         if (price <= 0 || originalPrice <= 0) {
             throw new BadRequestUserException("Giá phải lớn hơn 0");
+        }
+        if(originalPrice > price){
+            throw new BadRequestUserException("Giá nhập lớn hơn giá gốc");
         }
     }
     // get all product with pagination
@@ -81,15 +86,21 @@ public class ProductService {
 
 
     // create product
-    public ProductResponse createProduct(ProductRequest productRequest) throws BadRequestUserException {
+    public ProductResponse createProduct(
+            ProductRequest productRequest,
+             MultipartFile image
+            ) throws BadRequestUserException {
         validateInput(productRequest);
+        // create image url and upload image to cloud storage
+        var imageURL = uploadImage.uploadFile(image);
+
         Category category = categoryRepository.findById(productRequest.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
         Supplier supplier = supplierRepository.findById(productRequest.supplierId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhà cung cấp"));
         Product product = Product.builder()
                 .name(productRequest.name())
-                .image(productRequest.image())
+                .image(imageURL)
                 .category(category)
                 .supplier(supplier)
                 .isActive(true)
@@ -141,7 +152,7 @@ public class ProductService {
 
         // Update basic product information
         product.setName(productRequest.name());
-        product.setImage(productRequest.image());
+//        product.setImage(productRequest.image());
         product.setCategory(category);
         product.setSupplier(supplier);
 
