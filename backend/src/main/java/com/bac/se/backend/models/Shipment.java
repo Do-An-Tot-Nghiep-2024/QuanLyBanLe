@@ -6,24 +6,23 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "t_product_price")
-public class ProductPrice {
+@Table(name = "t_shipment")
+public class Shipment implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_price_id")
+    @Column(name = "shipment_id")
     private Long id;
-    private double originalPrice;
-    private double price;
-    private double discountPrice;
     private Date createdAt;
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
+
+    @OneToMany(mappedBy = "shipment")
+    private List<ShipmentItem> shipmentItems;
 }

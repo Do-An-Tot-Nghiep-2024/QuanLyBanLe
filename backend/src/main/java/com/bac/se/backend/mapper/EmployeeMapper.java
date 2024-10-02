@@ -16,7 +16,7 @@ public class EmployeeMapper {
                 .phone(employeeRequest.phone())
                 .email(employeeRequest.email())
                 .dob(employeeRequest.dob())
-                .employeeStatus(EmployeeStatus.ACTIVE)
+                .status(EmployeeStatus.ACTIVE)
                 .build();
     }
 

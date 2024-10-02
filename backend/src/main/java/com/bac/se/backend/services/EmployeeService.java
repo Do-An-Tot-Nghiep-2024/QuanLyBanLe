@@ -81,7 +81,7 @@ public class EmployeeService {
     public void deleteEmployee(Long id){
         Employee employeeNotFound = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
-        employeeNotFound.setEmployeeStatus(EmployeeStatus.ABSENT);
+        employeeNotFound.setStatus(EmployeeStatus.ABSENT);
         employeeRepository.save(employeeNotFound);
     }
 

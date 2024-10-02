@@ -6,24 +6,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "t_product_price")
-public class ProductPrice {
+@Table(name = "t_stock")
+public class Stock {
     @Id
+    @Column(name = "stock_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_price_id")
     private Long id;
-    private double originalPrice;
-    private double price;
-    private double discountPrice;
-    private Date createdAt;
-    @ManyToOne
+    private int quantity;
+    private int soldQuantity;
+    private int failedQuantity;
+    @OneToOne
     @JoinColumn(name = "product_id")
     private Product product;
 }

@@ -44,9 +44,9 @@ class EmployeeMapperTest {
     void mapObjectToEmployeeResponse() {
         Object[] objects = new Object[]{"1", "name", "phone", "email", new Date()};
         EmployeeResponse employeeResponse = employeeMapper.mapObjectToEmployeeResponse(objects);
-        assertEquals(employeeResponse.name(), "name");
-        assertEquals(employeeResponse.phone(), "phone");
-        assertEquals(employeeResponse.email(), "email");
-        assertEquals(employeeResponse.dob(), new Date());
+        assertEquals(employeeResponse.name(), objects[1]);
+        assertEquals(employeeResponse.phone(), objects[2]);
+        assertEquals(employeeResponse.email(), objects[3]);
+        assertEquals(employeeResponse.dob(), objects[4]);
     }
 }

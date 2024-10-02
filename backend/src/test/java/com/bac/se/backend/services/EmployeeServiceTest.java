@@ -105,7 +105,7 @@ class EmployeeServiceTest {
                 .email("email")
                 .phone("phone")
                 .dob(new Date())
-                .employeeStatus(EmployeeStatus.ACTIVE)
+                .status(EmployeeStatus.ACTIVE)
                 .build();
         EmployeeResponse employeeResponse = new EmployeeResponse(
                 1L,
@@ -156,7 +156,7 @@ class EmployeeServiceTest {
                 .email("john@gmail.com")
                 .phone("0123456789")
                 .dob(new Date())
-                .employeeStatus(EmployeeStatus.ACTIVE)
+                .status(EmployeeStatus.ACTIVE)
                 .build();
         Employee savedEmployee = Employee.builder()
                 .id(employeeId)
@@ -164,7 +164,7 @@ class EmployeeServiceTest {
                 .email("john@gmail.com")
                 .phone("0123456789")
                 .dob(new Date())
-                .employeeStatus(EmployeeStatus.ACTIVE)
+                .status(EmployeeStatus.ACTIVE)
                 .build();
         EmployeeResponse employeeResponse = new EmployeeResponse(
                 employeeId,
@@ -255,7 +255,7 @@ class EmployeeServiceTest {
         Long employeeId = 1L;
         Employee employee = Employee.builder()
                 .id(employeeId)
-                .employeeStatus(EmployeeStatus.ACTIVE)
+                .status(EmployeeStatus.ACTIVE)
                 .build();
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
@@ -263,7 +263,7 @@ class EmployeeServiceTest {
         // Act
         employeeService.deleteEmployee(employeeId);
         // Assert
-        assertEquals(EmployeeStatus.ABSENT, employee.getEmployeeStatus());
+        assertEquals(EmployeeStatus.ABSENT, employee.getStatus());
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(employeeRepository, times(1)).save(employee);
     }
@@ -293,7 +293,7 @@ class EmployeeServiceTest {
                 .email("david@gmail.com")
                 .phone("07777777777")
                 .dob(new Date())
-                .employeeStatus(EmployeeStatus.ACTIVE)
+                .status(EmployeeStatus.ACTIVE)
                 .build();
         EmployeeRequest employeeRequest = new EmployeeRequest(
                 "John Doe",
@@ -307,7 +307,7 @@ class EmployeeServiceTest {
                 .email("john@gmail.com")
                 .phone("0123456789")
                 .dob(new Date())
-                .employeeStatus(EmployeeStatus.ACTIVE)
+                .status(EmployeeStatus.ACTIVE)
                 .build();
         EmployeeResponse employeeResponse = new EmployeeResponse(
                 employeeId,
@@ -373,7 +373,7 @@ class EmployeeServiceTest {
                 .email("david@gmail.com")
                 .phone("0214815126")
                 .dob(new Date())
-                .employeeStatus(EmployeeStatus.ACTIVE)
+                .status(EmployeeStatus.ACTIVE)
                 .build();
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
         when(employeeRepository.existsByEmail(employeeRequest.email())).thenReturn(true);
@@ -398,7 +398,7 @@ class EmployeeServiceTest {
                 .email("david@gmail.com")
                 .phone("0214815126")
                 .dob(new Date())
-                .employeeStatus(EmployeeStatus.ACTIVE)
+                .status(EmployeeStatus.ACTIVE)
                 .build();
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));

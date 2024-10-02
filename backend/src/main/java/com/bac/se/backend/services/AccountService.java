@@ -40,7 +40,7 @@ public class AccountService {
     private final ValidateInput validateInput;
     private final JwtParse jwtParse;
 
-    private Account createAccountWithRole(String username, String password, Role role) {
+    public Account createAccountWithRole(String username, String password, Role role) {
         return Account.builder()
                 .username(username)
                 .password(passwordEncoder.encode(password))
@@ -111,7 +111,7 @@ public class AccountService {
                 accountRequest.password(),
                 Role.EMPLOYEE);
         accountRepository.save(account);
-        return new EmployeeAccountResponse(accountRequest.email(), accountRequest.email());
+        return new EmployeeAccountResponse(accountRequest.email(), account.getRole().name());
     }
 
 
