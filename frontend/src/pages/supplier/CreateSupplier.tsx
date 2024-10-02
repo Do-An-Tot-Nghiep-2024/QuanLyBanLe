@@ -9,7 +9,6 @@ import {
   Button,
   Container,
   Typography,
-  Box,
   Alert
 
 } from "@mui/material";
@@ -24,6 +23,11 @@ export default function CreateSupplier() {
     // Handle form submission logic here
     // On success, navigate back to the supplier page
     // navigate("/suppliers"); // Uncomment this line when you have success logic
+    try{
+      
+    }catch(err : any){
+      setError(err?.message);
+    }
   };
 
   const handleBack = () => {

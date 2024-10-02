@@ -167,6 +167,7 @@ export default function DataTable<T>({
   ]);
   const handleClickOpen = () => {
     setOpen(true);
+    setSelectedValue(employees[0]);
   };
 
   const getKeys = function (obj: T) {

@@ -2,7 +2,7 @@
 # https://docs.docker.com/develop/develop-images/multistage-build/
 
 # build stage
-FROM node:lts-alpine AS build-stage
+FROM node:22.3.0-alpine AS build-stage
 WORKDIR /app
 COPY package*.json ./
 RUN npm install

@@ -18,6 +18,11 @@ import {
   
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault();
+      try{
+
+      }catch(error : any){
+        setError(error?.message);
+      }
       // Handle form submission logic here
       // On success, navigate back to the supplier page
       // navigate("/suppliers"); // Uncomment this line when you have success logic
