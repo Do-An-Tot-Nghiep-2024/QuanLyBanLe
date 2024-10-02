@@ -21,11 +21,7 @@ import { useNavigate } from "react-router-dom";
 import colors from "../../constants/color";
 
 import Tooltip from "@mui/material/Tooltip";
-import InfoIcon from "@mui/icons-material/Info";
 import {
-  Category,
-  CategoryOutlined,
-  CategoryTwoTone,
   NoteAddOutlined,
 } from "@mui/icons-material";
 
