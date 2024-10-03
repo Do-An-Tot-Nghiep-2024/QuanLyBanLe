@@ -49,7 +49,7 @@ public class CustomerController {
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<Long>> deleteCustomer(@PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse<Long>> deleteCustomer(@PathVariable("id") final Long id) {
         try {
             customerService.deleteCustomer(id);
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, id));
@@ -61,7 +61,8 @@ public class CustomerController {
 
     @PutMapping("/update")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<ApiResponse<CustomerResponse>> updateCustomer(Customer customer, Long id) {
+    public ResponseEntity<ApiResponse<CustomerResponse>> updateCustomer(@RequestBody final Customer customer,
+                                                                        @PathVariable("id") final Long id) {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS,
                     customerService.updateCustomer(customer, id)));

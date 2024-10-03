@@ -66,10 +66,10 @@ public class AccountService {
         if (email.isEmpty() || password.isEmpty() || name.isEmpty() || phone.isEmpty()) {
             throw new BadRequestUserException("Input is required");
         }
-        if (validateInput.isValidEmail(email)) {
+        if (!validateInput.isValidEmail(email)) {
             throw new BadRequestUserException("Email is not valid");
         }
-        if (validateInput.isValidPhoneNumber(phone)) {
+        if (!validateInput.isValidPhoneNumber(phone)) {
             throw new BadRequestUserException("Phone is not valid");
         }
         if(customerRepository.existsByEmail(email)){

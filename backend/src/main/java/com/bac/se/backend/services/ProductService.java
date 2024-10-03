@@ -4,18 +4,12 @@ import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.mapper.ProductMapper;
 import com.bac.se.backend.mapper.ProductPriceMapper;
-import com.bac.se.backend.models.Category;
-import com.bac.se.backend.models.Product;
-import com.bac.se.backend.models.ProductPrice;
-import com.bac.se.backend.models.Supplier;
+import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.ProductRequest;
 import com.bac.se.backend.payload.response.PageResponse;
 import com.bac.se.backend.payload.response.ProductPriceResponse;
 import com.bac.se.backend.payload.response.ProductResponse;
-import com.bac.se.backend.repositories.CategoryRepository;
-import com.bac.se.backend.repositories.ProductPriceRepository;
-import com.bac.se.backend.repositories.ProductRepository;
-import com.bac.se.backend.repositories.SupplierRepository;
+import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.utils.UploadImage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +32,7 @@ public class ProductService {
     private final SupplierRepository supplierRepository;
     private final ProductPriceRepository productPriceRepository;
     private final ProductPriceMapper productPriceMapper;
+    private final StockRepository stockRepository;
     static final String NOT_FOUND_PRODUCT = "Không tìm thấy sản phẩm";
     private final UploadImage uploadImage;
 
@@ -88,9 +83,10 @@ public class ProductService {
     // create product
     public ProductResponse createProduct(
             ProductRequest productRequest,
-             MultipartFile image
+            MultipartFile image
             ) throws BadRequestUserException {
         validateInput(productRequest);
+
         // create image url and upload image to cloud storage
         var imageURL = uploadImage.uploadFile(image);
 
@@ -114,6 +110,11 @@ public class ProductService {
                 .product(productSave)
                 .build();
         var productPriceSave = productPriceRepository.save(productPrice);
+        // Tạo lô hàng cho sản phẩm
+        Stock stock = Stock.builder()
+                .product(productSave)
+                .build();
+        stockRepository.save(stock);
         return new ProductResponse(productSave.getId(),
                 productSave.getName(), productSave.getImage(),
                 productSave.getCategory().getName(),

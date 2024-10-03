@@ -7,7 +7,6 @@ import com.bac.se.backend.payload.request.LoginRequest;
 import com.bac.se.backend.payload.request.RegisterRequest;
 import com.bac.se.backend.payload.response.*;
 import com.bac.se.backend.services.AccountService;
-import com.bac.se.backend.utils.UploadImage;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -25,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class AccountController {
     private final AccountService accountService;
     static final String REQUEST_SUCCESS = "success";
-    private final UploadImage uploadImage;
+
     // Register account customer controller
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@RequestBody RegisterRequest request) {
@@ -90,13 +88,5 @@ public class AccountController {
 
     }
 
-
-    @PostMapping("/uploadImage")
-    public ResponseEntity<ApiResponse<String>> uploadImage(@RequestParam("file") MultipartFile file) {
-        log.info("File uploaded successfully {}", file);
-        String imageUrl = uploadImage.uploadFile(file);
-        return ResponseEntity.ok()
-                .body(new ApiResponse<>(REQUEST_SUCCESS, imageUrl));
-    }
 
 }
