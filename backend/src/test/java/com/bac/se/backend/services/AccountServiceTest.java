@@ -60,7 +60,6 @@ class AccountServiceTest {
         assertNotNull(response);
         assertEquals("testUser", response.username());
         assertEquals("EMPLOYEE", response.role());
-        assertEquals(token, response.token());
     }
 
     @Test

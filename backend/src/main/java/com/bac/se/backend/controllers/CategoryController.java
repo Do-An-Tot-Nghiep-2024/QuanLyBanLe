@@ -36,7 +36,7 @@ public class CategoryController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<CategoryResponse>> getCategory(@PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> getCategory(@PathVariable("id") final Long id) {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS,
                     categoryService.getCategory(id)));
@@ -48,7 +48,7 @@ public class CategoryController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@RequestBody CategoryRequest categoryRequest) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@RequestBody final CategoryRequest categoryRequest) {
         try {
             var response = categoryService.createCategory(categoryRequest);
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, response));
@@ -60,7 +60,7 @@ public class CategoryController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<Long>> deleteCategory(@PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse<Long>> deleteCategory(@PathVariable("id") final Long id) {
         try {
             categoryService.deleteCategory(id);
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, id));
