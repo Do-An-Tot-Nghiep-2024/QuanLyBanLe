@@ -41,19 +41,19 @@ public class UploadImage {
     }
 
     private File convertMultiPartToFile(MultipartFile file) {
-        File convFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
-        FileOutputStream fos = null;
         try {
-            if(!FilenameUtils.getExtension(file.getOriginalFilename()).equalsIgnoreCase("jpg")
+            if (!Objects.requireNonNull(FilenameUtils.getExtension(file.getOriginalFilename())).equalsIgnoreCase("jpg")
                     && !FilenameUtils.getExtension(file.getOriginalFilename()).equalsIgnoreCase("png")) {
                 throw new RuntimeException("Only jpg and png files are allowed");
             }
+            File convFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
+            FileOutputStream fos = null;
             fos = new FileOutputStream(convFile);
             fos.write(file.getBytes());
             fos.close();
+            return convFile;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return convFile;
     }
 }
