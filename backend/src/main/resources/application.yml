@@ -1,3 +1,13 @@
 spring:
   profiles:
     active: prod
+  main:
+    lazy-initialization: true
+
+server:
+  http2:
+    enabled: true
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,application/json
+    min-response-size: 1024

@@ -21,6 +21,7 @@ import java.util.Objects;
 public class UploadImage {
     private final Cloudinary cloudinaryConfig;
 
+
     public String uploadFile(MultipartFile gif) {
         try {
             File uploadedFile = convertMultiPartToFile(gif);

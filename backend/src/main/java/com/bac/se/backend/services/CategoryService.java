@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryService {
     private final CategoryRepository categoryRepository;
-
+    static final String CATEGORY_NOT_FOUND = "Không tìm thấy danh mục";
 
     public List<CategoryResponse> getCategories() {
         return categoryRepository.getCategories()
@@ -28,37 +28,39 @@ public class CategoryService {
 
     public CategoryResponse createCategory(CategoryRequest categoryRequest) throws BadRequestUserException {
         if (categoryRequest.name().isEmpty()) {
-            throw new BadRequestUserException("Name is required");
+            throw new BadRequestUserException("Vui lòng nhập tên danh mục");
         }
-        var save = categoryRepository.save(Category.builder()
+
+        Category category = Category.builder()
                 .name(categoryRequest.name())
                 .isActive(true)
-                .build());
+                .build();
+        var save = categoryRepository.save(category);
         return new CategoryResponse(save.getId(), save.getName());
     }
 
     public void deleteCategory(Long id) {
         var category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục nào"));
+                .orElseThrow(() -> new ResourceNotFoundException(CATEGORY_NOT_FOUND));
         category.setActive(false);
         categoryRepository.save(category);
     }
 
     public CategoryResponse getCategory(Long id) {
         var category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CATEGORY_NOT_FOUND));
         return new CategoryResponse(category.getId(), category.getName());
     }
 
     public CategoryResponse updateCategory(CategoryRequest categoryRequest, Long id) throws BadRequestUserException {
         if (categoryRequest.name().isEmpty()) {
-            throw new BadRequestUserException("Name is required");
+            throw new BadRequestUserException("Vui lòng nhập tên danh mục");
         }
         categoryRepository.findById(id)
                 .ifPresentOrElse(
                         categoryRepository::save,
                         () -> {
-                            throw new ResourceNotFoundException("Category not found");
+                            throw new ResourceNotFoundException(CATEGORY_NOT_FOUND);
                         }
                 );
         return new CategoryResponse(id, categoryRequest.name());
