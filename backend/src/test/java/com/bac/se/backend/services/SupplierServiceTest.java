@@ -282,7 +282,6 @@ class SupplierServiceTest {
         when(supplierRepository.findById(supplierId)).thenReturn(Optional.of(supplier));
         when(validateInput.isValidEmail(supplierRequest.email())).thenReturn(true);
         when(validateInput.isValidPhoneNumber(supplierRequest.phone())).thenReturn(true);
-        when(supplier.getPhone().equals(supplierRequest.phone())).thenReturn(false);
         when(supplierRepository.existsByPhone(supplierRequest.phone())).thenReturn(true);
         // Act & Assert
         AlreadyExistsException exception = assertThrows(AlreadyExistsException.class,
