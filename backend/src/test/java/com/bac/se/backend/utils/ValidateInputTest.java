@@ -11,7 +11,7 @@ class ValidateInputTest {
 
     @Test
     void isValidEmailSuccess() {
-        assertTrue(validateInput.isValidEmail("bac.se@gmail.com"));
+        assertTrue(validateInput.isValidEmail("john@gmail.com"));
     }
     @Test
     void isValidEmailFail() {

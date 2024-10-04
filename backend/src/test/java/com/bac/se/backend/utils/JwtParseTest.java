@@ -24,6 +24,7 @@ class JwtParseTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
     }
 
     @Test
@@ -33,6 +34,14 @@ class JwtParseTest {
         String result = jwtParse.parseJwt(request);
         assertEquals(result, token);
 
+    }
+
+    @Test
+    void parseJwtFail() {
+        String token = "";
+        when(request.getHeader("Authorization")).thenReturn(token);
+        String result = jwtParse.parseJwt(request);
+        assertEquals(result, null);
     }
 
     @Test

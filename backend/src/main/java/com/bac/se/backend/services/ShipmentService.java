@@ -58,8 +58,9 @@ public class ShipmentService {
             }
             // save shipment item
             shipmentItemRepository.save(shipmentItem);
+            // update quantity product in stock
             Stock stock = stockRepository.findStockByProductId(productItem.id())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lô hàng của sản phẩm"));
             stock.setQuantity(stock.getQuantity() + productItem.quantity());
             stockRepository.save(stock);
             total = total.add(BigDecimal.valueOf(productItem.quantity()).multiply(BigDecimal.valueOf(productItem.price())));
@@ -69,4 +70,8 @@ public class ShipmentService {
                 shipmentRequest.productItems(),
                 shipmentSave.getCreatedAt());
     }
+    // create unit test for code above
+
+        // create order shipment
+
 }

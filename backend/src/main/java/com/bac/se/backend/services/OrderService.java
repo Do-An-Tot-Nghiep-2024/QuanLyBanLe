@@ -73,9 +73,9 @@ public class OrderService {
         List<OrderItemResponse> orderItemResponses = new LinkedList<>();
         for (OrderItemRequest orderItemRequest : orderItemRequests) {
             Product product = productRepository.findById(orderItemRequest.productId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm sản phẩm"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
             Shipment shipment = shipmentRepository.findById(orderItemRequest.shipmentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm lô hàng"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lô hàng"));
             ShipmentItemKey key = ShipmentItemKey.builder()
                     .product(product)
                     .shipment(shipment)
