@@ -1,7 +1,7 @@
 package com.bac.se.backend.mapper;
 
 import com.bac.se.backend.models.ProductPrice;
-import com.bac.se.backend.payload.response.ProductPriceResponse;
+import com.bac.se.backend.payload.response.product.ProductPriceResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

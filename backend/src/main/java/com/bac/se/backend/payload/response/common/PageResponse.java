@@ -1,4 +1,4 @@
-package com.bac.se.backend.payload.response;
+package com.bac.se.backend.payload.response.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

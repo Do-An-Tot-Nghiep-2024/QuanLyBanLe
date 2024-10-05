@@ -3,17 +3,17 @@ package com.bac.se.backend.controllers;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.payload.request.OrderRequest;
-import com.bac.se.backend.payload.response.ApiResponse;
-import com.bac.se.backend.payload.response.CreateOrderResponse;
+import com.bac.se.backend.payload.response.common.ApiResponse;
+import com.bac.se.backend.payload.response.common.PageResponse;
+import com.bac.se.backend.payload.response.order.CreateOrderResponse;
+import com.bac.se.backend.payload.response.order.OrderCustomerResponse;
+import com.bac.se.backend.payload.response.order.OrderResponse;
 import com.bac.se.backend.services.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -36,5 +36,24 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
+    }
+
+    @GetMapping("/customer/{id}")
+    public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrderByCustomer(
+            @PathVariable("id") Long id,
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>("success", orderService.getOrdersByCustomer(id, pageNumber, pageSize)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/customer-detail/{orderId}")
+    public ResponseEntity<ApiResponse<OrderCustomerResponse>> getOrderCustomerDetail(@PathVariable("orderId") Long orderId) {
+        return ResponseEntity.ok(new ApiResponse<>("success", orderService.getOrderDetailByCustomer(orderId)));
+
     }
 }

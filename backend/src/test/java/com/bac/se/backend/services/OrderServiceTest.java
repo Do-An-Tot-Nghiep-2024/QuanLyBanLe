@@ -6,6 +6,8 @@ import com.bac.se.backend.keys.ShipmentItemKey;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.OrderItemRequest;
 import com.bac.se.backend.payload.request.OrderRequest;
+import com.bac.se.backend.payload.response.order.CreateOrderResponse;
+import com.bac.se.backend.payload.response.order.OrderItemResponse;
 import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.utils.JwtParse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,8 +23,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -160,49 +161,49 @@ class OrderServiceTest {
         assertEquals("Sản phẩm đã hết hạn", exception.getMessage());
     }
 
-//    @Test
-//    void createOrderLiveSuccess() throws BadRequestUserException {
-//        setUpCommonMocks();
-//        when(shipmentItemRepository.findById(any(ShipmentItemKey.class))).thenReturn(Optional.of(new ShipmentItem(
-//                mock(Shipment.class),
-//                mock(Product.class),
-//                0,
-//                Date.from(Instant.now()),
-//                expectedDate
-//        )));
-//
-//        when(stockRepository.findStockByProductId(anyLong())).thenReturn(Optional.of(mock(Stock.class)));
-//        List<Object[]> productPrice = new LinkedList<>();
-//        Object[] objects = new Object[]{1000, 1500, 30};
-//        productPrice.add(objects);
-//        when(productPriceRepository.getProductPriceLatest(anyLong(), any(PageRequest.class))).thenReturn(productPrice);
-//        CreateOrderResponse expectedResponse = new OrderResponse(
-//                List.of(
-//                        new OrderItemResponse(null,1,1500.0,30,30),
-//                        new OrderItemResponse(null,2,1500.0,30,60)
-//                ),
-//                90.0, 50000.0, 49910.0
-//        );
-//        // Call the method under test
-//        CreateOrderResponse response = orderService.createOrderLive(orderRequest, request);
-//
-//        // Verify the results
-//        assertNotNull(response);
-//        assertEquals(expectedResponse, response);
-//        assertEquals(jwtParse.decodeTokenWithRequest(request), "employee@example.com");
-//        // Add more assertions as needed
-//
-//        // Verify interactions with mocks
-//        verify(employeeRepository, times(1)).findByEmail(anyString());
-//        verify(orderRepository, times(1)).save(any(Order.class)); // save order
-//        verify(productRepository, times(orderRequest.orderItems().size())).findById(anyLong()); // find product
-//        verify(shipmentRepository, times(orderRequest.orderItems().size())).findById(anyLong()); // find shipment
-//        verify(shipmentItemRepository, times(orderRequest.orderItems().size())).findById(any(ShipmentItemKey.class)); // find shipment item
-//        verify(stockRepository, times(orderRequest.orderItems().size())).findStockByProductId(anyLong()); // find stock
-//        verify(stockRepository, times(orderRequest.orderItems().size())).save(any(Stock.class)); // update stock
-//        verify(productPriceRepository, times(orderRequest.orderItems().size())).getProductPriceLatest(anyLong(), any(PageRequest.class)); // find product price
-//        verify(orderItemRepository, times(orderRequest.orderItems().size())).save(any(OrderItem.class)); // save order item
-//    }
+    @Test
+    void createOrderLiveSuccess() throws BadRequestUserException {
+        setUpCommonMocks();
+        when(shipmentItemRepository.findById(any(ShipmentItemKey.class))).thenReturn(Optional.of(new ShipmentItem(
+                mock(Shipment.class),
+                mock(Product.class),
+                0,
+                Date.from(Instant.now()),
+                expectedDate
+        )));
+
+        when(stockRepository.findStockByProductId(anyLong())).thenReturn(Optional.of(mock(Stock.class)));
+        List<Object[]> productPrice = new LinkedList<>();
+        Object[] objects = new Object[]{1000, 1500, 30};
+        productPrice.add(objects);
+        when(productPriceRepository.getProductPriceLatest(anyLong(), any(PageRequest.class))).thenReturn(productPrice);
+        CreateOrderResponse expectedResponse = new CreateOrderResponse(
+                List.of(
+                        new OrderItemResponse(null,1,1500.0,30,30),
+                        new OrderItemResponse(null,2,1500.0,30,60)
+                ),
+                90.0, 50000.0, 49910.0
+        );
+        // Call the method under test
+        CreateOrderResponse response = orderService.createOrderLive(orderRequest, request);
+
+        // Verify the results
+        assertNotNull(response);
+        assertEquals(expectedResponse, response);
+        assertEquals(jwtParse.decodeTokenWithRequest(request), "employee@example.com");
+        // Add more assertions as needed
+
+        // Verify interactions with mocks
+        verify(employeeRepository, times(1)).findByEmail(anyString());
+        verify(orderRepository, times(1)).save(any(Order.class)); // save order
+        verify(productRepository, times(orderRequest.orderItems().size())).findById(anyLong()); // find product
+        verify(shipmentRepository, times(orderRequest.orderItems().size())).findById(anyLong()); // find shipment
+        verify(shipmentItemRepository, times(orderRequest.orderItems().size())).findById(any(ShipmentItemKey.class)); // find shipment item
+        verify(stockRepository, times(orderRequest.orderItems().size())).findStockByProductId(anyLong()); // find stock
+        verify(stockRepository, times(orderRequest.orderItems().size())).save(any(Stock.class)); // update stock
+        verify(productPriceRepository, times(orderRequest.orderItems().size())).getProductPriceLatest(anyLong(), any(PageRequest.class)); // find product price
+        verify(orderItemRepository, times(orderRequest.orderItems().size())).save(any(OrderItem.class)); // save order item
+    }
 
 
      void setUpCommonMocks() {

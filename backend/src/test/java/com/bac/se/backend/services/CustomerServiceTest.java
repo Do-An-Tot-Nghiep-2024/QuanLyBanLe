@@ -96,6 +96,8 @@ class CustomerServiceTest {
 
         // Stubbing method calls on the mock object
         when(customer.getName()).thenReturn("");
+        when(customer.getEmail()).thenReturn("john@gmail.com");
+        when(customer.getPhone()).thenReturn("0123456789");
         when(validateInput.isValidEmail(customer.getEmail())).thenReturn(false);
         when(validateInput.isValidPhoneNumber(customer.getPhone())).thenReturn(false);
 
@@ -119,13 +121,21 @@ class CustomerServiceTest {
     }
 
     @Test
-    void updateCustomerWithInvalidPhone() throws BadRequestUserException {
+    void updateCustomerWithInvalidPhone()  {
+        Customer customer = Customer.builder()
+                .email("john@gmail.com")
+                .phone("0123456789")
+                .name("John Doe")
+                .build();
+        when(validateInput.isValidEmail(customer.getEmail())).thenReturn(true);
         when(validateInput.isValidPhoneNumber(customer.getPhone())).thenReturn(false);
-        Exception exception = assertThrows(BadRequestUserException.class,
-                () -> customerService.updateCustomer(customer, 1L));
-        assertEquals("Email không hợp lệ", exception.getMessage());
-        verify(customerRepository, never()).findById(anyLong());
-        verify(customerRepository, never()).save(any());
+
+        // Act & Assert
+        BadRequestUserException thrown = assertThrows(BadRequestUserException.class, () -> {
+            customerService.validateInput(customer);
+        });
+
+        assertEquals("Số điện thoại không hợp lệ", thrown.getMessage());
     }
 
 
