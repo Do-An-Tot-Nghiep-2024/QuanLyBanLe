@@ -5,7 +5,9 @@ import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.mapper.ProductMapper;
 import com.bac.se.backend.mapper.ProductPriceMapper;
 import com.bac.se.backend.models.*;
-import com.bac.se.backend.payload.request.ProductRequest;
+import com.bac.se.backend.payload.request.CreateProductRequest;
+import com.bac.se.backend.payload.request.ProductUpdateRequest;
+import com.bac.se.backend.payload.response.CreateProductResponse;
 import com.bac.se.backend.payload.response.PageResponse;
 import com.bac.se.backend.payload.response.ProductPriceResponse;
 import com.bac.se.backend.payload.response.ProductResponse;
@@ -37,12 +39,12 @@ public class ProductService {
     private final UploadImage uploadImage;
 
     // validate product input
-    private void validateInput(ProductRequest productRequest) throws BadRequestUserException {
-        String name = productRequest.name();
-        Long categoryId = productRequest.categoryId();
-        Long supplierId = productRequest.supplierId();
-        double price = productRequest.price();
-        double originalPrice = productRequest.originalPrice();
+    private void validateInput(ProductUpdateRequest productUpdateRequest) throws BadRequestUserException {
+        String name = productUpdateRequest.name();
+        Long categoryId = productUpdateRequest.categoryId();
+        Long supplierId = productUpdateRequest.supplierId();
+        double price = productUpdateRequest.price();
+        double originalPrice = productUpdateRequest.originalPrice();
         if (name.isEmpty() || categoryId == null || supplierId == null) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
         }
@@ -81,47 +83,38 @@ public class ProductService {
 
 
     // create product
-    public ProductResponse createProduct(
-            ProductRequest productRequest,
+    public CreateProductResponse createProduct(
+            CreateProductRequest productUpdateRequest,
             MultipartFile image
             ) throws BadRequestUserException {
-        validateInput(productRequest);
-
+        if(productUpdateRequest.name().isEmpty() || productUpdateRequest.categoryId() == null || productUpdateRequest.supplierId() == null) {
+            throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
+        }
         // create image url and upload image to cloud storage
         var imageURL = uploadImage.uploadFile(image);
 
-        Category category = categoryRepository.findById(productRequest.categoryId())
+        Category category = categoryRepository.findById(productUpdateRequest.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
-        Supplier supplier = supplierRepository.findById(productRequest.supplierId())
+        Supplier supplier = supplierRepository.findById(productUpdateRequest.supplierId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhà cung cấp"));
         Product product = Product.builder()
-                .name(productRequest.name())
+                .name(productUpdateRequest.name())
                 .image(imageURL)
                 .category(category)
                 .supplier(supplier)
                 .isActive(true)
                 .build();
         var productSave = productRepository.save(product);
-        ProductPrice productPrice = ProductPrice.builder()
-                .originalPrice(productRequest.originalPrice())
-                .discountPrice(0)
-                .price(productRequest.price())
-                .createdAt(new Date())
-                .product(productSave)
-                .build();
-        var productPriceSave = productPriceRepository.save(productPrice);
         // Tạo lô hàng cho sản phẩm
         Stock stock = Stock.builder()
                 .product(productSave)
                 .build();
         stockRepository.save(stock);
-        return new ProductResponse(productSave.getId(),
+        return new CreateProductResponse(productSave.getId(),
                 productSave.getName(), productSave.getImage(),
                 productSave.getCategory().getName(),
-                productSave.getSupplier().getName(),
-                productPriceSave.getOriginalPrice(),
-                productPriceSave.getPrice(),
-                productPriceSave.getDiscountPrice());
+                productSave.getSupplier().getName());
+
     }
 
     // delete product by id
@@ -134,38 +127,40 @@ public class ProductService {
 
 
     // update product by id and input
-    public ProductResponse updateProduct(Long productId, ProductRequest productRequest) throws BadRequestUserException {
+    public ProductResponse updateProduct(Long productId, ProductUpdateRequest productUpdateRequest,MultipartFile image) throws BadRequestUserException {
         // Validate input once
-        validateInput(productRequest);
-
-        // Retrieve the product, category, and supplier efficiently
+        validateInput(productUpdateRequest);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new BadRequestUserException(NOT_FOUND_PRODUCT));
+        String imageURL = product.getImage();
+        if(image.getSize() > 0){
+            imageURL = uploadImage.uploadFile(image);
+        }
+        // Retrieve the product, category, and supplier efficiently
 
-        Category category = categoryRepository.findById(productRequest.categoryId())
+        Category category = categoryRepository.findById(productUpdateRequest.categoryId())
                 .orElseThrow(() -> new BadRequestUserException("Không tìm thấy danh mục"));
 
-        Supplier supplier = supplierRepository.findById(productRequest.supplierId())
+        Supplier supplier = supplierRepository.findById(productUpdateRequest.supplierId())
                 .orElseThrow(() -> new BadRequestUserException("Không tìm thấy nhà cung cấp"));
 
         // Get the latest product price
         var productPriceResponse = getProductPriceResponse(productId);
 
         // Update basic product information
-        product.setName(productRequest.name());
+        product.setName(productUpdateRequest.name());
 //        product.setImage(productRequest.image());
         product.setCategory(category);
         product.setSupplier(supplier);
-
+        product.setImage(imageURL);
         // Compare original prices, add new price if necessary
-        if (productRequest.originalPrice() != productPriceResponse.originalPrice()) {
+        if (productUpdateRequest.originalPrice() != productPriceResponse.originalPrice()) {
             ProductPrice newProductPrice = ProductPrice.builder()
-                    .originalPrice(productRequest.originalPrice())
+                    .originalPrice(productUpdateRequest.originalPrice())
                     .discountPrice(0)
-                    .price(productRequest.price())
+                    .price(productUpdateRequest.price())
                     .createdAt(new Date())
                     .build();
-
             productPriceRepository.save(newProductPrice);  // Save the new product price
             productRepository.save(product);  // Update the product after saving the new price
             var productPriceConvert = productPriceMapper.mapToProductPriceResponse(newProductPrice);
@@ -193,6 +188,9 @@ public class ProductService {
 
     private ProductPriceResponse getProductPriceResponse(Long productId) {
         var productPriceLatest = productPriceRepository.getProductPriceLatest(productId, PageRequest.of(0, 1));
+        if(productPriceLatest.isEmpty()){
+            return new ProductPriceResponse(0,0,0);
+        }
         return productPriceMapper.mapObjectToProductPriceResponse(productPriceLatest.get(0));
     }
 

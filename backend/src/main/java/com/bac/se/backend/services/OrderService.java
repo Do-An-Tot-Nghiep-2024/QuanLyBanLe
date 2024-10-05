@@ -8,6 +8,7 @@ import com.bac.se.backend.keys.ShipmentItemKey;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.OrderItemRequest;
 import com.bac.se.backend.payload.request.OrderRequest;
+import com.bac.se.backend.payload.response.CreateOrderResponse;
 import com.bac.se.backend.payload.response.OrderItemResponse;
 import com.bac.se.backend.payload.response.OrderResponse;
 import com.bac.se.backend.repositories.*;
@@ -16,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -41,8 +43,7 @@ public class OrderService {
     private final CustomerRepository customerRepository;
 
     // create order with request are shipment id and product id for each item
-    public OrderResponse createOrderLive(OrderRequest orderRequest, HttpServletRequest request) throws BadRequestUserException {
-
+    public CreateOrderResponse createOrderLive(OrderRequest orderRequest, HttpServletRequest request) throws BadRequestUserException {
         String phoneCustomer = "";
         // Kiểm tra nó khách hàng của đăng ký tài khoản
         if (orderRequest.customerPhone().isPresent()) {
@@ -123,6 +124,15 @@ public class OrderService {
         if (change < 0) {
             throw new BadRequestUserException("Số tiền không đủ");
         }
-        return new OrderResponse(orderItemResponses, total, orderRequest.customerPayment(), change);
+        return new CreateOrderResponse(orderItemResponses, total, orderRequest.customerPayment(), change);
     }
+
+
+    public List<OrderResponse> getOrdersByCustomer(Long id, int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        return null;
+    }
+
+
 }

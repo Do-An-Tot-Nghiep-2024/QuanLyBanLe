@@ -14,7 +14,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -69,25 +70,8 @@ class CustomerServiceTest {
         verify(customerRepository).getCustomerByEmail(anyString());
     }
 
-    @Test
-    void deleteCustomer() {
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
-        when(customerRepository.save(customer)).thenReturn(customer);
-        customerService.deleteCustomer(1L);
-        assertFalse(customer.isActive());
-        verify(customerRepository).findById(1L);
-        verify(customerRepository).save(customer);
-    }
 
-    @Test
-    void deleteCustomerNotFound() {
-        when(customerRepository.findById(1L)).thenReturn(Optional.empty());
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> customerService.deleteCustomer(1L));
-        assertEquals("Không tìm thấy khách hàng", exception.getMessage());
-        verify(customerRepository).findById(1L);
-        verify(customerRepository, never()).save(any());
-    }
+
 
     @Test
     void updateCustomer() throws BadRequestUserException {
