@@ -278,14 +278,14 @@ class SupplierServiceTest {
 
     @Test
     void updateSupplierExistPhone() {
-        SupplierRequest supplierRequest = new SupplierRequest("New Supplier", "newemail@example.com", "existingphone", "New Address");
+        SupplierRequest request = new SupplierRequest("New Supplier", "newemail@example.com", "existingphone", "New Address");
         when(supplierRepository.findById(supplierId)).thenReturn(Optional.of(supplier));
-        when(validateInput.isValidEmail(supplierRequest.email())).thenReturn(true);
-        when(validateInput.isValidPhoneNumber(supplierRequest.phone())).thenReturn(true);
-        when(supplierRepository.existsByPhone(supplierRequest.phone())).thenReturn(true);
+        when(validateInput.isValidEmail(request.email())).thenReturn(true);
+        when(validateInput.isValidPhoneNumber(request.phone())).thenReturn(true);
+        when(supplierRepository.existsByPhone(request.phone())).thenReturn(true);
         // Act & Assert
         AlreadyExistsException exception = assertThrows(AlreadyExistsException.class,
-                () -> supplierService.updateSupplier(supplierRequest, supplierId));
+                () -> supplierService.updateSupplier(request, supplierId));
         assertEquals("Số điện thoại đã được sử dụng", exception.getMessage());
         verify(supplierRepository, times(1)).findById(supplierId);
         verify(supplierRepository, never()).save(any(Supplier.class));

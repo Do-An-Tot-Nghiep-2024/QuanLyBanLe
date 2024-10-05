@@ -12,23 +12,4 @@ public class BackendApplication {
         SpringApplication.run(BackendApplication.class, args);
         log.info("Program is running");
     }
-//
-//    @Autowired
-//    OrderRepository orderRepository;
-////    OrderMapper orderMapper = new OrderMapper();
-//
-//    @Autowired
-//    EmployeeRepository employeeRepository;
-//
-//    @Bean
-//    CommandLineRunner commandLineRunner(){
-//        return args -> {
-//            var orderItemByOrderId = orderRepository.getOrderItemByOrderId(4L);
-//            for (var orderItem : orderItemByOrderId) {
-//                log.info("Order Item: {}", orderItem);
-//            }
-//        };
-//    }
-
-
 }

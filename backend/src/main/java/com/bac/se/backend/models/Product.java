@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.util.List;
 
 @NoArgsConstructor
@@ -15,7 +14,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "t_product")
-public class Product implements Serializable {
+public class Product  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")

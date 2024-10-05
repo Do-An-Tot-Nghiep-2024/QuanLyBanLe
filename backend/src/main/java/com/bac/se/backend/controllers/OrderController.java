@@ -20,12 +20,13 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
+    static final String REQUEST_SUCCESS = "success";
 
     @PostMapping("/live")
     public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrderLive(@RequestBody OrderRequest orderRequest, HttpServletRequest request) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ApiResponse<>("success", orderService.createOrderLive(orderRequest, request)));
+                    .body(new ApiResponse<>(REQUEST_SUCCESS, orderService.createOrderLive(orderRequest, request)));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(e.getMessage(), null));
@@ -44,7 +45,7 @@ public class OrderController {
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>("success", orderService.getOrdersByCustomer(id, pageNumber, pageSize)));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrdersByCustomer(id, pageNumber, pageSize)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
@@ -53,7 +54,7 @@ public class OrderController {
 
     @GetMapping("/customer-detail/{orderId}")
     public ResponseEntity<ApiResponse<OrderCustomerResponse>> getOrderCustomerDetail(@PathVariable("orderId") Long orderId) {
-        return ResponseEntity.ok(new ApiResponse<>("success", orderService.getOrderDetailByCustomer(orderId)));
+        return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrderDetailByCustomer(orderId)));
 
     }
 }
