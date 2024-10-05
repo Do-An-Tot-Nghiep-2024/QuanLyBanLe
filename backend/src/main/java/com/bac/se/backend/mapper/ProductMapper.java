@@ -1,6 +1,6 @@
 package com.bac.se.backend.mapper;
 
-import com.bac.se.backend.payload.response.ProductResponse;
+import com.bac.se.backend.payload.response.product.ProductResponse;
 import org.springframework.stereotype.Service;
 
 @Service

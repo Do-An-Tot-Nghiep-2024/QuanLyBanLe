@@ -5,12 +5,12 @@ import com.bac.se.backend.enums.PaymentType;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.keys.ShipmentItemKey;
+import com.bac.se.backend.mapper.OrderMapper;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.OrderItemRequest;
 import com.bac.se.backend.payload.request.OrderRequest;
-import com.bac.se.backend.payload.response.CreateOrderResponse;
-import com.bac.se.backend.payload.response.OrderItemResponse;
-import com.bac.se.backend.payload.response.OrderResponse;
+import com.bac.se.backend.payload.response.common.PageResponse;
+import com.bac.se.backend.payload.response.order.*;
 import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.utils.JwtParse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,6 +41,7 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final StockRepository stockRepository;
     private final CustomerRepository customerRepository;
+    private final OrderMapper orderMapper;
 
     // create order with request are shipment id and product id for each item
     public CreateOrderResponse createOrderLive(OrderRequest orderRequest, HttpServletRequest request) throws BadRequestUserException {
@@ -127,11 +128,37 @@ public class OrderService {
         return new CreateOrderResponse(orderItemResponses, total, orderRequest.customerPayment(), change);
     }
 
-
-    public List<OrderResponse> getOrdersByCustomer(Long id, int pageNumber, int pageSize) {
+    // get orders customer bought
+    public PageResponse<OrderResponse> getOrdersByCustomer(Long id, int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        var ordersByCustomer = orderRepository.getOrdersByCustomer(id, pageable);
+        List<Object[]> orderList = ordersByCustomer.getContent();
+        List<OrderResponse> orderResponseList = orderList.stream()
+                .map(orderMapper::mapObjectToResponse)
+                .toList();
+        return new PageResponse<>(orderResponseList, pageNumber,
+                ordersByCustomer.getTotalPages(), ordersByCustomer.getTotalElements(), ordersByCustomer.isLast());
+    }
 
-        return null;
+
+    public OrderCustomerResponse getOrderDetailByCustomer(Long orderId) {
+        var ordersByCustomer = orderRepository.getOrderItemByOrderId(orderId);
+        List<OrderItemQueryResponse> orderItemResponses = ordersByCustomer.stream()
+                .map(orderMapper::mapObjectToOrderItem)
+                .toList();
+        BigDecimal totalPrice = BigDecimal.valueOf(0);
+        for (OrderItemQueryResponse orderItemQueryResponse : orderItemResponses) {
+            totalPrice = totalPrice.add(BigDecimal.valueOf(orderItemQueryResponse.totalPrice()));
+        }
+        var emp = orderRepository.getEmployeeByOrderId(orderId);
+        log.info("emp is {}", emp.size());
+        OrderEmployeeResponse orderEmployee = orderMapper.mapObjectToEmployee(emp.get(0));
+        return new OrderCustomerResponse(
+               orderEmployee.name(),
+               orderEmployee.phone(),
+                orderItemResponses,
+                totalPrice
+        );
     }
 
 

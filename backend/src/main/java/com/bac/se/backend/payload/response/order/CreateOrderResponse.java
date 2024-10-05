@@ -1,4 +1,4 @@
-package com.bac.se.backend.payload.response;
+package com.bac.se.backend.payload.response.order;
 
 import java.util.List;
 

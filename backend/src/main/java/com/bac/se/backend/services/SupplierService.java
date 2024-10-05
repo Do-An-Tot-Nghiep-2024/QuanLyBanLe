@@ -6,7 +6,7 @@ import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.mapper.SupplierMapper;
 import com.bac.se.backend.models.Supplier;
 import com.bac.se.backend.payload.request.SupplierRequest;
-import com.bac.se.backend.payload.response.PageResponse;
+import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.SupplierResponse;
 import com.bac.se.backend.repositories.SupplierRepository;
 import com.bac.se.backend.utils.ValidateInput;

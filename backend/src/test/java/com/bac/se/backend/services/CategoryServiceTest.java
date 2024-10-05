@@ -1,5 +1,6 @@
 package com.bac.se.backend.services;
 
+import com.bac.se.backend.exceptions.AlreadyExistsException;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.models.Category;
@@ -72,6 +73,21 @@ class CategoryServiceTest {
         assertEquals(1L, response.id());
         assertEquals("New Category", response.name());
         verify(categoryRepository, times(1)).save(any(Category.class));
+    }
+
+    @Test
+    void createCategoryExistName() {
+        CategoryRequest request = new CategoryRequest("Electronics");
+        when(categoryRepository.existsByName(request.name())).thenReturn(true);
+
+        // Act & Assert
+        AlreadyExistsException thrown = assertThrows(AlreadyExistsException.class, () -> {
+            categoryService.createCategory(request);
+        });
+
+        assertEquals("Danh mục đã tồn tại", thrown.getMessage());
+        verify(categoryRepository, times(1)).existsByName(request.name());
+        verify(categoryRepository, never()).save(any(Category.class));
     }
 
     @Test

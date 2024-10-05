@@ -3,7 +3,7 @@ package com.bac.se.backend.controllers;
 
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.models.Customer;
-import com.bac.se.backend.payload.response.ApiResponse;
+import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.CustomerResponse;
 import com.bac.se.backend.services.CustomerService;
 import com.bac.se.backend.utils.JwtParse;

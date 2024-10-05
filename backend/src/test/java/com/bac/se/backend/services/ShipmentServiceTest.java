@@ -5,7 +5,7 @@ import com.bac.se.backend.mapper.ProductPriceMapper;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.ProductItem;
 import com.bac.se.backend.payload.request.ShipmentRequest;
-import com.bac.se.backend.payload.response.ProductPriceResponse;
+import com.bac.se.backend.payload.response.product.ProductPriceResponse;
 import com.bac.se.backend.payload.response.ShipmentResponse;
 import com.bac.se.backend.repositories.*;
 import org.junit.jupiter.api.BeforeEach;

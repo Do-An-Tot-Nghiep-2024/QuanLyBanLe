@@ -10,12 +10,13 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface EmployeeRepository extends JpaRepository<Employee,Long> {
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     @Query("select e.id, e.name, e.phone, e.email, e.dob, e.status from Employee e where e.status = 'ACTIVE'")
     Page<Object[]> getEmployees(Pageable pageable);
 
     boolean existsByPhone(String phone);
+
     boolean existsByEmail(String email);
 
     Optional<Employee> findByEmail(String email);
