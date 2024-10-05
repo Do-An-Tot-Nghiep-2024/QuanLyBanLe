@@ -58,13 +58,13 @@ public class CustomerService {
         return mapToCustomerResponse(customer);
     }
 
-    public void deleteCustomer(Long id) {
-        var customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(CUSTOMER_NOT_FOUND));
-        customer.setActive(false);
-        customerRepository.save(customer);
-
-    }
+//    public void deleteCustomer(Long id) {
+//        var customer = customerRepository.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException(CUSTOMER_NOT_FOUND));
+//        customer.setActive(false);
+//        customerRepository.save(customer);
+//
+//    }
 
     public CustomerResponse updateCustomer(Customer customer, Long id) throws BadRequestUserException {
         validateInput(customer);
@@ -73,7 +73,6 @@ public class CustomerService {
         customerToUpdate.setName(customer.getName());
         customerToUpdate.setEmail(customer.getEmail());
         customerToUpdate.setPhone(customer.getPhone());
-        customerToUpdate.setActive(customer.isActive());
         var save = customerRepository.save(customerToUpdate);
         return mapToCustomerResponse(save);
     }

@@ -1,5 +1,6 @@
 package com.bac.se.backend.services;
 
+import com.bac.se.backend.exceptions.AlreadyExistsException;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.models.Category;
@@ -27,8 +28,14 @@ public class CategoryService {
     }
 
     public CategoryResponse createCategory(CategoryRequest categoryRequest) throws BadRequestUserException {
+
+
         if (categoryRequest.name().isEmpty()) {
             throw new BadRequestUserException("Vui lòng nhập tên danh mục");
+        }
+
+        if(categoryRepository.existsByName(categoryRequest.name())){
+            throw new AlreadyExistsException("Danh mục đã tồn tại");
         }
 
         Category category = Category.builder()
@@ -56,13 +63,9 @@ public class CategoryService {
         if (categoryRequest.name().isEmpty()) {
             throw new BadRequestUserException("Vui lòng nhập tên danh mục");
         }
-        categoryRepository.findById(id)
-                .ifPresentOrElse(
-                        categoryRepository::save,
-                        () -> {
-                            throw new ResourceNotFoundException(CATEGORY_NOT_FOUND);
-                        }
-                );
+        var category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(CATEGORY_NOT_FOUND));
+        category.setName(categoryRequest.name());
+        categoryRepository.save(category);
         return new CategoryResponse(id, categoryRequest.name());
     }
 }

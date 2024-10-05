@@ -25,7 +25,6 @@ public class Customer {
     private String email;
     @Column(length = 10)
     private String phone;
-    private boolean isActive;
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;

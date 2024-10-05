@@ -12,4 +12,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query("SELECT c.id,c.name FROM Category c WHERE c.isActive = true")
     List<Object[]> getCategories();
 
+    boolean existsByName(String name);
+
 }

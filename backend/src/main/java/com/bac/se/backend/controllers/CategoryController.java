@@ -1,5 +1,6 @@
 package com.bac.se.backend.controllers;
 
+import com.bac.se.backend.exceptions.AlreadyExistsException;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.payload.request.CategoryRequest;
@@ -7,6 +8,7 @@ import com.bac.se.backend.payload.response.ApiResponse;
 import com.bac.se.backend.payload.response.CategoryResponse;
 import com.bac.se.backend.services.CategoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -52,8 +54,14 @@ public class CategoryController {
         try {
             var response = categoryService.createCategory(categoryRequest);
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, response));
+        } catch (BadRequestUserException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        } catch (AlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(e.getMessage(), null));
         } catch (Exception e) {
-            return ResponseEntity.status(500)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
@@ -66,6 +74,9 @@ public class CategoryController {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, id));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(404)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
@@ -83,6 +94,9 @@ public class CategoryController {
                     .body(new ApiResponse<>(e.getMessage(), null));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(404)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }

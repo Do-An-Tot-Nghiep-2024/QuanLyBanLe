@@ -10,12 +10,17 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @Query("SELECT p.id, p.name, p.image,c.name,s.name, pp.originalPrice, pp.price,pp.discountPrice " +
+    @Query("SELECT p.id, p.name, p.image, c.name, s.name, " +
+            "COALESCE(pp.originalPrice, 0) as originalPrice, " +
+            "COALESCE(pp.price, 0) as price, " +
+            "COALESCE(pp.discountPrice, 0) as discountPrice " +
             "FROM Product p " +
             "JOIN p.category c " +
             "JOIN p.supplier s " +
-            "JOIN ProductPrice pp ON pp.product.id = p.id " +
-            "WHERE pp.createdAt = (SELECT MAX(p1.createdAt) FROM ProductPrice p1 WHERE p1.product.id = p.id)")
+            "LEFT JOIN ProductPrice pp ON pp.product.id = p.id " +
+            "AND pp.createdAt = (SELECT MAX(p1.createdAt) FROM ProductPrice p1 WHERE p1.product.id = p.id) " +
+            "WHERE p.isActive = true")
     Page<Object[]> getProducts(Pageable pageable);
+
 
 }

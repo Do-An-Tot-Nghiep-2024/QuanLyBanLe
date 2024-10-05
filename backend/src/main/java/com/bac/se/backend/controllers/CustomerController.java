@@ -47,17 +47,17 @@ public class CustomerController {
         }
     }
 
-    @DeleteMapping("/delete")
-    @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<Long>> deleteCustomer(@PathVariable("id") final Long id) {
-        try {
-            customerService.deleteCustomer(id);
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, id));
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(e.getMessage(), null));
-        }
-    }
+//    @DeleteMapping("/delete")
+//    @PreAuthorize("hasAuthority('MANAGER')")
+//    public ResponseEntity<ApiResponse<Long>> deleteCustomer(@PathVariable("id") final Long id) {
+//        try {
+//            customerService.deleteCustomer(id);
+//            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, id));
+//        } catch (ResourceNotFoundException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(new ApiResponse<>(e.getMessage(), null));
+//        }
+//    }
 
     @PutMapping("/update")
     @PreAuthorize("hasAuthority('CUSTOMER')")
