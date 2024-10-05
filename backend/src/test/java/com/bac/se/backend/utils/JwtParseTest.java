@@ -41,7 +41,7 @@ class JwtParseTest {
         String token = "";
         when(request.getHeader("Authorization")).thenReturn(token);
         String result = jwtParse.parseJwt(request);
-        assertEquals(result, null);
+        assertEquals(null, result);
     }
 
     @Test

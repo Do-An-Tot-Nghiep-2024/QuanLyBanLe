@@ -102,10 +102,12 @@ class AccountServiceTest {
         assertEquals("Not found user", thrown.getMessage());
     }
 
-    //    @Test
-//    void registerCustomer() {
-//    }
-//
+    @Test
+    void registerCustomer() {
+
+    }
+
+    //
     @Test
     void createAccountEmployee() throws BadRequestUserException {
 
@@ -114,7 +116,7 @@ class AccountServiceTest {
     @Test
     void loginUser() throws BadRequestUserException {
         LoginRequest loginRequest = new LoginRequest("john_doe", "password123");
-        Account account = new Account(1L,"john_doe", "password123", Role.CUSTOMER);
+        Account account = new Account(1L, "john_doe", "password123", Role.CUSTOMER);
 
         when(accountRepository.findByUsername(loginRequest.username())).thenReturn(Optional.of(account));
         when(jwtService.generateToken(account)).thenReturn("access_token");
@@ -136,11 +138,10 @@ class AccountServiceTest {
     @Test
     void loginUserWithInputEmpty() {
         // Arrange
-        LoginRequest loginRequest = new LoginRequest("john_doe", "");
-
+        LoginRequest loginRequestEmpty = new LoginRequest("john_doe", "");
         // Act & Assert
         BadRequestUserException thrown = assertThrows(BadRequestUserException.class, () -> {
-            accountService.loginUser(loginRequest);
+            accountService.loginUser(loginRequestEmpty);
         });
 
         assertEquals("Username and password is required", thrown.getMessage());
@@ -151,7 +152,7 @@ class AccountServiceTest {
     }
 
     @Test
-    void loginUserWithInvalidUsername() throws BadRequestUserException {
+    void loginUserWithInvalidUsername() {
         // Arrange
         LoginRequest loginRequest = new LoginRequest("john_doe", "password123");
 

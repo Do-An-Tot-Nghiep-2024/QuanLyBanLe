@@ -35,7 +35,7 @@ public class EmployeeService {
     private final EmployeeMapper employeeMapper;
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
-    private final String EMPLOYEE_NOT_FOUND = "Employee not found";
+    static final String EMPLOYEE_NOT_FOUND = "Employee not found";
 
     @Value("${application.security.password}")
     private String defaultPassword;

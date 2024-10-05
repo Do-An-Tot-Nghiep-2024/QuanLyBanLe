@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Map;
+import java.nio.file.Files;
 import java.util.Objects;
 
 @Slf4j
@@ -25,16 +25,10 @@ public class UploadImage {
     public String uploadFile(MultipartFile gif) {
         try {
             File uploadedFile = convertMultiPartToFile(gif);
-            Map uploadResult = cloudinaryConfig
+            var uploadResult = cloudinaryConfig
                     .uploader().upload(uploadedFile, ObjectUtils.emptyMap());
             // delete the temporary file optimized for memory
-
-            boolean isDeleted = uploadedFile.delete();
-            if (isDeleted) {
-                System.out.println("File deleted successfully");
-            } else {
-                System.out.println("Failed to delete file");
-            }
+            Files.delete(uploadedFile.toPath());
             return uploadResult.get("secure_url").toString();
         } catch (Exception e) {
             throw new RuntimeException(e);
