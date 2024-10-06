@@ -13,6 +13,7 @@ import com.bac.se.backend.payload.response.employee.EmployeePageResponse;
 import com.bac.se.backend.payload.response.employee.EmployeeResponse;
 import com.bac.se.backend.repositories.AccountRepository;
 import com.bac.se.backend.repositories.EmployeeRepository;
+import com.bac.se.backend.services.impl.EmployeeServiceImpl;
 import com.bac.se.backend.utils.ValidateInput;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class EmployeeServiceTest {
     @Mock
     private EmployeeRepository employeeRepository;
     @InjectMocks
-    private EmployeeService employeeService;
+    private EmployeeServiceImpl employeeService;
     @Mock
     private EmployeeMapper employeeMapper;
 

@@ -8,6 +8,7 @@ import com.bac.se.backend.models.Supplier;
 import com.bac.se.backend.payload.request.SupplierRequest;
 import com.bac.se.backend.payload.response.SupplierResponse;
 import com.bac.se.backend.repositories.SupplierRepository;
+import com.bac.se.backend.services.impl.SupplierServiceImpl;
 import com.bac.se.backend.utils.ValidateInput;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class SupplierServiceTest {
     @Mock
     private SupplierRepository supplierRepository;
     @InjectMocks
-    private SupplierService supplierService;
+    private SupplierServiceImpl supplierService;
     @Mock
     private SupplierMapper supplierMapper;
     @Mock

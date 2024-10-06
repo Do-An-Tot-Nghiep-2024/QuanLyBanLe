@@ -9,6 +9,7 @@ import com.bac.se.backend.payload.request.OrderRequest;
 import com.bac.se.backend.payload.response.order.CreateOrderResponse;
 import com.bac.se.backend.payload.response.order.OrderItemResponse;
 import com.bac.se.backend.repositories.*;
+import com.bac.se.backend.services.impl.OrderServiceImpl;
 import com.bac.se.backend.utils.JwtParse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +55,7 @@ class OrderServiceTest {
     private HttpServletRequest request;
 
     @InjectMocks
-    private OrderService orderService;
+    private OrderServiceImpl orderService;
 
     OrderRequest orderRequest;
 

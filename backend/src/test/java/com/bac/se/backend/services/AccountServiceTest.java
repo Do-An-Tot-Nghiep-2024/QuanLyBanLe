@@ -10,6 +10,7 @@ import com.bac.se.backend.payload.response.AccountResponse;
 import com.bac.se.backend.payload.response.LoginResponse;
 import com.bac.se.backend.repositories.AccountRepository;
 import com.bac.se.backend.security.JWTService;
+import com.bac.se.backend.services.impl.AccountServiceImpl;
 import com.bac.se.backend.utils.JwtParse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +32,7 @@ class AccountServiceTest {
     @Mock
     private AccountRepository accountRepository;
     @InjectMocks
-    private AccountService accountService;
+    private AccountServiceImpl accountService;
     @Mock
     private JwtParse jwtParse;
     @Mock
