@@ -2,7 +2,7 @@ package com.bac.se.backend.controllers;
 
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.payload.request.ShipmentRequest;
-import com.bac.se.backend.payload.response.ApiResponse;
+import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.ShipmentResponse;
 import com.bac.se.backend.services.ShipmentService;
 import lombok.RequiredArgsConstructor;

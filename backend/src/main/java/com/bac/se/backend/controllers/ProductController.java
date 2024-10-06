@@ -2,10 +2,12 @@ package com.bac.se.backend.controllers;
 
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
-import com.bac.se.backend.payload.request.ProductRequest;
-import com.bac.se.backend.payload.response.ApiResponse;
-import com.bac.se.backend.payload.response.PageResponse;
-import com.bac.se.backend.payload.response.ProductResponse;
+import com.bac.se.backend.payload.request.CreateProductRequest;
+import com.bac.se.backend.payload.request.ProductUpdateRequest;
+import com.bac.se.backend.payload.response.common.ApiResponse;
+import com.bac.se.backend.payload.response.product.CreateProductResponse;
+import com.bac.se.backend.payload.response.common.PageResponse;
+import com.bac.se.backend.payload.response.product.ProductResponse;
 import com.bac.se.backend.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -43,11 +45,12 @@ public class ProductController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
-            @RequestPart("productRequest") ProductRequest productRequest,
+    public ResponseEntity<ApiResponse<CreateProductResponse>> createProduct(
+            @RequestPart("productRequest") CreateProductRequest createProductRequest,
             @RequestPart("file") MultipartFile filePath) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, productService.createProduct(productRequest,filePath)));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS,
+                    productService.createProduct(createProductRequest,filePath)));
         } catch (BadRequestUserException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -68,9 +71,12 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@RequestBody ProductRequest productRequest, @PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
+            @RequestPart("productRequest") ProductUpdateRequest productUpdateRequest,
+            @PathVariable("id") Long id,
+            @RequestPart("file") MultipartFile filePath) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, productService.updateProduct(id, productRequest)));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, productService.updateProduct(id, productUpdateRequest,filePath)));
         } catch (BadRequestUserException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)

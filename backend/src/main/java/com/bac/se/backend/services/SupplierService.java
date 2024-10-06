@@ -6,7 +6,7 @@ import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.mapper.SupplierMapper;
 import com.bac.se.backend.models.Supplier;
 import com.bac.se.backend.payload.request.SupplierRequest;
-import com.bac.se.backend.payload.response.PageResponse;
+import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.SupplierResponse;
 import com.bac.se.backend.repositories.SupplierRepository;
 import com.bac.se.backend.utils.ValidateInput;
@@ -25,6 +25,7 @@ public class SupplierService {
     private final SupplierRepository supplierRepository;
     private final SupplierMapper supplierMapper;
     private final ValidateInput validateInput;
+    static final String SUPPLIER_NOT_FOUND = "Không tìm thấy nhà cung cấp";
 
     public PageResponse<SupplierResponse> getSuppliers(Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -39,7 +40,7 @@ public class SupplierService {
 
     public SupplierResponse getSupplier(Long id) {
         Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhà cung cấp nào"));
+                .orElseThrow(() -> new ResourceNotFoundException(SUPPLIER_NOT_FOUND));
         return new SupplierResponse(
                 supplier.getId(),supplier.getName(),
                 supplier.getPhone(), supplier.getEmail(), supplier.getAddress());
@@ -68,14 +69,14 @@ public class SupplierService {
 
     public void deleteSupplier(Long id) {
         Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhà cung cấp nào"));
+                .orElseThrow(() -> new ResourceNotFoundException(SUPPLIER_NOT_FOUND));
         supplier.setActive(false);
         supplierRepository.save(supplier);
     }
 
     public SupplierResponse updateSupplier(SupplierRequest supplierRequest, Long id) throws BadRequestUserException {
         Supplier supplierNotFound = supplierRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhà cung cấp nào"));
+                .orElseThrow(() -> new ResourceNotFoundException(SUPPLIER_NOT_FOUND));
         validateRequest(supplierRequest);
         if (!supplierNotFound.getEmail().equals(supplierRequest.email())
                 && supplierRepository.existsByEmail(supplierRequest.email())) {
@@ -104,10 +105,10 @@ public class SupplierService {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
         }
         if (!validateInput.isValidEmail(email)) {
-            throw new BadRequestUserException("Email is not valid");
+            throw new BadRequestUserException("Email không hợp lệ");
         }
         if (!validateInput.isValidPhoneNumber(phone)) {
-            throw new BadRequestUserException("Phone is not valid");
+            throw new BadRequestUserException("Phone không hợp lệ");
         }
     }
 }

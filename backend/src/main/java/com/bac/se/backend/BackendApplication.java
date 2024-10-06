@@ -12,7 +12,4 @@ public class BackendApplication {
         SpringApplication.run(BackendApplication.class, args);
         log.info("Program is running");
     }
-
-
-
 }

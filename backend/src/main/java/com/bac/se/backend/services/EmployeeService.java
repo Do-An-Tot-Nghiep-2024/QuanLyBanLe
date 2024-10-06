@@ -9,8 +9,8 @@ import com.bac.se.backend.mapper.EmployeeMapper;
 import com.bac.se.backend.models.Account;
 import com.bac.se.backend.models.Employee;
 import com.bac.se.backend.payload.request.EmployeeRequest;
-import com.bac.se.backend.payload.response.EmployeePageResponse;
-import com.bac.se.backend.payload.response.EmployeeResponse;
+import com.bac.se.backend.payload.response.employee.EmployeePageResponse;
+import com.bac.se.backend.payload.response.employee.EmployeeResponse;
 import com.bac.se.backend.repositories.AccountRepository;
 import com.bac.se.backend.repositories.EmployeeRepository;
 import com.bac.se.backend.utils.ValidateInput;
@@ -35,7 +35,7 @@ public class EmployeeService {
     private final EmployeeMapper employeeMapper;
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
-    private final String EMPLOYEE_NOT_FOUND = "Employee not found";
+    static final String EMPLOYEE_NOT_FOUND = "Employee not found";
 
     @Value("${application.security.password}")
     private String defaultPassword;

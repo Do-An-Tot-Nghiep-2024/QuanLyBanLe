@@ -5,10 +5,9 @@ import com.bac.se.backend.models.Order;
 import com.bac.se.backend.models.Product;
 import lombok.Data;
 
-import java.io.Serializable;
 
 @Data
-public class OrderItemKey implements Serializable {
+public class OrderItemKey{
     private Product product;
     private Order order;
 }

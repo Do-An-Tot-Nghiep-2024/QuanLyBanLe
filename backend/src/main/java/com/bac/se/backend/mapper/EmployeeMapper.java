@@ -3,7 +3,7 @@ package com.bac.se.backend.mapper;
 import com.bac.se.backend.enums.EmployeeStatus;
 import com.bac.se.backend.models.Employee;
 import com.bac.se.backend.payload.request.EmployeeRequest;
-import com.bac.se.backend.payload.response.EmployeeResponse;
+import com.bac.se.backend.payload.response.employee.EmployeeResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;

@@ -218,9 +218,12 @@ export default function CreateProduct() {
               padding: "6px 12px",
             }}
           >
-            Thêm
+            Thêm sản phẩm mới
+
           </Button>
         </Stack>
+
+
       </Container>
     </Container>
   );

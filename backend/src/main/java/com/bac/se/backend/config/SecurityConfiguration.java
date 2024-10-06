@@ -44,7 +44,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults()) // allow cross origin requests
-                .csrf(AbstractHttpConfigurer::disable) // disable csrf protection
+                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for API endpoints
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST_URL)
                                 .permitAll()
