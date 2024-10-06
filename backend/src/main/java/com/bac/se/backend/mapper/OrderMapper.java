@@ -12,12 +12,12 @@ public class OrderMapper {
 
     public OrderResponse mapObjectToResponse(Object[] order) {
         return new OrderResponse(
-                Long.parseLong(order[0].toString()),
-                order[1].toString(),
-                Double.parseDouble(order[2].toString()),
-                order[3].toString(),
-                order[4].toString(),
-                (Date) order[5]
+                Long.parseLong(order[0].toString()), // id
+                order[1].toString(), // employee
+                Double.parseDouble(order[2].toString()), // total
+                order[3].toString(), // order status
+                order[4].toString(), // payment type
+                (Date) order[5] // date
         );
     }
 

@@ -7,6 +7,7 @@ import com.bac.se.backend.models.Category;
 import com.bac.se.backend.payload.request.CategoryRequest;
 import com.bac.se.backend.payload.response.CategoryResponse;
 import com.bac.se.backend.repositories.CategoryRepository;
+import com.bac.se.backend.services.impl.CategoryServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -25,7 +26,7 @@ class CategoryServiceTest {
 
 
     @InjectMocks
-    private CategoryService categoryService;
+    private CategoryServiceImpl categoryService;
     @Mock
     private CategoryRepository categoryRepository;
 

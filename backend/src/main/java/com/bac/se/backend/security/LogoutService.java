@@ -1,4 +1,4 @@
-package com.bac.se.backend.services;
+package com.bac.se.backend.security;
 
 import com.bac.se.backend.repositories.AccountRepository;
 import jakarta.servlet.http.HttpServletRequest;

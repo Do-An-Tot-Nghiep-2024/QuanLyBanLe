@@ -5,9 +5,10 @@ import com.bac.se.backend.mapper.ProductPriceMapper;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.ProductItem;
 import com.bac.se.backend.payload.request.ShipmentRequest;
-import com.bac.se.backend.payload.response.product.ProductPriceResponse;
 import com.bac.se.backend.payload.response.ShipmentResponse;
+import com.bac.se.backend.payload.response.product.ProductPriceResponse;
 import com.bac.se.backend.repositories.*;
+import com.bac.se.backend.services.impl.ShipmentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.*;
 
 class ShipmentServiceTest {
     @InjectMocks
-    private ShipmentService shipmentService;
+    private ShipmentServiceImpl shipmentService;
     @Mock
     private StockRepository stockRepository;
     @Mock

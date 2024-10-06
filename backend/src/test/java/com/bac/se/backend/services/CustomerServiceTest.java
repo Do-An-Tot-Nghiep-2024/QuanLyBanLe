@@ -2,9 +2,11 @@ package com.bac.se.backend.services;
 
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
+import com.bac.se.backend.mapper.CustomerMapper;
 import com.bac.se.backend.models.Customer;
 import com.bac.se.backend.payload.response.CustomerResponse;
 import com.bac.se.backend.repositories.CustomerRepository;
+import com.bac.se.backend.services.impl.CustomerServiceImpl;
 import com.bac.se.backend.utils.ValidateInput;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,7 @@ class CustomerServiceTest {
 
 
     @InjectMocks
-    private CustomerService customerService;
+    private CustomerServiceImpl customerService;
 
     @Mock
     private CustomerRepository customerRepository;
@@ -31,8 +33,12 @@ class CustomerServiceTest {
     @Mock
     private ValidateInput validateInput;
 
+    @Mock
+    private CustomerMapper customerMapper;
+
 
     Customer customer = null;
+    CustomerResponse customerResponse = null;
 
     @BeforeEach
     void setUp() {
@@ -43,16 +49,10 @@ class CustomerServiceTest {
                 .email("john@gmail.com")
                 .phone("0123456789")
                 .build();
+        customerResponse = new CustomerResponse(1L, "John Doe", "john@gmail.com", "0123456789");
     }
 
-    @Test
-    void mapToCustomerResponse() {
-        CustomerResponse customerResponse = customerService.mapToCustomerResponse(customer);
-        assertEquals(customer.getId(), customerResponse.id());
-        assertEquals(customer.getName(), customerResponse.name());
-        assertEquals(customer.getEmail(), customerResponse.email());
-        assertEquals(customer.getPhone(), customerResponse.phone());
-    }
+
 
     @Test
     void getCustomers() {
@@ -62,6 +62,7 @@ class CustomerServiceTest {
     @Test
     void getCustomerSuccess() {
         when(customerRepository.getCustomerByEmail("john@gmail.com")).thenReturn(Optional.of(customer));
+        when(customerMapper.mapToCustomerResponse(customer)).thenReturn(customerResponse);
         CustomerResponse customerResponse = customerService.getCustomer("john@gmail.com");
         assertEquals(customer.getId(), customerResponse.id());
         assertEquals(customer.getName(), customerResponse.name());
@@ -79,6 +80,7 @@ class CustomerServiceTest {
         when(validateInput.isValidPhoneNumber(customer.getPhone())).thenReturn(true);
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(customerRepository.save(customer)).thenReturn(customer);
+        when(customerMapper.mapToCustomerResponse(customer)).thenReturn(customerResponse);
         CustomerResponse customerResponse = customerService.updateCustomer(customer, 1L);
         assertEquals(customer.getId(), customerResponse.id());
         assertEquals(customer.getName(), customerResponse.name());
