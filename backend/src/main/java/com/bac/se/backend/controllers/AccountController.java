@@ -5,7 +5,9 @@ import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.payload.request.EmployeeAccountRequest;
 import com.bac.se.backend.payload.request.LoginRequest;
 import com.bac.se.backend.payload.request.RegisterRequest;
-import com.bac.se.backend.payload.response.*;
+import com.bac.se.backend.payload.response.AccountResponse;
+import com.bac.se.backend.payload.response.LoginResponse;
+import com.bac.se.backend.payload.response.RegisterResponse;
 import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.employee.EmployeeAccountResponse;
 import com.bac.se.backend.services.AccountService;
@@ -39,6 +41,9 @@ public class AccountController {
         } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
@@ -54,6 +59,9 @@ public class AccountController {
                     .body(new ApiResponse<>(e.getMessage(), null));
         } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
@@ -73,6 +81,9 @@ public class AccountController {
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
@@ -87,7 +98,22 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
+    }
 
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<LoginResponse>> resetPassword(String email,String newPassword,String confirmPassword) {
+        try {
+            LoginResponse login = accountService.resetPassword(email,newPassword,confirmPassword);
+            return ResponseEntity
+                    .ok()
+                    .body(new ApiResponse<>(REQUEST_SUCCESS, login));
+        } catch (BadRequestUserException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
     }
 
 

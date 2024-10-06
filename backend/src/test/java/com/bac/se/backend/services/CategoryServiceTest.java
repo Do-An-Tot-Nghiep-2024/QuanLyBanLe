@@ -184,6 +184,7 @@ class CategoryServiceTest {
     @Test
     void updateCategoryInvalidInput() {
         Long categoryId = 1L;
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         CategoryRequest categoryRequest = new CategoryRequest("");  // Empty name to trigger exception
 
         // Act & Assert
@@ -191,7 +192,7 @@ class CategoryServiceTest {
                 () -> categoryService.updateCategory(categoryRequest, categoryId));
 
         assertEquals("Vui lòng nhập tên danh mục", exception.getMessage());
-        verify(categoryRepository, never()).findById(anyLong());
+        verify(categoryRepository, times(1)).findById(anyLong());
         verify(categoryRepository, never()).save(any(Category.class));
     }
 

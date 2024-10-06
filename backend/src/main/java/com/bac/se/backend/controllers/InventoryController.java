@@ -2,8 +2,8 @@ package com.bac.se.backend.controllers;
 
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.payload.request.ShipmentRequest;
-import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.ShipmentResponse;
+import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.services.ShipmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +25,9 @@ public class InventoryController {
             return ResponseEntity.ok(new ApiResponse<>("success",shipmentService.createShipment(shipmentRequest)));
         }catch (ResourceNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(e.getMessage(),null));
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(),null));
         }
     }

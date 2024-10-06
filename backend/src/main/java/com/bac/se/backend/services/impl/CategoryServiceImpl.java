@@ -68,10 +68,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse updateCategory(CategoryRequest categoryRequest, Long id) throws BadRequestUserException {
-        if (categoryRequest.name().isEmpty()) {
+        var category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(CATEGORY_NOT_FOUND));
+        if (categoryRequest == null || categoryRequest.name().isEmpty()) {
             throw new BadRequestUserException("Vui lòng nhập tên danh mục");
         }
-        var category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(CATEGORY_NOT_FOUND));
         category.setName(categoryRequest.name());
         categoryRepository.save(category);
         return new CategoryResponse(id, categoryRequest.name());

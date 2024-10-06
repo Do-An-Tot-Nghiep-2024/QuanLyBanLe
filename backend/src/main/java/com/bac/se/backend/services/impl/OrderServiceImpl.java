@@ -39,6 +39,8 @@ public class OrderServiceImpl implements OrderService {
     private final ProductPriceRepository productPriceRepository;
     private final OrderItemRepository orderItemRepository;
     private final StockRepository stockRepository;
+    private final CustomerRepository customerRepository;
+    private final OrderMapper orderMapper;
 
     // create order with request are shipment id and product id for each item
     @Override
@@ -125,9 +127,6 @@ public class OrderServiceImpl implements OrderService {
         }
         return new CreateOrderResponse(orderItemResponses, total, orderRequest.customerPayment(), change);
     }
-    private final CustomerRepository customerRepository;
-
-    private final OrderMapper orderMapper;
 
     // get orders customer bought
     @Override
@@ -145,6 +144,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderCustomerResponse getOrderDetailByCustomer(Long orderId) {
+        if (orderRepository.findById(orderId).isEmpty()) {
+            throw new ResourceNotFoundException("Không tìm thấy hóa đơn");
+        }
         var ordersByCustomer = orderRepository.getOrderItemByOrderId(orderId);
         List<OrderItemQueryResponse> orderItemResponses = ordersByCustomer.stream()
                 .map(orderMapper::mapObjectToOrderItem)

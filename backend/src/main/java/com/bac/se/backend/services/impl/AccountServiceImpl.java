@@ -23,6 +23,7 @@ import com.bac.se.backend.utils.ValidateInput;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,6 +42,7 @@ public class AccountServiceImpl implements AccountService {
     private final EmployeeRepository employeeRepository;
     private final ValidateInput validateInput;
     private final JwtParse jwtParse;
+
 
     public Account createAccountWithRole(String username, String password, Role role) {
         return Account.builder()
@@ -76,10 +78,10 @@ public class AccountServiceImpl implements AccountService {
         if (!validateInput.isValidPhoneNumber(phone)) {
             throw new BadRequestUserException("Phone is not valid");
         }
-        if(customerRepository.existsByEmail(email)){
+        if (customerRepository.existsByEmail(email)) {
             throw new AlreadyExistsException("Email already in use");
         }
-        if(customerRepository.existsByPhone(phone)){
+        if (customerRepository.existsByPhone(phone)) {
             throw new AlreadyExistsException("Phone already in use");
         }
         Account account = createAccountWithRole(email, password, Role.CUSTOMER);
@@ -139,4 +141,20 @@ public class AccountServiceImpl implements AccountService {
                 refreshToken
         );
     }
+
+    @Override
+    public LoginResponse resetPassword(String email, String newPassword, String confirmPassword) throws BadRequestUserException {
+        if(email.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()){
+            throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
+        }
+        if(!newPassword.equals(confirmPassword)){
+            throw new BadRequestUserException("Mật khẩu và xác nhận mật khẩu không trùng khớp");
+        }
+        Account account = accountRepository.findByUsername(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
+        account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+        return new LoginResponse(jwtService.generateToken(account),jwtService.generateRefreshToken(account));
+    }
+
 }

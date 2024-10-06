@@ -28,9 +28,14 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EmployeePageResponse>> getEmployees(
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        var employees = employeeService.getEmployees(pageNumber, pageSize);
-        log.info("get employees success");
-        return ResponseEntity.ok(new ApiResponse<>(SUCCESS, employees));
+        try{
+            var employees = employeeService.getEmployees(pageNumber, pageSize);
+            log.info("get employees success");
+            return ResponseEntity.ok(new ApiResponse<>(SUCCESS, employees));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
     }
 
     @GetMapping("/{id}")
@@ -42,6 +47,9 @@ public class EmployeeController {
             return ResponseEntity.ok(new ApiResponse<>(SUCCESS, employee));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
@@ -59,6 +67,9 @@ public class EmployeeController {
         } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
@@ -71,6 +82,9 @@ public class EmployeeController {
             return ResponseEntity.ok(new ApiResponse<>(SUCCESS, id));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
@@ -87,6 +101,9 @@ public class EmployeeController {
                     .body(new ApiResponse<>(e.getMessage(), null));
         } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
