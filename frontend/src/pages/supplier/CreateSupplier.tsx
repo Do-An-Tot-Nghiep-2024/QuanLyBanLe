@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import colors from "../../constants/color";
 import {
   Stack,
@@ -9,29 +9,47 @@ import {
   Button,
   Container,
   Typography,
-  Alert
-
+  Alert,
 } from "@mui/material";
-
+import { createSupplierService } from "../../services/supplier.service"; 
+import { SupplierSchema, defaultSupplierSchema } from "../../types/supplierSchema"
 
 export default function CreateSupplier() {
+  const [supplier, setSupplier] = useState(defaultSupplierSchema);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const [success, setSuccess] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setSupplier({ ...supplier, [name]: value });
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    // Handle form submission logic here
-    // On success, navigate back to the supplier page
-    // navigate("/suppliers"); // Uncomment this line when you have success logic
-    try{
+    try {
+     
+      SupplierSchema.parse(supplier);
       
-    }catch(err : any){
-      setError(err?.message);
+      await createSupplierService(supplier);
+      setSuccess("Nhà cung cấp đã được thêm thành công!");
+      setError(null);
+      navigate("/suppliers");
+      
+   
+      setSupplier(defaultSupplierSchema);
+    } catch (err: any) {
+      if (err?.issues) {
+        setError(err.issues[0].message); 
+      } else {
+        setError("Lỗi khi thêm nhà cung cấp");
+      }
+      setSuccess(null);
     }
   };
 
   const handleBack = () => {
-    navigate("/suppliers"); // Navigate back to the supplier page
+    navigate("/suppliers");
   };
 
   return (
@@ -49,44 +67,64 @@ export default function CreateSupplier() {
         <Container
           component={"form"}
           onSubmit={handleSubmit}
-          sx={{
-            boxShadow: 3,
-            borderRadius: 2,
-            padding: 5,
-            backgroundColor: "white",
-            width: "80%",
-            margin: "auto",
-          }}
+          sx={styles.formContainer}
         >
           {error && <Alert severity="error">{error}</Alert>}
+          {success && <Alert severity="success">{success}</Alert>} {/* Success message */}
 
           <Stack spacing={2} mb={2} sx={{ alignItems: "center" }}>
-            <FormControl sx={{ width: "60%" }}>
-              <FormLabel htmlFor="name" sx={{ textAlign: "left" }}>
+            <FormControl sx={styles.formControl}>
+              <FormLabel htmlFor="name" sx={styles.formLabel}>
                 Tên nhà cung cấp:
               </FormLabel>
-              <TextField name="name" variant="outlined" />
+              <TextField
+                name="name"
+                variant="outlined"
+                value={supplier.name}
+                onChange={handleChange}
+                required
+              />
             </FormControl>
 
-            <FormControl sx={{ width: "60%" }}>
-              <FormLabel htmlFor="phone" sx={{ textAlign: "left" }}>
+            <FormControl sx={styles.formControl}>
+              <FormLabel htmlFor="phone" sx={styles.formLabel}>
                 Số điện thoại:
               </FormLabel>
-              <TextField name="phone" variant="outlined" />
+              <TextField
+                name="phone"
+                variant="outlined"
+                value={supplier.phone}
+                onChange={handleChange}
+                required
+              />
             </FormControl>
 
-            <FormControl sx={{ width: "60%" }}>
-              <FormLabel htmlFor="email" sx={{ textAlign: "left" }}>
+            <FormControl sx={styles.formControl}>
+              <FormLabel htmlFor="email" sx={styles.formLabel}>
                 Email:
               </FormLabel>
-              <TextField name="email" variant="outlined" type="email" />
+              <TextField
+                name="email"
+                variant="outlined"
+                type="email"
+                value={supplier.email}
+                onChange={handleChange}
+                required
+              />
             </FormControl>
 
-            <FormControl sx={{ width: "60%" }}>
-              <FormLabel htmlFor="address" sx={{ textAlign: "left" }}>
+            <FormControl sx={styles.formControl}>
+              <FormLabel htmlFor="address" sx={styles.formLabel}>
                 Địa chỉ:
               </FormLabel>
-              <TextField name="address" variant="outlined" type="text" />
+              <TextField
+                name="address"
+                variant="outlined"
+                type="text"
+                value={supplier.address}
+                onChange={handleChange}
+                required
+              />
             </FormControl>
           </Stack>
 
@@ -98,14 +136,8 @@ export default function CreateSupplier() {
           >
             <Button
               type="button"
-              sx={{
-                width: "30%", // Decreased button width
-                backgroundColor: colors.secondaryColor,
-                color: "white",
-                fontSize: "0.875rem", // Decrease font size
-                padding: "6px 12px", // Decrease padding
-              }}
-              onClick={handleBack} // Call handleBack to navigate back
+              sx={styles.backButton}
+              onClick={handleBack}
             >
               Quay lại
             </Button>
@@ -113,13 +145,7 @@ export default function CreateSupplier() {
             <Button
               type="submit"
               variant="contained"
-              sx={{
-                width: "30%", // Decreased button width
-                backgroundColor: colors.accentColor,
-                color: "white",
-                fontSize: "0.875rem", // Decrease font size
-                padding: "6px 12px", // Decrease padding
-              }}
+              sx={styles.submitButton}
             >
               Thêm
             </Button>
@@ -129,3 +155,34 @@ export default function CreateSupplier() {
     </>
   );
 }
+
+const styles = {
+  formContainer: {
+    boxShadow: 3,
+    borderRadius: 2,
+    padding: 5,
+    backgroundColor: "white",
+    width: "80%",
+    margin: "auto",
+  },
+  formControl: {
+    width: "60%",
+  },
+  formLabel: {
+    textAlign: "left",
+  },
+  backButton: {
+    width: "30%",
+    backgroundColor: colors.secondaryColor,
+    color: "white",
+    fontSize: "0.875rem",
+    padding: "6px 12px",
+  },
+  submitButton: {
+    width: "30%",
+    backgroundColor: colors.accentColor,
+    color: "white",
+    fontSize: "0.875rem",
+    padding: "6px 12px",
+  },
+};

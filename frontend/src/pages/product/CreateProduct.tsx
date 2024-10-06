@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import colors from "../../constants/color";
 import {
   Stack,
@@ -13,23 +13,80 @@ import {
   Input,
   Alert,
 } from "@mui/material";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createProductService } from "../../services/product.service";
+import { getCategoriesService } from "../../services/category.service";
+import { getSuppliersService } from "../../services/supplier.service";
+import { defaultProductSchema, ProductSchema } from "../../types/productSchema";
 
 export default function CreateProduct() {
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const navigate = useNavigate();
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    // Handle form submission logic here
-    // On success, navigate back to the supplier page
-    // navigate("/suppliers"); // Uncomment this line when you have success logic
+  const {
+    register,
+    handleSubmit,
+  } = useForm<ProductSchema>({
+    mode: "all",
+    resolver: zodResolver(ProductSchema),
+    defaultValues: defaultProductSchema,
+  });
+
+  const onSubmit = async (data: any) => {
+    console.log("data", data);
+    
     try {
-    } catch (err: any) {
-      setError(err?.message);
+      const file = data.productImage[0]; // Get the uploaded image file
+      const productRequest = {
+        name: data.productName,
+        categoryId: parseInt(data.categoryId, 10),
+        supplierId: parseInt(data.supplierId, 10),
+        originalPrice: parseFloat(data.originalPrice),
+        price: parseFloat((data.originalPrice * 1.1).toFixed(2)), 
+      };
+      
+      const response = await createProductService(productRequest, file);
+      if (response.message === "success") {
+        console.log("Create product success");
+        navigate("/products", {
+          state: { createdSuccess: "Thêm mới sản phẩm thành công" },
+        });
+      } else {
+        setError(response.message);
+      }
+    } catch (error) {
+      console.log(error);
+      setError("An error occurred while creating the product.");
     }
   };
+  
+
   const handleBack = () => {
-    navigate("/category"); // Navigate back to the supplier page
+    navigate("/category");
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getCategories();
+      await getSuppliers();
+    };
+
+    fetchData();
+  }, []); // Empty dependency array means this runs once when the component mounts
+
+  const getCategories = async () => {
+    const response = await getCategoriesService();
+    console.log("categories", response.data);
+    
+    setCategories(response.data);
+  };
+
+  const getSuppliers = async () => {
+    const response = await getSuppliersService();
+    setSuppliers(response.data.responseList);
   };
 
   return (
@@ -38,7 +95,7 @@ export default function CreateProduct() {
         variant="h4"
         align="center"
         padding={"5px"}
-        sx={{ mb: 3, fontWeight: "bold" }}
+        sx={{ mb: 1, fontWeight: "bold" }}
       >
         Thêm sản phẩm mới
       </Typography>
@@ -47,7 +104,7 @@ export default function CreateProduct() {
 
       <Container
         component={"form"}
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         sx={{
           boxShadow: 3,
           borderRadius: 2,
@@ -59,42 +116,46 @@ export default function CreateProduct() {
       >
         <Stack spacing={2} mb={2} sx={{ alignItems: "center" }}>
           <FormControl sx={{ width: "60%" }}>
-            <FormLabel htmlFor="name" sx={{ textAlign: "left" }}>
+            <FormLabel htmlFor="supplierId" sx={{ textAlign: "left" }}>
               Tên nhà cung cấp:
             </FormLabel>
             <Select
-              name="name"
+              id="supplierId"
+              {...register("supplierId")}
               variant="outlined"
               displayEmpty
-              native // Sử dụng native để tạo dropdown menu
+              native
             >
               <option value="" disabled>
                 Chọn nhà cung cấp
               </option>
-              <option value="supplier1">Nhà cung cấp 1</option>
-              <option value="supplier2">Nhà cung cấp 2</option>
-              <option value="supplier3">Nhà cung cấp 3</option>
-              {/* Thêm các option khác tương ứng với các nhà cung cấp khác */}
+              {suppliers.map((supplier: any) => (
+                <option key={supplier.id} value={supplier.id}>
+                  {supplier.name}
+                </option>
+              ))}
             </Select>
           </FormControl>
 
           <FormControl sx={{ width: "60%" }}>
-            <FormLabel htmlFor="name" sx={{ textAlign: "left" }}>
+            <FormLabel htmlFor="categoryId" sx={{ textAlign: "left" }}>
               Danh mục sản phẩm:
             </FormLabel>
             <Select
-              name="name"
+              id="categoryId"
+              {...register("categoryId")}
               variant="outlined"
               displayEmpty
-              native // Sử dụng native để tạo dropdown menu
+              native
             >
               <option value="" disabled>
                 Chọn danh mục sản phẩm
               </option>
-              <option value="supplier1">Danh mục 1</option>
-              <option value="supplier2">Danh mục 2</option>
-              <option value="supplier3">Danh mục 3</option>
-              {/* Thêm các option khác tương ứng với các nhà cung cấp khác */}
+              {categories.map((category: any) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
             </Select>
           </FormControl>
 
@@ -102,14 +163,27 @@ export default function CreateProduct() {
             <FormLabel htmlFor="name" sx={{ textAlign: "left" }}>
               Tên sản phẩm:
             </FormLabel>
-            <TextField name="name" variant="outlined" />
+            <TextField id="name" {...register("name")} variant="outlined" />
           </FormControl>
 
           <FormControl sx={{ width: "60%" }}>
-            <FormLabel htmlFor="productImage" sx={{ textAlign: "left" }}>
+            <FormLabel htmlFor="originalPrice" sx={{ textAlign: "left" }}>
+              Giá gốc:
+            </FormLabel>
+            <TextField
+              id="originalPrice"
+              {...register("originalPrice")}
+              variant="outlined"
+              type="number"
+              inputProps={{ min: 0 }}
+            />
+          </FormControl>
+
+          <FormControl sx={{ width: "60%" }}>
+            <FormLabel htmlFor="productImage" sx={{ textAlign: "left", mt: 1 }}>
               Hình ảnh sản phẩm:
             </FormLabel>
-            <Input id="productImage" name="productImage" type="file" />
+            <Input id="productImage" {...register("file")} type="file" />
           </FormControl>
         </Stack>
 
@@ -122,15 +196,30 @@ export default function CreateProduct() {
           <Button
             type="button"
             sx={{
-              width: "30%", // Decreased button width
+              width: "30%",
               backgroundColor: colors.secondaryColor,
               color: "white",
-              fontSize: "0.875rem", // Decrease font size
-              padding: "6px 12px", // Decrease padding
+              fontSize: "0.875rem",
+              padding: "6px 12px",
             }}
             onClick={handleBack}
           >
+            Quay lại
+          </Button>
+
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{
+              width: "30%",
+              backgroundColor: colors.accentColor,
+              color: "white",
+              fontSize: "0.875rem",
+              padding: "6px 12px",
+            }}
+          >
             Thêm sản phẩm mới
+
           </Button>
         </Stack>
 

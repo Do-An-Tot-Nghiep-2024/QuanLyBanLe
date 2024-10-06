@@ -41,7 +41,7 @@ const NAVIGATION: Navigation = [
     icon: <InventoryIcon />,
   },
   {
-    segment: "category",
+    segment: "products",
     title: "Sản phẩm",
     icon: <StoreIcon />,
   },

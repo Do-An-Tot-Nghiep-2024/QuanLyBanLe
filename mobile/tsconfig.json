@@ -17,5 +17,5 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "app/tabs/Home.jsx"
-  ]
+, "app/services/auth.service.js"  ]
 }
