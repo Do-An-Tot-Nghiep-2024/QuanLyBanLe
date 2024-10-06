@@ -54,7 +54,14 @@ public class OrderController {
 
     @GetMapping("/customer-detail/{orderId}")
     public ResponseEntity<ApiResponse<OrderCustomerResponse>> getOrderCustomerDetail(@PathVariable("orderId") Long orderId) {
-        return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrderDetailByCustomer(orderId)));
-
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrderDetailByCustomer(orderId)));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
     }
 }

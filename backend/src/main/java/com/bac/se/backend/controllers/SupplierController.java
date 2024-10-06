@@ -4,9 +4,9 @@ import com.bac.se.backend.exceptions.AlreadyExistsException;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.payload.request.SupplierRequest;
+import com.bac.se.backend.payload.response.SupplierResponse;
 import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.common.PageResponse;
-import com.bac.se.backend.payload.response.SupplierResponse;
 import com.bac.se.backend.services.SupplierService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +48,9 @@ public class SupplierController {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
@@ -66,6 +69,9 @@ public class SupplierController {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
@@ -79,6 +85,9 @@ public class SupplierController {
         } catch (ResourceNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
@@ -96,6 +105,9 @@ public class SupplierController {
         } catch (AlreadyExistsException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }

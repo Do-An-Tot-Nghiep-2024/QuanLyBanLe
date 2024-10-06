@@ -19,4 +19,6 @@ public interface AccountService {
     EmployeeAccountResponse createAccountEmployee(EmployeeAccountRequest accountRequest) throws BadRequestUserException;
 
     LoginResponse loginUser(LoginRequest loginRequest) throws BadRequestUserException;
+
+    LoginResponse resetPassword(String email,String newPassword,String confirmPassword) throws BadRequestUserException;
 }

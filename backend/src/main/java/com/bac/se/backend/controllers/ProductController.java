@@ -5,8 +5,8 @@ import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.payload.request.CreateProductRequest;
 import com.bac.se.backend.payload.request.ProductUpdateRequest;
 import com.bac.se.backend.payload.response.common.ApiResponse;
-import com.bac.se.backend.payload.response.product.CreateProductResponse;
 import com.bac.se.backend.payload.response.common.PageResponse;
+import com.bac.se.backend.payload.response.product.CreateProductResponse;
 import com.bac.se.backend.payload.response.product.ProductResponse;
 import com.bac.se.backend.services.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +41,9 @@ public class ProductController {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, productService.getProductById(id)));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
@@ -67,6 +70,9 @@ public class ProductController {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, id));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(e.getMessage(), null));
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
