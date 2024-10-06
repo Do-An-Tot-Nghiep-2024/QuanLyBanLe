@@ -2,41 +2,38 @@ import { LoginSchema } from "../types/loginSchema";
 import api from "../config/axios";
 import ApiResponse from "../types/apiResponse";
 import LoginResponse from "../types/loginResponse";
-import Cookies from "js-cookie";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const loginService = async (login: LoginSchema) => {
+const loginService = async (username: string, password: string) => {
+  console.log(username, password);
   
-  try {
-    const response: ApiResponse = await api.post("/auth/login", login);
-    if (response?.message !== "success") {
-      return {
-        status: false,
-        data: {},
-      };
-    }
+  const response = await fetch("http://localhost:8080/api/v1/auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+    
+  })
+  const data = await response.json();
+  console.log(data);
+  if (data.message !== "success") {
     return {
-      status: true,
-      data: response.data as LoginResponse,
+      status: false,
+      data: {},
     };
-  } catch (error) {
-    console.log(error);
   }
-};
+  return {
+    status: true,
+    data: data,
+  }
+
+}
+
 const getAccountService = async () => {
   try {
-    // const response = await axios.get(
-    //   `${import.meta.env.VITE_URL_BE}/auth/account`,
-    //   {
-    //     headers: {
-    //       Authorization: `Bearer ${Cookies.get("accessToken")}`,
-    //     },
-    //   }
-    // );
-  
     const response: any = await api.get("/auth/account");
     if (response.message !== "success") {
- 
-      
       return {
         status: false,
         data: {},

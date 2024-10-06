@@ -8,7 +8,7 @@ import { useAppDispatch, useAppSelector } from "../redux/hook";
 import { getAccount } from "../redux/auth/authSlice";
 import { useEffect, Suspense, lazy } from "react";
 import Cookies from "js-cookie";
-import CreateProduct from '../pages/product/CreateProduct';
+import CreateProduct from "../pages/product/CreateProduct";
 const LoginEmployee = lazy(() => import("../pages/login/LoginEmployeePage")); // optimized import
 const LoginManager = lazy(() => import("../pages/login/LoginManagerPage"));
 const EmployeeMain = lazy(() => import("../pages/staff/home/EmployeeMainPage"));
@@ -24,6 +24,8 @@ const CreateSupplier = lazy(() => import("../pages/supplier/CreateSupplier"));
 const UpdateSupplier = lazy(() => import("../pages/supplier/UpdateSupplier"));
 const Sidebar = lazy(() => import("../layout/Sidebar"));
 const CategoryPage = lazy(() => import("../pages/product/CategoryPage"));
+const ProductPage = lazy(() => import("../pages/product/ProductPage"));
+const UpdateProduct = lazy(() => import("../pages/product/UpdateProduct"));
 const PageRouter = () => {
   const auth = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
@@ -35,10 +37,9 @@ const PageRouter = () => {
     }
   }, [token, dispatch]);
 
-  const isLoggedIn = true;
+  const isLoggedIn = auth.isLogin;
   const userRole = auth.role || "MANAGER";
 
-  console.log("role sss", userRole);
   return (
     <Router>
       <Suspense fallback={<Loading />}>
@@ -102,10 +103,13 @@ const PageRouter = () => {
               </Route>
               <Route path="/suppliers" element={<SupplierPage />} />
               <Route path="/create-supplier" element={<CreateSupplier />} />
+              <Route path="/update-product/:id" element={<UpdateProduct />} />
+              <Route path="/update-supplier/:id" element={<UpdateSupplier />} />
+
               <Route path="/create-product" element={<CreateProduct />} />
 
-              <Route path="/update-supplier/:id" element={<UpdateSupplier />} />
-              <Route path="/category" element={<CategoryPage />} />
+              <Route path="/products" element={<ProductPage />} />
+              <Route path="/categories" element={<CategoryPage />} />
 
               <Route path="/update-employee/:id" element={<UpdateEmployee />} />
             </Route>

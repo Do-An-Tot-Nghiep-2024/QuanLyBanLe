@@ -16,21 +16,17 @@ import {
     TouchableRipple,
     Checkbox,
 } from "react-native-paper";
-// import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // import { storeToken, getAccessToken } from "../user-profile/getAccessToken";
 // import Toast from "react-native-toast-message";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 // import { fetchAllGroup } from "../../service/conversation.util";
 import { Stack, useNavigation, Link, router } from 'expo-router';
 import stylessheet from "../style";
+import { loginService } from "../services/auth.service";
 const Login = ({ }) => {
 
     const navigation = useNavigation();
-
-    // useEffect(() => {
-    //     navigation.setOptions({ headerShown: false });
-    // }, [navigation]);
-
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -46,148 +42,24 @@ const Login = ({ }) => {
     };
 
 
-    // const removeToken = async () => {
-    //     console.log("log out");
-    //     try {
-    //         await AsyncStorage.removeItem("access-token");
-    //         console.log("removed");
-    //         console.log(AsyncStorage.getItem("access-token"));
-    //         navigation.navigate("Login");
-    //     } catch (e) {
-    //         console.error(e);
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     // removeToken();
-    //     const token = getAccessToken().then((token) => {
-    //         if (token) {
-    //             // console.log(token);
-    //             const user = fetch(
-    //                 `${BASE_URL}/users/getMe`,
-    //                 {
-    //                     method: "GET",
-    //                     headers: {
-    //                         Authorization: "Bearer " + token,
-    //                     },
-    //                 }
-    //             )
-    //                 .then((response) => response.json())
-    //                 .then((data) => {
-    //                     if (data.status === "fail") {
-    //                         console.log("fail");
-    //                         // navigation.navigate("Login");
-    //                         return;
-    //                     }
-    //                     // console.log("response", data);
-    //                     return data.data;
-    //                 })
-    //                 .catch((error) => {
-    //                     console.log("Error:", error);
-    //                 });
-    //             const temp = user.then((user) => {
-    //                 // console.log(user);
-
-    //                 dispatch(
-    //                     login({
-    //                         user: user,
-    //                     })
-    //                 );
-    //                 fetchFriendRequest();
-    //                 fetchAllGroup()
-    //                 // console.log(user);
-    //                 fetchAllFriend();
-
-    //                 // const friendList = findFriendById(user._id).then((friend) => {
-    //                 //   console.log(friend);
-    //                 //   const list = friend.friend;
-    //                 //   dispatch(setFriend({
-    //                 //     friends: list
-    //                 //   }))
-    //                 //   log
-    //                 // })
-    //                 navigation.navigate("Home");
-    //             });
-    //         }
-    //     });
-    // }, []);
-
-
     const validateEmail = (email) => {
         let re = /^[a-zA-Z0-9](?!.*[&=_'\-+<>])[\w.]{4,28}(?<![.])@[a-zA-Z0-9]+(\.[a-zA-Z]{2,})+$/;
         return re.test(email);
     }
 
-    // const onLogin = () => {
-    //     if (email && password) {
 
-    //         if (validateEmail(email)) {
-    //             fetch(
-    //                 `${BASE_URL}/auth/login`,
-    //                 {
-    //                     method: "POST",
-    //                     headers: {
-    //                         "Content-Type": "application/json",
-    //                     },
-    //                     body: JSON.stringify({
-    //                         email: email,
-    //                         password: password,
-    //                     }),
-    //                 }
-    //             )
-    //                 .then((response) => {
-    //                     return response.json();
-    //                 })
-    //                 .then((data) => {
-    //                     if (data.status === "success") {
-    //                         // console.log(data.data.token.access_token);
-    //                         storeToken(data.data.token.access_token);
-    //                         Toast.show({
-    //                             type: "success",
-    //                             text1: "Login successful",
-    //                             position: "top",
-    //                             visibilityTime: 4000,
-    //                         });
-    //                         dispatch(
-    //                             login({
-    //                                 user: data.data.user,
-    //                             })
-    //                         );
-    //                         setPassword("");
-    //                         setLoginError(false);
-    //                         navigation.navigate("Home");
-    //                         fetchFriendRequest();
-    //                     } else {
-    //                         Toast.show({
-    //                             type: "error",
-    //                             text1: "Email or password incorrect",
-    //                             position: "top",
-    //                             visibilityTime: 4000,
-    //                         });
-    //                         setLoginError(true);
-    //                     }
-    //                 });
-
-    //         }
-    //         else {
-    //             Toast.show({
-    //                 type: "error",
-    //                 text1: "Please enter your valid email",
-    //                 position: "top",
-    //                 visibilityTime: 4000,
-    //             });
-
-    //         }
-    //     }
-    //     else {
-    //         Toast.show({
-    //             type: "error",
-    //             text1: "Please enter your email and password",
-    //             position: "top",
-    //             visibilityTime: 4000,
-    //         });
-    //     }
-    // };
+    const onLogin = async () => {
+        const response = await fetch('http://localhost:8080/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: email, password: password }),
+        })
+        const data = await response.json();
+        console.log(data);
+    };
+    
 
     return (
         <ScrollView style={styles.container}>
@@ -246,7 +118,7 @@ const Login = ({ }) => {
 
             <View style={styles.btnContainer}>
                 <Button mode="contained" style={stylessheet.button} onPress={() => {
-                    navigation.navigate("MyTabs");
+                    onLogin();
                 }} >
                     Đăng nhập
                 </Button>

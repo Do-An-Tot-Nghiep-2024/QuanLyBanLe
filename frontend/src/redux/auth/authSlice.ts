@@ -15,14 +15,17 @@ const initialState: Auth = {
 };
 const getAccount = createAsyncThunk("auth/get-user-token", async () => {
   try {
-    const res = await getAccountService();
-    console.log("Get Account Response at auth slice: ", res);
-    const responseData = res.data.data;
-    if (res?.status) {
-      console.log("account is ", res.data.data);
+    const res = await getAccountService().then((res) => res.data );
+    // console.log( Cookies.get("accessToken"));
+    
+    
+    
+    const responseData = res;
+   
+      // console.log("account is ", res.data.data);
       return responseData as Account;
-    }
-    return {} as Account;
+    
+ 
   } catch (error) {
     throw error;
   }
@@ -41,7 +44,6 @@ export const authSlice = createSlice({
       .addCase(
         getAccount.fulfilled,
         (state, action: PayloadAction<Account>) => {
-          console.log("Get Account Fulfilled: ", action.payload);
           state.isLogin = true;
           state.role = action.payload.role;
         }
