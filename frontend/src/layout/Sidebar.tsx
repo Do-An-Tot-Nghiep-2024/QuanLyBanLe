@@ -14,6 +14,7 @@ import {
   Inventory as InventoryIcon,
   Settings as SettingsIcon,
   NoteAddOutlined,
+  Logout,
 } from "@mui/icons-material";
 import { AppProvider, DashboardLayout } from "@toolpad/core";
 import type { Router, Navigation, Session } from "@toolpad/core";
@@ -91,6 +92,11 @@ const NAVIGATION: Navigation = [
     segment: "settings",
     title: "Cài đặt",
     icon: <SettingsIcon />,
+  },
+  {
+    segment: "logout",
+    title: "Đăng xuất",
+    icon: <Logout />,
   },
 ];
 

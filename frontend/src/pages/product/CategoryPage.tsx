@@ -31,6 +31,7 @@ import {
     updateCategoryService,
     deleteCategoryService,
   } from "../../services/category.service";
+import { CategorySchema } from "../../types/categorySchema";
   
   export default function CategoryPage() {
     const navigate = useNavigate();
@@ -99,8 +100,9 @@ import {
   
     async function handleUpdateCategory() {
       if (currentCategoryId) {
+        const categorySchema = CategorySchema.parse({ name: category });
         try {
-          await updateCategoryService(currentCategoryId, { name: category });
+          await updateCategoryService(currentCategoryId, categorySchema);
           showSnackbar("Cập nhật danh mục thành công");
           getCategories();
           handleEditClose();

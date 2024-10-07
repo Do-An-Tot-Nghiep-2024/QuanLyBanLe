@@ -38,7 +38,7 @@ const MessageAlert = lazy(() => import("../../components/MessageAlert"));
 export default function EmployeePage() {
   const updateSuccess: string = useLocation().state?.updateSuccess ?? "";
   const [deleteSuccess, setDeleteSuccess] = useState<string>("");
-  const [page, setPage] = useState(1); // Removed setPage since it's not used
+  const [page, setPage] = useState(0); // Removed setPage since it's not used
   const [limit, setLimit] = useState(10);
   const navigate = useNavigate(); // Removed setLimit since it's not used
   const [employee, setEmployee] = useState<EmployeeSchema | null>(null);
