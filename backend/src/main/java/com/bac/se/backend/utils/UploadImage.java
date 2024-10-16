@@ -34,8 +34,7 @@ public class UploadImage {
             throw new RuntimeException(e);
         }
     }
-
-    private File convertMultiPartToFile(MultipartFile file) {
+    File convertMultiPartToFile(MultipartFile file) {
         try {
             if (!Objects.requireNonNull(FilenameUtils.getExtension(file.getOriginalFilename())).equalsIgnoreCase("jpg")
                     && !FilenameUtils.getExtension(file.getOriginalFilename()).equalsIgnoreCase("png")) {

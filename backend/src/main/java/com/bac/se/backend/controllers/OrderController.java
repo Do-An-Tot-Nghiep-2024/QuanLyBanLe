@@ -3,6 +3,7 @@ package com.bac.se.backend.controllers;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.payload.request.OrderRequest;
+import com.bac.se.backend.payload.response.DateRequest;
 import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.order.CreateOrderResponse;
@@ -46,6 +47,36 @@ public class OrderController {
             @RequestParam(defaultValue = "10") Integer pageSize) {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrdersByCustomer(id, pageNumber, pageSize)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/employee/{id}")
+    public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrdersByEmployee(
+            @PathVariable("id") Long id,
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrdersByEmployee(id, pageNumber, pageSize)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/employee/{id}/date")
+    public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrdersEmployeeFromDate(
+            @PathVariable("id") Long id,
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestBody DateRequest dateRequest
+    ) {
+        System.out.println(dateRequest);
+        try {
+
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrdersEmployeeByDate(id, pageNumber, pageSize, dateRequest.fromDate(), dateRequest.toDate())));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));

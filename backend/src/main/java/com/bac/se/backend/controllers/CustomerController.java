@@ -5,6 +5,7 @@ import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.models.Customer;
 import com.bac.se.backend.payload.response.CustomerResponse;
 import com.bac.se.backend.payload.response.common.ApiResponse;
+import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.services.CustomerService;
 import com.bac.se.backend.utils.JwtParse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 @RestController
@@ -30,8 +29,18 @@ public class CustomerController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('MANAGER')")
-    public List<CustomerResponse> getCustomers() {
-        return customerService.getCustomers();
+    public ResponseEntity<ApiResponse<PageResponse<CustomerResponse>>> getCustomers(
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer pageSize
+    ) {
+        try {
+            return ResponseEntity
+                    .ok(new ApiResponse<>(REQUEST_SUCCESS, customerService.getCustomers(pageNumber, pageSize)));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
     }
 
     @GetMapping("/detail")
@@ -44,7 +53,7 @@ public class CustomerController {
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(e.getMessage(), null));
-        }catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }

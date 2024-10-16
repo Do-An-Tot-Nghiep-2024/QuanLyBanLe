@@ -42,7 +42,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private String defaultPassword;
 
     @Override
-    public EmployeePageResponse getEmployees(Integer pageNumber, Integer pageSize){
+    public EmployeePageResponse getEmployees(Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Object[]> employeePage = employeeRepository.getEmployees(pageable);
         List<Object[]> employeeList = employeePage.getContent();
@@ -55,19 +55,19 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
     @Override
-    public EmployeeResponse getEmployee(Long id){
+    public EmployeeResponse getEmployee(Long id) {
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         return employeeMapper.mapToEmployeeResponse(employee);
     }
 
     @Override
     public EmployeeResponse createEmployee(EmployeeRequest employeeRequest) throws BadRequestUserException {
         extracted(employeeRequest);
-        if(employeeRepository.existsByEmail(employeeRequest.email())){
+        if (employeeRepository.existsByEmail(employeeRequest.email())) {
             throw new AlreadyExistsException("Email already in use");
         }
-        if(employeeRepository.existsByPhone(employeeRequest.phone())){
+        if (employeeRepository.existsByPhone(employeeRequest.phone())) {
             throw new AlreadyExistsException("Phone already in use");
         }
         Employee employee = employeeMapper.mapToEmployeeRequest(employeeRequest);
@@ -82,7 +82,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeMapper.mapToEmployeeResponse(save);
     }
 
-    public void deleteEmployee(Long id){
+    public void deleteEmployee(Long id) {
         Employee employeeNotFound = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         employeeNotFound.setStatus(EmployeeStatus.ABSENT);
@@ -93,14 +93,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeResponse updateEmployee(Long id, EmployeeRequest employeeRequest) throws BadRequestUserException {
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         extracted(employeeRequest);
-        if(!employee.getEmail().equals(employeeRequest.email())
-                && employeeRepository.existsByEmail(employeeRequest.email())){
+        if (!employee.getEmail().equals(employeeRequest.email())
+                && employeeRepository.existsByEmail(employeeRequest.email())) {
             throw new AlreadyExistsException("Email already in use");
         }
-        if(!employee.getPhone().equals(employeeRequest.phone())
-                && employeeRepository.existsByPhone(employeeRequest.phone())){
+        if (!employee.getPhone().equals(employeeRequest.phone())
+                && employeeRepository.existsByPhone(employeeRequest.phone())) {
             throw new AlreadyExistsException("Phone already in use");
         }
         employee.setName(employeeRequest.name());
@@ -111,13 +111,34 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeMapper.mapToEmployeeResponse(save);
     }
 
+    @Override
+    public List<EmployeeResponse> exportEmployees() {
+        return employeeRepository.findAll().stream()
+                .map(employeeMapper::mapToEmployeeResponse)
+                .toList();
+    }
+
+    @Override
+    public String importEmployees(List<EmployeeRequest> employeeRequestList) {
+        int count = employeeRequestList.size();
+        for (int i = 0; i < count; i++) {
+           try{
+               createEmployee(employeeRequestList.get(i));
+           }catch (BadRequestUserException | AlreadyExistsException e) {
+               --count;
+               return "Import fail tại dòng " + (i + 1) + ": " + e.getMessage();
+           }
+        }
+        return count + " employees imported";
+    }
+
     private void extracted(EmployeeRequest employeeRequest) throws BadRequestUserException {
         log.info("employeeRequest is {}", employeeRequest);
         String name = employeeRequest.name();
         String phone = employeeRequest.phone();
         String email = employeeRequest.email();
         Date dob = employeeRequest.dob();
-        if(name.isEmpty() || phone.isEmpty() || email.isEmpty() || dob == null){
+        if (name.isEmpty() || phone.isEmpty() || email.isEmpty() || dob == null) {
             throw new BadRequestUserException("Input is required");
         }
         if (!validateInput.isValidEmail(email)) {

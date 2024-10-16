@@ -5,6 +5,7 @@ import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.mapper.CustomerMapper;
 import com.bac.se.backend.models.Customer;
 import com.bac.se.backend.payload.response.CustomerResponse;
+import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.repositories.CustomerRepository;
 import com.bac.se.backend.services.impl.CustomerServiceImpl;
 import com.bac.se.backend.utils.ValidateInput;
@@ -13,7 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,6 +62,19 @@ class CustomerServiceTest {
 
     @Test
     void getCustomers() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Object[]> customerData = List.of(
+                new Object[]{1L, "John Doe", "john@example.com", "1234567890"},
+                new Object[]{2L, "Jane Doe", "jane@example.com", "0987654321"}
+        );
+        Page<Object[]> customerPage = new PageImpl<>(customerData, pageable, customerData.size());
+        when(customerRepository.getCustomers(pageable)).thenReturn(customerPage);
+        // Act
+        PageResponse<CustomerResponse> response = customerService.getCustomers(0, 10);
+        // Assert
+        assertEquals(2, response.getTotalElements());
+        assertEquals("John Doe", response.getResponseList().get(0).name());
+        assertEquals("Jane Doe", response.getResponseList().get(1).name());
 
     }
 
@@ -71,8 +90,14 @@ class CustomerServiceTest {
         verify(customerRepository).getCustomerByEmail(anyString());
     }
 
-
-
+    @Test
+    void getCustomerNotFound() {
+        when(customerRepository.getCustomerByEmail("john@gmail.com")).thenReturn(Optional.empty());
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> customerService.getCustomer("john@gmail.com"));
+        assertEquals("Không tìm thấy khách hàng", exception.getMessage());
+        verify(customerRepository).getCustomerByEmail(anyString());
+    }
 
     @Test
     void updateCustomer() throws BadRequestUserException {
@@ -91,7 +116,7 @@ class CustomerServiceTest {
     }
 
     @Test
-    void updateCustomerInvalidInput() throws BadRequestUserException {
+    void updateCustomerInvalidInput() {
         // Mock the customer and dependencies
         Customer customer = mock(Customer.class);  // Ensure customer is mocked
         ValidateInput validateInput = mock(ValidateInput.class);
@@ -113,7 +138,7 @@ class CustomerServiceTest {
     }
 
     @Test
-    void updateCustomerWithInvalidEmail() throws BadRequestUserException {
+    void updateCustomerWithInvalidEmail(){
         when(validateInput.isValidEmail(customer.getEmail())).thenReturn(false);
         Exception exception = assertThrows(BadRequestUserException.class,
                 () -> customerService.updateCustomer(customer, 1L));
@@ -133,9 +158,7 @@ class CustomerServiceTest {
         when(validateInput.isValidPhoneNumber(customer.getPhone())).thenReturn(false);
 
         // Act & Assert
-        BadRequestUserException thrown = assertThrows(BadRequestUserException.class, () -> {
-            customerService.validateInput(customer);
-        });
+        BadRequestUserException thrown = assertThrows(BadRequestUserException.class, () -> customerService.validateInput(customer));
 
         assertEquals("Số điện thoại không hợp lệ", thrown.getMessage());
     }

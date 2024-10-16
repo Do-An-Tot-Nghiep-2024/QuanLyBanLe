@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
-    @Query("select e.id, e.name, e.phone, e.email, e.dob, e.status from Employee e where e.status = 'ACTIVE'")
+    @Query("select e.id, e.name, e.phone, e.email, e.dob, e.status from Employee e where e.status = 'ACTIVE' order by e.name asc")
     Page<Object[]> getEmployees(Pageable pageable);
 
     boolean existsByPhone(String phone);
