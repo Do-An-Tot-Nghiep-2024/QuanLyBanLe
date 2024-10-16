@@ -3,6 +3,8 @@ package com.bac.se.backend.mapper;
 import com.bac.se.backend.payload.response.product.ProductResponse;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ProductMapperTest {
@@ -11,7 +13,7 @@ class ProductMapperTest {
 
     @Test
     void mapObjectToProductResponse() {
-        ProductResponse productResponse = productMapper.mapObjectToProductResponse(new Object[]{"1", "name", "image", "category", "supplier", "100", "200", "300"});
+        ProductResponse productResponse = productMapper.mapObjectToProductResponse(new Object[]{"1", "name", "image", "category", "supplier", "100", "200", "300"}, new ArrayList<>());
         assertEquals(1L, productResponse.id());
         assertEquals("name", productResponse.name());
         assertEquals("image", productResponse.image());

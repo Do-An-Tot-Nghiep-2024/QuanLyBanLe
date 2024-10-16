@@ -14,6 +14,7 @@ import com.bac.se.backend.payload.response.order.*;
 import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.services.OrderService;
 import com.bac.se.backend.utils.JwtParse;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -139,6 +140,33 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
         return new PageResponse<>(orderResponseList, pageNumber,
                 ordersByCustomer.getTotalPages(), ordersByCustomer.getTotalElements(), ordersByCustomer.isLast());
+    }
+
+    @Override
+    public PageResponse<OrderResponse> getOrdersByEmployee(Long employeeId, int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        var ordersByCustomer = orderRepository.getOrdersByEmployee(employeeId, pageable);
+        List<Object[]> orderList = ordersByCustomer.getContent();
+        List<OrderResponse> orderResponseList = orderList.stream()
+                .map(orderMapper::mapObjectToResponse)
+                .toList();
+        return new PageResponse<>(orderResponseList, pageNumber,
+                ordersByCustomer.getTotalPages(), ordersByCustomer.getTotalElements(), ordersByCustomer.isLast());
+
+    }
+
+    @Override
+    public PageResponse<OrderResponse> getOrdersEmployeeByDate(Long employeeId, int pageNumber, int pageSize,
+                                                               @JsonFormat(pattern = "yyyy-MM-dd") Date fromDate,
+                                                               @JsonFormat(pattern = "yyyy-MM-dd") Date toDate) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        var ordersEmployeeByDate = orderRepository.getOrdersEmployeeByDate(employeeId, pageable, fromDate, toDate);
+        List<Object[]> orderList = ordersEmployeeByDate.getContent();
+        List<OrderResponse> orderResponseList = orderList.stream()
+                .map(orderMapper::mapObjectToResponse)
+                .toList();
+        return new PageResponse<>(orderResponseList, pageNumber,
+                ordersEmployeeByDate.getTotalPages(), ordersEmployeeByDate.getTotalElements(), ordersEmployeeByDate.isLast());
     }
 
 

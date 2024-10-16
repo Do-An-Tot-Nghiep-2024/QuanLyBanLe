@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    @Query("SELECT c.id,c.name FROM Category c WHERE c.isActive = true")
+    @Query("SELECT c.id,c.name FROM Category c WHERE c.isActive = true order by c.name asc")
     List<Object[]> getCategories();
 
     boolean existsByName(String name);

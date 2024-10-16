@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -28,22 +27,17 @@ public class AccountController {
     private final AccountService accountService;
     static final String REQUEST_SUCCESS = "success";
 
-    // Register account customer controller
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@RequestBody RegisterRequest request) {
         try {
             RegisterResponse registerResponse = accountService.registerCustomer(request);
-            return ResponseEntity.ok()
-                    .body(new ApiResponse<>(REQUEST_SUCCESS, registerResponse));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, registerResponse));
         } catch (BadRequestUserException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage(), null));
         } catch (AlreadyExistsException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(e.getMessage(), null));
-        }catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
@@ -52,17 +46,13 @@ public class AccountController {
         log.info("Request is {}", accountRequest);
         try {
             EmployeeAccountResponse accountEmployee = accountService.createAccountEmployee(accountRequest);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ApiResponse<>(REQUEST_SUCCESS, accountEmployee));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(REQUEST_SUCCESS, accountEmployee));
         } catch (BadRequestUserException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage(), null));
         } catch (AlreadyExistsException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(e.getMessage(), null));
-        }catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
@@ -71,50 +61,35 @@ public class AccountController {
         try {
             LoginResponse login = accountService.loginUser(loginRequest);
             log.info("Login user is {}", login);
-            return ResponseEntity
-                    .ok()
-//                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                    .body(new ApiResponse<>(REQUEST_SUCCESS, login));
+            return ResponseEntity.ok().body(new ApiResponse<>(REQUEST_SUCCESS, login));
         } catch (BadRequestUserException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage(), null));
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ApiResponse<>(e.getMessage(), null));
-        }catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(e.getMessage(), null));
         }
     }
-
 
     @GetMapping("/account")
     public ResponseEntity<ApiResponse<AccountResponse>> getAccount(HttpServletRequest request) {
         try {
             log.info("token user is {}", request.getHeader("Authorization"));
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS,
-                    accountService.getAccountResponse(request)));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, accountService.getAccountResponse(request)));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<ApiResponse<LoginResponse>> resetPassword(String email,String newPassword,String confirmPassword) {
+    public ResponseEntity<ApiResponse<LoginResponse>> resetPassword(String email, String newPassword, String confirmPassword) {
         try {
-            LoginResponse login = accountService.resetPassword(email,newPassword,confirmPassword);
-            return ResponseEntity
-                    .ok()
-                    .body(new ApiResponse<>(REQUEST_SUCCESS, login));
+            LoginResponse login = accountService.resetPassword(email, newPassword, confirmPassword);
+            return ResponseEntity.ok().body(new ApiResponse<>(REQUEST_SUCCESS, login));
         } catch (BadRequestUserException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage(), null));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(e.getMessage(), null));
         }
     }
-
-
 }

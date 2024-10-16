@@ -19,8 +19,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "JOIN p.supplier s " +
             "LEFT JOIN ProductPrice pp ON pp.product.id = p.id " +
             "AND pp.createdAt = (SELECT MAX(p1.createdAt) FROM ProductPrice p1 WHERE p1.product.id = p.id) " +
-            "WHERE p.isActive = true")
+            "WHERE p.isActive = true order by p.name asc")
     Page<Object[]> getProducts(Pageable pageable);
 
+
+    @Query(value = "select count(*) from t_product where is_active = 0",nativeQuery = true)
+    long getTotalQuantityProduct();
 
 }

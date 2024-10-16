@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/employees")
 @RequiredArgsConstructor
@@ -28,11 +30,11 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EmployeePageResponse>> getEmployees(
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        try{
+        try {
             var employees = employeeService.getEmployees(pageNumber, pageSize);
             log.info("get employees success");
             return ResponseEntity.ok(new ApiResponse<>(SUCCESS, employees));
-        }catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
@@ -48,7 +50,7 @@ public class EmployeeController {
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse<>(e.getMessage(), null));
-        }catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
@@ -67,7 +69,7 @@ public class EmployeeController {
         } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ApiResponse<>(e.getMessage(), null));
-        }catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
@@ -83,7 +85,7 @@ public class EmployeeController {
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse<>(e.getMessage(), null));
-        }catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
@@ -102,6 +104,29 @@ public class EmployeeController {
         } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ApiResponse<>(e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+
+    @GetMapping("/export")
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public ResponseEntity<ApiResponse<List<EmployeeResponse>>> exportEmployees() {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(SUCCESS, employeeService.exportEmployees()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @PostMapping("/import")
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public ResponseEntity<ApiResponse<String>> importEmployees(@RequestBody List<EmployeeRequest> employeeRequestList) {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(SUCCESS, employeeService.importEmployees(employeeRequestList)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));

@@ -22,8 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +36,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductPriceRepository productPriceRepository;
     private final ProductPriceMapper productPriceMapper;
     private final StockRepository stockRepository;
+    private final ShipmentItemRepository shipmentItemRepository;
     static final String NOT_FOUND_PRODUCT = "Không tìm thấy sản phẩm";
     private final UploadImage uploadImage;
 
@@ -53,19 +53,29 @@ public class ProductServiceImpl implements ProductService {
         if (price <= 0 || originalPrice <= 0) {
             throw new BadRequestUserException("Giá phải lớn hơn 0");
         }
-        if(originalPrice > price){
+        if (originalPrice > price) {
             throw new BadRequestUserException("Giá nhập lớn hơn giá gốc");
         }
     }
+
     // get all product with pagination
     @Override
     public PageResponse<ProductResponse> getProducts(Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Object[]> productPage = productRepository.getProducts(pageable);
         List<Object[]> productList = productPage.getContent();
+        List<Long> productIds = productList.stream().map(x -> Long.parseLong(x[0].toString())).toList();
+        Map<Long, List<Long>> shipmentItemMap = new HashMap<>();
+        for (Long productId : productIds) {
+            List<Long> shipmentIds = shipmentItemRepository.getShipmentItemByProduct(productId).stream()
+                    .map(x -> Long.parseLong(x[0].toString())).toList();
+            shipmentItemMap.put(productId, shipmentIds);
+        }
         List<ProductResponse> employeeResponseList = productList.stream()
-                .map(productMapper::mapObjectToProductResponse)
-                .toList();
+                .map(res -> {
+                    List<Long> shipmentItemIds = shipmentItemMap.getOrDefault(Long.parseLong(res[0].toString()), Collections.emptyList());
+                    return productMapper.mapObjectToProductResponse(res, shipmentItemIds);
+                }).toList();
         return new PageResponse<>(employeeResponseList, pageNumber,
                 productPage.getTotalPages(), productPage.getTotalElements(), productPage.isLast());
     }
@@ -76,13 +86,20 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_PRODUCT));
         var productPriceResponse = getProductPriceResponse(productId);
+        List<Long> shipmentIds = new ArrayList<>();
+        List<Object[]> shipmentItems = shipmentItemRepository.getShipmentItemByProduct(productId);
+        if (!shipmentItems.isEmpty()) {
+            shipmentIds = shipmentItems.stream().map(x -> Long.parseLong(x[0].toString())).toList();
+        }
+//        System.out.println(shipmentItems.size());
         return new ProductResponse(product.getId(),
                 product.getName(), product.getImage(),
                 product.getCategory().getName(),
                 product.getSupplier().getName(),
                 productPriceResponse.originalPrice(),
                 productPriceResponse.price(),
-                productPriceResponse.discountPrice());
+                productPriceResponse.discountPrice(),
+                shipmentIds);
     }
 
 
@@ -92,7 +109,7 @@ public class ProductServiceImpl implements ProductService {
             CreateProductRequest productUpdateRequest,
             MultipartFile image
     ) throws BadRequestUserException {
-        if(productUpdateRequest.name().isEmpty() || productUpdateRequest.categoryId() == null || productUpdateRequest.supplierId() == null) {
+        if (productUpdateRequest.name().isEmpty() || productUpdateRequest.categoryId() == null || productUpdateRequest.supplierId() == null) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
         }
         // create image url and upload image to cloud storage
@@ -134,13 +151,13 @@ public class ProductServiceImpl implements ProductService {
 
     // update product by id and input
     @Override
-    public ProductResponse updateProduct(Long productId, ProductUpdateRequest productUpdateRequest,MultipartFile image) throws BadRequestUserException {
+    public ProductResponse updateProduct(Long productId, ProductUpdateRequest productUpdateRequest, MultipartFile image) throws BadRequestUserException {
         // Validate input once
         validateInput(productUpdateRequest);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new BadRequestUserException(NOT_FOUND_PRODUCT));
         String imageURL = product.getImage();
-        if(image.getSize() > 0){
+        if (image.getSize() > 0) {
             imageURL = uploadImage.uploadFile(image);
         }
         // Retrieve the product, category, and supplier efficiently
@@ -188,14 +205,15 @@ public class ProductServiceImpl implements ProductService {
                 product.getSupplier().getName(),
                 productPrice.originalPrice(),
                 productPrice.price(),
-                productPrice.discountPrice()
+                productPrice.discountPrice(),
+                null
         );
     }
 
     private ProductPriceResponse getProductPriceResponse(Long productId) {
         var productPriceLatest = productPriceRepository.getProductPriceLatest(productId, PageRequest.of(0, 1));
-        if(productPriceLatest.isEmpty()){
-            return new ProductPriceResponse(0,0,0);
+        if (productPriceLatest.isEmpty()) {
+            return new ProductPriceResponse(0, 0, 0);
         }
         return productPriceMapper.mapObjectToProductPriceResponse(productPriceLatest.get(0));
     }

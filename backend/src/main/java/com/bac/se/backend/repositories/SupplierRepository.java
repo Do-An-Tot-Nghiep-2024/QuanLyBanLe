@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SupplierRepository extends JpaRepository<Supplier, Long> {
-    @Query("select s.id, s.name, s.phone, s.email, s.address from Supplier s where s.isActive = true")
+    @Query("select s.id, s.name, s.phone, s.email, s.address from Supplier s where s.isActive = true order by s.name asc")
     Page<Object[]> getSuppliers(Pageable pageable);
 
     boolean existsByPhone(String phone);

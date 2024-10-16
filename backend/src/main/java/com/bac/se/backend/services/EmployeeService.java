@@ -5,6 +5,8 @@ import com.bac.se.backend.payload.request.EmployeeRequest;
 import com.bac.se.backend.payload.response.employee.EmployeePageResponse;
 import com.bac.se.backend.payload.response.employee.EmployeeResponse;
 
+import java.util.List;
+
 public interface EmployeeService {
 
     EmployeePageResponse getEmployees(Integer pageNumber, Integer pageSize);
@@ -16,5 +18,9 @@ public interface EmployeeService {
     void deleteEmployee(Long id);
 
     EmployeeResponse updateEmployee(Long id, EmployeeRequest employeeRequest) throws BadRequestUserException;
+
+    List<EmployeeResponse> exportEmployees();
+
+    String importEmployees(List<EmployeeRequest> employeeRequestList) throws BadRequestUserException;
 
 }

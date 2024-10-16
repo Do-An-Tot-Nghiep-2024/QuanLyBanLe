@@ -3,11 +3,12 @@ package com.bac.se.backend.services;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.keys.ShipmentItemKey;
+import com.bac.se.backend.mapper.OrderMapper;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.OrderItemRequest;
 import com.bac.se.backend.payload.request.OrderRequest;
-import com.bac.se.backend.payload.response.order.CreateOrderResponse;
-import com.bac.se.backend.payload.response.order.OrderItemResponse;
+import com.bac.se.backend.payload.response.common.PageResponse;
+import com.bac.se.backend.payload.response.order.*;
 import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.services.impl.OrderServiceImpl;
 import com.bac.se.backend.utils.JwtParse;
@@ -17,8 +18,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -57,10 +62,14 @@ class OrderServiceTest {
     @InjectMocks
     private OrderServiceImpl orderService;
 
+    @Mock
+    private OrderMapper orderMapper;
+
     OrderRequest orderRequest;
 
     Date expectedDate;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
+
     @BeforeEach
     void setUp() throws ParseException {
         MockitoAnnotations.openMocks(this);
@@ -130,7 +139,7 @@ class OrderServiceTest {
         productPrice.add(objects);
         when(productPriceRepository.getProductPriceLatest(anyLong(), any(PageRequest.class))).thenReturn(productPrice);
         double change = -1.0;
-        double total  = 1;
+        double total = 1;
         when(orderRequest.customerPayment() - total).thenReturn(change);
         BadRequestUserException exception = assertThrows(BadRequestUserException.class,
                 () -> orderService.createOrderLive(orderRequest, request));
@@ -139,12 +148,6 @@ class OrderServiceTest {
         // Add more assertions as needed
 
         // Verify interactions with mocks
-    }
-
-
-    @Test
-    void createOrderLiveProductNotFound() {
-
     }
 
     @Test
@@ -180,8 +183,8 @@ class OrderServiceTest {
         when(productPriceRepository.getProductPriceLatest(anyLong(), any(PageRequest.class))).thenReturn(productPrice);
         CreateOrderResponse expectedResponse = new CreateOrderResponse(
                 List.of(
-                        new OrderItemResponse(null,1,1500.0,30,30),
-                        new OrderItemResponse(null,2,1500.0,30,60)
+                        new OrderItemResponse(null, 1, 1500.0, 30, 30),
+                        new OrderItemResponse(null, 2, 1500.0, 30, 60)
                 ),
                 90.0, 50000.0, 49910.0
         );
@@ -206,9 +209,64 @@ class OrderServiceTest {
         verify(orderItemRepository, times(orderRequest.orderItems().size())).save(any(OrderItem.class)); // save order item
     }
 
+    @Test
+    void getOrdersByCustomer() {
+        Long customerId = 1L;
+        int pageNumber = 0;
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        List<Object[]> orderList = List.of(new Object[]{}, new Object[]{});
+        Page<Object[]> ordersPage = new PageImpl<>(orderList, pageable, 1);
 
-     void setUpCommonMocks() {
-        OrderRequest orderRequest =  mock(OrderRequest.class); // provide necessary data
+        when(orderRepository.getOrdersByCustomer(customerId, pageable)).thenReturn(ordersPage);
+        when(orderMapper.mapObjectToResponse(any(Object[].class))).thenReturn(mock(OrderResponse.class));
+        PageResponse<OrderResponse> result = orderService.getOrdersByCustomer(customerId, pageNumber, pageSize);
+
+        assertEquals(2, result.getTotalElements());
+        assertEquals(0, result.getPageNumber());
+        assertEquals(1, result.getTotalPages());
+        assertTrue(result.isLastPage());
+        verify(orderRepository, times(1)).getOrdersByCustomer(customerId, pageable);
+        verify(orderMapper, times(orderList.size())).mapObjectToResponse(any());
+    }
+
+    @Test
+    void getOrderDetailByCustomerShouldReturnNotFoundException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> orderService.getOrderDetailByCustomer(1L));
+        assertEquals("Không tìm thấy hóa đơn", exception.getMessage());
+        verify(orderRepository).findById(1L);
+        verify(orderMapper, never()).mapObjectToResponse(any());
+    }
+
+    @Test
+    void getOrderDetailByCustomerShouldSuccess() {
+        Long orderId = 1L;
+        List<Object[]> objectsProduct = List.of(new Object[]{}, new Object[]{});
+        List<Object[]> objectsEmployee = List.of(new Object[]{}, new Object[]{});
+        OrderEmployeeResponse employeeResponse = new OrderEmployeeResponse("John Doe", "123456789");
+        OrderItemQueryResponse item1 = new OrderItemQueryResponse(100.0, "Cut", 2, 200);
+        OrderItemQueryResponse item2 = new OrderItemQueryResponse(100.0, "Plate", 2, 200);
+        List<OrderItemQueryResponse> orderItems = List.of(item1, item2);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(mock(Order.class)));
+        when(orderRepository.getOrderItemByOrderId(orderId)).thenReturn(objectsProduct);
+        when(orderMapper.mapObjectToOrderItem(objectsProduct.get(0))).thenReturn(item1);
+        when(orderMapper.mapObjectToOrderItem(objectsProduct.get(1))).thenReturn(item2);
+        when(orderRepository.getEmployeeByOrderId(orderId)).thenReturn(objectsEmployee);
+        when(orderMapper.mapObjectToEmployee(any())).thenReturn(employeeResponse);
+
+        OrderCustomerResponse response = orderService.getOrderDetailByCustomer(orderId);
+
+        assertEquals(BigDecimal.valueOf(400.0), response.total());
+        assertEquals(employeeResponse.name(), response.employeeName());
+        assertEquals(employeeResponse.phone(), response.employeePhone());
+        assertEquals(orderItems.size(), response.queryResponses().size());
+
+    }
+
+    void setUpCommonMocks() {
+        OrderRequest orderRequest = mock(OrderRequest.class); // provide necessary data
         doReturn(orderRequest.customerPayment()).when(orderRequest).customerPayment();
         when(orderRequest.customerPhone()).thenReturn(Optional.of("123456789"));
         when(jwtParse.decodeTokenWithRequest(request)).thenReturn("employee@example.com");
@@ -219,4 +277,6 @@ class OrderServiceTest {
         when(productRepository.findById(anyLong())).thenReturn(Optional.of(mock(Product.class)));
         when(shipmentRepository.findById(anyLong())).thenReturn(Optional.of(mock(Shipment.class)));
     }
+
+
 }

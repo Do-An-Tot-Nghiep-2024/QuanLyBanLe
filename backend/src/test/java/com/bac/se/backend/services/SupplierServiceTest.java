@@ -7,6 +7,7 @@ import com.bac.se.backend.mapper.SupplierMapper;
 import com.bac.se.backend.models.Supplier;
 import com.bac.se.backend.payload.request.SupplierRequest;
 import com.bac.se.backend.payload.response.SupplierResponse;
+import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.repositories.SupplierRepository;
 import com.bac.se.backend.services.impl.SupplierServiceImpl;
 import com.bac.se.backend.utils.ValidateInput;
@@ -15,7 +16,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,9 +34,9 @@ class SupplierServiceTest {
     @InjectMocks
     private SupplierServiceImpl supplierService;
     @Mock
-    private SupplierMapper supplierMapper;
-    @Mock
     private ValidateInput validateInput;
+    @Mock
+    private SupplierMapper supplierMapper;
 
     SupplierRequest supplierRequest;
     Supplier supplier;
@@ -52,6 +58,19 @@ class SupplierServiceTest {
 
     @Test
     void getSuppliersSuccess() {
+        // Arrange
+        int pageNumber = 0;
+        int pageSize = 2;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        List<Object[]> supplierList = List.of(new Object[]{}, new Object[]{});
+        Page<Object[]> supplierPage = new PageImpl<>(supplierList, pageable, supplierList.size());
+        when(supplierRepository.getSuppliers(pageable)).thenReturn(supplierPage);
+        when(supplierMapper.mapObjectToSupplierResponse(any(Object[].class))).thenReturn(mock(SupplierResponse.class));
+        // Act
+        PageResponse<SupplierResponse> result = supplierService.getSuppliers(pageNumber, pageSize);
+        // Assert
+        assertEquals(2, result.getTotalElements());
+        assertEquals(0, result.getPageNumber());
 
     }
 
@@ -163,7 +182,7 @@ class SupplierServiceTest {
         when(supplierRepository.findById(supplierId)).thenReturn(Optional.of(supplier));
         when(supplierRepository.save(supplier)).thenReturn(supplier);
         supplierService.deleteSupplier(supplierId);
-        assertEquals(supplier.isActive(), false);
+        assertFalse(supplier.isActive());
         verify(supplierRepository, times(1)).findById(supplierId);
         verify(supplierRepository, times(1)).save(supplier);
     }
@@ -280,6 +299,7 @@ class SupplierServiceTest {
     @Test
     void updateSupplierExistPhone() {
         SupplierRequest request = new SupplierRequest("New Supplier", "newemail@example.com", "existingphone", "New Address");
+
         when(supplierRepository.findById(supplierId)).thenReturn(Optional.of(supplier));
         when(validateInput.isValidEmail(request.email())).thenReturn(true);
         when(validateInput.isValidPhoneNumber(request.phone())).thenReturn(true);
@@ -288,6 +308,7 @@ class SupplierServiceTest {
         AlreadyExistsException exception = assertThrows(AlreadyExistsException.class,
                 () -> supplierService.updateSupplier(request, supplierId));
         assertEquals("Số điện thoại đã được sử dụng", exception.getMessage());
+        assertNotEquals(supplier.getPhone(), request.phone());
         verify(supplierRepository, times(1)).findById(supplierId);
         verify(supplierRepository, never()).save(any(Supplier.class));
     }
