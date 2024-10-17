@@ -63,11 +63,7 @@ export default function UpdateEmployee() {
 
       if (response.message == "success") {
         console.log("Create employee success");
-        // navigate("/employees");
-        // how to send a message to the parent component?
         navigate("/employees", { state: { updateSuccess: "Cập nhật thông tin nhân viên thành công" } });
-        // how to get the message in the parent component?
-        // const message = useLocation().state.message;
       } else {
         setErrorMessage(response.message);
       }

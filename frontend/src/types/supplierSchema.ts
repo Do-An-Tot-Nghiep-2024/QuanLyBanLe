@@ -5,12 +5,12 @@ export const SupplierSchema = z.object({
   name: z.string().min(1, { message: "Tên nhà cung cấp là bắt buộc" }),
   phone: z
     .string()
-    .min(10, { message: "Số điện thoại là bắt buộc" })
-    .max(10, { message: "Số điện thoại không quá 15 chữ số" }), 
+    .length(10, { message: "Số điện thoại phải gồm 10 chữ số" }) 
+    .regex(/[0-9]/, { message: "Số điện thoại phải là 10 chữ số" }),
   email: z
     .string()
     .min(1, { message: "Email là bắt buộc" })
-    .refine((value) => /.+@.+/.test(value), { message: "Email không hợp lệ" }),
+    .refine((value) => /.+@.+\..+/.test(value), { message: "Email không hợp lệ" }), 
   address: z
     .string()
     .min(1, { message: "Địa chỉ là bắt buộc" }),

@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from "../redux/hook";
 import { getAccount } from "../redux/auth/authSlice";
 import { useEffect, Suspense, lazy } from "react";
 import Cookies from "js-cookie";
+import OrderPage from "../pages/order/OrderPage";
 const LoginEmployee = lazy(() => import("../pages/login/LoginEmployeePage")); // optimized import
 const LoginManager = lazy(() => import("../pages/login/LoginManagerPage"));
 const EmployeeMain = lazy(() => import("../pages/staff/home/EmployeeMainPage"));
@@ -27,6 +28,7 @@ const ProductPage = lazy(() => import("../pages/product/ProductPage"));
 const UpdateProduct = lazy(() => import("../pages/product/UpdateProduct"));
 const Logout = lazy(() => import("../pages/login/Logout"));
 const CreateProduct = lazy(() => import("../pages/product/CreateProduct"));
+const OrderTabs = lazy(() => import("../pages/order/OrderTabs"));
 const PageRouter = () => {
   const auth = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
@@ -112,9 +114,11 @@ const PageRouter = () => {
               <Route path="/products" element={<ProductPage />} />
               <Route path="/categories" element={<CategoryPage />} />
 
-  < Route path = "/update-employee/:id" element = {< UpdateEmployee />} />
-                
-    <Route path="/logout" element={<Logout />}  />
+              <Route path="/update-employee/:id" element={<UpdateEmployee />} />
+
+              <Route path="/logout" element={<Logout />} />
+              <Route path="/orders" element={<OrderTabs />} />
+              <Route path="/order" element={<OrderPage />} />
             </Route>
           </Route>
           {/* Not found page */}

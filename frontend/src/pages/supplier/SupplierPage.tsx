@@ -16,7 +16,8 @@ import {
   Snackbar,
   Alert,
   Modal,
-  Button
+  Button,
+  Tooltip
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import AddBoxIcon from "@mui/icons-material/AddBox";
@@ -40,7 +41,7 @@ export default function SupplierPage() {
     setSuppliers(response.data.responseList);
   };
 
-  const handleDeleteClick = (supplier) => {
+  const handleDeleteClick = (supplier : any) => {
     setSupplierToDelete(supplier);
     setConfirmOpen(true);
   };
@@ -94,16 +95,20 @@ export default function SupplierPage() {
               width: "90%",
             }}
           />
-          <IconButton
+          <Tooltip title="Thêm nhà cung cấp" arrow>
+            <IconButton
             onClick={() => {
               navigate("/create-supplier");
             }}
             aria-label="import"
-            size="small"
-            color="success"
+            size="30px"
+color = "success"
+            sx={{ width: "10%" }}
           >
             <AddBoxIcon />
-          </IconButton>
+            </IconButton>
+            </Tooltip>
+    
         </Stack>
 
         <TableContainer component={Paper} sx={{ width: "100%", margin: "auto", backgroundColor: 'white', height: "100%" }}>
