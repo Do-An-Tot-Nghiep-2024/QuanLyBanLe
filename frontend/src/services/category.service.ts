@@ -1,6 +1,4 @@
 import api from "../config/axios";
-import { ProductSchema } from "../types/productSchema";
-import ApiResponse from "../types/apiResponse";
 import { CategorySchema } from "../types/categorySchema";
 
 const getCategoriesService = async () => {

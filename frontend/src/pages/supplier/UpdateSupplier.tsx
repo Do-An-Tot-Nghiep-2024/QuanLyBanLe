@@ -19,8 +19,8 @@ export default function UpdateSupplier() {
   const { id } = useParams();
   const [supplier, setSupplier] = useState({ ...defaultSupplierSchema });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState("success");
+  const [alertMessage, setAlertMessage] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,15 +50,15 @@ export default function UpdateSupplier() {
       
       await updateSupplierService(id, supplier);
       
-      // Show success message
+
       setAlertMessage("Nhà cung cấp đã được cập nhật thành công!");
       setAlertSeverity("success");
       setSnackbarOpen(true);
       
-      // Wait before navigating
+
       setTimeout(() => {
         navigate("/suppliers");
-      }, 2000); // Navigate after 2 seconds
+      }, 2000); 
     } catch (err: any) {
       if (err?.issues) {
         setAlertMessage(err.issues[0].message);

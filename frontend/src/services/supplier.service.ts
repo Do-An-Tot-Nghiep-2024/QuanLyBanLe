@@ -23,7 +23,7 @@ const createSupplierService = async (supplier: SupplierSchema) => {
     const { message, data } = response.data;
     console.log(response.data);
       
-    if (message !== "success") {
+    if (!response.data) {
       return {
         status: false,
         message: message,

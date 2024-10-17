@@ -65,16 +65,15 @@ export default function EmployeePage() {
       return response.data as ResponsePagination<EmployeeSchema>;
     } catch (error) {
       console.error(error);
-      throw error; // Rethrow the error to be handled by useQuery
+      throw error; 
     }
   };
 
   const { isLoading, isError, error, data, isFetching } = useQuery({
     queryKey: ["employees", page, limit],
-    queryFn: () => getEmployees(page, limit), // No need for async/await here
+    queryFn: () => getEmployees(page, limit), 
   });
 
-  console.log(data);
   // how to detructuring data from useQuery
   const handleChangePage = (
     _event: React.MouseEvent<HTMLButtonElement> | null,
@@ -118,6 +117,9 @@ export default function EmployeePage() {
     setOpen(false);
   };
 
+
+  console.log(data);
+  
   return (
     <>
       {updateSuccess && (
@@ -293,7 +295,6 @@ export default function EmployeePage() {
                       }}
                       onPageChange={handleChangePage}
                       onRowsPerPageChange={handleChangeRowsPerPage}
-                      // ActionsComponent={TablePaginationActions}
                     />
                   </TableRow>
                 </TableFooter>

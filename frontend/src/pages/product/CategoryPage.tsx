@@ -34,7 +34,7 @@ import {
 import { CategorySchema } from "../../types/categorySchema";
   
   export default function CategoryPage() {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -43,8 +43,6 @@ import { CategorySchema } from "../../types/categorySchema";
     const [currentCategoryId, setCurrentCategoryId] = useState<number | null>(null);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    
-    // Pagination states
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
   
@@ -56,20 +54,19 @@ import { CategorySchema } from "../../types/categorySchema";
   
     const handleClose = () => {
       setOpen(false);
-      setCategory(""); // Reset category for new addition
-    };
-  
+      setCategory("");
+    }
     const handleEditOpen = (categoryId: number, categoryName: string) => {
       setCurrentCategoryId(categoryId);
       setCategory(categoryName);
       setEditOpen(true);
     };
   
-    const handleEditClose = () => {
-      setEditOpen(false);
-      setCategory(""); // Reset category after edit
-      setCurrentCategoryId(null); // Reset current category ID
-    };
+      const handleEditClose = () => {
+        setEditOpen(false);
+        setCategory("");
+        setCurrentCategoryId(null);
+      }
   
     const handleDeleteOpen = (categoryId: number) => {
       setCurrentCategoryId(categoryId);
@@ -78,7 +75,7 @@ import { CategorySchema } from "../../types/categorySchema";
   
     const handleDeleteClose = () => {
       setDeleteConfirmOpen(false);
-      setCurrentCategoryId(null); // Reset current category ID
+      setCurrentCategoryId(null); 
     };
   
     const showSnackbar = (message: string) => {
@@ -88,6 +85,10 @@ import { CategorySchema } from "../../types/categorySchema";
   
     async function handleCreateCategory() {
       try {
+        if (!category) {
+          showSnackbar("Vui lòng nhập tên danh mục");
+          return;
+        }
         await createCategoryService(category);
         showSnackbar("Tạo danh mục thành công");
         getCategories();
@@ -338,7 +339,7 @@ import { CategorySchema } from "../../types/categorySchema";
       </>
     );
   }
-  
+ 
   const styles = {
     searchField: {
       display: { xs: "none", md: "inline-block", sm: "flex" },
@@ -402,4 +403,3 @@ import { CategorySchema } from "../../types/categorySchema";
       border: "1px solid #d4d2d2",
     },
   };
-  

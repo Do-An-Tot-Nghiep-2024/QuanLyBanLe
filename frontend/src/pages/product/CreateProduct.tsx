@@ -12,7 +12,6 @@ import {
   Snackbar,
   Alert,
   Select,
-  MenuItem,
 } from "@mui/material";
 import { createProductService } from "../../services/product.service";
 import { ProductSchema, defaultProductSchema } from "../../types/productSchema";
@@ -28,6 +27,9 @@ export default function CreateProduct() {
   const [alertSeverity, setAlertSeverity] = useState("success");
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const [fieldErrors, setFieldErrors] = useState<{
+    [key: string]: string | null;
+  }>({});
   const navigate = useNavigate();
 
   const getCategories = async () => {
@@ -99,10 +101,6 @@ export default function CreateProduct() {
     navigate("/products");
   };
 
-  const selectedCategory = categories.find(
-    (cat) => cat.id === product.categoryId
-  );
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -159,7 +157,7 @@ export default function CreateProduct() {
             <FormLabel htmlFor="file" sx={styles.formLabel}>
               Tải Lên Hình Ảnh:
             </FormLabel>
-            <input type="file" accept="image/*" onChange={handleFileChange} />
+            <input required type="file" accept="image/*" onChange={handleFileChange} />
           </FormControl>
 
           <FormControl sx={{ width: "60%" }}>
@@ -173,7 +171,8 @@ export default function CreateProduct() {
               displayEmpty
               native
               onChange={handleChange}
-              name="supplierId"
+name = "supplierId"
+          
             >
               <option value="" disabled>
                 Chọn nhà cung cấp
@@ -197,7 +196,7 @@ export default function CreateProduct() {
               variant="outlined"
               displayEmpty
               native
-              onChange={handleChange}
+onChange = { handleChange }
             >
               <option value="" disabled>
                 Chọn danh mục sản phẩm
