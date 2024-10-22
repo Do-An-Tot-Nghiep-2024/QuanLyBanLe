@@ -33,6 +33,7 @@ import {
 } from "../../types/employeeSchema";
 import { useNavigate, useLocation } from "react-router-dom";
 import DialogDetail from "../../components/DialogDetail";
+import colors from "../../constants/color";
 const MessageAlert = lazy(() => import("../../components/MessageAlert"));
 
 export default function EmployeePage() {
@@ -153,7 +154,6 @@ export default function EmployeePage() {
               justifyContent={"space-between"}
               sx={{ width: "100%" }}
             >
-              {/* create textfield  with search icon*/}
               <TextField
                 id="search"
                 label="Tìm kiếm"
@@ -180,7 +180,6 @@ export default function EmployeePage() {
                 }}
               />
 
-              {/* create import and export button */}
               <Stack direction="row" spacing={2}>
                 <IconButton
                   type="button"
@@ -205,15 +204,16 @@ export default function EmployeePage() {
               </Stack>
             </Stack>
 
-            <TableContainer component={Paper} sx={{ width: "100%" }}>
+            <TableContainer component={Paper} sx={{ width: "100%", backgroundColor:'white' }}>
               <Table aria-label="custom pagination table">
-                <TableHead>
+                <TableHead sx={{backgroundColor:colors.secondaryColor}}>
                   <TableRow>
                     {columns.map((column: string) => (
                       <TableCell
                         colSpan={column === "Hành động" ? 3 : 1}
                         key={column}
                         align={"center"}
+                        sx={{fontSize:"16px", fontWeight:'bold'}}
                       >
                         {column}
                       </TableCell>

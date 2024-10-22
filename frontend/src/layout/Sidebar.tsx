@@ -37,7 +37,7 @@ const NAVIGATION: Navigation = [
     icon: <ShoppingCartIcon />,
   },
   {
-    segment: "inventory",
+    segment: "create-inventory",
     title: "Kho hàng",
     icon: <InventoryIcon />,
   },

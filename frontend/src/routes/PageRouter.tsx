@@ -9,7 +9,7 @@ import { getAccount } from "../redux/auth/authSlice";
 import { useEffect, Suspense, lazy } from "react";
 import Cookies from "js-cookie";
 import OrderPage from "../pages/order/OrderPage";
-const LoginEmployee = lazy(() => import("../pages/login/LoginEmployeePage")); // optimized import
+const LoginEmployee = lazy(() => import("../pages/login/LoginEmployeePage")); 
 const LoginManager = lazy(() => import("../pages/login/LoginManagerPage"));
 const EmployeeMain = lazy(() => import("../pages/staff/home/EmployeeMainPage"));
 const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
@@ -29,6 +29,9 @@ const UpdateProduct = lazy(() => import("../pages/product/UpdateProduct"));
 const Logout = lazy(() => import("../pages/login/Logout"));
 const CreateProduct = lazy(() => import("../pages/product/CreateProduct"));
 const OrderTabs = lazy(() => import("../pages/order/OrderTabs"));
+const CreateInventoryOrder = lazy(()=> import("../pages/inventory/CreateInvenoryOrder"))
+
+
 const PageRouter = () => {
   const auth = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
@@ -119,6 +122,8 @@ const PageRouter = () => {
               <Route path="/logout" element={<Logout />} />
               <Route path="/orders" element={<OrderTabs />} />
               <Route path="/order" element={<OrderPage />} />
+
+              <Route path="/create-inventory" element={<CreateInventoryOrder/>}/>
             </Route>
           </Route>
           {/* Not found page */}

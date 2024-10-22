@@ -24,21 +24,27 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import NoteAddOutlined from "@mui/icons-material/NoteAddOutlined";
 import { useNavigate } from "react-router-dom";
 import colors from "../../constants/color";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { deleteProductService, getAllProductsService } from "../../services/product.service";
 import ResponsePagination from "../../types/responsePagination";
 import { useQuery } from "@tanstack/react-query";
 import { GetProductSchema } from "../../types/getProductSchema";
-import * as XLSX from "xlsx";
+// import * as XLSX from "xlsx";
 
 export default function ProductPage() {
   const navigate = useNavigate();
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState(null);
+
+
+  const [productToDelete, setProductToDelete] = useState({
+    name: "",
+    id: 0,
+    price: 0,
+  });
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
   const fetchProducts = async () => {
@@ -46,7 +52,9 @@ export default function ProductPage() {
     if (!response) {
       throw new Error("Error fetching products");
     }
-    return response.data as ResponsePagination<GetProductSchema>;
+    console.log(response.data);
+
+    return response.data as unknown as ResponsePagination<GetProductSchema>;
   };
 
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -66,16 +74,15 @@ export default function ProductPage() {
       setAlertMessage("Xóa sản phẩm thất bại");
     } finally {
       setConfirmOpen(false);
-      setProductToDelete(null);
       setTimeout(() => setAlertMessage(""), 3000);
     }
   };
 
-  const handleChangePage = (_event, newPage) => {
+  const handleChangePage = (_event: any, newPage: SetStateAction<number>) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = (event: { target: { value: string; }; }) => {
     setLimit(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -84,43 +91,43 @@ export default function ProductPage() {
     fetchProducts();
   }, []);
 
-  const handleExcelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // Get data as an array of arrays
-        
-        // Skip the header row
-        jsonData.slice(1).forEach((row: any) => {
-          const productData = {
-            ...data?.responseList,
-            name: row[0], 
-            categoryId: Number(row[1]),
-            supplierId: Number(row[2]),
-          };
+  // const handleExcelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = (e) => {
+  //       const data = new Uint8Array(e.target?.result as ArrayBuffer);
+  //       const workbook = XLSX.read(data, { type: "array" });
+  //       const sheetName = workbook.SheetNames[0];
+  //       const sheet = workbook.Sheets[sheetName];
+  //       const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // Get data as an array of arrays
 
-          try {
-            ProductSchema.parse(productData);
-            createProductService(productData, imageFile); // Adjust if needed
-          } catch (err: any) {
-            setAlertMessage(err?.issues ? err.issues[0].message : "Lỗi khi tạo sản phẩm");
-            setAlertSeverity("error");
-            setSnackbarOpen(true);
-          }
-        });
-        
-        setAlertMessage("Sản phẩm đã được nhập thành công!");
-        setAlertSeverity("success");
-        setSnackbarOpen(true);
-      };
-      reader.readAsArrayBuffer(file);
-    }
-  };
+  //       // Skip the header row
+  //       jsonData.slice(1).forEach((row: any) => {
+  //         const productData = {
+  //           ...data?.responseList,
+  //           name: row[0],
+  //           categoryId: Number(row[1]),
+  //           supplierId: Number(row[2]),
+  //         };
+
+  //         try {
+  //           ProductSchema.parse(productData);
+  //           createProductService(productData, imageFile); // Adjust if needed
+  //         } catch (err: any) {
+  //           setAlertMessage(err?.issues ? err.issues[0].message : "Lỗi khi tạo sản phẩm");
+  //           setAlertSeverity("error");
+  //           setSnackbarOpen(true);
+  //         }
+  //       });
+
+  //       setAlertMessage("Sản phẩm đã được nhập thành công!");
+  //       setAlertSeverity("success");
+  //       setSnackbarOpen(true);
+  //     };
+  //     reader.readAsArrayBuffer(file);
+  //   }
+  // };
 
   const categories = Array.from(new Set(data?.responseList.map(product => product.category))).concat("All").sort();
 
@@ -146,19 +153,19 @@ export default function ProductPage() {
             <IconButton onClick={() => navigate("/create-product")} size="large" color="success">
               <AddBoxIcon />
             </IconButton>
-              </Tooltip>
-              <Tooltip title="Import sản phẩm" arrow>
-              <IconButton onClick={() => navigate("/create-product")} size="large" color="success">
-                <AddBoxIcon />
-              </IconButton>
-            </Tooltip>
+          </Tooltip>
+          <Tooltip title="Import sản phẩm" arrow>
+            <IconButton onClick={() => navigate("/create-product")} size="large" color="success">
+              <AddBoxIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Quản lí danh mục sản phẩm" arrow>
             <IconButton onClick={() => navigate("/categories")} size="large" color="success">
               <NoteAddOutlined />
             </IconButton>
           </Tooltip>
         </Stack>
-        <Tabs value={selectedCategory} onChange={(event, newValue) => setSelectedCategory(newValue)} sx={{mb: 2}}>
+        <Tabs value={selectedCategory} onChange={(_event, newValue) => setSelectedCategory(newValue)} sx={{ mb: 2 }}>
           {categories.map((category) => (
             <Tab key={category} label={category} value={category} />
           ))}
@@ -173,11 +180,20 @@ export default function ProductPage() {
             <Grid item xs={12} display="flex" justifyContent="center">
               <Typography variant="h6">Error: {error.message}</Typography>
             </Grid>
-          ) : filteredProducts?.length > 0 ? (
-            filteredProducts.map((product) => (
-              <Grid item xs={6} sm={3} md={2} key={product.id}>
-                <Card sx={{ width: 200, height: 300, display: 'flex', flexDirection: 'column' }}>
-                  <CardMedia
+          ) : filteredProducts?.length && filteredProducts?.length > 0 ? (
+            filteredProducts?.map((product) => (
+              <Grid item xs={6} sm={3} md={3} key={product.id}>
+                <Card
+                  sx={{
+                    width: 200,
+                    height: 300,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    backgroundColor: 'white',
+                    boxShadow: 3,
+                    borderRadius: 2,
+                  }}
+                >                  <CardMedia
                     component="img"
                     height="140"
                     image={product.image}
@@ -188,11 +204,11 @@ export default function ProductPage() {
                     <Typography>{product.name}</Typography>
                     <Typography variant="body2" color="text.secondary">
                       {product.category}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                  {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
-                </Typography>
-                
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
+                    </Typography>
+
                   </CardContent>
                   <Box display="flex" justifyContent="center" padding={1}>
                     <IconButton
