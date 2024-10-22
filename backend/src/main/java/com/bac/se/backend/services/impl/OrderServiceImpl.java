@@ -87,7 +87,7 @@ public class OrderServiceImpl implements OrderService {
             var shipmentItem = shipmentItemRepository.findById(key)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm lô của sản phẩm"));
             // Kiểm tra sản phẩm đã hết hạn
-            if (shipmentItem.getExpirationDate().before(new Date())) {
+            if (shipmentItem.getExp().before(new Date())) {
                 throw new BadRequestUserException("Sản phẩm đã hết hạn");
             }
             // Kiêm tra sản phẩm có đủ số lượng trong lô hàng hay không

@@ -28,7 +28,7 @@ public class ShipmentItem {
     private Product product;
     private int quantity;
     @JsonFormat(pattern = "dd/MM/yyyy")
-    private Date productionDate;
+    private Date mxp;
     @JsonFormat(pattern = "dd/MM/yyyy")
-    private Date expirationDate;
+    private Date exp;
 }

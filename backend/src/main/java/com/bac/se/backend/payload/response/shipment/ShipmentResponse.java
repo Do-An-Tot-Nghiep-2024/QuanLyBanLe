@@ -1,4 +1,4 @@
-package com.bac.se.backend.payload.response;
+package com.bac.se.backend.payload.response.shipment;
 
 import com.bac.se.backend.payload.request.ProductItem;
 

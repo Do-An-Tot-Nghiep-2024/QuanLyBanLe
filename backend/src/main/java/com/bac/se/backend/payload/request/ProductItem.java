@@ -6,6 +6,6 @@ import java.util.Date;
 
 public record ProductItem(Long id, int quantity,
                           double price,
-                         @JsonFormat(pattern = "dd/MM/yyyy") Date productionDate,
-                         @JsonFormat(pattern = "dd/MM/yyyy") Date expirationDate) {
+                         @JsonFormat(pattern = "dd/MM/yyyy") Date mxp,
+                         @JsonFormat(pattern = "dd/MM/yyyy") Date exp) {
 }

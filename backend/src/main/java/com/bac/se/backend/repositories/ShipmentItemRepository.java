@@ -15,4 +15,13 @@ public interface ShipmentItemRepository extends JpaRepository<ShipmentItem,Shipm
 
     @Query(value = "select p.shipment.id from ShipmentItem p where p.product.id = :productId")
     List<Object[]> getShipmentItemByProduct(Long productId);
+
+    @Query(value = "select p.name, si.quantity, si.mxp, si.exp, pp.original_price, pp.original_price * si.quantity as total " +
+            "from t_shipment_item si " +
+            "inner join t_product p on p.product_id = si.product_id " +
+            "inner join t_product_price pp on pp.product_id = si.product_id " +
+            "where shipment_id = 9 and pp.created_at = (SELECT MAX(pp2.created_at) " +
+            "                     FROM t_product_price pp2 " +
+            "                     WHERE pp2.product_id = pp.product_id);",nativeQuery = true)
+    List<Object[]> getProductsByShipmentId(Long shipmentId);
 }

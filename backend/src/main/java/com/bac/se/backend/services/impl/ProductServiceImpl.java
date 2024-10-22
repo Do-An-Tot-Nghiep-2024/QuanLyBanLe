@@ -45,9 +45,10 @@ public class ProductServiceImpl implements ProductService {
         String name = productUpdateRequest.name();
         Long categoryId = productUpdateRequest.categoryId();
         Long supplierId = productUpdateRequest.supplierId();
-        double price = productUpdateRequest.price();
-        double originalPrice = productUpdateRequest.originalPrice();
-        if (name.isEmpty() || categoryId == null || supplierId == null) {
+        Double price = productUpdateRequest.price();
+        Double originalPrice = productUpdateRequest.originalPrice();
+        if (name.isEmpty() || categoryId == null || supplierId == null ||
+                price == null || originalPrice == null ) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
         }
         if (price <= 0 || originalPrice <= 0) {
