@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
@@ -25,5 +27,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value = "select count(*) from t_product where is_active = 0",nativeQuery = true)
     long getTotalQuantityProduct();
+
+
+    @Query(value = "select p.id, p.name from Product p where p.supplier.id = ?1 and p.isActive = true")
+    List<Object[]> getProductsBySupplier(Long supplierId);
 
 }
