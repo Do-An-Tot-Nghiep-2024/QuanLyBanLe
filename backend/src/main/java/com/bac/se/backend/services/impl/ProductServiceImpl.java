@@ -6,11 +6,13 @@ import com.bac.se.backend.mapper.ProductMapper;
 import com.bac.se.backend.mapper.ProductPriceMapper;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.CreateProductRequest;
+import com.bac.se.backend.payload.request.ProductPriceRequest;
 import com.bac.se.backend.payload.request.ProductUpdateRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.product.CreateProductResponse;
 import com.bac.se.backend.payload.response.product.ProductPriceResponse;
 import com.bac.se.backend.payload.response.product.ProductResponse;
+import com.bac.se.backend.payload.response.product.ProductSupplierResponse;
 import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.services.ProductService;
 import com.bac.se.backend.utils.UploadImage;
@@ -45,17 +47,8 @@ public class ProductServiceImpl implements ProductService {
         String name = productUpdateRequest.name();
         Long categoryId = productUpdateRequest.categoryId();
         Long supplierId = productUpdateRequest.supplierId();
-        Double price = productUpdateRequest.price();
-        Double originalPrice = productUpdateRequest.originalPrice();
-        if (name.isEmpty() || categoryId == null || supplierId == null ||
-                price == null || originalPrice == null ) {
+        if (name.isEmpty() || categoryId == null || supplierId == null) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
-        }
-        if (price <= 0 || originalPrice <= 0) {
-            throw new BadRequestUserException("Giá phải lớn hơn 0");
-        }
-        if (originalPrice > price) {
-            throw new BadRequestUserException("Giá nhập lớn hơn giá gốc");
         }
     }
 
@@ -177,23 +170,41 @@ public class ProductServiceImpl implements ProductService {
         product.setCategory(category);
         product.setSupplier(supplier);
         product.setImage(imageURL);
-        // Compare original prices, add new price if necessary
-        if (productUpdateRequest.originalPrice() != productPriceResponse.originalPrice()) {
-            ProductPrice newProductPrice = ProductPrice.builder()
-                    .originalPrice(productUpdateRequest.originalPrice())
-                    .discountPrice(0)
-                    .price(productUpdateRequest.price())
-                    .createdAt(new Date())
-                    .build();
-            productPriceRepository.save(newProductPrice);  // Save the new product price
-            productRepository.save(product);  // Update the product after saving the new price
-            var productPriceConvert = productPriceMapper.mapToProductPriceResponse(newProductPrice);
-            // Return response with new price
-            return createProductResponse(product, productPriceConvert);
-        }
-
-        // Return response with existing price
         return createProductResponse(product, productPriceResponse);
+    }
+
+    @Override
+    public ProductPriceResponse updatePriceProduct(Long productId, ProductPriceRequest request) throws BadRequestUserException {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_PRODUCT));
+        if (request.price() == null || request.originalPrice() == null) {
+            throw new BadRequestUserException("Vui lòng nhập đẩy đủ thông tin ");
+        }
+        if (request.originalPrice() <= 0 || request.price() <= 0) {
+            throw new BadRequestUserException("Giá không được nhỏ hơn 0 ");
+        }
+        if (request.originalPrice() > request.price()) {
+            throw new BadRequestUserException("Giá nhập lớn hơn giá gốc");
+        }
+        // cập nhật giá mới trong db
+        ProductPrice productPrice = ProductPrice.builder()
+                .product(product)
+                .originalPrice(request.originalPrice())
+                .price(request.price())
+                .createdAt(new Date())
+                .build();
+        productPriceRepository.save(productPrice);
+        return new ProductPriceResponse(productPrice.getOriginalPrice(),productPrice.getPrice(),0);
+    }
+
+    @Override
+    public List<ProductSupplierResponse> getProductsBySupplier(Long supplierId) {
+        List<Object[]> productList = productRepository.getProductsBySupplier(supplierId);
+        return productList.stream()
+                .map(p -> new ProductSupplierResponse(
+                        Long.parseLong(p[0].toString()),
+                        p[1].toString()
+                )).toList();
     }
 
     // Helper method to create ProductResponse

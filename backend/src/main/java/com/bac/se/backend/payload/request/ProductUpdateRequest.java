@@ -2,7 +2,5 @@ package com.bac.se.backend.payload.request;
 
 public record ProductUpdateRequest(String name,
                                    Long categoryId,
-                                   Long supplierId,
-                                   Double originalPrice,
-                                   Double price) {
+                                   Long supplierId) {
 }
