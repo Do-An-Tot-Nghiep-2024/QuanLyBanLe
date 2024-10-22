@@ -89,7 +89,7 @@ const updateCategoryService = async (categoryId: number, categorySchema: Categor
  
 const deleteCategoryService = async (categoryId: any) => {
     try {
-        const response = await api.delete(`/categories/${categoryId}`);
+        await api.delete(`/categories/${categoryId}`);
     } catch (error) {
         console.error("Error deleting category: ", error);
         return {

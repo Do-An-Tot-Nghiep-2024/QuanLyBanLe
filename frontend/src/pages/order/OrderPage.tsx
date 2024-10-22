@@ -12,11 +12,10 @@ import {
   InputLabel,
   FormControl,
   Paper,
-  Grid
+  Grid,
 } from "@mui/material";
 import { getCategoriesService } from "../../services/category.service";
 import { getAllProductsService } from "../../services/product.service";
-
 
 interface Product {
   id: number;
@@ -30,15 +29,19 @@ interface OrderItem {
   quantity: number;
 }
 
+interface Category {
+  name: string;
+}
+
 const OrderPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
 
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [page] = useState(1);
+  const [limit] = useState(10);
 
   const handleAddToOrder = (product: Product) => {
     setOrderItems((prev) => {
@@ -70,7 +73,8 @@ const OrderPage: React.FC = () => {
         setOrderItems((prev) => prev.filter((_, i) => i !== index));
       }
     });
-  }
+  };
+
   const handleCreateBill = () => {
     console.log("Hóa đơn đã được tạo:", orderItems);
   };
@@ -96,7 +100,6 @@ const OrderPage: React.FC = () => {
       (selectedCategory ? product.category === selectedCategory : true)
   );
 
-  const totalPages = Math.ceil(filteredProducts.length / limit);
   const startIndex = (page - 1) * limit;
   const paginatedProducts = filteredProducts.slice(
     startIndex,
@@ -123,8 +126,8 @@ const OrderPage: React.FC = () => {
           <Select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value as string)}
-label = "Danh mục"
-              sx={{ textAlign: "left" }}
+            label="Danh mục"
+            sx={{ textAlign: "left" }}
           >
             <MenuItem value="">
               Tất cả danh mục

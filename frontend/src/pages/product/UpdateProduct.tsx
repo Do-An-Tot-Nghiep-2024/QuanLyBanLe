@@ -13,37 +13,51 @@ import {
   Alert,
   Select,
   MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 import {
   getProductByIdService,
   updateProductService,
 } from "../../services/product.service";
-import { ProductSchema } from "../../types/productSchema";
 import { getCategoriesService } from "../../services/category.service";
 import { getSuppliersService } from "../../services/supplier.service";
-import { any, set } from "zod";
 import { UpdateProductSchema } from "../../types/updateProductSchema";
 
+type Category = {
+  id: number;
+  name: string;
+};
+
+type Supplier = {
+  id: number;
+  name: string;
+};
+
 export default function UpdateProduct() {
-  const { id } = useParams();
-  const [product, setProduct] = useState({
+  const { id } = useParams<{ id: string }>();
+  const [product, setProduct] = useState<{
+    name: string;
+    categoryId: number;
+    supplierId: number;
+    price: number;
+    image:string;
+  }>({
     name: "",
-    categoryId: any,
-    supplierId: any,
+    categoryId: 0,
+    supplierId: 0,
     price: 0,
+    image:""
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState("success");
-  const [categories, setCategories] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("success");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const navigate = useNavigate();
-  const [category, setCategory] = useState("");
-  const [supplier, setSupplier] = useState("");
-  const [categoryId, setCategoryId] = useState(0);
-  const [supplierId, setSupplierId] = useState(0);
+  const [category, setCategory] = useState<string>("");
+  const [supplier, setSupplier] = useState<string>("");
 
   const getCategories = async () => {
     const response = await getCategoriesService();
@@ -55,34 +69,31 @@ export default function UpdateProduct() {
     setSuppliers(response.data.responseList);
   };
 
-  const handleChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+  const handleChange = (event: React.ChangeEvent<{ name?: string; value: unknown }> | SelectChangeEvent<string>) => {
     const { name, value } = event.target;
-
-
+  
     setProduct((prev) => ({
       ...prev,
-      [name]: name === "price" ? Number(value) : value,
+      [String(name)]: name === "price" ? Number(value) : value,
     }));
-
-    if (name === "categoryId") {
-      setCategory(value);
-      setProduct((prev) => ({
-        ...prev,
-        categoryId: Number(categories.find((cat) => cat.name === value)?.id),
-      }))
-    }
-
-    if (name === "supplierId") {
-      setSupplier(value);
-      setProduct((prev) => ({
-        ...prev,
-        supplierId: Number(suppliers.find((sup) => sup.name === value)?.id),
-      }))
-
-    }
-
   
- 
+    if (name === "categoryId") {
+      const categoryObj = categories.find((cat) => cat.name === value);
+      setCategory(value as string);
+      setProduct((prev) => ({
+        ...prev,
+        categoryId: categoryObj ? categoryObj.id : 0,
+      }));
+    }
+  
+    if (name === "supplierId") {
+      const supplierObj = suppliers.find((sup) => sup.name === value);
+      setSupplier(value as string);
+      setProduct((prev) => ({
+        ...prev,
+        supplierId: supplierObj ? supplierObj.id : 0,
+      }));
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,35 +106,29 @@ export default function UpdateProduct() {
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();    
+    event.preventDefault();
     try {
+      await getId();
+      const productId = Number.parseInt(id ?? "");
+      const data = UpdateProductSchema.parse({
+        name: product.name,
+        categoryId: product.categoryId,
+        supplierId: product.supplierId,
+        price: product.price,
+      });
 
-      getId().then(async () => { 
-        const productId = Number.parseInt(id ?? "");
-        console.log(product);
-        
-        const data = UpdateProductSchema.parse({
-          name: product.name,
-          categoryId: product.categoryId,
-          supplierId: product.supplierId,
-          price: product.price,
+      const response = await updateProductService(productId, data, imageFile || new File([], ""));
+      if (response.message === "success") {
+        navigate("/products", {
+          state: { updateSuccess: "Cập nhật thông tin sản phẩm thành công" },
         });
-  
-        const response = await updateProductService(productId, data, imageFile || new File([], ""));
-        if (response.message === "success") {
-          navigate("/products", {
-            state: { updateSuccess: "Cập nhật thông tin sản phẩm thành công" },
-          });
-        } else {
-          setAlertMessage(response.message);
-          setAlertSeverity("error");
-          setSnackbarOpen(true);
-        }
-      })
-      
-    } catch (error) {
-      console.log(error);
-      setAlertMessage(error.errors[0].message);
+      } else {
+        setAlertMessage(response.message);
+        setAlertSeverity("error");
+        setSnackbarOpen(true);
+      }
+    } catch (error: any) {
+      setAlertMessage(error?.errors ? error.errors[0].message : "An error occurred");
       setAlertSeverity("error");
       setSnackbarOpen(true);
     }
@@ -138,8 +143,12 @@ export default function UpdateProduct() {
       try {
         await getCategories();
         await getSuppliers();
-        const response = await getProductByIdService(id);
-        // setProduct(response.data);
+        const response = await getProductByIdService(Number(id));
+
+        const idCategoryTemp = categories.find((cate) => cate.name === response.data.category)?.id || 0;
+        const idSupplyTemp = suppliers.find((cate) => cate.name === response.data.supplier)?.id || 0;
+
+
         setImagePreview(response.data.image);
         setCategory(response.data.category);
         setSupplier(response.data.supplier);
@@ -147,6 +156,8 @@ export default function UpdateProduct() {
           ...prev,
           name: response.data.name,
           price: response.data.price,
+          categoryId: idCategoryTemp,
+          supplierId: idSupplyTemp,
         }));
       } catch (err) {
         setAlertMessage("Lỗi khi lấy dữ liệu sản phẩm");
@@ -158,38 +169,26 @@ export default function UpdateProduct() {
     fetchData();
   }, [id]);
 
-
-  const getId = async () => { 
+  const getId = async () => {
     const categoryObj = categories.find((cat) => cat.name === category);
     const supplierObj = suppliers.find((sup) => sup.name === supplier);
     
-    const categoryId = categoryObj ? Number(categoryObj.id) : null;
-    const supplierId = supplierObj ? Number(supplierObj.id) : null;
-  
+    const categoryId = categoryObj ? categoryObj.id : null;
+    const supplierId = supplierObj ? supplierObj.id : null;
+
     setProduct((prev) => ({
       ...prev,
-      categoryId: categoryId,
-      supplierId: supplierId,
+      categoryId: categoryId || 0,
+      supplierId: supplierId || 0,
     }));
-  }
-  
-  
-  
+  };
+
   return (
     <Container>
-      <Typography
-        variant="h4"
-        align="center"
-        padding={"5px"}
-        sx={{ mb: 3, fontWeight: "bold" }}
-      >
+      <Typography variant="h4" align="center" padding={"5px"} sx={{ mb: 3, fontWeight: "bold" }}>
         Cập Nhật Sản Phẩm
       </Typography>
-      <Container
-        component={"form"}
-        onSubmit={handleSubmit}
-        sx={styles.formContainer}
-      >
+      <Container component={"form"} onSubmit={handleSubmit} sx={styles.formContainer}>
         <Container sx={{ textAlign: "center", mb: 3 }}>
           <img
             src={imagePreview || product.image}
@@ -202,12 +201,7 @@ export default function UpdateProduct() {
             <FormLabel htmlFor="name" sx={styles.formLabel}>
               Tên Sản Phẩm:
             </FormLabel>
-            <TextField
-              name="name"
-              variant="outlined"
-              value={product.name}
-              onChange={handleChange}
-            />
+            <TextField name="name" variant="outlined" value={product.name} onChange={handleChange} />
           </FormControl>
           <FormControl sx={styles.formControl}>
             <FormLabel htmlFor="file" sx={styles.formLabel}>
@@ -255,20 +249,10 @@ export default function UpdateProduct() {
             <FormLabel htmlFor="price" sx={styles.formLabel}>
               Giá bán:
             </FormLabel>
-            <TextField
-              name="price"
-              variant="outlined"
-              value={product.price}
-              onChange={handleChange}
-            />
+            <TextField name="price" variant="outlined" value={product.price} onChange={handleChange} />
           </FormControl>
         </Stack>
-        <Stack
-          direction="row"
-          spacing={2}
-          mb={2}
-          sx={{ justifyContent: "center" }}
-        >
+        <Stack direction="row" spacing={2} mb={2} sx={{ justifyContent: "center" }}>
           <Button type="button" sx={styles.backButton} onClick={handleBack}>
             Quay Lại
           </Button>
@@ -277,7 +261,6 @@ export default function UpdateProduct() {
           </Button>
         </Stack>
       </Container>
-
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

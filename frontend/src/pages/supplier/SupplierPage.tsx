@@ -27,21 +27,28 @@ import colors from "../../constants/color";
 import { getSuppliersService, deleteSupplierService } from "../../services/supplier.service";
 import { useEffect, useState } from "react";
 
+interface Supplier {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+}
+
 export default function SupplierPage() {
   const navigate = useNavigate();
-  const [suppliers, setSuppliers] = useState([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState("success");
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [supplierToDelete, setSupplierToDelete] = useState(null);
+  const [supplierToDelete, setSupplierToDelete] = useState<Supplier | null>(null);
 
   const getSuppliers = async () => {
     const response = await getSuppliersService();
     setSuppliers(response.data.responseList);
   };
 
-  const handleDeleteClick = (supplier : any) => {
+  const handleDeleteClick = (supplier: any) => {
     setSupplierToDelete(supplier);
     setConfirmOpen(true);
   };
@@ -52,12 +59,10 @@ export default function SupplierPage() {
     try {
       await deleteSupplierService(supplierToDelete.id);
       setAlertMessage("Nhà cung cấp đã được xóa thành công!");
-      setAlertSeverity("success");
       setSnackbarOpen(true);
-      getSuppliers(); 
+      getSuppliers();
     } catch (error) {
       setAlertMessage("Có lỗi xảy ra khi xóa nhà cung cấp.");
-      setAlertSeverity("error");
       setSnackbarOpen(true);
     } finally {
       setConfirmOpen(false);
@@ -97,18 +102,18 @@ export default function SupplierPage() {
           />
           <Tooltip title="Thêm nhà cung cấp" arrow>
             <IconButton
-            onClick={() => {
-              navigate("/create-supplier");
-            }}
-            aria-label="import"
-            size="30px"
-color = "success"
-            sx={{ width: "10%" }}
-          >
-            <AddBoxIcon />
+              onClick={() => {
+                navigate("/create-supplier");
+              }}
+              aria-label="import"
+              size="small"
+              color="success"
+              sx={{ width: "10%" }}
+            >
+              <AddBoxIcon />
             </IconButton>
-            </Tooltip>
-    
+          </Tooltip>
+
         </Stack>
 
         <TableContainer component={Paper} sx={{ width: "100%", margin: "auto", backgroundColor: 'white', height: "100%" }}>
@@ -116,7 +121,7 @@ color = "success"
             <TableHead sx={{ backgroundColor: colors.secondaryColor }}>
               <TableRow>
                 {columns.map((column) => (
-                  <TableCell key={column} align={"center"} sx={{ padding: "16px", fontSize: "1.2rem" }}>
+                  <TableCell key={column} align={"center"} sx={{ padding: "16px", fontSize: "16px", fontWeight:'bold' }}>
                     {column}
                   </TableCell>
                 ))}
@@ -150,8 +155,8 @@ color = "success"
                   count={suppliers.length}
                   rowsPerPage={10}
                   page={0}
-                  onPageChange={() => {}}
-                  onRowsPerPageChange={() => {}}
+                  onPageChange={() => { }}
+                  onRowsPerPageChange={() => { }}
                 />
               </TableRow>
             </TableFooter>
@@ -168,77 +173,75 @@ color = "success"
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
-          severity={alertSeverity}
           sx={{ width: '100%' }}
         >
           {alertMessage}
         </Alert>
       </Snackbar>
 
-      {/* Modal for deletion confirmation */}
       <Modal
-        open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        aria-labelledby="delete-confirmation-modal"
-        aria-describedby="delete-confirmation-modal-description"
-        sx={styles.modal}
-      >
-        <div style={styles.modalContent}>
-          <h3 id="delete-confirmation-modal">Xác nhận xóa nhà cung cấp</h3>
-          <p>Bạn có chắc chắn muốn xóa nhà cung cấp <strong>{supplierToDelete?.name}</strong> không?</p>
-          <div style={styles.buttonContainer}>
+    open={confirmOpen}
+    onClose={() => setConfirmOpen(false)}
+    aria-labelledby="delete-confirmation-modal"
+    aria-describedby="delete-confirmation-modal-description"
+>
+    <div style={styles.modalContent}>
+        <h3 id="delete-confirmation-modal">Xác nhận xóa nhà cung cấp</h3>
+        <p>Bạn có chắc chắn muốn xóa nhà cung cấp <strong>{supplierToDelete?.name}</strong> không?</p>
+        <div style={styles.buttonContainer}>
             <Button
-              onClick={() => setConfirmOpen(false)}
-              style={styles.closeButton}
+                onClick={() => setConfirmOpen(false)}
+                style={styles.closeButton}
             >
-              Hủy
+                Hủy
             </Button>
             <Button onClick={handleDelete} style={styles.addButton}>
-              Xóa
+                Xóa
             </Button>
-          </div>
         </div>
-      </Modal>
+    </div>
+</Modal>
+
     </>
   );
 }
 
-const styles = {
+const styles: { [key: string]: React.CSSProperties} = {
   modal: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "auto",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      margin: "auto",
   },
   modalContent: {
-    backgroundColor: "white",
-    padding: "10px",
-    borderRadius: "8px",
-    height: "30vh",
-    width: "30vw",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    margin: "auto",
-    flexDirection: "column",
-    gap: "30px",
+      backgroundColor: "white",
+      padding: "10px",
+      borderRadius: "8px",
+      height: "30vh",
+      width: "30vw",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      margin: "auto",
+      flexDirection: "column" as React.CSSProperties['flexDirection'], // Type assertion here
+      gap: "30px",
   },
   buttonContainer: {
-    display: "flex",
-    flexDirection: "row",
-    gap: "40px",
-    width: "100%",
-    justifyContent: "center",
+      display: "flex",
+      flexDirection: "row" as React.CSSProperties['flexDirection'], // Type assertion here
+      gap: "40px",
+      width: "100%",
+      justifyContent: "center",
   },
   closeButton: {
-    backgroundColor: "#f0f0f0",
-    borderRadius: "8px",
-    width: "30%",
+      backgroundColor: "#f0f0f0",
+      borderRadius: "8px",
+      width: "30%",
   },
   addButton: {
-    backgroundColor: colors.primaryColor,
-    borderRadius: "8px",
-    width: "30%",
-    color: "white",
+      backgroundColor: colors.primaryColor,
+      borderRadius: "8px",
+      width: "30%",
+      color: "white",
   },
 };

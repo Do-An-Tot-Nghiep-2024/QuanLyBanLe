@@ -12,6 +12,7 @@ import {
   Snackbar,
   Alert,
   Select,
+  SelectChangeEvent,
 } from "@mui/material";
 import { createProductService } from "../../services/product.service";
 import { ProductSchema, defaultProductSchema } from "../../types/productSchema";
@@ -24,12 +25,8 @@ export default function CreateProduct() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState("success");
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
-  const [fieldErrors, setFieldErrors] = useState<{
-    [key: string]: string | null;
-  }>({});
   const navigate = useNavigate();
 
   const getCategories = async () => {
@@ -42,19 +39,34 @@ export default function CreateProduct() {
     setSuppliers(response.data.responseList);
   };
 
+  // const handleChange = (
+  //   event: React.ChangeEvent<{ name?: string; value: unknown }>
+  // ) => {
+  //   const { name, value } = event.target;
+
+  //   console.log(name, value);
+
+  //   setProduct((prev) => ({
+  //     ...prev,
+  //     [String(name)]:
+  //       name === "categoryId" || name === "supplierId" ? Number(value) : value,
+  //   }));
+  // };
+
   const handleChange = (
-    event: React.ChangeEvent<{ name?: string; value: unknown }>
+    event: SelectChangeEvent<unknown> | React.ChangeEvent<{ name?: string; value: unknown }>
   ) => {
     const { name, value } = event.target;
-
+  
     console.log(name, value);
-
+  
     setProduct((prev) => ({
       ...prev,
-      [name]:
+      [String(name)]:
         name === "categoryId" || name === "supplierId" ? Number(value) : value,
     }));
   };
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -81,18 +93,19 @@ export default function CreateProduct() {
       console.log(productData);
 
       ProductSchema.parse(productData);
-      await createProductService(productData, imageFile);
-      setAlertMessage("Sản phẩm đã được tạo thành công!");
-      setAlertSeverity("success");
-      setSnackbarOpen(true);
-      setTimeout(() => {
-        navigate("/products");
-      }, 2000);
+      if (imageFile) {
+        await createProductService(productData, imageFile);
+        setAlertMessage("Sản phẩm đã được tạo thành công!");
+        setSnackbarOpen(true);
+        setTimeout(() => {
+          navigate("/products");
+        }, 2000);
+      }
+
     } catch (err: any) {
       setAlertMessage(
         err?.issues ? err.issues[0].message : "Lỗi khi tạo sản phẩm"
       );
-      setAlertSeverity("error");
       setSnackbarOpen(true);
     }
   };
@@ -171,8 +184,8 @@ export default function CreateProduct() {
               displayEmpty
               native
               onChange={handleChange}
-name = "supplierId"
-          
+              name="supplierId"
+
             >
               <option value="" disabled>
                 Chọn nhà cung cấp
@@ -196,7 +209,7 @@ name = "supplierId"
               variant="outlined"
               displayEmpty
               native
-onChange = { handleChange }
+              onChange={handleChange}
             >
               <option value="" disabled>
                 Chọn danh mục sản phẩm
@@ -233,7 +246,6 @@ onChange = { handleChange }
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
-          severity={alertSeverity}
           sx={{ width: "100%" }}
         >
           {alertMessage}

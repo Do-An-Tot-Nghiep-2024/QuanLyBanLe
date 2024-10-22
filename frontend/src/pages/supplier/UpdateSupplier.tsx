@@ -19,7 +19,6 @@ export default function UpdateSupplier() {
   const { id } = useParams();
   const [supplier, setSupplier] = useState({ ...defaultSupplierSchema });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [alertSeverity, setAlertSeverity] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
   const navigate = useNavigate();
 
@@ -30,7 +29,6 @@ export default function UpdateSupplier() {
         setSupplier(response.data);
       } catch (err) {
         setAlertMessage("Error fetching supplier data");
-        setAlertSeverity("error");
         setSnackbarOpen(true);
       }
     };
@@ -48,11 +46,10 @@ export default function UpdateSupplier() {
     try {
       SupplierSchema.parse(supplier);
       
-      await updateSupplierService(id, supplier);
+      await updateSupplierService(Number(id), supplier);
       
 
       setAlertMessage("Nhà cung cấp đã được cập nhật thành công!");
-      setAlertSeverity("success");
       setSnackbarOpen(true);
       
 
@@ -65,7 +62,6 @@ export default function UpdateSupplier() {
       } else {
         setAlertMessage("Lỗi khi cập nhật nhà cung cấp");
       }
-      setAlertSeverity("error");
       setSnackbarOpen(true);
     }
   };
@@ -174,7 +170,6 @@ export default function UpdateSupplier() {
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
-          severity={alertSeverity}
           sx={{ width: '100%' }}
         >
           {alertMessage}

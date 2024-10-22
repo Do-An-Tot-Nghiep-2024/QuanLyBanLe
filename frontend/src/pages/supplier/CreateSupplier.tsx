@@ -1,4 +1,4 @@
-import { lazy, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import colors from "../../constants/color";
 import {
@@ -18,7 +18,6 @@ import {
   SupplierSchema,
   defaultSupplierSchema,
 } from "../../types/supplierSchema";
-const MessageAlert = lazy(() => import("../../components/MessageAlert"));
 
 export default function CreateSupplier() {
   const [supplier, setSupplier] = useState(defaultSupplierSchema);
@@ -29,7 +28,6 @@ export default function CreateSupplier() {
     [key: string]: string | null;
   }>({});
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [alertSeverity, setAlertSeverity] = useState("success");
   const navigate = useNavigate();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +49,6 @@ export default function CreateSupplier() {
       if (response.status) {
         setAlertMessage("Nhà cung cấp đã được thêm thành công!");
         setError(null);
-        setAlertSeverity("success");
         setSnackbarOpen(true);
 
         setTimeout(() => {
@@ -67,7 +64,6 @@ export default function CreateSupplier() {
         setFieldErrors(newFieldErrors);
         setError(null); 
       } else {
-        setAlertSeverity("error");
         setAlertMessage("Lỗi khi thêm nhà cung cấp");
       }
       setSuccess(null);
@@ -184,7 +180,6 @@ export default function CreateSupplier() {
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
-          severity={alertSeverity}
           sx={{ width: "100%" }}
         >
           {alertMessage}
