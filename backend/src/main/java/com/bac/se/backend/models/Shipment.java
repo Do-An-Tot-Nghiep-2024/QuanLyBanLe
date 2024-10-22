@@ -24,4 +24,8 @@ public class Shipment {
 
     @OneToMany(mappedBy = "shipment")
     private List<ShipmentItem> shipmentItems;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
 }
