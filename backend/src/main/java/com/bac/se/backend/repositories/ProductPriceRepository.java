@@ -4,7 +4,6 @@ import com.bac.se.backend.models.ProductPrice;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -14,6 +13,10 @@ public interface ProductPriceRepository extends JpaRepository<ProductPrice, Long
             "FROM ProductPrice p " +
             "WHERE p.product.id = :productId " +
             "ORDER BY p.createdAt DESC ")
-    List<Object[]> getProductPriceLatest(@Param("productId") Long productId, Pageable pageable);
+    List<Object[]> getProductPriceLatest(Long productId, Pageable pageable);
+
+
+    @Query("select p.originalPrice,p.price,p.createdAt from ProductPrice p where p.product.id = :productId")
+    List<Object[]> getProductPricesByProduct(Long productId);
 
 }

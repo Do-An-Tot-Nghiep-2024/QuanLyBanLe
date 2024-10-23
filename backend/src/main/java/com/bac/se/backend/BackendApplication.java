@@ -1,6 +1,6 @@
 package com.bac.se.backend;
 
-import com.bac.se.backend.repositories.ProductRepository;
+import com.bac.se.backend.repositories.OrderItemRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -21,16 +21,16 @@ public class BackendApplication {
 
 
     @Autowired
-    ProductRepository productRepository;
+    OrderItemRepository orderItemRepository;
 
     @Bean
     CommandLineRunner commandLineRunner(){
         return args -> {
-           List<Object[]> productList = productRepository.getProductsBySupplier(1L);
-           productList.forEach(x -> {
-               log.info(x[0].toString());
-               log.info(x[1].toString());
-           });
+            List<Object[]> objects = orderItemRepository.salesStatisticsByProduct();
+            objects.forEach(obj -> {
+                log.info(obj[0].toString());
+                log.info(obj[1].toString());
+            });
         };
     }
 
