@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { lazy, useState } from "react";
+import React, { lazy, useState } from "react";
 import {
   Box,
   IconButton,
@@ -24,7 +24,6 @@ import {
 import ResponsePagination from "../../types/responsePagination";
 import { SearchIcon } from "../../assets/svg/Icon";
 import AddBoxIcon from "@mui/icons-material/AddBox";
-import GetAppIcon from "@mui/icons-material/GetApp";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import {
@@ -33,6 +32,7 @@ import {
 } from "../../types/employeeSchema";
 import { useNavigate, useLocation } from "react-router-dom";
 import DialogDetail from "../../components/DialogDetail";
+import DownloadBtn from "../../components/DownloadBtn";
 import colors from "../../constants/color";
 const MessageAlert = lazy(() => import("../../components/MessageAlert"));
 
@@ -50,7 +50,7 @@ export default function EmployeePage() {
     "Số điện thoại",
     "Email",
     "Ngày sinh",
-    "Hành động",
+    "Tác động",
   ];
 
   const getEmployees = async (
@@ -84,10 +84,10 @@ export default function EmployeePage() {
   };
 
   const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setLimit(parseInt(event.target.value, 10));
-    setPage(1);
+    setPage(0);
   };
   const handleOpenAlert = () => {
     setOpenAlert(false);
@@ -118,6 +118,7 @@ export default function EmployeePage() {
     setOpen(false);
   };
 
+  console.log("Total pages: ", data?.totalPages ?? 0);
 
   console.log(data);
   
@@ -181,14 +182,7 @@ export default function EmployeePage() {
               />
 
               <Stack direction="row" spacing={2}>
-                <IconButton
-                  type="button"
-                  aria-label="export"
-                  size="small"
-                  color="default"
-                >
-                  <GetAppIcon />
-                </IconButton>
+                <DownloadBtn fileName="danh-sach-nhan-vien" />
 
                 <IconButton
                   onClick={() => {
@@ -275,24 +269,11 @@ export default function EmployeePage() {
                 <TableFooter>
                   <TableRow>
                     <TablePagination
-                      rowsPerPageOptions={[
-                        5,
-                        10,
-                        25,
-                        { label: "All", value: -1 },
-                      ]}
+                      rowsPerPageOptions={[5, 10, 25]}
                       colSpan={3}
-                      count={data !== undefined ? data.totalPages : 0}
+                      count={data !== undefined ? data.totalElements : 0}
                       rowsPerPage={limit}
                       page={page}
-                      slotProps={{
-                        select: {
-                          inputProps: {
-                            "aria-label": "rows per page",
-                          },
-                          native: true,
-                        },
-                      }}
                       onPageChange={handleChangePage}
                       onRowsPerPageChange={handleChangeRowsPerPage}
                     />

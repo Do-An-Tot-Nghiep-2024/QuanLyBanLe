@@ -24,20 +24,33 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import NoteAddOutlined from "@mui/icons-material/NoteAddOutlined";
 import { useNavigate } from "react-router-dom";
 import colors from "../../constants/color";
+import { useEffect, useState } from "react";
+import { createCategoryService } from "../../services/category.service";
+import {
+  getProductsService,
+  deleteProductService,
+} from "../../services/product.service";
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+=======
 import { SetStateAction, useEffect, useState } from "react";
 import { deleteProductService, getAllProductsService } from "../../services/product.service";
 import ResponsePagination from "../../types/responsePagination";
 import { useQuery } from "@tanstack/react-query";
 import { GetProductSchema } from "../../types/getProductSchema";
 // import * as XLSX from "xlsx";
-
 export default function ProductPage() {
   const navigate = useNavigate();
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const response = await getProductsService();
+      setProducts(response.data.responseList as any);
+    };
+    fetchProducts();
+  }, []);
   const [productToDelete, setProductToDelete] = useState<GetProductSchema>();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [page, setPage] = useState(1);
@@ -61,7 +74,10 @@ export default function ProductPage() {
   const handleDeleteProduct = async () => {
     if (!productToDelete) return;
     try {
-      await deleteProductService(Number(productToDelete.id));
+      await deleteProductService(productToDelete.id);
+      setProducts(
+        products.filter((product) => product.id !== productToDelete.id)
+      );
       setAlertMessage("Xóa sản phẩm thành công");
       setAlertOpen(true);
       refetch();
@@ -143,6 +159,81 @@ export default function ProductPage() {
             label="Tìm kiếm sản phẩm"
             variant="filled"
             size="small"
+            sx={{
+              display: { xs: "none", md: "inline-block", sm: "flex" },
+              mr: 1,
+              width: "100%",
+              mt: 2,
+            }}
+          />
+          <Tooltip title="Thêm sản phẩm" arrow>
+            <IconButton
+              onClick={() => navigate("/create-product")}
+              size="large"
+              color="success"
+            >
+              <AddBoxIcon sx={{ width: "100%" }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Quản lí danh mục sản phẩm" arrow>
+            <IconButton
+              onClick={() => navigate("/categories")}
+              size="large"
+              color="success"
+            >
+              <NoteAddOutlined sx={{ width: "100%" }} />
+            </IconButton>
+          </Tooltip>
+          <Modal
+            open={open}
+            onClose={() => setOpen(false)}
+            aria-labelledby="add-category-modal"
+            aria-describedby="add-category-modal-description"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "auto",
+            }}
+          >
+            <Box
+              sx={{
+                backgroundColor: "white",
+                padding: "10px",
+                borderRadius: "8px",
+                height: "30vh",
+                width: "30vw",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "30px",
+              }}
+            >
+              <h3 id="add-category-modal">Thêm danh mục sản phẩm</h3>
+              <TextField
+                fullWidth
+                label="Tên danh mục"
+                variant="outlined"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              />
+              <Stack
+                direction="row"
+                gap="40px"
+                justifyContent="center"
+                width="100%"
+              >
+                <Button onClick={() => setOpen(false)} sx={styles.closeButton}>
+                  Đóng
+                </Button>
+                <Button onClick={handleCreateCategory} sx={styles.addButton}>
+                  Thêm
+                </Button>
+              </Stack>
+            </Box>
+          </Modal>
+=======
             sx={{ width: "100%", mt: 2, display: { xs: "none", md: "inline-block", sm: "flex" } }}
           />
           <Tooltip title="Thêm sản phẩm" arrow>
@@ -167,6 +258,39 @@ export default function ProductPage() {
           ))}
         </Tabs>
 
+        <TableContainer component={Paper} sx={styles.tableContainer}>
+          <Table aria-label="custom pagination table">
+            <TableHead sx={{ backgroundColor: colors.secondaryColor }}>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column}
+                    align="center"
+                    sx={styles.tableHeaderCell}
+                  >
+                    {column}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {products.map((product: any) => (
+                <TableRow hover key={product.id}>
+                  <TableCell align="center" sx={styles.tableCell}>
+                    <Box
+                      component="img"
+                      sx={styles.productImage}
+                      alt={product.name}
+                      src={product.image}
+                    />
+                  </TableCell>
+                  <TableCell align="left" sx={styles.tableCell}>
+                    {product?.name}
+                  </TableCell>
+                  <TableCell align="left" sx={styles.tableCell}>
+                    {product?.category}
+                  </TableCell>
+                  <TableCell align="center" sx={styles.tableCell}>
         <Grid container spacing={1}>
           {isLoading ? (
             <Grid item xs={12} display="flex" justifyContent="center">
@@ -222,6 +346,31 @@ export default function ProductPage() {
                     >
                       <EditIcon />
                     </IconButton>
+                    <IconButton
+                      color="success"
+                      onClick={() => navigate(`/reports/product-price/${product.id}`)}
+                    >
+                      <TrendingUpIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={3}
+                  count={products.length}
+                  rowsPerPage={10}
+                  page={0}
+                  onPageChange={() => {}}
+                  onRowsPerPageChange={() => {}}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </TableContainer>
                   </Box>
                 </Card>
 
@@ -249,6 +398,21 @@ export default function ProductPage() {
       {/* Confirmation Modal for Deleting Product */}
       <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <Box sx={styles.modalContent}>
+          <h3 id="delete-confirmation-modal">Xác nhận xóa sản phẩm</h3>
+          <p>
+            Bạn có chắc chắn muốn xóa sản phẩm{" "}
+            <strong>{productToDelete?.name}</strong> không?
+          </p>
+          <Stack
+            direction="row"
+            gap="40px"
+            justifyContent="center"
+            width="100%"
+          >
+            <Button
+              onClick={() => setConfirmOpen(false)}
+              sx={styles.closeButton}
+            />
           <Typography variant="h6">Xác nhận xóa sản phẩm</Typography>
           <Typography>
             Bạn có chắc chắn muốn xóa sản phẩm <strong>{productToDelete?.name}</strong> không?
@@ -263,7 +427,6 @@ export default function ProductPage() {
           </Stack>
         </Box>
       </Modal>
-
       {/* Snackbar for Alerts */}
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
@@ -271,6 +434,11 @@ export default function ProductPage() {
         autoHideDuration={3000}
         onClose={() => setAlertOpen(false)}
       >
+        <Alert
+          onClose={() => setAlertOpen(false)}
+          severity="info"
+          sx={{ width: "100%" }}
+        >
         <Alert onClose={() => setAlertOpen(false)} severity="info" sx={{ width: "100%" }}>
           {alertMessage}
         </Alert>

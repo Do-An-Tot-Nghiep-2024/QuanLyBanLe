@@ -21,10 +21,11 @@ import type { Router, Navigation, Session } from "@toolpad/core";
 import AddAlertIcon from "@mui/icons-material/AddAlert";
 
 import Cookies from "js-cookie";
-import {logout } from "../redux/auth/authSlice";
+import { logout } from "../redux/auth/authSlice";
 import { useAppDispatch } from "../redux/hook";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import colors from "../constants/color";
+import { Breadcrumbs, Typography } from "@mui/material";
 const NAVIGATION: Navigation = [
   {
     segment: "dashboard",
@@ -40,6 +41,13 @@ const NAVIGATION: Navigation = [
     segment: "create-inventory",
     title: "Kho hàng",
     icon: <InventoryIcon />,
+    children:[
+      {
+        segment: "stock",
+        title: "Số lượng sản phẩm",
+        icon: <StoreIcon />,
+      }
+    ]
   },
   {
     segment: "products",
@@ -72,12 +80,12 @@ const NAVIGATION: Navigation = [
     icon: <BarChartIcon />,
     children: [
       {
-        segment: "following products",
+        segment: "product",
         title: "Theo sản phẩm",
         icon: <ShoppingBagIcon />,
       },
       {
-        segment: "traffic",
+        segment: "employee",
         title: "Theo nhân viên",
         icon: <RecentActorsIcon />,
       },
@@ -190,15 +198,26 @@ export default function Sidebar() {
       }}
     >
       <DashboardLayout>
+        <Breadcrumbs separator="-" sx={{ pl: 2, pt: 3 }}>
+          <Typography key="3" sx={{ color: "text.primary" }}>
+            Quản lý
+          </Typography>
+          <Link
+            style={{ textDecoration: "none" }}
+            key="1"
+            to={pathname}
+          >
+            {pathname.replace("/", "").toLocaleUpperCase()}
+          </Link>
+        </Breadcrumbs>
         <Box
           component={"main"}
           sx={{
-            py: 4,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             textAlign: "center",
-            mx: 4,
+            padding: 4,
           }}
         >
           <Outlet />

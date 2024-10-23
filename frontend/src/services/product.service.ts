@@ -1,8 +1,26 @@
 import api from "../config/axios";
 import { GetProductSchema } from "../types/getProductSchema";
 import { ProductSchema } from "../types/productSchema";
+import ApiResponse from "../types/apiResponse";
 import { UpdateProductSchema } from "../types/updateProductSchema";
 
+const createProductService = async (
+  productRequest: ProductSchema,
+  imageFile: File
+) => {
+  try {
+    const calculatedPrice = productRequest.originalPrice * 1.1;
+    const formData = new FormData();
+    const productWithCalculatedPrice = {
+      ...productRequest,
+      price: parseFloat(calculatedPrice.toFixed(2)),
+    };
+
+    formData.append(
+      "productRequest",
+      JSON.stringify(productWithCalculatedPrice)
+    );
+    formData.append("file", imageFile);
 
 const createProductService = async (productRequest: ProductSchema, imageFile: File) => {
   try {
@@ -19,6 +37,10 @@ const createProductService = async (productRequest: ProductSchema, imageFile: Fi
         "Content-Type": "multipart/form-data",
       },
     });
+
+    console.log(response);
+    const { message, data } = response;
+
     console.log(response);
     const { message, data } = response;
     if (message !== "success") {
@@ -27,6 +49,7 @@ const createProductService = async (productRequest: ProductSchema, imageFile: Fi
         data: {},
       };
     }
+
     return {
       message: message,
       data: data,
@@ -39,6 +62,40 @@ const createProductService = async (productRequest: ProductSchema, imageFile: Fi
   }
 };
 
+const updateProductService = async (
+  productRequest: ProductSchema,
+  imageFile: File
+) => {
+  console.log(productRequest);
+
+  try {
+    const calculatedPrice = productRequest.originalPrice * 1.1;
+    const formData = new FormData();
+    const productWithCalculatedPrice = {
+      ...productRequest,
+      price: parseFloat(calculatedPrice.toFixed(2)),
+    };
+
+    formData.append(
+      "productRequest",
+      JSON.stringify(productWithCalculatedPrice)
+    );
+    formData.append("file", imageFile);
+
+    const response: ApiResponse = await api.put(
+      `/products/${productRequest.id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    console.log(response);
+    const { message, data } = response;
+
+=======
 const updateProductService = async (id: number, productRequest: UpdateProductSchema, imageFile: File) => {
   try {
     console.log(productRequest);
@@ -64,6 +121,7 @@ const updateProductService = async (id: number, productRequest: UpdateProductSch
         data: {},
       };
     }
+
     return {
       message: message,
       data: data,
@@ -74,6 +132,11 @@ const updateProductService = async (id: number, productRequest: UpdateProductSch
       data: {},
     };
   }
+};
+
+const getProductsService = async () => {
+  try {
+    const response: ApiResponse = await api.get("/products");
 }
 
 const getProductsService = async (page: number, limit: number) => {
@@ -98,6 +161,32 @@ const getProductsService = async (page: number, limit: number) => {
       data: [],
     };
   }
+};
+
+const getProductByIdService = async (id: number) => {
+  try {
+    const response: ApiResponse = await api.get(`/products/${id}`);
+    const { message, data } = response;
+
+    if (message !== "success") {
+      return {
+        message: message,
+        data: {},
+      };
+    }
+
+    return {
+      message: message,
+      data: data,
+    };
+  } catch (error: any) {
+    return {
+      message: error.response?.data?.message || "An error occurred",
+      data: {},
+    };
+  }
+};
+
 }
 
 // const getAllProductsService = async () => {
@@ -231,6 +320,15 @@ const deleteProductService = async (id: number) => {
       data: {},
     };
   }
+};
+
+export {
+  createProductService,
+  getProductByIdService,
+  getProductsService,
+  updateProductService,
+  deleteProductService,
+};
 }
 
 export { getAllProductsService, createProductService, getProductByIdService, getProductsService, updateProductService, deleteProductService };
