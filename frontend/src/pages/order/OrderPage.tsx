@@ -16,16 +16,12 @@ import {
 } from "@mui/material";
 import { getCategoriesService } from "../../services/category.service";
 import { getAllProductsService } from "../../services/product.service";
+import { GetProductSchema } from "../../types/getProductSchema";
 
-interface Product {
-  id: number;
-  name: string;
-  category: string;
-  price: number;
-}
+
 
 interface OrderItem {
-  product: Product;
+  product: GetProductSchema;
   quantity: number;
 }
 
@@ -38,12 +34,12 @@ const OrderPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<GetProductSchema[]>([]);
 
   const [page] = useState(1);
   const [limit] = useState(10);
 
-  const handleAddToOrder = (product: Product) => {
+  const handleAddToOrder = (product: GetProductSchema) => {
     setOrderItems((prev) => {
       const existingItem = prev.find((item) => item.product.id === product.id);
       if (existingItem) {
@@ -86,7 +82,10 @@ const OrderPage: React.FC = () => {
 
   const fetchProducts = async () => {
     const response = await getAllProductsService();
-    setProducts(response.data.responseList);
+    if(response.data){
+      setProducts(response!.data);
+
+    }
   };
 
   useEffect(() => {
@@ -148,7 +147,7 @@ const OrderPage: React.FC = () => {
           }}
         >
           {paginatedProducts.map((product) => (
-            <ListItem key={product.id} divider>
+            <ListItem key={Number(product.id)} divider>
               <ListItemText
                 primary={`${product.name} - ${product.price.toFixed(2)}`}
               />
@@ -198,7 +197,7 @@ const OrderPage: React.FC = () => {
             {orderItems.map((item) => (
               <Grid
                 container
-                key={item.product.id}
+                key={item.product.id as number}
                 justifyContent="space-between"
                 alignItems="center"
                 mb={1}
@@ -212,7 +211,7 @@ const OrderPage: React.FC = () => {
                     value={item.quantity}
                     onChange={(e) =>
                       handleUpdateQuantity(
-                        item.product.id,
+                        item.product.id as number,
                         parseInt(e.target.value)
                       )
                     }
@@ -222,7 +221,7 @@ const OrderPage: React.FC = () => {
                 </Grid>
                 <Grid item xs={4} sx={{ textAlign: "right" }}>
                   <Typography>
-                    {(item.product.price * item.quantity).toFixed(2)}
+                    {(item.product.price as number * item.quantity).toFixed(2)}
                   </Typography>
                 </Grid>
               </Grid>
@@ -234,7 +233,7 @@ const OrderPage: React.FC = () => {
               <Typography variant="h6" fontWeight="bold">
                 {orderItems
                   .reduce(
-                    (sum, item) => sum + item.product.price * item.quantity,
+                    (sum, item) => sum + Number(item.product.price) * item.quantity,
                     0
                   )
                   .toFixed(2)}
