@@ -36,11 +36,11 @@ type Supplier = {
 export default function UpdateProduct() {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<{
-    name: string;
+    name: String;
     categoryId: number;
     supplierId: number;
-    price: number;
-    image:string;
+    price: Number;
+    image:String;
   }>({
     name: "",
     categoryId: 0,
@@ -49,15 +49,15 @@ export default function UpdateProduct() {
     image:""
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<String | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("success");
   const [categories, setCategories] = useState<Category[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const navigate = useNavigate();
-  const [category, setCategory] = useState<string>("");
-  const [supplier, setSupplier] = useState<string>("");
+  const [category, setCategory] = useState<String>("");
+  const [supplier, setSupplier] = useState<String>("");
 
   const getCategories = async () => {
     const response = await getCategoriesService();
@@ -69,7 +69,7 @@ export default function UpdateProduct() {
     setSuppliers(response.data.responseList);
   };
 
-  const handleChange = (event: React.ChangeEvent<{ name?: string; value: unknown }> | SelectChangeEvent<string>) => {
+  const handleChange = (event: React.ChangeEvent<{ name?: String; value: unknown }> | SelectChangeEvent<String>) => {
     const { name, value } = event.target;
   
     setProduct((prev) => ({
@@ -145,20 +145,26 @@ export default function UpdateProduct() {
         await getSuppliers();
         const response = await getProductByIdService(Number(id));
 
-        const idCategoryTemp = categories.find((cate) => cate.name === response.data.category)?.id || 0;
-        const idSupplyTemp = suppliers.find((cate) => cate.name === response.data.supplier)?.id || 0;
+        const idCategoryTemp = categories.find((cate) => cate.name === response.data?.category)?.id || 0;
+        const idSupplyTemp = suppliers.find((cate) => cate.name === response.data?.supplier)?.id || 0;
 
+          if(response.data){
+            setImagePreview(response.data.image);
+            setCategory(response.data.category);
+            setSupplier(response.data.supplier);
+            setProduct((prev) => ({
+              ...prev,
+              name: response.data!.name,
+              price: response.data!.price,
+              categoryId: idCategoryTemp,
+              supplierId: idSupplyTemp,
+            }));
 
-        setImagePreview(response.data.image);
-        setCategory(response.data.category);
-        setSupplier(response.data.supplier);
-        setProduct((prev) => ({
-          ...prev,
-          name: response.data.name,
-          price: response.data.price,
-          categoryId: idCategoryTemp,
-          supplierId: idSupplyTemp,
-        }));
+          }
+       
+        
+
+       
       } catch (err) {
         setAlertMessage("Lỗi khi lấy dữ liệu sản phẩm");
         setAlertSeverity("error");
@@ -191,8 +197,8 @@ export default function UpdateProduct() {
       <Container component={"form"} onSubmit={handleSubmit} sx={styles.formContainer}>
         <Container sx={{ textAlign: "center", mb: 3 }}>
           <img
-            src={imagePreview || product.image}
-            alt={product.name}
+            src={imagePreview?.toString() || product.image.toString()}
+            alt={product.name.toString()}
             style={{ width: "200px", height: "auto", borderRadius: "8px" }}
           />
         </Container>

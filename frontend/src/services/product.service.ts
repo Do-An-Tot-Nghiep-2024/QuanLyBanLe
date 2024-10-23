@@ -100,30 +100,53 @@ const getProductsService = async (page: number, limit: number) => {
   }
 }
 
-const getAllProductsService = async () => {
-  try {
-    const response: GetAllProductsResponse = await api.get(`/products`);
-    const { message, data } = response;
+// const getAllProductsService = async () => {
+//   try {
+//     const response: GetAllProductsResponse = await api.get(`/products`);
+//     const { message, data } = response;
   
 
-    if (message !== "success") {
-      return {
-        message: message,
-        data: [] as GetProductSchema[],
-      };
-    }
+//     if (message !== "success") {
+//       return {
+//         message: message,
+//         data: [] as GetProductSchema[],
+//       };
+//     }
+
+//     return {
+//       message: message,
+//       data: data,
+//     };
+//   } catch (error: any) {
+//     return {
+//       message: error.response?.data?.message || "An error occurred",
+//       data: [] as GetProductSchema[],
+//     };
+//   }
+// }
+
+
+const getAllProductsService = async (): Promise<{ message: string; data: GetProductSchema[] | null }> => {
+  try {
+    const response: ApiResponse = await api.get(`/products`);
+    const { message, data } = response;
+
+    console.log(data);
 
     return {
-      message: message,
-      data: data,
+      message,
+      data: message === "success" ? (data as unknown as GetProductSchema[]) : null,
     };
-  } catch (error: any) {
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    
     return {
-      message: error.response?.data?.message || "An error occurred",
-      data: [] as GetProductSchema[],
+      message: String(error),
+      data: null,
     };
   }
-}
+};
+
 
 // const getProductByIdService = async (id: any) => { 
 //     try {
@@ -167,31 +190,29 @@ interface ApiResponse {
   data: GetProductSchema; // Ensure this reflects the actual expected structure
 }
 
-interface GetAllProductsResponse {
-  message: string;
-  data: GetProductSchema[];
-}
 
-const getProductByIdService = async (id: number): Promise<{ message: string; data: GetProductSchema }> => {
+const getProductByIdService = async (id: number): Promise<{ message: string; data: GetProductSchema | null }> => {
   try {
     const response: ApiResponse = await api.get(`/products/${id}`);
     const { message, data } = response;
 
     console.log(data);
 
-    if (message == "success") {
-      return {
-        message: message,
-        data: data as GetProductSchema,
-      };
-    };
-  } catch (error: any) {
     return {
-      message: error.response?.data?.message || "An error occurred",
-      data: data as ProductSchema,
+      message,
+      data: message === "success" ? (data as GetProductSchema) : null,
+    };
+  } catch (error) {
+    // const errorMessage = error?.response?.message || "An error occurred";
+    console.error("Error fetching product:", error);
+    
+    return {
+      message: String(error),
+      data: null,
     };
   }
-}
+};
+
 
 
 

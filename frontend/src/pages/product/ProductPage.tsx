@@ -38,11 +38,7 @@ export default function ProductPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
 
-  const [productToDelete, setProductToDelete] = useState({
-    name: "",
-    id: 0,
-    price: 0,
-  });
+  const [productToDelete, setProductToDelete] = useState<GetProductSchema>();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -65,7 +61,7 @@ export default function ProductPage() {
   const handleDeleteProduct = async () => {
     if (!productToDelete) return;
     try {
-      await deleteProductService(productToDelete.id);
+      await deleteProductService(Number(productToDelete.id));
       setAlertMessage("Xóa sản phẩm thành công");
       setAlertOpen(true);
       refetch();
@@ -167,7 +163,7 @@ export default function ProductPage() {
         </Stack>
         <Tabs value={selectedCategory} onChange={(_event, newValue) => setSelectedCategory(newValue)} sx={{ mb: 2 }}>
           {categories.map((category) => (
-            <Tab key={category} label={category} value={category} />
+            <Tab key={String(category)} label={category} value={category} />
           ))}
         </Tabs>
 
@@ -182,7 +178,7 @@ export default function ProductPage() {
             </Grid>
           ) : filteredProducts?.length && filteredProducts?.length > 0 ? (
             filteredProducts?.map((product) => (
-              <Grid item xs={6} sm={3} md={3} key={product.id}>
+              <Grid item xs={6} sm={3} md={3} key={Number(product.id)}>
                 <Card
                   sx={{
                     width: 200,
@@ -193,11 +189,12 @@ export default function ProductPage() {
                     boxShadow: 3,
                     borderRadius: 2,
                   }}
-                >                  <CardMedia
+                >
+                  <CardMedia
                     component="img"
                     height="140"
-                    image={product.image}
-                    alt={product.name}
+                    image={product.image as string} 
+                    alt={product.name as string} 
                     sx={{ objectFit: 'cover', padding: 1 }}
                   />
                   <CardContent sx={{ flexGrow: 1 }}>
@@ -206,9 +203,8 @@ export default function ProductPage() {
                       {product.category}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
+                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(product.price))}
                     </Typography>
-
                   </CardContent>
                   <Box display="flex" justifyContent="center" padding={1}>
                     <IconButton
@@ -228,6 +224,7 @@ export default function ProductPage() {
                     </IconButton>
                   </Box>
                 </Card>
+
               </Grid>
             ))
           ) : (

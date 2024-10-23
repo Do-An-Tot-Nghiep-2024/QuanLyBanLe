@@ -22,16 +22,10 @@ import {
 import { getCategoriesService } from "../../services/category.service";
 import { getAllProductsService } from "../../services/product.service";
 import { createInventoryOrderService } from "../../services/inventory.service";
-
-interface Product {
-    id: number;
-    price: number;
-    name: string;
-    category: string;
-}
+import { GetProductSchema } from "../../types/getProductSchema";
 
 interface OrderItem {
-    product: Product;
+    product: GetProductSchema;
     quantity: number;
     productionDate?: string;
     expirationDate?: string;
@@ -41,14 +35,14 @@ interface Category {
     name: string;
 }
 
-interface GetProductSchema {
-    id: number;
-    name: string;
-    image: string;
-    category: string;
-    supplier: string;
-    price: number;
-  }
+// interface GetProductSchema {
+//     id: Number;
+//     name: String;
+//     image: string;
+//     category: string;
+//     supplier: string;
+//     price: number;
+//   }
 const CreateInventoryOrder: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
@@ -56,7 +50,7 @@ const CreateInventoryOrder: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [products, setProducts] = useState<GetProductSchema[]>([]);
 
-    const handleAddToOrder = (product: Product) => {
+    const handleAddToOrder = (product: GetProductSchema) => {
         setOrderItems((prev) => {
             const existingItem = prev.find((item) => item.product.id === product.id);
             return existingItem
@@ -148,8 +142,15 @@ const CreateInventoryOrder: React.FC = () => {
         const response = await getAllProductsService();
         console.log(response);
         
-        setProducts(response.data.responseList);
+        if (response.data) {
+            setProducts(response.data); 
+        } else {
+          
+            console.error("No products found");
+            setProducts([]); 
+        }
     };
+    
     const formatDateToDDMMYYYY = (dateString: string) => {
         const date = new Date(dateString);
         const day = String(date.getDate()).padStart(2, '0');
@@ -208,7 +209,7 @@ const CreateInventoryOrder: React.FC = () => {
                     }}
                 >
                     {filteredProducts.map((product) => (
-                        <ListItem key={product.id} divider>
+                        <ListItem key={Number(product.id)} divider>
                             <ListItemText
                                 primary={`${product.name} - ${product.price.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}₫`}
                             />
@@ -240,7 +241,7 @@ const CreateInventoryOrder: React.FC = () => {
                             </TableHead>
                             <TableBody sx={{gap: 1, justifyContent:'left'}}>
                                 {orderItems.map((item) => (
-                                    <TableRow key={item.product.id}>
+                                    <TableRow key={Number(item.product.id)}>
                                         <TableCell sx={{ textAlign: "left" }}>{item.product.name}</TableCell>
                                         <TableCell sx={{ textAlign: "left", width:'20%' }}>
                                             <TextField
@@ -248,7 +249,7 @@ const CreateInventoryOrder: React.FC = () => {
                                                 value={item.quantity}
                                                 onChange={(e) =>
                                                     handleUpdateQuantity(
-                                                        item.product.id,
+                                                        Number(item.product.id),
                                                         parseInt(e.target.value)
                                                     )
                                                 }
@@ -260,7 +261,7 @@ const CreateInventoryOrder: React.FC = () => {
                                             <TextField
                                                 type="date"
                                                 value={item.productionDate || ""}
-                                                onChange={(e) => handleUpdateProductionDate(item.product.id, e.target.value)}
+                                                onChange={(e) => handleUpdateProductionDate(Number(item.product.id), e.target.value)}
                                                 sx={{width:'90%'}}
                                             />
                                         </TableCell>
@@ -268,7 +269,7 @@ const CreateInventoryOrder: React.FC = () => {
                                             <TextField
                                                 type="date"
                                                 value={item.expirationDate || ""}
-                                                onChange={(e) => handleUpdateExpirationDate(item.product.id, e.target.value)}
+                                                onChange={(e) => handleUpdateExpirationDate(Number(item.product.id), e.target.value)}
                                                 sx={{width:'90%'}}
                                             />
                                         </TableCell>
@@ -279,7 +280,7 @@ const CreateInventoryOrder: React.FC = () => {
                                                 onChange={(e) => {
                                                     const newPrice = parseFloat(e.target.value);
                                                     if (!isNaN(newPrice) && newPrice >= 0) {
-                                                        handleUpdatePrice(item.product.id, newPrice);
+                                                        handleUpdatePrice(Number(item.product.id), newPrice);
                                                     }
                                                 }}
                                                 placeholder="VNĐ"
@@ -296,7 +297,7 @@ const CreateInventoryOrder: React.FC = () => {
                         <Typography variant="h6" fontWeight="bold">Tổng cộng</Typography>
                         <Typography variant="h6" fontWeight="bold">
                             {orderItems.reduce(
-                                (sum, item) => sum + item.product.price * item.quantity,
+                                (sum, item) => sum + Number(item.product.price) * item.quantity,
                                 0
                             ).toFixed(2)}₫
                         </Typography>
