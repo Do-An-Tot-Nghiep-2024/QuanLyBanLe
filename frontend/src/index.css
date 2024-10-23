@@ -1,5 +1,9 @@
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+.custom-tooltip {
+  border: 3px dotted red;
+  padding: 0px 10px;
 }

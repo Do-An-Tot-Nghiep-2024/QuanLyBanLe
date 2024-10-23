@@ -30,7 +30,7 @@ const getEmployeesService = async (page: number, limit: number) => {
   }
 };
 
-const getEmployeeByIdService  = async (id: number)  => {
+const getEmployeeByIdService = async (id: number) => {
   try {
     const response: ApiResponse = await api.get(`/employees/${id}`);
     if (response.message !== "success") {
@@ -45,9 +45,8 @@ const getEmployeeByIdService  = async (id: number)  => {
       message: error.response.data.message,
       data: {},
     } as ApiResponse;
-  } 
-}
-
+  }
+};
 
 const createEmployeeService = async (employee: EmployeeSchema) => {
   try {
@@ -114,12 +113,32 @@ const updateEmployeeService = async (id: number, employee: EmployeeSchema) => {
   }
 };
 
-
+const exportEmployeeService = async () => {
+  try {
+    const response: ApiResponse = await api.get("/employees/export");
+    if (response.message !== "success") {
+      return {
+        message: response.message,
+        data: {},
+      };
+    }
+    return {
+      message: response.message,
+      data: response.data,
+    };
+  } catch (error: any) {
+    return {
+      message: error.response.data.message,
+      data: {},
+    };
+  }
+};
 
 export {
   createEmployeeService,
   getEmployeesService,
   deleteEmployeeService,
   updateEmployeeService,
-  getEmployeeByIdService
+  getEmployeeByIdService,
+  exportEmployeeService
 };

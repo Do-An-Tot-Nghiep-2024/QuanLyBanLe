@@ -26,6 +26,22 @@ const Sidebar = lazy(() => import("../layout/Sidebar"));
 const CategoryPage = lazy(() => import("../pages/product/CategoryPage"));
 const ProductPage = lazy(() => import("../pages/product/ProductPage"));
 const UpdateProduct = lazy(() => import("../pages/product/UpdateProduct"));
+
+// statistic
+const StatisticsProduct = lazy(
+  () => import("../pages/report/SalesStatisticsProduct")
+);
+const StatisticsEmployee = lazy(
+  () => import("../pages/report/SalesStatisticsEmployee")
+);
+
+const StatisticsProductPrice = lazy(
+  () => import("../pages/report/StatisticsProductPrice")
+);
+
+// inventory
+const StockPage = lazy(() => import("../pages/inventory/StockPage"));
+
 const PageRouter = () => {
   const auth = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
@@ -38,7 +54,7 @@ const PageRouter = () => {
   }, [token, dispatch]);
 
   const isLoggedIn = auth.isLogin;
-  const userRole = auth.role || "MANAGER";
+  const userRole = auth.role;
 
   return (
     <Router>
@@ -98,9 +114,7 @@ const PageRouter = () => {
             <Route element={<Sidebar />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/employees" element={<EmployeePage />} />
-              <Route path="/create-employee" element={<CreateEmployee />}>
-                {" "}
-              </Route>
+              <Route path="/create-employee" element={<CreateEmployee />} />
               <Route path="/suppliers" element={<SupplierPage />} />
               <Route path="/create-supplier" element={<CreateSupplier />} />
               <Route path="/update-product/:id" element={<UpdateProduct />} />
@@ -109,9 +123,22 @@ const PageRouter = () => {
               <Route path="/create-product" element={<CreateProduct />} />
 
               <Route path="/products" element={<ProductPage />} />
+
               <Route path="/categories" element={<CategoryPage />} />
 
               <Route path="/update-employee/:id" element={<UpdateEmployee />} />
+              {/* Static pages */}
+              <Route path="/reports/product" element={<StatisticsProduct />} />
+              <Route
+                path="/reports/employee"
+                element={<StatisticsEmployee />}
+              />
+              <Route
+                path="/reports/product-price/:productId"
+                element={<StatisticsProductPrice />}
+              />
+              {/* inventory */}
+              <Route path="/inventory/stock" element={<StockPage />} />
             </Route>
           </Route>
           {/* Not found page */}

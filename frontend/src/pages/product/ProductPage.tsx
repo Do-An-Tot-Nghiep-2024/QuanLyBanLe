@@ -27,8 +27,11 @@ import { useNavigate } from "react-router-dom";
 import colors from "../../constants/color";
 import { useEffect, useState } from "react";
 import { createCategoryService } from "../../services/category.service";
-import { getProductsService, deleteProductService } from "../../services/product.service";
-
+import {
+  getProductsService,
+  deleteProductService,
+} from "../../services/product.service";
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 export default function ProductPage() {
   const navigate = useNavigate();
   const [alertOpen, setAlertOpen] = useState(false);
@@ -44,7 +47,7 @@ export default function ProductPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       const response = await getProductsService();
-      setProducts(response.data.responseList);
+      setProducts(response.data.responseList as any);
     };
     fetchProducts();
   }, []);
@@ -69,7 +72,9 @@ export default function ProductPage() {
 
     try {
       await deleteProductService(productToDelete.id);
-      setProducts(products.filter(product => product.id !== productToDelete.id));
+      setProducts(
+        products.filter((product) => product.id !== productToDelete.id)
+      );
       setAlertMessage("Xóa sản phẩm thành công");
       setAlertOpen(true);
     } catch (error) {
@@ -99,15 +104,28 @@ export default function ProductPage() {
             label="Tìm kiếm sản phẩm"
             variant="filled"
             size="small"
-            sx={{ display: { xs: "none", md: "inline-block", sm: "flex" }, mr: 1, width: "100%", mt: 2 }}
+            sx={{
+              display: { xs: "none", md: "inline-block", sm: "flex" },
+              mr: 1,
+              width: "100%",
+              mt: 2,
+            }}
           />
           <Tooltip title="Thêm sản phẩm" arrow>
-            <IconButton onClick={() => navigate("/create-product")} size="large" color="success">
+            <IconButton
+              onClick={() => navigate("/create-product")}
+              size="large"
+              color="success"
+            >
               <AddBoxIcon sx={{ width: "100%" }} />
             </IconButton>
           </Tooltip>
           <Tooltip title="Quản lí danh mục sản phẩm" arrow>
-            <IconButton onClick={() => navigate("/categories")} size="large" color="success">
+            <IconButton
+              onClick={() => navigate("/categories")}
+              size="large"
+              color="success"
+            >
               <NoteAddOutlined sx={{ width: "100%" }} />
             </IconButton>
           </Tooltip>
@@ -116,7 +134,12 @@ export default function ProductPage() {
             onClose={() => setOpen(false)}
             aria-labelledby="add-category-modal"
             aria-describedby="add-category-modal-description"
-            sx={{ display: "flex", alignItems: "center", justifyContent: "center", margin: "auto" }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "auto",
+            }}
           >
             <Box
               sx={{
@@ -140,7 +163,12 @@ export default function ProductPage() {
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               />
-              <Stack direction="row" gap="40px" justifyContent="center" width="100%">
+              <Stack
+                direction="row"
+                gap="40px"
+                justifyContent="center"
+                width="100%"
+              >
                 <Button onClick={() => setOpen(false)} sx={styles.closeButton}>
                   Đóng
                 </Button>
@@ -157,33 +185,54 @@ export default function ProductPage() {
             <TableHead sx={{ backgroundColor: colors.secondaryColor }}>
               <TableRow>
                 {columns.map((column) => (
-                  <TableCell key={column} align="center" sx={styles.tableHeaderCell}>
+                  <TableCell
+                    key={column}
+                    align="center"
+                    sx={styles.tableHeaderCell}
+                  >
                     {column}
                   </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {products.map((product) => (
+              {products.map((product: any) => (
                 <TableRow hover key={product.id}>
                   <TableCell align="center" sx={styles.tableCell}>
-                    <Box component="img" sx={styles.productImage} alt={product.name} src={product.image} />
+                    <Box
+                      component="img"
+                      sx={styles.productImage}
+                      alt={product.name}
+                      src={product.image}
+                    />
                   </TableCell>
                   <TableCell align="left" sx={styles.tableCell}>
-                    {product.name}
+                    {product?.name}
                   </TableCell>
                   <TableCell align="left" sx={styles.tableCell}>
-                    {product.category}
+                    {product?.category}
                   </TableCell>
                   <TableCell align="center" sx={styles.tableCell}>
-                    <IconButton color="error" onClick={() => {
-                      setProductToDelete(product);
-                      setConfirmOpen(true);
-                    }}>
+                    <IconButton
+                      color="error"
+                      onClick={() => {
+                        setProductToDelete(product);
+                        setConfirmOpen(true);
+                      }}
+                    >
                       <DeleteForeverIcon />
                     </IconButton>
-                    <IconButton color="warning" onClick={() => navigate(`/update-product/${product.id}`)}>
+                    <IconButton
+                      color="warning"
+                      onClick={() => navigate(`/update-product/${product.id}`)}
+                    >
                       <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      color="success"
+                      onClick={() => navigate(`/reports/product-price/${product.id}`)}
+                    >
+                      <TrendingUpIcon />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -216,9 +265,20 @@ export default function ProductPage() {
       >
         <Box sx={styles.modalContent}>
           <h3 id="delete-confirmation-modal">Xác nhận xóa sản phẩm</h3>
-          <p>Bạn có chắc chắn muốn xóa sản phẩm <strong>{productToDelete?.name}</strong> không?</p>
-          <Stack direction="row" gap="40px" justifyContent="center" width="100%">
-            <Button onClick={() => setConfirmOpen(false)} sx={styles.closeButton}>
+          <p>
+            Bạn có chắc chắn muốn xóa sản phẩm{" "}
+            <strong>{productToDelete?.name}</strong> không?
+          </p>
+          <Stack
+            direction="row"
+            gap="40px"
+            justifyContent="center"
+            width="100%"
+          >
+            <Button
+              onClick={() => setConfirmOpen(false)}
+              sx={styles.closeButton}
+            >
               Hủy
             </Button>
             <Button onClick={handleDeleteProduct} sx={styles.addButton}>
@@ -228,14 +288,23 @@ export default function ProductPage() {
         </Box>
       </Modal>
 
-      <Snackbar anchorOrigin={{ vertical: "top", horizontal: "right" }} open={alertOpen} autoHideDuration={3000} onClose={() => setAlertOpen(false)}>
-        <Alert onClose={() => setAlertOpen(false)} severity="info" sx={{ width: '100%' }}>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={alertOpen}
+        autoHideDuration={3000}
+        onClose={() => setAlertOpen(false)}
+      >
+        <Alert
+          onClose={() => setAlertOpen(false)}
+          severity="info"
+          sx={{ width: "100%" }}
+        >
           {alertMessage}
         </Alert>
-          </Snackbar>
+      </Snackbar>
     </>
   );
-};
+}
 
 const styles = {
   tableContainer: {

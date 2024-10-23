@@ -2,7 +2,6 @@ import { LoginSchema } from "../types/loginSchema";
 import api from "../config/axios";
 import ApiResponse from "../types/apiResponse";
 import LoginResponse from "../types/loginResponse";
-import Cookies from "js-cookie";
 
 const loginService = async (login: LoginSchema) => {
   
