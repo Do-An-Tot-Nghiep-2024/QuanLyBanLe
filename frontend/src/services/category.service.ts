@@ -1,6 +1,5 @@
 import api from "../config/axios";
-import { ProductSchema } from "../types/productSchema";
-import ApiResponse from "../types/apiResponse";
+import { CategorySchema } from "../types/categorySchema";
 
 const getCategoriesService = async () => {
   try {
@@ -59,10 +58,12 @@ const createCategoryService = async (category:any ) => {
     }
 };
 
-const updateCategoryService = async (categoryId: number, name: any) => {
+const updateCategoryService = async (categoryId: number, categorySchema: CategorySchema) => {
     try {
-        const response = await api.put(`/categories/${categoryId}`, { name: name });
-        const { message, data } = response.data;
+      const response = await api.put(`/categories/${categoryId}`, categorySchema);
+      const { message, data } = response.data;
+      console.log(response);
+      
         if (message !== "success") {
         return {
             status: false,
@@ -88,7 +89,7 @@ const updateCategoryService = async (categoryId: number, name: any) => {
  
 const deleteCategoryService = async (categoryId: any) => {
     try {
-        const response = await api.delete(`/categories/${categoryId}`);
+        await api.delete(`/categories/${categoryId}`);
     } catch (error) {
         console.error("Error deleting category: ", error);
         return {

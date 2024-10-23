@@ -18,6 +18,8 @@ api.interceptors.request.use(
   function (config) {
     // Do something before request is sent
     const token = Cookies.get("accessToken");
+    console.log(token);
+    
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -38,6 +40,8 @@ api.interceptors.response.use(
   },
   function (error) {
     const originalRequest = error.config;
+    console.log(error.response);
+    
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       if (error.response.status === 403 && !originalRequest._retry) {
