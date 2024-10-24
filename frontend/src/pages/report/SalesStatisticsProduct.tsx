@@ -6,12 +6,12 @@ import {
   Legend,
   CartesianGrid,
   Label,
-  Bar
+  Bar,
+  Line,
 } from "recharts";
 import { getSalesStatisticsByProductService } from "../../services/statistic.service";
 import { useQuery } from "@tanstack/react-query";
-
-
+import formatMoney from "../../utils/formatMoney";
 
 export default function SalesStatisticsProduct() {
   const getSalesStatisticsByProduct = async () => {
@@ -37,16 +37,21 @@ export default function SalesStatisticsProduct() {
   if (isError) {
     return <div>Error: {error.message}</div>;
   }
-  console.log(data);
+
+  const renderColorfulLegendText = ( entry: any) => {
+    const { color } = entry;
+
+    return <span style={{ color }}>Doanh thu</span>;
+  };
   return (
     <div>
       <ComposedChart
         width={750}
         height={300}
         data={data}
-        margin={{ top: 25, right: 30, left: 25, bottom: 65 }}
+        margin={{ top: 25, right: 30, left: 40, bottom: 65 }}
       >
-        <CartesianGrid stroke="#f2f2f5" strokeDasharray="3 3" />
+        <CartesianGrid stroke="#3C3D37" strokeDasharray="3 3" />
         <XAxis dataKey="name">
           <Label
             value="Biểu đồ doanh thu theo sản phẩm"
@@ -57,10 +62,11 @@ export default function SalesStatisticsProduct() {
             fontWeight={"bold"}
           />
         </XAxis>
-        <YAxis>
+        <YAxis dataKey="total"
+        tickFormatter={(amount: number) => formatMoney(amount)}>
           <Label
-            dy={-50}
-            dx={-10}
+            dy={-60}
+            dx={-25}
             value="Doanh thu (VNĐ)"
             position="left"
             angle={-90}
@@ -76,9 +82,9 @@ export default function SalesStatisticsProduct() {
             })
           }
         />
-        <Legend />
-
+        <Legend formatter={renderColorfulLegendText} />
         <Bar dataKey="total" fill="#8884d8" barSize={30} />
+        <Line type="monotone" dataKey="total" stroke="#ff7300" />
       </ComposedChart>
     </div>
   );

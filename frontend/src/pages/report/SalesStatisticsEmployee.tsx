@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { getSalesStatisticsByEmployeeService } from "../../services/statistic.service";
 import { useQuery } from "@tanstack/react-query";
+import formatMoney from "../../utils/formatMoney";
 
 export default function SalesStatisticsEmployee() {
   const getSalesStatisticsByProduct = async () => {
@@ -36,13 +37,18 @@ export default function SalesStatisticsEmployee() {
     return <div>Error: {error.message}</div>;
   }
   console.log(data);
+  const renderColorfulLegendText = (entry: any) => {
+    const { color } = entry;
+
+    return <span style={{ color }}>Doanh thu</span>;
+  };
   return (
     <div>
       <ComposedChart
         width={750}
         height={300}
         data={data}
-        margin={{ top: 25, right: 30, left: 25, bottom: 65 }}
+        margin={{ top: 25, right: 30, left: 35, bottom: 65 }}
       >
         <CartesianGrid stroke="#f2f2f5" strokeDasharray="3 3" />
         <XAxis dataKey="name">
@@ -55,10 +61,10 @@ export default function SalesStatisticsEmployee() {
             fontWeight={"bold"}
           />
         </XAxis>
-        <YAxis>
+        <YAxis tickFormatter={(amount: number) => formatMoney(amount)}>
           <Label
-            dy={-50}
-            dx={-10}
+            dy={-60}
+            dx={-22}
             value="Doanh thu (VNĐ)"
             position="left"
             angle={-90}
@@ -74,7 +80,7 @@ export default function SalesStatisticsEmployee() {
             })
           }
         />
-        <Legend />
+        <Legend formatter={renderColorfulLegendText}/>
 
         <Bar dataKey="total" fill="#8884d8" barSize={30} />
       </ComposedChart>

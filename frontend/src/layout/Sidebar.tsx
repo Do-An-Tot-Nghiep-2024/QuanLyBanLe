@@ -20,6 +20,8 @@ import { AppProvider, DashboardLayout } from "@toolpad/core";
 import type { Router, Navigation, Session } from "@toolpad/core";
 import AddAlertIcon from "@mui/icons-material/AddAlert";
 
+import WarehouseIcon from '@mui/icons-material/Warehouse';
+import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import Cookies from "js-cookie";
 import { logout } from "../redux/auth/authSlice";
 import { useAppDispatch } from "../redux/hook";
@@ -38,14 +40,19 @@ const NAVIGATION: Navigation = [
     icon: <ShoppingCartIcon />,
   },
   {
-    segment: "create-inventory",
+    segment: "inventory",
     title: "Kho hàng",
     icon: <InventoryIcon />,
     children:[
       {
         segment: "stock",
         title: "Số lượng sản phẩm",
-        icon: <StoreIcon />,
+        icon: <WarehouseIcon />,
+      },
+      {
+        segment: "create-inventory",
+        title: "Tạo hóa đơn nhập hàng",
+        icon: <AddBusinessIcon />,
       }
     ]
   },
