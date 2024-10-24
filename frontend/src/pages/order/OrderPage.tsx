@@ -18,8 +18,6 @@ import { getCategoriesService } from "../../services/category.service";
 import { getAllProductsService } from "../../services/product.service";
 import { GetProductSchema } from "../../types/getProductSchema";
 
-
-
 interface OrderItem {
   product: GetProductSchema;
   quantity: number;
@@ -82,9 +80,8 @@ const OrderPage: React.FC = () => {
 
   const fetchProducts = async () => {
     const response = await getAllProductsService();
-    if(response.data){
+    if (response.data) {
       setProducts(response!.data);
-
     }
   };
 
@@ -93,11 +90,13 @@ const OrderPage: React.FC = () => {
     fetchProducts();
   }, []);
 
-  const filteredProducts = products?.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedCategory ? product.category === selectedCategory : true)
-  );
+  const filteredProducts =
+    Array.isArray(products) ?
+    products?.filter(
+      (product) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (selectedCategory ? product.category === selectedCategory : true)
+    ) : [];
 
   const startIndex = (page - 1) * limit;
   const paginatedProducts = filteredProducts.slice(
@@ -128,9 +127,7 @@ const OrderPage: React.FC = () => {
             label="Danh mục"
             sx={{ textAlign: "left" }}
           >
-            <MenuItem value="">
-              Tất cả danh mục
-            </MenuItem>
+            <MenuItem value="">Tất cả danh mục</MenuItem>
             {categories.map((category, index) => (
               <MenuItem key={index} value={category.name}>
                 {category.name}
@@ -221,7 +218,9 @@ const OrderPage: React.FC = () => {
                 </Grid>
                 <Grid item xs={4} sx={{ textAlign: "right" }}>
                   <Typography>
-                    {(item.product.price as number * item.quantity).toFixed(2)}
+                    {((item.product.price as number) * item.quantity).toFixed(
+                      2
+                    )}
                   </Typography>
                 </Grid>
               </Grid>
@@ -233,7 +232,8 @@ const OrderPage: React.FC = () => {
               <Typography variant="h6" fontWeight="bold">
                 {orderItems
                   .reduce(
-                    (sum, item) => sum + Number(item.product.price) * item.quantity,
+                    (sum, item) =>
+                      sum + Number(item.product.price) * item.quantity,
                     0
                   )
                   .toFixed(2)}

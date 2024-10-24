@@ -2,7 +2,6 @@ import { useParams } from "react-router-dom";
 import { getStatisticsProductPriceService } from "../../services/statistic.service";
 import { useQuery } from "@tanstack/react-query";
 import {
-  BarChart,
   CartesianGrid,
   Legend,
   XAxis,
@@ -11,12 +10,9 @@ import {
   Tooltip,
   Line,
   ComposedChart,
-  Area,
 } from "recharts";
 import formatMoney from "../../utils/formatMoney";
-import { formatDate } from "../../utils/convertDate";
-import { get } from "react-hook-form";
-import { Box, Paper, Stack } from "@mui/material";
+import {Paper, Stack } from "@mui/material";
 
 export default function StatisticsProductPrice() {
   const productId = useParams()?.productId;
@@ -107,12 +103,7 @@ export default function StatisticsProductPrice() {
       <Bar dataKey="originalPrice" fill="#8884d8" />
       <Bar dataKey="price" fill="#82ca9d" />
       <Line type="monotone" dataKey="price" stroke="#ff7300" />
-      <Area
-        type="monotone"
-        dataKey="originalPrice"
-        fill="#8884d8"
-        stroke="#8884d8"
-      />
+     
     </ComposedChart>
   );
 }

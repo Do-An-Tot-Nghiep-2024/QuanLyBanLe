@@ -9,4 +9,4 @@ public interface StatisticService {
     List<StatisticResponse> salesStatisticsByProduct();
     List<StatisticResponse> salesStatisticsByEmployee();
     List<StatisticPriceProductResponse> statisticsProductPriceByTime(Long productId);
-}
+}   

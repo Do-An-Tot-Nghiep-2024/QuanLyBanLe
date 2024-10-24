@@ -18,7 +18,8 @@ public interface StockRepository extends JpaRepository<Stock,Long> {
 
     @Query(value = "select s.stock_id, p.name, sold_quantity, quantity - sold_quantity as total " +
             "from t_stock s " +
-            "inner join t_product p on s.product_id = p.product_id order by s.sold_quantity desc",nativeQuery = true)
+            "inner join t_product p on s.product_id = p.product_id " +
+            "where p.is_active = 1 order by s.sold_quantity desc",nativeQuery = true)
     Page<Object[]> getStocksByProduct(Pageable pageable);
 
 }

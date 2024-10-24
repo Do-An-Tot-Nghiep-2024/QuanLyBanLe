@@ -4,23 +4,7 @@ import { ProductSchema } from "../types/productSchema";
 import ApiResponse from "../types/apiResponse";
 import { UpdateProductSchema } from "../types/updateProductSchema";
 
-const createProductService = async (
-  productRequest: ProductSchema,
-  imageFile: File
-) => {
-  try {
-    const calculatedPrice = productRequest.originalPrice * 1.1;
-    const formData = new FormData();
-    const productWithCalculatedPrice = {
-      ...productRequest,
-      price: parseFloat(calculatedPrice.toFixed(2)),
-    };
 
-    formData.append(
-      "productRequest",
-      JSON.stringify(productWithCalculatedPrice)
-    );
-    formData.append("file", imageFile);
 
 const createProductService = async (productRequest: ProductSchema, imageFile: File) => {
   try {
@@ -37,10 +21,6 @@ const createProductService = async (productRequest: ProductSchema, imageFile: Fi
         "Content-Type": "multipart/form-data",
       },
     });
-
-    console.log(response);
-    const { message, data } = response;
-
     console.log(response);
     const { message, data } = response;
     if (message !== "success") {
@@ -62,40 +42,7 @@ const createProductService = async (productRequest: ProductSchema, imageFile: Fi
   }
 };
 
-const updateProductService = async (
-  productRequest: ProductSchema,
-  imageFile: File
-) => {
-  console.log(productRequest);
 
-  try {
-    const calculatedPrice = productRequest.originalPrice * 1.1;
-    const formData = new FormData();
-    const productWithCalculatedPrice = {
-      ...productRequest,
-      price: parseFloat(calculatedPrice.toFixed(2)),
-    };
-
-    formData.append(
-      "productRequest",
-      JSON.stringify(productWithCalculatedPrice)
-    );
-    formData.append("file", imageFile);
-
-    const response: ApiResponse = await api.put(
-      `/products/${productRequest.id}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-
-    console.log(response);
-    const { message, data } = response;
-
-=======
 const updateProductService = async (id: number, productRequest: UpdateProductSchema, imageFile: File) => {
   try {
     console.log(productRequest);
@@ -134,10 +81,6 @@ const updateProductService = async (id: number, productRequest: UpdateProductSch
   }
 };
 
-const getProductsService = async () => {
-  try {
-    const response: ApiResponse = await api.get("/products");
-}
 
 const getProductsService = async (page: number, limit: number) => {
   try {
@@ -177,7 +120,7 @@ const getProductByIdService = async (id: number) => {
 
     return {
       message: message,
-      data: data,
+      data: data as any,
     };
   } catch (error: any) {
     return {
@@ -186,34 +129,6 @@ const getProductByIdService = async (id: number) => {
     };
   }
 };
-
-}
-
-// const getAllProductsService = async () => {
-//   try {
-//     const response: GetAllProductsResponse = await api.get(`/products`);
-//     const { message, data } = response;
-  
-
-//     if (message !== "success") {
-//       return {
-//         message: message,
-//         data: [] as GetProductSchema[],
-//       };
-//     }
-
-//     return {
-//       message: message,
-//       data: data,
-//     };
-//   } catch (error: any) {
-//     return {
-//       message: error.response?.data?.message || "An error occurred",
-//       data: [] as GetProductSchema[],
-//     };
-//   }
-// }
-
 
 const getAllProductsService = async (): Promise<{ message: string; data: GetProductSchema[] | null }> => {
   try {
@@ -237,31 +152,6 @@ const getAllProductsService = async (): Promise<{ message: string; data: GetProd
 };
 
 
-// const getProductByIdService = async (id: any) => { 
-//     try {
-//       const response: ApiResponse = await api.get(`/products/${id}`);
-//       const { message, data } = response;
-
-//       console.log(data);
-
-//       if (message !== "success") {
-//         return {
-//           message: message,
-//           data: {},
-//         };
-//       }
-
-//       return {
-//         message: message,
-//         data: data,
-//       };
-//     } catch (error: any) {
-//       return {
-//         message: error.response?.data?.message || "An error occurred",
-//         data: {},
-//       };
-//     }
-// }
 
 // Define your GetProductSchema interface
 // interface GetProductSchema {
@@ -274,33 +164,10 @@ const getAllProductsService = async (): Promise<{ message: string; data: GetProd
 // }
 
 // Define your API response interface
-interface ApiResponse {
-  message: string;
-  data: GetProductSchema; // Ensure this reflects the actual expected structure
-}
-
-
-const getProductByIdService = async (id: number): Promise<{ message: string; data: GetProductSchema | null }> => {
-  try {
-    const response: ApiResponse = await api.get(`/products/${id}`);
-    const { message, data } = response;
-
-    console.log(data);
-
-    return {
-      message,
-      data: message === "success" ? (data as GetProductSchema) : null,
-    };
-  } catch (error) {
-    // const errorMessage = error?.response?.message || "An error occurred";
-    console.error("Error fetching product:", error);
-    
-    return {
-      message: String(error),
-      data: null,
-    };
-  }
-};
+// interface ApiResponse {
+//   message: string;
+//   data: GetProductSchema; // Ensure this reflects the actual expected structure
+// }
 
 
 
@@ -321,14 +188,5 @@ const deleteProductService = async (id: number) => {
     };
   }
 };
-
-export {
-  createProductService,
-  getProductByIdService,
-  getProductsService,
-  updateProductService,
-  deleteProductService,
-};
-}
 
 export { getAllProductsService, createProductService, getProductByIdService, getProductsService, updateProductService, deleteProductService };

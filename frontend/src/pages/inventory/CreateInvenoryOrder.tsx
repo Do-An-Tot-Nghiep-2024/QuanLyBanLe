@@ -165,11 +165,12 @@ const CreateInventoryOrder: React.FC = () => {
         fetchProducts();
     }, []);
 
-    const filteredProducts = products.filter(
-        (product) =>
-            product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            (selectedCategory ? product.category === selectedCategory : true)
-    );
+    const filteredProducts = Array.isArray(products) ?
+    products?.filter(
+      (product) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (selectedCategory ? product.category === selectedCategory : true)
+    ) : [];
 
     return (
         <Box
