@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   FormControl,
@@ -25,6 +26,7 @@ export default function LoginManagerPage() {
   const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigate();
   const dispatch = useAppDispatch();
+  const [alertMessage, setAlertMessage] = useState("");
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>
@@ -51,14 +53,14 @@ export default function LoginManagerPage() {
   const onSubmit: SubmitHandler<LoginSchema> = async (data) => {
     try {
       const response = await loginService(data);
-      if (response?.status) {
+      if (response?.message === "success") {
         console.log("Login successfully");
         const { accessToken } = response.data as { accessToken: string };
         Cookies.set("accessToken", accessToken);
         dispatch(getAccount());
         navigation("/dashboard");
       } else {
-        console.log("Login failed");
+        setAlertMessage(response.message);
       }
     } catch (error) {
       console.log(error);
@@ -74,6 +76,9 @@ export default function LoginManagerPage() {
         backgroundColor: "#fff",
       }}
     >
+      {alertMessage !== "" ? (
+        <Alert severity="error">Tên đăng nhập hoặc mật khẩu không đúng</Alert>
+      ) : null}
       <Stack
         component={"form"}
         onSubmit={handleSubmit(onSubmit)}

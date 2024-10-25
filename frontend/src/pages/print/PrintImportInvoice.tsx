@@ -153,6 +153,15 @@ const InvoiceDoc = ({
       <View>
         <PDFTable data={data} />
         <Text style={styles.total}>Tổng tiền: {formatMoney(total)}</Text>
+        <Text
+          style={{
+            fontSize: 14,
+            marginRight: 100,
+            textAlign: "right",
+          }}
+        >
+          {`( Đã bao gồm VAT )`}
+        </Text>
       </View>
     </Page>
   </Document>
