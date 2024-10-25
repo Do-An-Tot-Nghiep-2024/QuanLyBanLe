@@ -9,8 +9,6 @@ import {
     List,
     ListItem,
     ListItemText,
-    InputLabel,
-    FormControl,
     Paper,
     Table,
     TableBody,
@@ -18,39 +16,42 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    FormControl,
+    InputLabel,
 } from "@mui/material";
-import { getCategoriesService } from "../../services/category.service";
-import { getAllProductsService } from "../../services/product.service";
+import { getProductsBySupplierService } from "../../services/product.service";
 import { createInventoryOrderService } from "../../services/inventory.service";
-import { GetProductSchema } from "../../types/getProductSchema";
+import { getSuppliersService } from "../../services/supplier.service";
 
 interface OrderItem {
-    product: GetProductSchema;
+    product: GetProductBySupplier;
     quantity: number;
     productionDate?: string;
     expirationDate?: string;
+    price: number; // Price included in OrderItem
 }
 
-interface Category {
+interface Supplier {
+    id: number;
     name: string;
+    phone: string;
+    email: string;
+    address: string;
 }
 
-// interface GetProductSchema {
-//     id: Number;
-//     name: String;
-//     image: string;
-//     category: string;
-//     supplier: string;
-//     price: number;
-//   }
+interface GetProductBySupplier {
+    id: number;
+    productName: string;
+}
+
 const CreateInventoryOrder: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState("");
     const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [products, setProducts] = useState<GetProductSchema[]>([]);
+    const [products, setProducts] = useState<GetProductBySupplier[]>([]);
+    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+    const [selectedSupplier, setSelectedSupplier] = useState<number | "">(1);
 
-    const handleAddToOrder = (product: GetProductSchema) => {
+    const handleAddToOrder = (product: GetProductBySupplier) => {
         setOrderItems((prev) => {
             const existingItem = prev.find((item) => item.product.id === product.id);
             return existingItem
@@ -59,7 +60,7 @@ const CreateInventoryOrder: React.FC = () => {
                         ? { ...item, quantity: item.quantity + 1 }
                         : item
                 )
-                : [...prev, { product, quantity: 1 }];
+                : [...prev, { product, quantity: 1, price: 0 }]; // Set initial price to 0
         });
     };
 
@@ -69,27 +70,7 @@ const CreateInventoryOrder: React.FC = () => {
                 item.product.id === productId ? { ...item, quantity } : item
             )
         );
-        removeItem();
     };
-
-    const handleUpdatePrice = (productId: number, price: number) => {
-        setOrderItems((prev) =>
-            prev.map((item) =>
-                item.product.id === productId ? { ...item, product: { ...item.product, price } } : item
-            )
-        );
-    };
-    
-
-    const removeItem = () => {
-        orderItems.map((item) => {
-            if (item.quantity === 0) {
-                const index = orderItems.indexOf(item);
-                setOrderItems((prev) => prev.filter((_, i) => i !== index));
-            }
-        });
-    };
-
 
     const handleUpdateProductionDate = (productId: number, date: string) => {
         setOrderItems((prev) =>
@@ -107,6 +88,14 @@ const CreateInventoryOrder: React.FC = () => {
         );
     };
 
+    const handleUpdatePrice = (productId: number, price: number) => {
+        setOrderItems((prev) =>
+            prev.map((item) =>
+                item.product.id === productId ? { ...item, price } : item
+            )
+        );
+    };
+
     const handleCreateBill = async () => {
         if (orderItems.length === 0) {
             alert("Please add at least one item to the order.");
@@ -116,68 +105,73 @@ const CreateInventoryOrder: React.FC = () => {
         const formattedOrderItems = orderItems.map(item => ({
             id: item.product.id,
             quantity: item.quantity,
-            price: item.product.price,
-            productionDate: item.productionDate ? formatDateToDDMMYYYY(item.productionDate) : undefined,
-            expirationDate: item.expirationDate ? formatDateToDDMMYYYY(item.expirationDate) : undefined,
+            price: item.price,
+            productionDate: item.productionDate,
+            expirationDate: item.expirationDate,
         }));
 
         try {
-            
-            const response = await createInventoryOrderService(formattedOrderItems);
-            console.log("Hóa đơn đã được tạo:", response.data);
-            setOrderItems([]); 
-            alert("Order created successfully!");
+            const response = await createInventoryOrderService(formattedOrderItems, Number(selectedSupplier));
+            console.log("Order created:", response);
+            setOrderItems([]);
+
         } catch (error) {
-            console.error("Error creating inventory order:", error);
+            console.error("Error creating order:", error);
             alert("An error occurred while creating the order.");
         }
     };
 
-    const fetchCategories = async () => {
-        const response = await getCategoriesService();
-        setCategories(response.data);
-    };
-
     const fetchProducts = async () => {
-        const response = await getAllProductsService();
-        console.log(response);
-        
+        const response = await getProductsBySupplierService(Number(selectedSupplier));
         if (response.data) {
-            setProducts(response.data); 
-        } else {
-          
-            console.error("No products found");
-            setProducts([]); 
+            setProducts(response.data as GetProductBySupplier[]);
         }
     };
-    
-    const formatDateToDDMMYYYY = (dateString: string) => {
-        const date = new Date(dateString);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0'); 
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
+
+    const fetchSuppliers = async () => {
+        const response = await getSuppliersService();
+        setSuppliers(response.data.responseList);
     };
-    
+
+    const handleSelectSupplier = (id: number) => {
+        setSelectedSupplier(id);
+        setOrderItems([]);
+        setSearchTerm("");
+    };
+
+    const filteredProducts = products.filter(product =>
+        product.productName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     useEffect(() => {
-        fetchCategories();
         fetchProducts();
-    }, []);
-
-    const filteredProducts = Array.isArray(products) ?
-    products?.filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (selectedCategory ? product.category === selectedCategory : true)
-    ) : [];
+        fetchSuppliers();
+    }, [selectedSupplier]);
 
     return (
         <Box
             display="flex"
-            sx={{ backgroundColor: "#f5f5f5", height: "100vh", width: "100%" }}
+            flexDirection="column"
+            sx={{ backgroundColor: "#f5f5f5", height: "100vh", width: "100%", padding: 2 }}
         >
-            <Box mr={2} sx={{ width: "30%" }}>
+            <Paper elevation={3} sx={{ padding: 3, borderRadius: 2, marginBottom: 2 }}>
+                <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+                    <InputLabel>Nhà cung cấp</InputLabel>
+                    <Select
+                        value={selectedSupplier}
+                        onChange={(e) => handleSelectSupplier(Number(e.target.value))}
+                        label="Nhà cung cấp"
+                        sx={{ textAlign: 'left' }}
+                    >
+                        <MenuItem value="">Chọn nhà cung cấp</MenuItem>
+                        {suppliers.map((supplier) => (
+                            <MenuItem key={supplier.id} value={supplier.id}>
+                                {supplier.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+
                 <TextField
                     fullWidth
                     variant="outlined"
@@ -185,133 +179,101 @@ const CreateInventoryOrder: React.FC = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     sx={{ mb: 2 }}
+                    disabled={!selectedSupplier}
                 />
-                <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                    <InputLabel>Danh mục</InputLabel>
-                    <Select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value as string)}
-                        label="Danh mục"
-                    >
-                        <MenuItem value="">Tất cả danh mục</MenuItem>
-                        {categories.map((category) => (
-                            <MenuItem key={category.name} value={category.name}>
-                                {category.name}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-                <List
-                    sx={{
-                        maxHeight: "70vh",
-                        overflowY: "auto",
-                        bgcolor: "white",
-                        borderRadius: 2,
-                    }}
-                >
+
+                <List sx={{ maxHeight: "300px", overflowY: "auto", bgcolor: "white", borderRadius: 2 }}>
                     {filteredProducts.map((product) => (
-                        <ListItem key={Number(product.id)} divider>
-                            <ListItemText
-                                primary={`${product.name} - ${product.price.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}₫`}
-                            />
-                            <Button
-                                variant="contained"
-                                onClick={() => handleAddToOrder(product)}
-                            >
+                        <ListItem key={product.id} divider>
+                            <ListItemText primary={product.productName} />
+                            <Button variant="contained" onClick={() => handleAddToOrder(product)}>
                                 Thêm
                             </Button>
                         </ListItem>
                     ))}
                 </List>
-            </Box>
-            <Box flex={1}>
-                <Paper elevation={3} sx={{ padding: 3, borderRadius: 2, backgroundColor: "#fff" }}>
-                    <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
-                        Chi tiết hóa đơn nhập hàng
-                    </Typography>
-                    <TableContainer>
-                        <Table>
-                            <TableHead>
-                                <TableRow sx={{gap:1, width:'100%'}}>
-                                    <TableCell sx={{ textAlign: "left", fontWeight: 'bold', width: '20%' }}>Tên sản phẩm</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Số lượng</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Ngày sản xuất</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Ngày hết hạn</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Giá nhập</TableCell>
+            </Paper>
+
+            <Paper elevation={3} sx={{ padding: 3, borderRadius: 2 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+                    Chi tiết hóa đơn nhập hàng
+                </Typography>
+                <TableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell sx={{ textAlign: "left", fontWeight: 'bold' }}>Tên sản phẩm</TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Số lượng</TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Ngày sản xuất</TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Ngày hết hạn</TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Giá nhập</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {orderItems.map((item) => (
+                                <TableRow key={item.product.id}>
+                                    <TableCell sx={{ textAlign: "left" }}>{item.product.productName}</TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                        <TextField
+                                            type="number"
+                                            value={item.quantity}
+                                            onChange={(e) =>
+                                                handleUpdateQuantity(item.product.id, parseInt(e.target.value))
+                                            }
+                                            inputProps={{ min: 1 }}
+                                            sx={{ width: "100%" }}
+                                        />
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                        <TextField
+                                            type="date"
+                                            value={item.productionDate || ""}
+                                            onChange={(e) => handleUpdateProductionDate(item.product.id, e.target.value)}
+                                            sx={{ width: '90%' }}
+                                        />
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                        <TextField
+                                            type="date"
+                                            value={item.expirationDate || ""}
+                                            onChange={(e) => handleUpdateExpirationDate(item.product.id, e.target.value)}
+                                            sx={{ width: '90%' }}
+                                        />
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                        <TextField
+                                            type="number"
+                                            value={item.price}
+                                            onChange={(e) => handleUpdatePrice(item.product.id, parseFloat(e.target.value))}
+                                            placeholder="VNĐ"
+                                            sx={{ width: "100%" }}
+                                        />
+                                    </TableCell>
                                 </TableRow>
-                            </TableHead>
-                            <TableBody sx={{gap: 1, justifyContent:'left'}}>
-                                {orderItems.map((item) => (
-                                    <TableRow key={Number(item.product.id)}>
-                                        <TableCell sx={{ textAlign: "left" }}>{item.product.name}</TableCell>
-                                        <TableCell sx={{ textAlign: "left", width:'20%' }}>
-                                            <TextField
-                                                type="number"
-                                                value={item.quantity}
-                                                onChange={(e) =>
-                                                    handleUpdateQuantity(
-                                                        Number(item.product.id),
-                                                        parseInt(e.target.value)
-                                                    )
-                                                }
-                                                inputProps={{ min: 1 }}
-                                                sx={{ width: "100%", flex: 1, textAlign: "right" }}
-                                            />
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "left", width:'10%' }}>
-                                            <TextField
-                                                type="date"
-                                                value={item.productionDate || ""}
-                                                onChange={(e) => handleUpdateProductionDate(Number(item.product.id), e.target.value)}
-                                                sx={{width:'90%'}}
-                                            />
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "left" }}>
-                                            <TextField
-                                                type="date"
-                                                value={item.expirationDate || ""}
-                                                onChange={(e) => handleUpdateExpirationDate(Number(item.product.id), e.target.value)}
-                                                sx={{width:'90%'}}
-                                            />
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "center", width: "100%" }}>
-                                            <TextField
-                                                type="number"
-                                                value={item.product.price}
-                                                onChange={(e) => {
-                                                    const newPrice = parseFloat(e.target.value);
-                                                    if (!isNaN(newPrice) && newPrice >= 0) {
-                                                        handleUpdatePrice(Number(item.product.id), newPrice);
-                                                    }
-                                                }}
-                                                placeholder="VNĐ"
-                            
-                                            />
-                                           
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    <Box display="flex" justifyContent="space-between" mt={3}>
-                        <Typography variant="h6" fontWeight="bold">Tổng cộng</Typography>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <Box display="flex" flexDirection="column" justifyContent="space-between" mt={3}>
+                    <Box display="flex" flexDirection="row" justifyContent="space-between" mt={3}>
+                        <Typography variant="h6" fontWeight="bold">Tổng tiền hàng</Typography>
                         <Typography variant="h6" fontWeight="bold">
-                            {orderItems.reduce(
-                                (sum, item) => sum + Number(item.product.price) * item.quantity,
-                                0
-                            ).toFixed(2)}₫
+                            {orderItems.reduce((total, item) => total + (item.price * item.quantity), 0)} VNĐ
                         </Typography>
                     </Box>
-                    <Button
-                        variant="contained"
-                        onClick={handleCreateBill}
-                        sx={{ mt: 2, width: "100%", height: "50px", fontSize: "16px" }}
-                    >
-                        Tạo hóa đơn
-                    </Button>
-                </Paper>
-            </Box>
+
+                    <Typography textAlign="left" fontStyle={"italic"}> (Giá trên đã bao gồm VAT)</Typography>
+
+                    <Box display="flex" flexDirection="row" justifyContent="space-between" mt={3}>
+                        <Typography variant="h6" fontWeight="bold"> Thành tiền</Typography>
+                        <Typography variant="h6" fontWeight="bold">
+                            {orderItems.reduce((total, item) => total + (item.price * item.quantity), 0)} VNĐ
+                        </Typography>
+                    </Box>
+
+                </Box>
+                <Button variant="contained" onClick={handleCreateBill} sx={{ mt: 2 }}>Tạo hóa đơn</Button>
+            </Paper>
         </Box>
     );
 };

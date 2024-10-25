@@ -44,7 +44,9 @@ const StockPage = lazy(() => import("../pages/inventory/StockPage"));
 const Logout = lazy(() => import("../pages/login/Logout"));
 const CreateProduct = lazy(() => import("../pages/product/CreateProduct"));
 const OrderTabs = lazy(() => import("../pages/order/OrderTabs"));
-const OrderPage = lazy(() => import("../pages/order/OrderPage"));
+const OrderPage1 = lazy(() => import("../pages/order/OrderPage1"));
+const OrderPage2 = lazy(() => import("../pages/order/OrderPage2"));
+
 const CreateInventoryOrder = lazy(()=> import("../pages/inventory/CreateInvenoryOrder"))
 
 
@@ -130,7 +132,7 @@ const PageRouter = () => {
 
               <Route path="/products" element={<ProductPage />} />
 
-              <Route path="/categories" element={<CategoryPage />} />
+              <Route path="/products/categories" element={<CategoryPage />} />
 
               <Route path="/update-employee/:id" element={<UpdateEmployee />} />
               {/* Static pages */}
@@ -148,7 +150,10 @@ const PageRouter = () => {
 
               <Route path="/logout" element={<Logout />} />
               <Route path="/orders" element={<OrderTabs />} />
-              <Route path="/order" element={<OrderPage />} />
+              <Route path="/order1" element={<OrderPage1 />} />
+              <Route path="/order2" element={<OrderPage2 />} />
+
+
 
               <Route path="/inventory/create-inventory" element={<CreateInventoryOrder/>}/>
             </Route>

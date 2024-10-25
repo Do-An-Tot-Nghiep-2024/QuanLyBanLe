@@ -60,6 +60,18 @@ const NAVIGATION: Navigation = [
     segment: "products",
     title: "Sản phẩm",
     icon: <StoreIcon />,
+    children:[
+      {
+        segment: "",
+        title: "Danh sách sản phẩm",
+        icon: <WarehouseIcon />,
+      },
+      {
+        segment: "categories",
+        title: "Quản lí danh mục",
+        icon: <AddBusinessIcon />,
+      }
+    ]
   },
   {
     segment: "suppliers",
