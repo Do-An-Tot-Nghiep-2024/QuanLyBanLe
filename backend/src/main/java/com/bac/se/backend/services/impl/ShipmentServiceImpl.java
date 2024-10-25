@@ -132,6 +132,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     public ShipmentItemResponse getShipment(Long id) {
         Object[] object = shipmentRepository.getShipmentById(id).get(0);
         List<Object[]> objectList = shipmentItemRepository.getProductsByShipmentId(id);
+        objectList.forEach(obj -> log.info("objects is {}", obj));
         List<ProductShipmentResponse> productShipmentResponses = objectList.stream()
                 .map(productMapper::mapObjectToProductShipmentResponse).toList();
         BigDecimal total = BigDecimal.ZERO;

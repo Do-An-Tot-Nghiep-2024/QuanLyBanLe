@@ -8,8 +8,8 @@ import { useAppDispatch, useAppSelector } from "../redux/hook";
 import { getAccount } from "../redux/auth/authSlice";
 import { useEffect, Suspense, lazy } from "react";
 import Cookies from "js-cookie";
-// import OrderPage from "../pages/order/OrderPage";  
-const LoginEmployee = lazy(() => import("../pages/login/LoginEmployeePage")); 
+// import OrderPage from "../pages/order/OrderPage";
+const LoginEmployee = lazy(() => import("../pages/login/LoginEmployeePage"));
 const LoginManager = lazy(() => import("../pages/login/LoginManagerPage"));
 const EmployeeMain = lazy(() => import("../pages/staff/home/EmployeeMainPage"));
 const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
@@ -44,11 +44,23 @@ const StockPage = lazy(() => import("../pages/inventory/StockPage"));
 const Logout = lazy(() => import("../pages/login/Logout"));
 const CreateProduct = lazy(() => import("../pages/product/CreateProduct"));
 const OrderTabs = lazy(() => import("../pages/order/OrderTabs"));
+const OrderPage = lazy(() => import("../pages/order/OrderPage"));
+const CreateInventoryOrder = lazy(
+  () => import("../pages/inventory/CreateInvenoryOrder")
+);
+const InventoryPage = lazy(() => import("../pages/inventory/InventoryPage"));
+
+const InventoryDetailPage = lazy(
+  () => import("../pages/inventory/InventoryDetailPage")
+);
 const OrderPage1 = lazy(() => import("../pages/order/OrderPage1"));
 const OrderPage2 = lazy(() => import("../pages/order/OrderPage2"));
 
 const CreateInventoryOrder = lazy(()=> import("../pages/inventory/CreateInvenoryOrder"))
 
+const PrintImportInvoice = lazy(
+  () => import("../pages/print/PrintImportInvoice")
+);
 
 const PageRouter = () => {
   const auth = useAppSelector((state) => state.auth);
@@ -147,7 +159,11 @@ const PageRouter = () => {
               />
               {/* inventory */}
               <Route path="/inventory/stock" element={<StockPage />} />
-
+              <Route
+                path="/inventory/import-invoices"
+                element={<InventoryPage />}
+              />
+              <Route path="/inventory/:id" element={<InventoryDetailPage />} />
               <Route path="/logout" element={<Logout />} />
               <Route path="/orders" element={<OrderTabs />} />
               <Route path="/order1" element={<OrderPage1 />} />
@@ -155,7 +171,14 @@ const PageRouter = () => {
 
 
 
-              <Route path="/inventory/create-inventory" element={<CreateInventoryOrder/>}/>
+              <Route
+                path="/inventory/create-inventory"
+                element={<CreateInventoryOrder />}
+              />
+              <Route
+                path="/print/import-invoice"
+                element={<PrintImportInvoice />}
+              />
             </Route>
           </Route>
           {/* Not found page */}
