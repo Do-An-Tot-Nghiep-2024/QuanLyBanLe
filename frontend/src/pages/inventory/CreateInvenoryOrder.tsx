@@ -26,9 +26,9 @@ import { getSuppliersService } from "../../services/supplier.service";
 interface OrderItem {
     product: GetProductBySupplier;
     quantity: number;
-    productionDate?: string;
-    expirationDate?: string;
-    price: number; // Price included in OrderItem
+    mxp?: Date;
+    exp?: Date;
+    price: number;
 }
 
 interface Supplier {
@@ -60,7 +60,7 @@ const CreateInventoryOrder: React.FC = () => {
                         ? { ...item, quantity: item.quantity + 1 }
                         : item
                 )
-                : [...prev, { product, quantity: 1, price: 0 }]; // Set initial price to 0
+                : [...prev, { product, quantity: 1, price: 0 }];
         });
     };
 
@@ -73,9 +73,11 @@ const CreateInventoryOrder: React.FC = () => {
     };
 
     const handleUpdateProductionDate = (productId: number, date: string) => {
+        console.log(date);
+
         setOrderItems((prev) =>
             prev.map((item) =>
-                item.product.id === productId ? { ...item, productionDate: date } : item
+                item.product.id === productId ? { ...item, mxp: new Date(date) } : item
             )
         );
     };
@@ -83,7 +85,7 @@ const CreateInventoryOrder: React.FC = () => {
     const handleUpdateExpirationDate = (productId: number, date: string) => {
         setOrderItems((prev) =>
             prev.map((item) =>
-                item.product.id === productId ? { ...item, expirationDate: date } : item
+                item.product.id === productId ? { ...item, exp: new Date(date) } : item
             )
         );
     };
@@ -96,6 +98,15 @@ const CreateInventoryOrder: React.FC = () => {
         );
     };
 
+    const formatDate = (date: Date): string => {
+        if (!date) return "";
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    };
+
+
     const handleCreateBill = async () => {
         if (orderItems.length === 0) {
             alert("Please add at least one item to the order.");
@@ -106,20 +117,22 @@ const CreateInventoryOrder: React.FC = () => {
             id: item.product.id,
             quantity: item.quantity,
             price: item.price,
-            productionDate: item.productionDate,
-            expirationDate: item.expirationDate,
+            mxp: item.mxp ? formatDate(item.mxp) : null,
+            exp: item.exp ? formatDate(item.exp) : null,
         }));
+
+        console.log(formattedOrderItems);
 
         try {
             const response = await createInventoryOrderService(formattedOrderItems, Number(selectedSupplier));
             console.log("Order created:", response);
             setOrderItems([]);
-
         } catch (error) {
             console.error("Error creating order:", error);
             alert("An error occurred while creating the order.");
         }
     };
+
 
     const fetchProducts = async () => {
         const response = await getProductsBySupplierService(Number(selectedSupplier));
@@ -147,6 +160,10 @@ const CreateInventoryOrder: React.FC = () => {
         fetchProducts();
         fetchSuppliers();
     }, [selectedSupplier]);
+
+    const formatCurrency = (amount: number): string => {
+        return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+    };
 
     return (
         <Box
@@ -227,7 +244,7 @@ const CreateInventoryOrder: React.FC = () => {
                                     <TableCell sx={{ textAlign: "center" }}>
                                         <TextField
                                             type="date"
-                                            value={item.productionDate || ""}
+                                            value={item.mxp ? item.mxp.toISOString().split('T')[0] : ""}
                                             onChange={(e) => handleUpdateProductionDate(item.product.id, e.target.value)}
                                             sx={{ width: '90%' }}
                                         />
@@ -235,7 +252,7 @@ const CreateInventoryOrder: React.FC = () => {
                                     <TableCell sx={{ textAlign: "center" }}>
                                         <TextField
                                             type="date"
-                                            value={item.expirationDate || ""}
+                                            value={item.exp ? item.exp.toISOString().split('T')[0] : ""}
                                             onChange={(e) => handleUpdateExpirationDate(item.product.id, e.target.value)}
                                             sx={{ width: '90%' }}
                                         />
@@ -258,7 +275,7 @@ const CreateInventoryOrder: React.FC = () => {
                     <Box display="flex" flexDirection="row" justifyContent="space-between" mt={3}>
                         <Typography variant="h6" fontWeight="bold">Tổng tiền hàng</Typography>
                         <Typography variant="h6" fontWeight="bold">
-                            {orderItems.reduce((total, item) => total + (item.price * item.quantity), 0)} VNĐ
+                            {formatCurrency(orderItems.reduce((total, item) => total + (item.price * item.quantity), 0))}
                         </Typography>
                     </Box>
 
@@ -267,11 +284,11 @@ const CreateInventoryOrder: React.FC = () => {
                     <Box display="flex" flexDirection="row" justifyContent="space-between" mt={3}>
                         <Typography variant="h6" fontWeight="bold"> Thành tiền</Typography>
                         <Typography variant="h6" fontWeight="bold">
-                            {orderItems.reduce((total, item) => total + (item.price * item.quantity), 0)} VNĐ
+                            {formatCurrency(orderItems.reduce((total, item) => total + (item.price * item.quantity), 0))}
                         </Typography>
                     </Box>
-
                 </Box>
+
                 <Button variant="contained" onClick={handleCreateBill} sx={{ mt: 2 }}>Tạo hóa đơn</Button>
             </Paper>
         </Box>

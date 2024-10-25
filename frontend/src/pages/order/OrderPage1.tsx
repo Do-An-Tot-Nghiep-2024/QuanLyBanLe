@@ -22,7 +22,8 @@ import {
 import { getCategoriesService } from "../../services/category.service";
 import { getAllProductsService } from "../../services/product.service";
 import { GetProductSchema } from "../../types/getProductSchema";
-import { Text } from "recharts";
+import { getShipmentsService } from "../../services/inventory.service";
+import { createOrderService } from "../../services/order.service";
 
 interface OrderItem {
   product: GetProductSchema;
@@ -30,11 +31,20 @@ interface OrderItem {
   productionDate?: string;
   expirationDate?: string;
   price: number;
+  selectedShipment?: string; // Added selected shipment field
 }
 
 interface Category {
   name: string;
 }
+
+interface Invoice {
+  numberInvoice: string; 
+  name: string;          
+  createdAt: string;     
+  total: number;       
+}
+
 
 const OrderPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,7 +52,7 @@ const OrderPage: React.FC = () => {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<GetProductSchema[]>([]);
-
+  const [shipments, setShipments] = useState<Invoice[]>([]); 
   const [page] = useState(1);
   const [limit] = useState(10);
 
@@ -63,7 +73,7 @@ const OrderPage: React.FC = () => {
             : item
         );
       }
-      return [...prev, { product, quantity: 1, selectedOption: "", price: Number(product.price) }];
+      return [...prev, { product, quantity: 1, price: Number(product.price), selectedShipment: "" }];
     });
   };
 
@@ -75,32 +85,28 @@ const OrderPage: React.FC = () => {
     );
   };
 
-  const handleUpdateProductionDate = (productId: number, date: string) => {
-    setOrderItems((prev) =>
-      prev.map((item) =>
-        item.product.id === productId ? { ...item, productionDate: date } : item
-      )
-    );
-  };
+  const handleCreateBill = async () => {
+    if (orderItems.length === 0) {
+      alert("Please add at least one item to the order.");
+      return;
+  }
 
-  const handleUpdateExpirationDate = (productId: number, date: string) => {
-    setOrderItems((prev) =>
-      prev.map((item) =>
-        item.product.id === productId ? { ...item, expirationDate: date } : item
-      )
-    );
-  };
+  const formattedOrderItems = orderItems.map(item => ({
+      productId: item.product.id,
+      quantity: item.quantity,
+      shipmentId: item.selectedShipment
+  }));
 
-  const handleUpdatePrice = (productId: number, price: number) => {
-    setOrderItems((prev) =>
-      prev.map((item) =>
-        item.product.id === productId ? { ...item, price } : item
-      )
-    );
-  };
+  console.log(formattedOrderItems);
 
-  const handleCreateBill = () => {
-    // Bill creation logic
+  try {
+      const response = await createOrderService(formattedOrderItems);
+      console.log("Order created:", response);
+      setOrderItems([]);
+  } catch (error) {
+      console.error("Error creating order:", error);
+      alert("An error occurred while creating the order.");
+  }
   };
 
   const fetchCategories = async () => {
@@ -115,18 +121,29 @@ const OrderPage: React.FC = () => {
     }
   };
 
+  const fetchShipments = async () => {
+    const response = await getShipmentsService();
+    if (response.data) {
+
+      console.log(response.data);
+      
+      setShipments(response.data.responseList);
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
     fetchProducts();
+    fetchShipments();
   }, []);
 
   const filteredProducts =
     Array.isArray(products)
       ? products.filter(
-        (product) =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          (selectedCategory ? product.category === selectedCategory : true)
-      )
+          (product) =>
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (selectedCategory ? product.category === selectedCategory : true)
+        )
       : [];
 
   const startIndex = (page - 1) * limit;
@@ -134,8 +151,6 @@ const OrderPage: React.FC = () => {
     startIndex,
     startIndex + limit
   );
-
-  // const fetchShipment = ()
 
   return (
     <Box
@@ -198,7 +213,6 @@ const OrderPage: React.FC = () => {
         </List>
       </Box>
 
-
       <Box flex={1}>
         <Paper
           elevation={3}
@@ -214,7 +228,7 @@ const OrderPage: React.FC = () => {
                 <TableRow>
                   <TableCell sx={{ textAlign: "left", fontWeight: 'bold' }}>Tên sản phẩm</TableCell>
                   <TableCell sx={{ textAlign: "left", fontWeight: 'bold' }}>Số lượng</TableCell>
-                  <TableCell sx={{textAlign:"center", fontWeight: 'bold' }}>Mã lô hàng</TableCell>
+                  <TableCell sx={{ textAlign: "left", fontWeight: 'bold' }}>Mã lô hàng</TableCell>
                   <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Giá</TableCell>
                 </TableRow>
               </TableHead>
@@ -222,7 +236,7 @@ const OrderPage: React.FC = () => {
                 {orderItems.map((item) => (
                   <TableRow key={Number(item.product.id)}>
                     <TableCell sx={{ textAlign: "left" }}>{item.product.name}</TableCell>
-                    <TableCell sx={{ textAlign: "left" }}>
+                    <TableCell sx={{ textAlign: "left"}}>
                       <TextField
                         type="number"
                         value={item.quantity}
@@ -232,18 +246,31 @@ const OrderPage: React.FC = () => {
                         sx={{ width: "50%" }}
                       />
                     </TableCell>
-                    <TableCell>
-                      
-
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <Text
-                        type="number"
+                    <TableCell sx={{flex:1}}>
+                      <Select
+                        value={item.selectedShipment || ""}
+                        onChange={(e) => {
+                          const selectedValue = e.target.value;
+                          setOrderItems((prev) =>
+                            prev.map((orderItem) =>
+                              orderItem.product.id === item.product.id
+                                ? { ...orderItem, selectedShipment: selectedValue }
+                                : orderItem
+                            )
+                          );
+                        }}
+                        sx={{ width: "100%", textAlign:'left'}}
                       >
-                        {Number(item.product.price)}
-
-                      </Text>
-
+                        <MenuItem value="">Chọn mã lô hàng</MenuItem>
+                        {shipments?.map((shipment) => (
+                          <MenuItem key={shipment.numberInvoice} value={shipment.numberInvoice}>
+                            {shipment.numberInvoice} 
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center", width:"30%" }}>
+                      {formatCurrency(Number(item.price))}
                     </TableCell>
                   </TableRow>
                 ))}

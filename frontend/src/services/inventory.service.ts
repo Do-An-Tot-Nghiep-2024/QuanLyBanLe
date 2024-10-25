@@ -32,6 +32,8 @@ import ApiResponse from "../types/apiResponse";
 const createInventoryOrderService = async (itemList: any[], supplierId:number) => {
   try {
     console.log(itemList);
+    console.log(supplierId);
+    
 
     const response: ApiResponse = await api.post(`/inventory/import`, {
       supplierId: supplierId,
@@ -108,9 +110,34 @@ const getShipmentItemsService = async (shipmentId: number) => {
   }
 };
 
+const getShipmentsService = async () => {
+  try {
+    const response: any = await api.get(`/inventory`);
+    const { message, data } = response;
+    if (message !== "success") {
+      return {
+        message: message,
+        data: {},
+      };
+    }
+    return {
+      message: message,
+      data: data,
+    };
+  } catch (error: any) {
+    return {
+      message: error.response?.data?.message || "An error occurred",
+      data: {},
+    };
+  }
+};
+
+
+
 export {
   createInventoryOrderService,
   getStocksByProductService,
   getImportInvoicesService,
   getShipmentItemsService,
+  getShipmentsService
 };

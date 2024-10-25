@@ -32,12 +32,12 @@ export default function InventoryPage() {
       return response.data;
     } catch (error) {
       console.error(error);
-      throw error; // Rethrow the error to be handled by useQuery
+      throw error; 
     }
   };
   const { isLoading, isError, error, data, isFetching } = useQuery({
     queryKey: ["inventory/stock", pageNumber, pageSize],
-    queryFn: () => getImportInvoices(pageNumber, pageSize), // No need for async/await here
+    queryFn: () => getImportInvoices(pageNumber, pageSize), 
   });
   if (isFetching || isLoading) {
     return <div>Loading...</div>;
