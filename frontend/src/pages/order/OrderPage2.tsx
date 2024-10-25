@@ -27,7 +27,7 @@ interface Category {
   name: string;
 }
 
-const OrderPage: React.FC = () => {
+const OrderPage2: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
@@ -81,7 +81,7 @@ const OrderPage: React.FC = () => {
   const fetchProducts = async () => {
     const response = await getAllProductsService();
     if (response.data) {
-      setProducts(response!.data);
+      setProducts(response!.data.responseList);
     }
   };
 
@@ -253,4 +253,4 @@ const OrderPage: React.FC = () => {
   );
 };
 
-export default OrderPage;
+export default OrderPage2;

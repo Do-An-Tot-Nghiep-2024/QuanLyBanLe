@@ -4,7 +4,8 @@ import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
-import OrderPage from './OrderPage';
+import OrderPage from './OrderPage1';
+import OrderPage2 from './OrderPage2';
 
 export default function OrderTabs() {
   const [value, setValue] = React.useState('1');
@@ -14,8 +15,8 @@ export default function OrderTabs() {
   };
 
   return (
-    <Box sx= {{ width: '100%', typography: 'body1' }
-}>
+    <Box sx={{ width: '100%', typography: 'body1' }
+    }>
       <TabContext value={value}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <TabList onChange={handleChange} aria-label="lab API tabs example">
@@ -24,10 +25,12 @@ export default function OrderTabs() {
             <Tab label="Đơn hàng tự đến lấy" value="3" />
           </TabList>
         </Box>
-  < TabPanel value = "1" >
-    <OrderPage/>
-    </TabPanel>
-        <TabPanel value="2">Item Two</TabPanel>
+        < TabPanel value="1" >
+          <OrderPage />
+        </TabPanel>
+        <TabPanel value="2">
+          <OrderPage2 />
+        </TabPanel>
         <TabPanel value="3">Item Three</TabPanel>
       </TabContext>
     </Box>

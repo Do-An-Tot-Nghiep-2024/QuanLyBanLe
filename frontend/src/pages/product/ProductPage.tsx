@@ -174,18 +174,10 @@ export default function ProductPage() {
               size="large"
               color="success"
             >
-              <AddBoxIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Quản lí danh mục sản phẩm" arrow>
-            <IconButton
-              onClick={() => navigate("/categories")}
-              size="large"
-              color="success"
-            >
               <NoteAddOutlined />
             </IconButton>
           </Tooltip>
+        
         </Stack>
         <Tabs
           value={selectedCategory}
