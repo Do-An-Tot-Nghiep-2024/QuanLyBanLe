@@ -57,17 +57,18 @@ export default function StockPage() {
   console.log(data);
 
   return (
-    <TableContainer component={Paper} sx={{ width: "100%" }}>
+    <TableContainer component={Paper} sx={{ width: "100%",backgroundColor:"white" }}>
       <Table aria-label="custom pagination table">
-        <TableHead>
+        <TableHead sx={{backgroundColor:"gray"}}>
           <TableRow>
             {columns.map((column: string) => (
               <TableCell
                 key={column}
-                align={"center"}
+                align={column === "Tên sản phẩm" ? "left" : "center"}
                 sx={{
                   fontWeight: "bold",
                   color: "text.primary",
+                  fontSize:16
                 }}
               >
                 {column}
@@ -81,7 +82,7 @@ export default function StockPage() {
           data.responseList.length > 0 ? (
             data.responseList.map((row: StockResponse) => (
               <TableRow hover key={row.id}>
-                <TableCell align={"center"}>{row.name}</TableCell>
+                <TableCell align={"left"}>{row.name}</TableCell>
                 <TableCell align={"center"}>{row.soldQuantity}</TableCell>
                 <TableCell align={"center"}>{row.remainingQuantity}</TableCell>
               </TableRow>

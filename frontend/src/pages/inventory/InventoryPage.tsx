@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { formatDateTime } from "../../utils/convertDate";
 import { formatMoneyThousand } from "../../utils/formatMoney";
 import ImportInvoice from "../../types/inventory/importInvoice";
+import colors from "../../constants/color";
 export default function InventoryPage() {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -66,9 +67,14 @@ export default function InventoryPage() {
     "Chi tiết",
   ];
   return (
-    <TableContainer component={Paper} sx={{ width: "100%" }}>
+    <TableContainer
+      component={Paper}
+      sx={{ width: "100%", backgroundColor: "white" }}
+    >
       <Table aria-label="custom pagination table">
-        <TableHead>
+        <TableHead
+          sx={{ backgroundColor: colors.secondaryColor, fontSize: 18 }}
+        >
           <TableRow>
             {columns.map((column: string) => (
               <TableCell
