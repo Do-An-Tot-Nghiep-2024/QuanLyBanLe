@@ -11,7 +11,7 @@ import {
   Line,
   ComposedChart,
 } from "recharts";
-import formatMoney from "../../utils/formatMoney";
+import {formatMoney} from "../../utils/formatMoney";
 import {Paper, Stack } from "@mui/material";
 
 export default function StatisticsProductPrice() {

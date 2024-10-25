@@ -5,7 +5,21 @@ const convertDate = (date: string | undefined) => {
 };
 
 const formatDate = (date: Date) => {
-  return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+  return new Date(date).toLocaleDateString("vi-VN", {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  });
+};
+const formatDateTime = (date: Date) => {
+  return new Date(date).toLocaleDateString("vi-VN", {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+  });
 };
 
-export { convertDate, formatDate };
+export { convertDate, formatDate, formatDateTime };

@@ -16,6 +16,7 @@ import {
   Tabs,
   Tab,
   TablePagination,
+  Pagination,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import EditIcon from "@mui/icons-material/Edit";
@@ -43,7 +44,7 @@ export default function ProductPage() {
 
   const [productToDelete, setProductToDelete] = useState<GetProductSchema>();
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(10);
 
   const fetchProducts = async () => {
@@ -276,7 +277,7 @@ export default function ProductPage() {
         </Grid>
 
         {/* Pagination Component */}
-        <TablePagination
+        <TablePagination component={Pagination}
           rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
           count={data ? data.totalPages : 0}
           rowsPerPage={limit}

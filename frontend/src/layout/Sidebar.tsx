@@ -20,14 +20,15 @@ import { AppProvider, DashboardLayout } from "@toolpad/core";
 import type { Router, Navigation, Session } from "@toolpad/core";
 import AddAlertIcon from "@mui/icons-material/AddAlert";
 
-import WarehouseIcon from '@mui/icons-material/Warehouse';
-import AddBusinessIcon from '@mui/icons-material/AddBusiness';
+import WarehouseIcon from "@mui/icons-material/Warehouse";
+import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import Cookies from "js-cookie";
 import { logout } from "../redux/auth/authSlice";
 import { useAppDispatch } from "../redux/hook";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import colors from "../constants/color";
 import { Breadcrumbs, Typography } from "@mui/material";
+import ReceiptIcon from "@mui/icons-material/Receipt";
 const NAVIGATION: Navigation = [
   {
     segment: "dashboard",
@@ -43,7 +44,7 @@ const NAVIGATION: Navigation = [
     segment: "inventory",
     title: "Kho hàng",
     icon: <InventoryIcon />,
-    children:[
+    children: [
       {
         segment: "stock",
         title: "Số lượng sản phẩm",
@@ -53,8 +54,13 @@ const NAVIGATION: Navigation = [
         segment: "create-inventory",
         title: "Tạo hóa đơn nhập hàng",
         icon: <AddBusinessIcon />,
-      }
-    ]
+      },
+      {
+        segment: "import-invoices",
+        title: "Hóa đơn nhập hàng",
+        icon: <ReceiptIcon />,
+      },
+    ],
   },
   {
     segment: "products",
@@ -209,11 +215,7 @@ export default function Sidebar() {
           <Typography key="3" sx={{ color: "text.primary" }}>
             Quản lý
           </Typography>
-          <Link
-            style={{ textDecoration: "none" }}
-            key="1"
-            to={pathname}
-          >
+          <Link style={{ textDecoration: "none" }} key="1" to={pathname}>
             {pathname.replace("/", "").toLocaleUpperCase()}
           </Link>
         </Breadcrumbs>

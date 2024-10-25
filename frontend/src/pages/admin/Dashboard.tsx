@@ -5,7 +5,7 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { getDashboardService } from "../../services/dashboard.service";
 import { useQuery } from "@tanstack/react-query";
-import formatMoney from "../../utils/formatMoney";
+import {formatMoney} from "../../utils/formatMoney";
 const DataChart = lazy(() => import("../../components/DataChart"));
 function Dashboard() {
   const getDashboard = async () => {

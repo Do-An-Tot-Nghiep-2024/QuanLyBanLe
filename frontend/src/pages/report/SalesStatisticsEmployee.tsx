@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { getSalesStatisticsByEmployeeService } from "../../services/statistic.service";
 import { useQuery } from "@tanstack/react-query";
-import formatMoney from "../../utils/formatMoney";
+import {formatMoney} from "../../utils/formatMoney";
 
 export default function SalesStatisticsEmployee() {
   const getSalesStatisticsByProduct = async () => {
