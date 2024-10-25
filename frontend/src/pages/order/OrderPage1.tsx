@@ -22,7 +22,6 @@ import {
 import { getCategoriesService } from "../../services/category.service";
 import { getAllProductsService } from "../../services/product.service";
 import { GetProductSchema } from "../../types/getProductSchema";
-import { getShipmentsService } from "../../services/inventory.service";
 import { createOrderService } from "../../services/order.service";
 
 interface OrderItem {
@@ -31,18 +30,11 @@ interface OrderItem {
   productionDate?: string;
   expirationDate?: string;
   price: number;
-  selectedShipment?: string; // Added selected shipment field
+  selectedShipment?: string; 
 }
 
 interface Category {
   name: string;
-}
-
-interface Invoice {
-  numberInvoice: string; 
-  name: string;          
-  createdAt: string;     
-  total: number;       
 }
 
 
@@ -52,7 +44,6 @@ const OrderPage: React.FC = () => {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<GetProductSchema[]>([]);
-  const [shipments, setShipments] = useState<Invoice[]>([]); 
   const [page] = useState(1);
   const [limit] = useState(10);
 
@@ -121,20 +112,12 @@ const OrderPage: React.FC = () => {
     }
   };
 
-  const fetchShipments = async () => {
-    const response = await getShipmentsService();
-    if (response.data) {
 
-      console.log(response.data);
-      
-      setShipments(response.data.responseList);
-    }
-  };
 
   useEffect(() => {
     fetchCategories();
     fetchProducts();
-    fetchShipments();
+   
   }, []);
 
   const filteredProducts =
@@ -151,6 +134,9 @@ const OrderPage: React.FC = () => {
     startIndex,
     startIndex + limit
   );
+
+
+  
 
   return (
     <Box
@@ -262,9 +248,9 @@ const OrderPage: React.FC = () => {
                         sx={{ width: "100%", textAlign:'left'}}
                       >
                         <MenuItem value="">Chọn mã lô hàng</MenuItem>
-                        {shipments?.map((shipment) => (
-                          <MenuItem key={shipment.numberInvoice} value={shipment.numberInvoice}>
-                            {shipment.numberInvoice} 
+                        {item.product.shipmentIds?.map((shipment) => (
+                          <MenuItem key={shipment} value={shipment}>
+                            {shipment} 
                           </MenuItem>
                         ))}
                       </Select>
