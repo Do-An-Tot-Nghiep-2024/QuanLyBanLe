@@ -4,6 +4,16 @@ import { ProductSchema } from "../types/productSchema";
 import ApiResponse from "../types/apiResponse";
 import { UpdateProductSchema } from "../types/updateProductSchema";
 
+interface GetProductResponse {
+  message: string;
+  data: {
+      lastPage: boolean;
+      pageNumber: number;
+      responseList: GetProductSchema[];
+      totalElements: number;
+      totalPages: number;
+  } | null;
+}
 
 
 const createProductService = async (productRequest: ProductSchema, imageFile: File) => {
@@ -130,16 +140,16 @@ const getProductByIdService = async (id: number) => {
   }
 };
 
-const getAllProductsService = async (): Promise<{ message: string; data: GetProductSchema[] | null }> => {
+const getAllProductsService = async (): Promise<GetProductResponse> => {
   try {
-    const response: ApiResponse = await api.get(`/products`);
+    const response: GetProductResponse = await api.get(`/products`);
     const { message, data } = response;
 
     console.log(data);
 
     return {
       message,
-      data: message === "success" ? (data as unknown as GetProductSchema[]) : null,
+      data: message === "success" ? data : null,
     };
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -150,6 +160,32 @@ const getAllProductsService = async (): Promise<{ message: string; data: GetProd
     };
   }
 };
+
+
+const getProductsBySupplierService = async ( supplierId : number) => {
+  try {
+    const response: ApiResponse = await api.get(`/products/supplier/${supplierId}`);
+    const { message, data } = response;
+
+    console.log(data);
+
+    return {
+      message,
+      data: message === "success" ? data : null,
+    };
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    
+    return {
+      message: String(error),
+      data: null,
+    };
+  }
+};
+
+
+
+
 
 
 
@@ -189,4 +225,4 @@ const deleteProductService = async (id: number) => {
   }
 };
 
-export { getAllProductsService, createProductService, getProductByIdService, getProductsService, updateProductService, deleteProductService };
+export { getAllProductsService, createProductService, getProductByIdService, getProductsService, updateProductService, deleteProductService, getProductsBySupplierService };

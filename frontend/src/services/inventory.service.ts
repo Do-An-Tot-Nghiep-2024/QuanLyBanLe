@@ -29,11 +29,12 @@ const getStocksByProductService = async (
 };
 import ApiResponse from "../types/apiResponse";
 
-const createInventoryOrderService = async (itemList: any[]) => {
+const createInventoryOrderService = async (itemList: any[], supplierId:number) => {
   try {
     console.log(itemList);
 
     const response: ApiResponse = await api.post(`/inventory/import`, {
+      supplierId: supplierId,
       productItems: itemList,
     });
 
