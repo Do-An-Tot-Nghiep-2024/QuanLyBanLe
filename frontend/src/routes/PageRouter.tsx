@@ -48,6 +48,7 @@ const OrderTabs = lazy(() => import("../pages/order/OrderTabs"));
 const CreateInventoryOrder = lazy(
   () => import("../pages/inventory/CreateInvenoryOrder")
 );
+
 const InventoryPage = lazy(() => import("../pages/inventory/InventoryPage"));
 
 const InventoryDetailPage = lazy(
