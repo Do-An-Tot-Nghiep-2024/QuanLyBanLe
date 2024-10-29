@@ -11,8 +11,8 @@ import com.bac.se.backend.payload.request.ProductUpdateRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.product.CreateProductResponse;
 import com.bac.se.backend.payload.response.product.ProductPriceResponse;
+import com.bac.se.backend.payload.response.product.ProductQueryResponse;
 import com.bac.se.backend.payload.response.product.ProductResponse;
-import com.bac.se.backend.payload.response.product.ProductSupplierResponse;
 import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.services.ProductService;
 import com.bac.se.backend.utils.UploadImage;
@@ -37,10 +37,11 @@ public class ProductServiceImpl implements ProductService {
     private final SupplierRepository supplierRepository;
     private final ProductPriceRepository productPriceRepository;
     private final ProductPriceMapper productPriceMapper;
-    private final StockRepository stockRepository;
+//    private final StockRepository stockRepository;
     private final ShipmentItemRepository shipmentItemRepository;
     static final String NOT_FOUND_PRODUCT = "Không tìm thấy sản phẩm";
     private final UploadImage uploadImage;
+    private final UnitRepository unitRepository;
 
     // validate product input
     private void validateInput(ProductUpdateRequest productUpdateRequest) throws BadRequestUserException {
@@ -68,6 +69,7 @@ public class ProductServiceImpl implements ProductService {
         List<ProductResponse> employeeResponseList = productList.stream()
                 .map(res -> {
                     List<Long> shipmentItemIds = shipmentItemMap.getOrDefault(Long.parseLong(res[0].toString()), Collections.emptyList());
+                    
                     return productMapper.mapObjectToProductResponse(res, shipmentItemIds);
                 }).toList();
         return new PageResponse<>(employeeResponseList, pageNumber,
@@ -93,6 +95,7 @@ public class ProductServiceImpl implements ProductService {
                 productPriceResponse.originalPrice(),
                 productPriceResponse.price(),
                 productPriceResponse.discountPrice(),
+                product.getUnit().getName(),
                 shipmentIds);
     }
 
@@ -113,19 +116,17 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
         Supplier supplier = supplierRepository.findById(productUpdateRequest.supplierId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhà cung cấp"));
+        Unit unit = unitRepository.findById(productUpdateRequest.unitId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn vị tính"));
         Product product = Product.builder()
                 .name(productUpdateRequest.name())
                 .image(imageURL)
                 .category(category)
                 .supplier(supplier)
+                .unit(unit)
                 .isActive(true)
                 .build();
         var productSave = productRepository.save(product);
-        // Tạo lô hàng cho sản phẩm
-        Stock stock = Stock.builder()
-                .product(productSave)
-                .build();
-        stockRepository.save(stock);
         return new CreateProductResponse(productSave.getId(),
                 productSave.getName(), productSave.getImage(),
                 productSave.getCategory().getName(),
@@ -198,10 +199,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductSupplierResponse> getProductsBySupplier(Long supplierId) {
+    public List<ProductQueryResponse> getProductsBySupplier(Long supplierId) {
         List<Object[]> productList = productRepository.getProductsBySupplier(supplierId);
         return productList.stream()
-                .map(p -> new ProductSupplierResponse(
+                .map(p -> new ProductQueryResponse(
+                        Long.parseLong(p[0].toString()),
+                        p[1].toString()
+                )).toList();
+    }
+
+    @Override
+    public List<ProductQueryResponse> getProductsByCategory(Long categoryId) {
+        List<Object[]> productList = productRepository.getProductsByCategory(categoryId);
+        return productList.stream()
+                .map(p -> new ProductQueryResponse(
                         Long.parseLong(p[0].toString()),
                         p[1].toString()
                 )).toList();
@@ -218,6 +229,7 @@ public class ProductServiceImpl implements ProductService {
                 productPrice.originalPrice(),
                 productPrice.price(),
                 productPrice.discountPrice(),
+                product.getUnit().getName(),
                 null
         );
     }

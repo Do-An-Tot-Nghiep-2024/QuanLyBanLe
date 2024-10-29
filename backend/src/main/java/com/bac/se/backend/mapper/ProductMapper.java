@@ -1,5 +1,6 @@
 package com.bac.se.backend.mapper;
 
+import com.bac.se.backend.payload.response.product.BestSellingProductResponse;
 import com.bac.se.backend.payload.response.product.ProductResponse;
 import com.bac.se.backend.payload.response.product.ProductShipmentResponse;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class ProductMapper {
                 Double.parseDouble(object[5].toString()), // originalPrice
                 Double.parseDouble(object[6].toString()), // price
                 Double.parseDouble(object[7].toString()),
+                object[8] == null ? "" : object[8].toString(), // unit
                 shipmentIds // isInShipment
         );
     }
@@ -27,12 +29,22 @@ public class ProductMapper {
         return new ProductShipmentResponse(
                 (String) object[0], // product name
                 Integer.parseInt(object[1].toString()), // quantity
-                (Date) object[2], // mxp
-                (Date) object[3], // exp
-                Double.parseDouble(object[4].toString()), // price
-                Double.parseDouble(object[5].toString()) // total
+                Integer.parseInt(object[2] == null ? "0" : object[2].toString()), // sold quantity
+                Integer.parseInt(object[3] == null ? "0" : object[3].toString()),
+                Integer.parseInt(object[4] == null ? "0" : object[4].toString()),
+                (Date) object[5], // mxp
+                (Date) object[6], // exp
+                Double.parseDouble(object[7].toString()), // price
+                Double.parseDouble(object[8].toString()), // total
+                object[9].toString() // unit
         );
     }
 
+    public BestSellingProductResponse mapObjectToBestSellingProduct(Object[] object) {
+        return new BestSellingProductResponse(
+                object[0].toString(),
+                Integer.parseInt(object[1].toString())
+        );
+    }
 
 }

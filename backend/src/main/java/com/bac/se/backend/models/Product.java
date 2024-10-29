@@ -27,6 +27,9 @@ public class Product  {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @ManyToOne
+    @JoinColumn(name = "unit_id")
+    private Unit unit;
 
     @ManyToOne
     @JoinColumn(name = "supplier_id")
@@ -36,11 +39,13 @@ public class Product  {
     @JoinColumn(name = "promotion_id")
     private Promotion promotion;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<ProductPrice> productPrices;
-    @OneToMany(mappedBy = "product")
+
+    @OneToMany(mappedBy = "product",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
-    @OneToMany(mappedBy = "product")
+
+    @OneToMany(mappedBy = "product",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<ShipmentItem> shipmentItems;
 
 }

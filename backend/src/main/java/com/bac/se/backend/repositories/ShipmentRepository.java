@@ -5,14 +5,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.Date;
 import java.util.List;
 
-public interface ShipmentRepository extends JpaRepository<Shipment,Long> {
+public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
     @Query(value = "SELECT " +
             "    s.shipment_id, " +
             "    sup.name, " +
-            "    s.created_at, " +
+            "    DATE_FORMAT(s.created_at, '%d/%m/%Y'), " +
             "    SUM(si.quantity * pp.original_price) AS total_price " +
             "FROM  " +
             "    t_shipment s " +
@@ -26,9 +28,14 @@ public interface ShipmentRepository extends JpaRepository<Shipment,Long> {
             "    pp.created_at = (SELECT MAX(pp2.created_at) " +
             "                     FROM t_product_price pp2 " +
             "                     WHERE pp2.product_id = pp.product_id) " +
+            "AND s.created_at between :fromDate and :toDate " +
             "GROUP BY " +
-            "    s.shipment_id, s.created_at", nativeQuery = true)
-    Page<Object[]> getShipments(Pageable pageable);
+            "    s.shipment_id " +
+            "ORDER BY " +
+            "    s.shipment_id DESC", nativeQuery = true)
+    Page<Object[]> getShipments(Pageable pageable,
+                                @Param("fromDate") Date fromDate,
+                                @Param("toDate") Date toDate);
 
 
     @Query(value = "select sup.name, s.createdAt from Shipment s " +

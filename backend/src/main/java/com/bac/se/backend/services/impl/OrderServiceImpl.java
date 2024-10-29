@@ -52,7 +52,6 @@ public class OrderServiceImpl implements OrderService {
             phoneCustomer = orderRequest.customerPhone().get();
         }
         var orderItemRequests = orderRequest.orderItems();
-        log.info("Phone customer is {}", phoneCustomer);
         // Kiểm tra thông tin khách hàng
         Customer customer = new Customer();
         if (!phoneCustomer.isEmpty()) {
@@ -60,13 +59,12 @@ public class OrderServiceImpl implements OrderService {
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thông tin khách hàng"));
         }
         String emailEmployee = jwtParse.decodeTokenWithRequest(request);
-        log.info("Email employee is {}", emailEmployee);
         // Kiểm tra thông tin nhân viên
         Employee employee = employeeRepository.findByEmail(emailEmployee)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thông tin nhân viên"));
         // Kiểm tra thông tin khách hàng
         // Tạo hóa đơn cho khách hàng mua trực tiếp
-        Order order = Order.builder().build();
+        Order order;
         if (customer.getId() == null) {
             order = Order.builder()
                     .employee(employee)
@@ -84,13 +82,6 @@ public class OrderServiceImpl implements OrderService {
                     .build();
         }
 
-//        Order order = Order.builder()
-//                .customer(customer)
-//                .employee(employee)
-//                .orderStatus(OrderStatus.COMPLETED)
-//                .createdAt(new Date())
-//                .paymentType(PaymentType.CASH)
-//                .build();
         Order orderSave = orderRepository.save(order);
         double total = 0;
         // Kiểm tra số các mặt hàng trong đơn
@@ -111,16 +102,27 @@ public class OrderServiceImpl implements OrderService {
             if (shipmentItem.getExp().before(new Date())) {
                 throw new BadRequestUserException("Sản phẩm đã hết hạn");
             }
-            // Kiêm tra sản phẩm có đủ số lượng trong lô hàng hay không
-            var stock = stockRepository.findStockByProductId(product.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm số lượng của sản phẩm"));
-            if (stock.getQuantity() - stock.getSoldQuantity() - stock.getFailedQuantity() == stock.getNotifyQuantity()) {
-                // Thông báo cho người dùng sắp hết hàng
-                log.info("Sản phẩm sắp hết hàng");
+//
+            Pageable pageRequest = PageRequest.of(0, 1);
+            var objects = shipmentItemRepository.getStockByShipmentItem(shipmentItem.getShipment().getId(), shipmentItem.getProduct().getId(), pageRequest).get(0);
+            if(objects.length == 0){
+                throw new BadRequestUserException("Chưa có số lượng lô hàng");
             }
-            // Cập nhât số lượng sản phẩm trong lô hàng
+            // Kiểm tra số lượng của lô hàng
+            // Cập nhật số lượng đã bán
+            var stock = stockRepository.findById(Long.parseLong(objects[0].toString()))
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy số lượng của lô hàng"));
+            log.info("stock quantity {}",stock.getQuantity());
+            if(stock.getQuantity() - stock.getSoldQuantity() < orderItemRequest.quantity()){
+                throw new BadRequestUserException("Số lượng không đủ");
+            }
+            if(stock.getQuantity() - stock.getSoldQuantity() == 5){
+                log.info("send message to manager");
+            }
             stock.setSoldQuantity(stock.getSoldQuantity() + orderItemRequest.quantity());
             stockRepository.save(stock);
+
+
 //          // Lấy ra giá mới nhất của sản phẩm và tính tổng thành tiền của sản phẩm
             var productPriceLatest = productPriceRepository.getProductPriceLatest(product.getId(), PageRequest.of(0, 1));
             double price = Double.parseDouble(productPriceLatest.get(0)[1].toString());

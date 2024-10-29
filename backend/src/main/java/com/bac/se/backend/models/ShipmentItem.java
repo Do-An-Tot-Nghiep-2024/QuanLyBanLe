@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,17 +19,26 @@ import java.util.Date;
 @IdClass(ShipmentItemKey.class)
 @Table(name = "t_shipment_item")
 public class ShipmentItem {
+
     @Id
-    @ManyToOne
-    @JoinColumn(name = "shipment_id")
-    private Shipment shipment;
-    @Id
-    @ManyToOne
     @JoinColumn(name = "product_id")
+    @ManyToOne(cascade = CascadeType.ALL)
     private Product product;
+
+    @Id
+    @JoinColumn(name = "shipment_id")
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Shipment shipment;
+
     private int quantity;
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date mxp;
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date exp;
+
+    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JoinColumn(name = "stock_id")
+    private Stock stock;
+
+
 }

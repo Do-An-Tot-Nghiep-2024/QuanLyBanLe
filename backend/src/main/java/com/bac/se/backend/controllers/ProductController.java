@@ -9,8 +9,8 @@ import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.product.CreateProductResponse;
 import com.bac.se.backend.payload.response.product.ProductPriceResponse;
+import com.bac.se.backend.payload.response.product.ProductQueryResponse;
 import com.bac.se.backend.payload.response.product.ProductResponse;
-import com.bac.se.backend.payload.response.product.ProductSupplierResponse;
 import com.bac.se.backend.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -123,7 +123,7 @@ public class ProductController {
 
     @GetMapping("/supplier/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<List<ProductSupplierResponse>>> getProductsBySupplier(@PathVariable("id") Long supplierId){
+    public ResponseEntity<ApiResponse<List<ProductQueryResponse>>> getProductsBySupplier(@PathVariable("id") Long supplierId){
         try{
             return ResponseEntity.ok()
                     .body(new ApiResponse<>(REQUEST_SUCCESS,productService.getProductsBySupplier(supplierId)));
@@ -132,4 +132,14 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/category/{id}")
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public ResponseEntity<ApiResponse<List<ProductQueryResponse>>> getProductsByCategory(@PathVariable("id") Long categoryId){
+        try{
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(REQUEST_SUCCESS,productService.getProductsByCategory(categoryId)));
+        }catch (Exception e){
+            return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
 }
