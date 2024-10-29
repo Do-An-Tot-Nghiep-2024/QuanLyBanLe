@@ -21,8 +21,5 @@ public class Stock {
     private int soldQuantity;
     private int failedQuantity;
     private int notifyQuantity; // số lượng sản càn còn lại nếu bằng với notifyQuantity thì gửi thông báo cho người dùng
-    @OneToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
 
 }

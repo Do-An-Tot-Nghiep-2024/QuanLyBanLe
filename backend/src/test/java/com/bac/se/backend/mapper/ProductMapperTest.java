@@ -13,7 +13,7 @@ class ProductMapperTest {
 
     @Test
     void mapObjectToProductResponse() {
-        ProductResponse productResponse = productMapper.mapObjectToProductResponse(new Object[]{"1", "name", "image", "category", "supplier", "100", "200", "300"}, new ArrayList<>());
+        ProductResponse productResponse = productMapper.mapObjectToProductResponse(new Object[]{"1", "name", "image", "category", "supplier", "100", "200", "300","cái"}, new ArrayList<>());
         assertEquals(1L, productResponse.id());
         assertEquals("name", productResponse.name());
         assertEquals("image", productResponse.image());
@@ -22,5 +22,6 @@ class ProductMapperTest {
         assertEquals(100.0, productResponse.originalPrice());
         assertEquals(200.0, productResponse.price());
         assertEquals(300.0, productResponse.discountPrice());
+        assertEquals("cái", productResponse.unit());
     }
 }

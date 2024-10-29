@@ -7,12 +7,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 
-@Data
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ShipmentItemKey  {
+@Data
+public class ShipmentItemKey implements Serializable {
     private Product product;
     private Shipment shipment;
+
 }
