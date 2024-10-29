@@ -20,8 +20,9 @@ import { useNavigate } from "react-router-dom";
 import { formatDateTime } from "../../utils/convertDate";
 import { formatMoneyThousand } from "../../utils/formatMoney";
 import ImportInvoice from "../../types/inventory/importInvoice";
+import colors from "../../constants/color";
+export default function InventoryPage() {
 
-export default function InventoryPage({}) {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const navigate = useNavigate();
@@ -85,20 +86,49 @@ export default function InventoryPage({}) {
         </Button>
       </Box>
       
-      <TableContainer component={Paper} sx={{ width: "100%" }}>
-        <Table aria-label="custom pagination table">
-          <TableHead>
-            <TableRow>
-              {columns.map((column: string) => (
-                <TableCell
-                  key={column}
-                  align={"center"}
-                  sx={{
-                    fontWeight: "bold",
-                    color: "text.primary",
-                  }}
-                >
-                  {column}
+    <TableContainer
+      component={Paper}
+      sx={{ width: "100%", backgroundColor: "white" }}
+    >
+      <Table aria-label="custom pagination table">
+        <TableHead
+          sx={{ backgroundColor: colors.secondaryColor, fontSize: 18 }}
+        >
+          <TableRow>
+            {columns.map((column: string) => (
+              <TableCell
+                key={column}
+                align={"center"}
+                sx={{
+                  fontWeight: "bold",
+                  color: "text.primary",
+                }}
+              >
+                {column}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data !== undefined &&
+          data.responseList !== undefined &&
+          data.responseList.length > 0 ? (
+            data.responseList.map((row: ImportInvoice) => (
+              <TableRow hover key={row.numberInvoice}>
+                <TableCell align={"center"}>{row.numberInvoice}</TableCell>
+                <TableCell align={"center"}>{row.name}</TableCell>
+                <TableCell align={"center"}>
+                  {formatDateTime(row.createdAt)}
+                </TableCell>
+                <TableCell align={"center"}>
+                  {formatMoneyThousand(row.total)}
+                </TableCell>
+                <TableCell align={"center"}>
+                  <IconButton
+                    onClick={() => navigate(`/inventory/${row.numberInvoice}`)}
+                  >
+                    <RemoveRedEyeIcon color="success" />
+                  </IconButton>
                 </TableCell>
               ))}
             </TableRow>

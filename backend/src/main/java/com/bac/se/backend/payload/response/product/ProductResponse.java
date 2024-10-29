@@ -7,6 +7,7 @@ public record ProductResponse(Long id, String name,
                               String category, String supplier,
                               double originalPrice, double price,
                               double discountPrice,
+                              String unit,
                               List<Long> shipmentIds
 ) {
 }

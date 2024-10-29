@@ -61,7 +61,7 @@ const NAVIGATION: Navigation = [
     segment: "products",
     title: "Sản phẩm",
     icon: <StoreIcon />,
-    children:[
+    children: [
       {
         segment: "",
         title: "Quản lí sản phẩm",
@@ -71,8 +71,8 @@ const NAVIGATION: Navigation = [
         segment: "categories",
         title: "Quản lí danh mục",
         icon: <AddBusinessIcon />,
-      }
-    ]
+      },
+    ],
   },
   {
     segment: "suppliers",
@@ -160,34 +160,43 @@ const demoTheme = createTheme({
     },
   },
 });
+const Logo = () => (
+  <img
+    src="https://res.cloudinary.com/dujylxkra/image/upload/c_thumb,w_200,g_face/v1729824625/logo-product_imja18.png"
+    alt="logo"
+    style={{ width: "100%", borderRadius: "50%" }}
+  />
+);
 
 export default function Sidebar() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>({
     user: {
-      name: "Bharat Kashyap",
+      // name: "Bharat Kashyap",
       email: "bharatkashyap@outlook.com",
       image: "https://avatars.githubusercontent.com/u/19550456",
     },
   });
+  const clearToken = () => {
+    setSession(null);
+    Cookies.remove("accessToken");
+    navigate("/login");
+    dispatch(logout());
+  };
 
   const authentication = useMemo(() => {
     return {
       signIn: () => {
         setSession({
           user: {
-            name: "Bharat Kashyap",
-            email: "bharatkashyap@outlook.com",
+            name: "",
             image: "https://avatars.githubusercontent.com/u/19550456",
           },
         });
       },
       signOut: () => {
-        setSession(null);
-        Cookies.remove("accessToken");
-        navigate("/login");
-        dispatch(logout());
+        clearToken();
       },
     };
   }, []);
@@ -198,8 +207,12 @@ export default function Sidebar() {
       pathname,
       searchParams: new URLSearchParams(),
       navigate: (path) => {
-        setPathname(String(path));
-        navigate(path);
+        if (path === "/logout") {
+          clearToken();
+        } else {
+          setPathname(String(path));
+          navigate(path);
+        }
       },
     };
   }, [pathname]);
@@ -214,6 +227,7 @@ export default function Sidebar() {
       theme={demoTheme}
       branding={{
         // logo: "https://avatars.githubusercontent.com/u/19550456",
+        logo: <Logo />,
         title: "Retail Store",
       }}
     >
@@ -222,6 +236,7 @@ export default function Sidebar() {
           <Typography key="3" sx={{ color: "text.primary" }}>
             Quản lý
           </Typography>
+
           <Link style={{ textDecoration: "none" }} key="1" to={pathname}>
             {pathname.replace("/", "").toLocaleUpperCase()}
           </Link>

@@ -49,7 +49,7 @@ export default function SalesStatisticsProduct() {
         width={750}
         height={300}
         data={data}
-        margin={{ top: 25, right: 30, left: 40, bottom: 65 }}
+        margin={{ top: 25, right: 30, left: 50, bottom: 65 }}
       >
         <CartesianGrid stroke="#3C3D37" strokeDasharray="3 3" />
         <XAxis dataKey="name">
@@ -65,8 +65,8 @@ export default function SalesStatisticsProduct() {
         <YAxis dataKey="total"
         tickFormatter={(amount: number) => formatMoney(amount)}>
           <Label
-            dy={-60}
-            dx={-25}
+            dy={-75}
+            dx={-30}
             value="Doanh thu (VNĐ)"
             position="left"
             angle={-90}

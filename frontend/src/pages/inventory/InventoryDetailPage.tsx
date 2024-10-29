@@ -65,17 +65,19 @@ export default function InventoryDetailPage() {
       <Box>
         <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
           <Typography fontWeight="bold">Tên nhà cung cấp: </Typography>
-          <Typography sx={{ fontSize: 15 }}>{data?.name}</Typography>
+          <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
+            {data?.name}
+          </Typography>
         </Stack>
         <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
           <Typography fontWeight="bold">Ngày tạo hóa đơn: </Typography>
-          <Typography sx={{ fontSize: 15 }}>
+          <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
             {formatDateTime(data?.createdAt as Date)}
           </Typography>
         </Stack>
         <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
           <Typography fontWeight="bold">Tổng thành tiền: </Typography>
-          <Typography sx={{ fontSize: 15 }}>
+          <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
             {formatMoney(data?.total as number)}
           </Typography>
         </Stack>
@@ -88,7 +90,7 @@ export default function InventoryDetailPage() {
               {columns.map((column: string) => (
                 <TableCell
                   key={column}
-                  align={"center"}
+                  align={column === "Tên sản phẩm" ? "left" : "center"}
                   sx={{
                     fontWeight: "bold",
                     color: "text.primary",
@@ -103,7 +105,7 @@ export default function InventoryDetailPage() {
           <TableBody>
             {data?.productItems.map((item, index: number) => (
               <TableRow key={index}>
-                <TableCell align={"center"}>{item.name}</TableCell>
+                <TableCell align={"left"}>{item.name}</TableCell>
                 <TableCell align={"center"}>{item.quantity}</TableCell>
                 <TableCell align={"center"}>{formatDate(item.mxp)}</TableCell>
                 <TableCell align={"center"}>{formatDate(item.exp)}</TableCell>

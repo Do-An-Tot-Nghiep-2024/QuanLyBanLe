@@ -66,13 +66,13 @@ export default function EmployeePage() {
       return response.data as ResponsePagination<EmployeeSchema>;
     } catch (error) {
       console.error(error);
-      throw error; 
+      throw error;
     }
   };
 
   const { isLoading, isError, error, data, isFetching } = useQuery({
     queryKey: ["employees", page, limit],
-    queryFn: () => getEmployees(page, limit), 
+    queryFn: () => getEmployees(page, limit),
   });
 
   // how to detructuring data from useQuery
@@ -121,7 +121,7 @@ export default function EmployeePage() {
   console.log("Total pages: ", data?.totalPages ?? 0);
 
   console.log(data);
-  
+
   return (
     <>
       {updateSuccess && (
@@ -198,16 +198,24 @@ export default function EmployeePage() {
               </Stack>
             </Stack>
 
-            <TableContainer component={Paper} sx={{ width: "100%", backgroundColor:'white' }}>
+            <TableContainer
+              component={Paper}
+              sx={{ width: "100%", backgroundColor: "white" }}
+            >
               <Table aria-label="custom pagination table">
-                <TableHead sx={{backgroundColor:colors.secondaryColor}}>
-                  <TableRow>
+                <TableHead>
+                  <TableRow
+                    sx={{
+                      backgroundColor: colors.secondaryColor,
+                      width: "100%",
+                    }}
+                  >
                     {columns.map((column: string) => (
                       <TableCell
-                        colSpan={column === "Hành động" ? 3 : 1}
+                        colSpan={column === "Tác động" ? 3 : 1}
                         key={column}
                         align={"center"}
-                        sx={{fontSize:"16px", fontWeight:'bold'}}
+                        sx={{ fontSize: "16px", fontWeight: "bold" }}
                       >
                         {column}
                       </TableCell>

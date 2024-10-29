@@ -4,21 +4,25 @@ import ApiResponse from "../types/apiResponse";
 import LoginResponse from "../types/loginResponse";
 
 const loginService = async (login: LoginSchema) => {
-  
   try {
     const response: ApiResponse = await api.post("/auth/login", login);
+    console.log(response);
+
     if (response?.message !== "success") {
       return {
-        status: false,
+        message: response.message,
         data: {},
       };
     }
     return {
-      status: true,
+      message: response.message,
       data: response.data as LoginResponse,
     };
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    return {
+      message: error.response.data.message,
+      data: {},
+    };
   }
 };
 const getAccountService = async () => {
@@ -31,17 +35,15 @@ const getAccountService = async () => {
     //     },
     //   }
     // );
-  
+
     const response: any = await api.get("/auth/account");
     if (response.message !== "success") {
- 
-      
       return {
         status: false,
         data: {},
       };
     }
-    
+
     return {
       status: true,
       data: response.data,

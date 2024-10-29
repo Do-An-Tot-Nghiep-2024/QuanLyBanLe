@@ -44,6 +44,10 @@ const StockPage = lazy(() => import("../pages/inventory/StockPage"));
 const Logout = lazy(() => import("../pages/login/Logout"));
 const CreateProduct = lazy(() => import("../pages/product/CreateProduct"));
 const OrderTabs = lazy(() => import("../pages/order/OrderTabs"));
+// const OrderPage = lazy(() => import("../pages/order/OrderPage1"));
+const CreateInventoryOrder = lazy(
+  () => import("../pages/inventory/CreateInvenoryOrder")
+);
 
 const InventoryPage = lazy(() => import("../pages/inventory/InventoryPage"));
 
@@ -53,7 +57,6 @@ const InventoryDetailPage = lazy(
 const OrderPage1 = lazy(() => import("../pages/order/OrderPage1"));
 const OrderPage2 = lazy(() => import("../pages/order/OrderPage2"));
 
-const CreateInventoryOrder = lazy(()=> import("../pages/inventory/CreateInvenoryOrder"))
 
 const PrintImportInvoice = lazy(
   () => import("../pages/print/PrintImportInvoice")

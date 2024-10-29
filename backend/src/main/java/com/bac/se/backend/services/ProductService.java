@@ -7,8 +7,8 @@ import com.bac.se.backend.payload.request.ProductUpdateRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.product.CreateProductResponse;
 import com.bac.se.backend.payload.response.product.ProductPriceResponse;
+import com.bac.se.backend.payload.response.product.ProductQueryResponse;
 import com.bac.se.backend.payload.response.product.ProductResponse;
-import com.bac.se.backend.payload.response.product.ProductSupplierResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -34,5 +34,7 @@ public interface ProductService {
 
     ProductPriceResponse updatePriceProduct(Long productId, ProductPriceRequest request) throws BadRequestUserException;
 
-    List<ProductSupplierResponse> getProductsBySupplier(Long supplierId);
+    List<ProductQueryResponse> getProductsBySupplier(Long supplierId);
+
+    List<ProductQueryResponse> getProductsByCategory(Long categoryId);
 }

@@ -20,8 +20,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +42,16 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final InvoiceMapper invoiceMapper;
     private final SupplierRepository supplierRepository;
     private final ProductMapper productMapper;
+    private final UnitRepository unitRepository;
+
+    static final String DEFAULT_TO_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
+            .format(LocalDate.now().plusDays(1));
+    static final String DEFAULT_FROM_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
+            .format(LocalDate.now().minusDays(2));
+
+    static final int defaultQuantityNotify = 5;
+
+
 
     ///  create order shipment
 
@@ -57,23 +72,26 @@ public class ShipmentServiceImpl implements ShipmentService {
             Product product = productRepository.findById(productItem.id())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với mã là: "
                             + productItem.id()));
+            log.info("find product success");
+
             // Thông báo ngoại lệ nếu sản phẩm không thuộc về nh cung cấp
             if (!product.getSupplier().getId().equals(supplier.getId())) {
                 throw new BadRequestUserException("Sản phẩm không thuộc về nhà cung cấp");
             }
             ShipmentItem shipmentItem = ShipmentItem.builder()
-                    .product(product)
                     .quantity(productItem.quantity())
                     .exp(productItem.exp())
                     .mxp(productItem.mxp())
                     .shipment(shipmentSave)
+                    .product(product)
                     .build();
+            log.info("create shipment item success");
             List<Object[]> productPrices = productPriceRepository.getProductPriceLatest(
                     productItem.id(), PageRequest.of(0, 1));
             Object[] productPrice = null;
             // Tạo mới mới product price nếu không có product price
-            if(productPrices.isEmpty()){
-                productPrice = new Object[]{productItem.price(),productItem.price() + productItem.price() * DEFAULT_PROFIT,0};
+            if (productPrices.isEmpty()) {
+                productPrice = new Object[]{productItem.price(), productItem.price() + productItem.price() * DEFAULT_PROFIT, 0};
                 ProductPrice newProductPrice = ProductPrice.builder()
                         .product(Product.builder().id(productItem.id()).build())
                         .originalPrice(productItem.price())
@@ -82,10 +100,11 @@ public class ShipmentServiceImpl implements ShipmentService {
                         .createdAt(new Date())
                         .build();
                 productPriceRepository.save(newProductPrice);
-            }else{
+            } else {
                 productPrice = productPrices.get(0);
             }
             double oldPrice = productPriceMapper.mapObjectToProductPriceResponse(productPrice).originalPrice();
+            log.info("find product price success");
             // So sánh giá nhập với giá mới nhất của sản phẩm
             if (oldPrice != productItem.price()) {
                 ProductPrice newProductPrice = ProductPrice.builder()
@@ -99,12 +118,16 @@ public class ShipmentServiceImpl implements ShipmentService {
 
             }
             // Lưu thông tin chi tiết lô hàng
+            Stock stock = Stock.builder()
+                    .notifyQuantity(defaultQuantityNotify)
+                    .quantity(productItem.quantity())
+                    .failedQuantity(0)
+                    .soldQuantity(0)
+                    .build();
+            // Cập nhật số lượng sản phâm trong lô hàng
+            var stockSave = stockRepository.save(stock);
+            shipmentItem.setStock(stockSave);
             shipmentItemRepository.save(shipmentItem);
-            // Cập nhật số lượng sản phẩm
-            Stock stock = stockRepository.findStockByProductId(productItem.id())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lô hàng của sản phẩm"));
-            stock.setQuantity(stock.getQuantity() + productItem.quantity());
-            stockRepository.save(stock);
             total = total.add(BigDecimal.valueOf(productItem.quantity()).multiply(BigDecimal.valueOf(productItem.price())));
         }
         return new ShipmentResponse(supplier.getName(),
@@ -114,9 +137,16 @@ public class ShipmentServiceImpl implements ShipmentService {
     }
 
     @Override
-    public PageResponse<ImportInvoice> getImportInvoices(Integer pageNumber, Integer pageSize) {
+    public PageResponse<ImportInvoice> getImportInvoices(Integer pageNumber, Integer pageSize,
+                                                         String fromDate,
+                                                         String toDate) throws ParseException {
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
-        var shipments = shipmentRepository.getShipments(pageRequest);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date from = fromDate != null ? dateFormat.parse(fromDate) : dateFormat.parse(DEFAULT_FROM_DATE);
+        Date to = toDate != null ? dateFormat.parse(toDate) : dateFormat.parse(DEFAULT_TO_DATE);
+        log.info("from: {} ",from);
+        log.info("to: {}",to);
+        var shipments = shipmentRepository.getShipments(pageRequest, from, to);
         var content = shipments.getContent();
         var response = content.stream().map(invoiceMapper::mapObjectToImportInvoice).toList();
         return new PageResponse<>(
