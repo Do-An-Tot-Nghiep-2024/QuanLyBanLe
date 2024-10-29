@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
     FlatList,
     Image,
@@ -12,7 +12,35 @@ import {
 import { colors } from '@/app/style';
 import categories from '@/app/component/data/category';
 import { Shadow } from 'react-native-shadow-2';
+import { getAllCategoryService } from '@/app/services/category.service';
+import { useFocusEffect } from 'expo-router';
 export default function Category({ navigation }) {
+    const [categories, setCategories] = useState([]);
+    
+    useFocusEffect(
+        React.useCallback(() => {
+            const fetchCategories = async () => {
+          
+                try {
+                    const data =  getAllCategoryService().then((data) =>{
+                        console.log("page", data);
+                    
+                        setCategories(data.data);
+                    })
+                   console.log("data", data);
+                   
+                } catch (error) {
+                    console.error('Error fetching categories:', error);
+                } finally {
+                }
+            };
+    
+            fetchCategories();
+
+        }, [])
+    );
+
+
     return (
         <View style={styles.container}>
             <View style={styles.headerContainer}>

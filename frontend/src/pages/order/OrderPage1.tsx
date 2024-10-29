@@ -18,11 +18,14 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import { getCategoriesService } from "../../services/category.service";
 import { getAllProductsService } from "../../services/product.service";
 import { GetProductSchema } from "../../types/getProductSchema";
 import { createOrderService } from "../../services/order.service";
+import AddBoxIcon from "@mui/icons-material/AddBox";
 
 interface OrderItem {
   product: GetProductSchema;
@@ -30,7 +33,7 @@ interface OrderItem {
   productionDate?: string;
   expirationDate?: string;
   price: number;
-  selectedShipment?: string; 
+  selectedShipment?: string;
 }
 
 interface Category {
@@ -80,24 +83,24 @@ const OrderPage: React.FC = () => {
     if (orderItems.length === 0) {
       alert("Please add at least one item to the order.");
       return;
-  }
+    }
 
-  const formattedOrderItems = orderItems.map(item => ({
+    const formattedOrderItems = orderItems.map(item => ({
       productId: item.product.id,
       quantity: item.quantity,
       shipmentId: item.selectedShipment
-  }));
+    }));
 
-  console.log(formattedOrderItems);
+    console.log(formattedOrderItems);
 
-  try {
+    try {
       const response = await createOrderService(formattedOrderItems);
       console.log("Order created:", response);
       setOrderItems([]);
-  } catch (error) {
+    } catch (error) {
       console.error("Error creating order:", error);
       alert("An error occurred while creating the order.");
-  }
+    }
   };
 
   const fetchCategories = async () => {
@@ -114,20 +117,28 @@ const OrderPage: React.FC = () => {
 
 
 
+
   useEffect(() => {
     fetchCategories();
     fetchProducts();
-   
+
   }, []);
 
+  const normalizeString = (str : string) => {
+    return str
+      .normalize("NFD") 
+      .replace(/[\u0300-\u036f]/g, "") 
+      .toLowerCase(); 
+  };
+
   const filteredProducts =
-    Array.isArray(products)
-      ? products.filter(
-          (product) =>
-            product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            (selectedCategory ? product.category === selectedCategory : true)
-        )
-      : [];
+  Array.isArray(products)
+    ? products.filter(
+        (product) =>
+          normalizeString(String(product.name)).includes(normalizeString(searchTerm)) &&
+          (selectedCategory ? product.category === selectedCategory : true)
+      )
+    : [];
 
   const startIndex = (page - 1) * limit;
   const paginatedProducts = filteredProducts.slice(
@@ -136,7 +147,7 @@ const OrderPage: React.FC = () => {
   );
 
 
-  
+
 
   return (
     <Box
@@ -188,12 +199,15 @@ const OrderPage: React.FC = () => {
                   variant: 'body2'
                 }}
               />
-              <Button
-                variant="contained"
-                onClick={() => handleAddToOrder(product)}
-              >
-                Thêm
-              </Button>
+              <Tooltip title="Thêm sản phẩm" arrow>
+                <IconButton
+                  onClick={() => handleAddToOrder(product)}
+                  size="large"
+                  color="success"
+                >
+                  <AddBoxIcon />
+                </IconButton>
+              </Tooltip>
             </ListItem>
           ))}
         </List>
@@ -222,7 +236,7 @@ const OrderPage: React.FC = () => {
                 {orderItems.map((item) => (
                   <TableRow key={Number(item.product.id)}>
                     <TableCell sx={{ textAlign: "left" }}>{item.product.name}</TableCell>
-                    <TableCell sx={{ textAlign: "left"}}>
+                    <TableCell sx={{ textAlign: "left" }}>
                       <TextField
                         type="number"
                         value={item.quantity}
@@ -232,7 +246,7 @@ const OrderPage: React.FC = () => {
                         sx={{ width: "50%" }}
                       />
                     </TableCell>
-                    <TableCell sx={{flex:1}}>
+                    <TableCell sx={{ flex: 1 }}>
                       <Select
                         value={item.selectedShipment || ""}
                         onChange={(e) => {
@@ -245,17 +259,17 @@ const OrderPage: React.FC = () => {
                             )
                           );
                         }}
-                        sx={{ width: "100%", textAlign:'left'}}
+                        sx={{ width: "100%", textAlign: 'left' }}
                       >
                         <MenuItem value="">Chọn mã lô hàng</MenuItem>
                         {item.product.shipmentIds?.map((shipment) => (
                           <MenuItem key={shipment} value={shipment}>
-                            {shipment} 
+                            {shipment}
                           </MenuItem>
                         ))}
                       </Select>
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center", width:"30%" }}>
+                    <TableCell sx={{ textAlign: "center", width: "30%" }}>
                       {formatCurrency(Number(item.price))}
                     </TableCell>
                   </TableRow>

@@ -46,7 +46,7 @@ export default function ProductPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(10);
-
+  const [searchTerm, setSearchTerm] = useState("");
   const fetchProducts = async () => {
     const response = await getAllProductsService();
     if (!response) {
@@ -135,12 +135,49 @@ export default function ProductPage() {
     .concat("All")
     .sort();
 
+
+  const normalizeString = (str: string) => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  };
+
+  // const filteredProducts =
+  // Array.isArray(products)
+  //   ? products.filter(
+  //       (product) =>
+  //         normalizeString(String(product.productName)).includes(normalizeString(searchTerm))
+  //     )
+  //   : [];
+
+
   const filteredProducts =
-    selectedCategory === "All"
+    selectedCategory === "All" && !searchTerm
       ? data?.responseList
       : data?.responseList.filter(
-          (product) => product.category === selectedCategory
-        );
+        (product) => product.category === selectedCategory 
+      );
+
+
+  // const filteredProducts = (): GetProductSchema[] => {
+  //   if (!data || !data.responseList) return [];
+
+  //   const normalizedSearchTerm = normalizeString(searchTerm);
+
+  //   const categoryFilteredProducts = selectedCategory === "All"
+  //     ? data.responseList
+  //     : data.responseList.filter(product => product.category === selectedCategory);
+
+  //   if (normalizedSearchTerm) {
+  //     return categoryFilteredProducts.filter(product =>
+  //       normalizeString(String(product.name)).includes(normalizedSearchTerm)
+  //     );
+  //   }
+
+  //   return categoryFilteredProducts as GetProductSchema[];
+  // };
+
 
   return (
     <>
@@ -159,6 +196,8 @@ export default function ProductPage() {
               mt: 2,
               display: { xs: "none", md: "inline-block", sm: "flex" },
             }}
+            onChange={(e) => setSearchTerm(e.target.value)}
+
           />
           <Tooltip title="Thêm sản phẩm" arrow>
             <IconButton
@@ -178,7 +217,7 @@ export default function ProductPage() {
               <NoteAddOutlined />
             </IconButton>
           </Tooltip>
-        
+
         </Stack>
         <Tabs
           value={selectedCategory}
@@ -199,8 +238,8 @@ export default function ProductPage() {
             <Grid size="auto" display="flex" justifyContent="center">
               <Typography variant="h6">Error: {error.message}</Typography>
             </Grid>
-          ) : filteredProducts?.length && filteredProducts?.length > 0 ? (
-            filteredProducts?.map((product) => (
+          ) : filteredProducts?.length && filteredProducts?.length > 0 ?(
+            filteredProducts?.map((product ) => (
               <Grid size="auto" key={Number(product.id)}>
                 <Card
                   sx={{

@@ -18,10 +18,13 @@ import {
     TableRow,
     FormControl,
     InputLabel,
+    Tooltip,
+    IconButton,
 } from "@mui/material";
 import { getProductsBySupplierService } from "../../services/product.service";
 import { createInventoryOrderService } from "../../services/inventory.service";
 import { getSuppliersService } from "../../services/supplier.service";
+import AddBoxIcon from "@mui/icons-material/AddBox";
 
 interface OrderItem {
     product: GetProductBySupplier;
@@ -152,9 +155,20 @@ const CreateInventoryOrder: React.FC = () => {
         setSearchTerm("");
     };
 
-    const filteredProducts = products.filter(product =>
-        product.productName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const normalizeString = (str : string) => {
+        return str
+          .normalize("NFD") 
+          .replace(/[\u0300-\u036f]/g, "") 
+          .toLowerCase(); 
+      };
+    
+      const filteredProducts =
+      Array.isArray(products)
+        ? products.filter(
+            (product) =>
+              normalizeString(String(product.productName)).includes(normalizeString(searchTerm))
+          )
+        : [];
 
     useEffect(() => {
         fetchProducts();
@@ -203,9 +217,19 @@ const CreateInventoryOrder: React.FC = () => {
                     {filteredProducts.map((product) => (
                         <ListItem key={product.id} divider>
                             <ListItemText primary={product.productName} />
-                            <Button variant="contained" onClick={() => handleAddToOrder(product)}>
-                                Thêm
-                            </Button>
+                            {/* <Button variant="contained" onClick={() => handleAddToOrder(product)}>
+                              
+                            </Button> */}
+
+                            <Tooltip title="Thêm sản phẩm" arrow>
+                                <IconButton
+                                    onClick={() => handleAddToOrder(product) }
+                                    size="large"
+                                    color="success"
+                                >
+                                    <AddBoxIcon />
+                                </IconButton>
+                            </Tooltip>
                         </ListItem>
                     ))}
                 </List>
@@ -213,7 +237,7 @@ const CreateInventoryOrder: React.FC = () => {
 
             <Paper elevation={3} sx={{ padding: 3, borderRadius: 2 }}>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
-                    Chi tiết hóa đơn nhập hàng
+                    Chi tiết phiếu nhập hàng
                 </Typography>
                 <TableContainer>
                     <Table>
@@ -289,7 +313,7 @@ const CreateInventoryOrder: React.FC = () => {
                     </Box>
                 </Box>
 
-                <Button variant="contained" onClick={handleCreateBill} sx={{ mt: 2 }}>Tạo hóa đơn</Button>
+                <Button variant="contained" onClick={handleCreateBill} sx={{ mt: 2 }}>Tạo</Button>
             </Paper>
         </Box>
     );
