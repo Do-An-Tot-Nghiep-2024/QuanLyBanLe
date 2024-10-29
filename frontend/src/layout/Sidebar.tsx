@@ -47,17 +47,12 @@ const NAVIGATION: Navigation = [
     children: [
       {
         segment: "stock",
-        title: "Số lượng sản phẩm",
+        title: "Quản lí kho hàng",
         icon: <WarehouseIcon />,
       },
       {
-        segment: "create-inventory",
-        title: "Tạo hóa đơn nhập hàng",
-        icon: <AddBusinessIcon />,
-      },
-      {
         segment: "import-invoices",
-        title: "Hóa đơn nhập hàng",
+        title: "Quản lí phiếu nhập hàng",
         icon: <ReceiptIcon />,
       },
     ],
@@ -69,7 +64,7 @@ const NAVIGATION: Navigation = [
     children:[
       {
         segment: "",
-        title: "Danh sách sản phẩm",
+        title: "Quản lí sản phẩm",
         icon: <WarehouseIcon />,
       },
       {

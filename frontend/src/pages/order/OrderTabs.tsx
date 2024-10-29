@@ -25,7 +25,7 @@ export default function OrderTabs() {
             <Tab label="Đơn hàng tự đến lấy" value="3" />
           </TabList>
         </Box>
-        < TabPanel value="1" >
+        <TabPanel value="1" >
           <OrderPage />
         </TabPanel>
         <TabPanel value="2">

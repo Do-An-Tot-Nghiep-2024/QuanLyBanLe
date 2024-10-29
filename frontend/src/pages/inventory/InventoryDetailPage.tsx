@@ -1,9 +1,9 @@
-import { useNavigate, useParams } from "react-router-dom";
+import {  useParams } from "react-router-dom";
 import { getShipmentItemsService } from "../../services/inventory.service";
 import { useQuery } from "@tanstack/react-query";
 import {
   Box,
-  Button,
+  // Button,
   Container,
   Paper,
   Stack,
@@ -19,11 +19,11 @@ import {
 import ShipmentItem from "../../types/inventory/shipmentItem";
 import { formatMoney, formatMoneyThousand } from "../../utils/formatMoney";
 import { formatDate, formatDateTime } from "../../utils/convertDate";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+// import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
 export default function InventoryDetailPage() {
   const id = useParams().id;
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const shipmentId = Number(id?.substring(5));
   const getShipmentItems = async (id: number) => {
     try {
@@ -118,7 +118,7 @@ export default function InventoryDetailPage() {
           </TableBody>
         </Table>
       </TableContainer>
-      <Button
+      {/* <Button
         onClick={() => {
           navigate("/print/import-invoice", {
             state: data,
@@ -132,7 +132,7 @@ export default function InventoryDetailPage() {
         }}
       >
         In hóa đơn
-      </Button>
+      </Button> */}
     </Container>
   );
 }

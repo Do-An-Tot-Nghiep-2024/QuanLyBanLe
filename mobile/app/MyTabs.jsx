@@ -4,22 +4,39 @@ import Product from './component/Product/ProductList';
 import Promotion from './component/Promotion/PromotionList';
 import Category from './component/Product/Category';
 import Cart from './component/Cart/Cart';
-import { Text } from 'react-native';
+import { Pressable, Text } from 'react-native';
+import { removeItem } from './AsyncStorage';
+import { useNavigation } from 'expo-router';
 const Tab = createBottomTabNavigator();
 const { MaterialCommunityIcons } = require('@expo/vector-icons');
 
-
+const logout = async (navigation) => {
+  await removeItem('accessToken');
+  navigation.navigate('authentication/Login');
+}
 export default function MyTabs() {
+  const navigation = useNavigation();
   return (
     <Tab.Navigator screenOptions={{
       headerStyle: {
-        backgroundColor: colors.primaryColor, // Set your header color here
+        backgroundColor: colors.primaryColor, 
       },
-      headerTintColor: '#fff', // Set the color of the header text
+      headerTintColor: '#fff', 
       headerTitleStyle: {
-        fontWeight: 'bold', // Optional: set the header title style
+        fontWeight: 'bold', 
       },
       title: 'Retail Shop',
+      headerRight: () => (
+        <Pressable
+          onPress={() => {
+            logout(navigation)
+          }}
+        >
+          <MaterialCommunityIcons name='logout-variant'style={{
+            marginRight: 10
+          }} color={"white"} size={25} />
+        </Pressable>
+      ),
     }
     }>
       <Tab.Screen name="promotion" component={Promotion} options={{

@@ -1,65 +1,79 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Text,
     StyleSheet,
     ScrollView,
-    Alert,
     Pressable,
+    ToastAndroid,
+    
 } from "react-native";
 import {
     TextInput,
     Button,
     Title,
-    Caption,
     Paragraph,
-    TouchableRipple,
-    Checkbox,
 } from "react-native-paper";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { storeToken, getAccessToken } from "../user-profile/getAccessToken";
-// import Toast from "react-native-toast-message";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-// import { fetchAllGroup } from "../../service/conversation.util";
-import { Stack, useNavigation, Link, router } from 'expo-router';
+import { useNavigation } from 'expo-router';
+import { IpAddress } from "../IpAddressConfig";
+import { colors } from "../style";
+import { showToastWithGravityAndOffset } from "../ToastAndroid";
+import { LoginService } from "../services/auth.service";
+import { getItem } from "../AsyncStorage";
 import stylessheet from "../style";
-import { loginService } from "../services/auth.service";
-const Login = ({ }) => {
 
+const Login = () => {
     const navigation = useNavigation();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [checked, setChecked] = useState(false);
-    const [loginError, setLoginError] = useState(false);
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
     const [showNewPassword, setShowNewPassword] = useState(false);
 
     const toggleNewPasswordVisibility = () => {
         setShowNewPassword((prevState) => !prevState);
-    };
-    const onPressCheckbox = () => {
-        setChecked(!checked);
-    };
-
-
-    const validateEmail = (email) => {
-        let re = /^[a-zA-Z0-9](?!.*[&=_'\-+<>])[\w.]{4,28}(?<![.])@[a-zA-Z0-9]+(\.[a-zA-Z]{2,})+$/;
-        return re.test(email);
-    }
-
+    
+    };    
+    useEffect(() => {
+        const token = getItem("accessToken").then((token) => {
+            if(token){
+                navigation.navigate("MyTabs");
+            }
+        })
+      
+    }, [])
 
     const onLogin = async () => {
-        const response = await fetch('http://localhost:8080/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username: email, password: password }),
-        })
-        const data = await response.json();
-        console.log(data);
+        setEmailError("");
+        setPasswordError("");
+
+        if (!email) {
+            setEmailError("*Email không được rỗng");
+        }
+        if (!password) {
+            setPasswordError("*Mật khẩu không được rỗng");
+        }
+
+        if (email && password) {
+           await LoginService(email, password, navigation);
+        }
     };
-    
+
+    const handleEmailChange = (text) => {
+        setEmail(text.trim());
+        if (text.trim()) {
+            setEmailError("");
+        }
+    };
+
+    const handlePasswordChange = (text) => {
+        setPassword(text.trim());
+        if (text.trim()) {
+            setPasswordError("");
+        }
+    };
 
     return (
         <ScrollView style={styles.container}>
@@ -67,81 +81,45 @@ const Login = ({ }) => {
                 <Title style={styles.title}>Đăng nhập</Title>
             </View>
             <Paragraph style={styles.signupText}>
-               Chưa có tài khoản?{" "}
-
-                <Text
-                    style={stylessheet.accentText} onPress={() => {
-                        navigation.navigate("authentication/Register");
-                    }}                    >
+                Chưa có tài khoản?{" "}
+                <Text style={{ color: colors.accentColor, fontWeight:'bold'}} onPress={() => navigation.navigate("authentication/Register")}>
                     Đăng ký
                 </Text>
-
-
             </Paragraph>
 
             <View style={styles.inputContainer}>
                 <TextInput
-                    style={[styles.input, loginError && styles.errorInput]}
+                    style={[styles.input, emailError ? styles.errorInput : {}]}
                     label="Email"
-                    underlineColorAndroid="transparent"
                     value={email}
-                    maxLength={40}
-                    onChangeText={(text) => setEmail(text.trim())}
+                    onChangeText={handleEmailChange}
                 />
+                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
             </View>
-            <View
-                style={{
-                    marginBottom: 5,
-                    flexDirection: "row",
-                }}
-            >
+
+            <View style={styles.inputContainer}>
                 <TextInput
-                    style={[styles.input, loginError && styles.errorInput]}
+                    style={[styles.input, passwordError ? styles.errorInput : {}]}
                     label="Mật khẩu"
-                    underlineColorAndroid="transparent"
                     secureTextEntry={!showNewPassword}
                     value={password}
-                    onChangeText={(text) => setPassword(text.trim())}
+                    onChangeText={handlePasswordChange}
                 />
-                <Pressable
-                    onPress={toggleNewPasswordVisibility}
-                    style={styles.iconContainer}
-                >
+                <Pressable onPress={toggleNewPasswordVisibility} style={styles.iconContainer}>
                     <MaterialCommunityIcons
                         name={!showNewPassword ? "eye-off" : "eye"}
                         size={20}
                         style={styles.eyeIcon}
                     />
-
                 </Pressable>
+                {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
             </View>
 
             <View style={styles.btnContainer}>
-                <Button mode="contained" style={stylessheet.button} onPress={() => {
-                    onLogin();
-                }} >
+                <Button mode="contained" style={stylessheet.button} onPress={onLogin}>
                     Đăng nhập
                 </Button>
             </View>
-
-
-            {/* // forgot password
-            <View style={styles.forgetContainer}>
-                <Pressable
-                    onPress={() => {
-                        if (email) {
-                            navigation.navigate("ForgotPassword", { email: email });
-                        }
-                        else {
-                            navigation.navigate("ForgotPassword", { email: '' });
-
-                        }
-                    }
-                    }
-                >
-                    <Text style={styles.forgetText}>Forgot password?</Text>
-                </Pressable>
-            </View> */}
         </ScrollView>
     );
 };
@@ -161,17 +139,9 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         paddingBottom: 20,
     },
-    signupContainer: {
-
-        alignItems: "left",
-
-    },
     signupText: {
         fontSize: 14,
-    },
-    signupLink: {
-        color: "#f558a4",
-        fontWeight: "bold",
+        marginBottom: 10
     },
     inputContainer: {
         marginBottom: 15,
@@ -183,36 +153,19 @@ const styles = StyleSheet.create({
     },
     errorInput: {
         backgroundColor: "#ffcccc",
-        paddingLeft: 10,
     },
-    checkContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 15,
-    },
-    checkText: {
+    errorText: {
+        color: "red",
         fontSize: 14,
-        marginLeft: 5,
+        marginTop: 5,
     },
     btnContainer: {
         marginTop: 10,
         alignItems: "center",
     },
-    btn: {
+    button: {
         width: "100%",
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: "#f558a4",
-        justifyContent: "center",
-    },
-    forgetContainer: {
-        marginTop: 10,
-        alignItems: "center",
-    },
-    forgetText: {
-        color: "#f558a4",
-        fontWeight: 500,
-        fontSize: 15,
+        backgroundColor: colors.primaryColor
     },
     iconContainer: {
         marginRight: 20,
