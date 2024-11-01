@@ -93,10 +93,14 @@ public class UnitController {
         try {
             return ResponseEntity
                     .status(201)
-                    .body(new ApiResponse<>(REQUEST_SUCCESS, unitService.updateUnit(id,unit)));
+                    .body(new ApiResponse<>(REQUEST_SUCCESS, unitService.updateUnit(id, unit)));
         } catch (BadRequestUserException e) {
             return ResponseEntity
                     .status(400)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity
+                    .status(404)
                     .body(new ApiResponse<>(e.getMessage(), null));
         } catch (Exception e) {
             return ResponseEntity

@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 public class OrderItem {
     private int quantity;
     private BigDecimal totalPrice;
+    private String note;
     @Id
     @ManyToOne
     @JoinColumn(name = "product_id")

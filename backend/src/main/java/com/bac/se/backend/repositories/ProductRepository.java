@@ -36,7 +36,22 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "select p.id, p.name from Product p where p.supplier.id = ?1 and p.isActive = true")
     List<Object[]> getProductsBySupplier(Long supplierId);
 
-    @Query(value = "select p.id, p.name from Product p where p.category.id = ?1 and p.isActive = true")
+    @Query(value = "SELECT  " +
+            "    p.product_id, p.name, p.image,pp.price,pp.discount_price " +
+            "FROM " +
+            "    t_product p " +
+            "        INNER JOIN " +
+            "    t_category c ON c.category_id = p.category_id " +
+            "        INNER JOIN " +
+            "    t_product_price pp ON p.product_id = pp.product_id " +
+            "WHERE " +
+            "    pp.created_at = (SELECT  " +
+            "            MAX(pp2.created_at) " +
+            "        FROM " +
+            "            t_product_price pp2 " +
+            "        WHERE " +
+            "            pp2.product_id = pp.product_id) " +
+            "        AND p.is_active = 1 AND c.category_id = ?1", nativeQuery = true)
     List<Object[]> getProductsByCategory(Long categoryId);
 
 

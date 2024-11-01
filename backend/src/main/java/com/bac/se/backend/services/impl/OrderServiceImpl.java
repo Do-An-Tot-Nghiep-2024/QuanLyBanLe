@@ -2,15 +2,19 @@ package com.bac.se.backend.services.impl;
 
 import com.bac.se.backend.enums.OrderStatus;
 import com.bac.se.backend.enums.PaymentType;
+import com.bac.se.backend.enums.PromotionScope;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
+import com.bac.se.backend.keys.OrderItemKey;
 import com.bac.se.backend.keys.ShipmentItemKey;
 import com.bac.se.backend.mapper.OrderMapper;
+import com.bac.se.backend.mapper.StockMapper;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.OrderItemRequest;
 import com.bac.se.backend.payload.request.OrderRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.order.*;
+import com.bac.se.backend.payload.response.stock.StockResponse;
 import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.services.OrderService;
 import com.bac.se.backend.utils.JwtParse;
@@ -23,9 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -42,48 +44,57 @@ public class OrderServiceImpl implements OrderService {
     private final StockRepository stockRepository;
     private final CustomerRepository customerRepository;
     private final OrderMapper orderMapper;
+    private final QuantityPromotionRepository quantityPromotionRepository;
+    private final GiftPromotionRepository giftPromotionRepository;
+    private final StockMapper stockMapper;
+
+
+    void minusStock(Long shipmenId, Long productId, int quantity) throws BadRequestUserException {
+        PageRequest pageRequest = PageRequest.of(0, 1);
+        var availableQuantityStock = stockRepository.getAvailableQuantityStock(shipmenId, productId, pageRequest);
+        if (availableQuantityStock.isEmpty()) {
+            throw new BadRequestUserException("Khong tim thay lo hang cua san pham");
+        }
+        StockResponse stockResponse = stockMapper.mapObjectToStockResponse(availableQuantityStock.get(0));
+        if (stockResponse.quantity() - stockResponse.soldQuantity() < quantity) {
+            throw new BadRequestUserException("So luong san pham khong du");
+        }
+        Stock stock = stockRepository.findById(stockResponse.id())
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay so luong san pham"));
+        stock.setSoldQuantity(stock.getSoldQuantity() + quantity);
+        stockRepository.save(stock);
+    }
 
     // create order with request are shipment id and product id for each item
     @Override
     public CreateOrderResponse createOrderLive(OrderRequest orderRequest, HttpServletRequest request) throws BadRequestUserException {
         String phoneCustomer = "";
+        String emailEmployee = jwtParse.decodeTokenWithRequest(request);
+        Map<Long, Integer> map = new HashMap<>();
+        // Kiểm tra thông tin nhân viên
+        Employee employee = employeeRepository.findByEmail(emailEmployee)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thông tin nhân viên"));
+        Order order = Order.builder()
+                .employee(employee)
+                .orderStatus(OrderStatus.COMPLETED)
+                .createdAt(new Date())
+                .paymentType(PaymentType.CASH)
+                .build();
         // Kiểm tra nó khách hàng của đăng ký tài khoản
         if (orderRequest.customerPhone().isPresent()) {
             phoneCustomer = orderRequest.customerPhone().get();
         }
-        var orderItemRequests = orderRequest.orderItems();
         // Kiểm tra thông tin khách hàng
-        Customer customer = new Customer();
         if (!phoneCustomer.isEmpty()) {
-            customer = customerRepository.findByPhone(phoneCustomer)
+            var customer = customerRepository.findByPhone(phoneCustomer)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thông tin khách hàng"));
-        }
-        String emailEmployee = jwtParse.decodeTokenWithRequest(request);
-        // Kiểm tra thông tin nhân viên
-        Employee employee = employeeRepository.findByEmail(emailEmployee)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thông tin nhân viên"));
-        // Kiểm tra thông tin khách hàng
-        // Tạo hóa đơn cho khách hàng mua trực tiếp
-        Order order;
-        if (customer.getId() == null) {
-            order = Order.builder()
-                    .employee(employee)
-                    .orderStatus(OrderStatus.COMPLETED)
-                    .createdAt(new Date())
-                    .paymentType(PaymentType.CASH)
-                    .build();
-        } else {
-            order = Order.builder()
-                    .customer(customer)
-                    .employee(employee)
-                    .orderStatus(OrderStatus.COMPLETED)
-                    .createdAt(new Date())
-                    .paymentType(PaymentType.CASH)
-                    .build();
+            order.setCustomer(customer);
         }
 
+        var orderItemRequests = orderRequest.orderItems();
         Order orderSave = orderRepository.save(order);
         double total = 0;
+        int remain = 0;
         // Kiểm tra số các mặt hàng trong đơn
         List<OrderItemResponse> orderItemResponses = new LinkedList<>();
         for (OrderItemRequest orderItemRequest : orderItemRequests) {
@@ -98,57 +109,122 @@ public class OrderServiceImpl implements OrderService {
             // Kiểm tra sản phẩm nào có tồn tại trong lô hàng nào không
             var shipmentItem = shipmentItemRepository.findById(key)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm lô của sản phẩm"));
+
             // Kiểm tra sản phẩm đã hết hạn
             if (shipmentItem.getExp().before(new Date())) {
                 throw new BadRequestUserException("Sản phẩm đã hết hạn");
             }
-//
-            Pageable pageRequest = PageRequest.of(0, 1);
-            var objects = shipmentItemRepository.getStockByShipmentItem(shipmentItem.getShipment().getId(), shipmentItem.getProduct().getId(), pageRequest).get(0);
-            if(objects.length == 0){
-                throw new BadRequestUserException("Chưa có số lượng lô hàng");
-            }
+
             // Kiểm tra số lượng của lô hàng
-            // Cập nhật số lượng đã bán
-            var stock = stockRepository.findById(Long.parseLong(objects[0].toString()))
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy số lượng của lô hàng"));
-            log.info("stock quantity {}",stock.getQuantity());
-            if(stock.getQuantity() - stock.getSoldQuantity() < orderItemRequest.quantity()){
-                throw new BadRequestUserException("Số lượng không đủ");
-            }
-            if(stock.getQuantity() - stock.getSoldQuantity() == 5){
-                log.info("send message to manager");
-            }
-            stock.setSoldQuantity(stock.getSoldQuantity() + orderItemRequest.quantity());
-            stockRepository.save(stock);
-
-
-//          // Lấy ra giá mới nhất của sản phẩm và tính tổng thành tiền của sản phẩm
+            log.info("Trừ số lượng trong lô hàng");
+            minusStock(orderItemRequest.shipmentId(),
+                    orderItemRequest.productId(), orderItemRequest.quantity());
+            // Lấy ra giá mới nhất của sản phẩm và tính tổng thành tiền của sản phẩm
             var productPriceLatest = productPriceRepository.getProductPriceLatest(product.getId(), PageRequest.of(0, 1));
             double price = Double.parseDouble(productPriceLatest.get(0)[1].toString());
             double discountPrice = Double.parseDouble(productPriceLatest.get(0)[2].toString());
-            double totalPrice = price * orderItemRequest.quantity();
-            // Kiểm tra xem sản phẩm có khuyến mại hay không
+            double totalPrice = 0;
+            // Kiểm tra xem sản phẩm có giảm giá hay không
             if (discountPrice > 0) {
-                totalPrice = discountPrice * orderItemRequest.quantity();
+                totalPrice += discountPrice * orderItemRequest.quantity();
+            } else {
+                totalPrice += price * orderItemRequest.quantity();
             }
+            OrderItemResponse orderItemResponse;
+            if (map.containsKey(product.getId())) {
+                remain = map.get(product.getId());
+                map.put(product.getId(), map.get(product.getId()) + orderItemRequest.quantity());
+                // increment quantity if product duplicate name
+                double finalTotalPrice = totalPrice;
+                orderItemResponses.replaceAll(response ->
+                        Objects.equals(response.name(), product.getName())
+                                ? new OrderItemResponse(
+                                response.name(),
+                                response.quantity() + orderItemRequest.quantity(),
+                                price,
+                                discountPrice,
+                                response.totalPrice() + finalTotalPrice)
+                                : response
+                );
+            } else {
+                map.put(product.getId(), orderItemRequest.quantity());
+                orderItemResponses.add(new OrderItemResponse(
+                        product.getName(),
+                        orderItemRequest.quantity(),
+                        price,
+                        discountPrice,
+                        totalPrice));
+            }
+
+            // Kiem tra san pham co khuyen mai hay khong
+            if (product.getPromotion() != null && product.getPromotion().getScope() == PromotionScope.PRODUCT) {
+                // check quantity promotion
+                log.info("existing promotion");
+                Promotion promotion = product.getPromotion();
+                var existQuantityPromotion = quantityPromotionRepository.findByPromotion(promotion);
+                var existGiftPromotion = giftPromotionRepository.findByPromotion(promotion);
+                if (existQuantityPromotion.isPresent()) {
+                    log.info("Quantity Promotion found");
+                    QuantityPromotion quantityPromotion = existQuantityPromotion.get();
+                    int freeQuantity = (map.get(product.getId()) / quantityPromotion.getBuyQuantity()) * quantityPromotion.getFreeQuantity();
+                    totalPrice = totalPrice - (freeQuantity * price);
+                }
+                if (existGiftPromotion.isPresent()) {
+                    GiftPromotion giftPromotion = existGiftPromotion.get();
+                    log.info("Gift Promotion found");
+                    int giftQuantity = (map.get(product.getId()) / giftPromotion.getBuyQuantity()) * giftPromotion.getGiftQuantity();
+                    int remainQuantity = (remain / giftPromotion.getBuyQuantity()) * giftPromotion.getGiftQuantity();
+                    if (giftQuantity > 0) {
+                        OrderItem giftOrderItem = OrderItem.builder()
+                                .product(productRepository.findById(giftPromotion.getGiftProductId()).orElseThrow(
+                                        () -> new IllegalArgumentException("product not found")
+                                ))
+                                .quantity(giftQuantity)
+                                .order(order)
+                                .note("Sản phẩm tặng kèm")
+                                .totalPrice(BigDecimal.ZERO)
+                                .build();
+                        orderItemRepository.save(giftOrderItem);
+                        log.info("Trừ số lượng khuyến mãi");
+                        giftQuantity = giftQuantity - remainQuantity;
+                        minusStock(giftPromotion.getGiftShipmentId(), giftPromotion.getGiftProductId(), giftQuantity);
+                    }
+                }
+            }
+
             // Thêm order item vào danh sách trả về
-            orderItemResponses.add(new OrderItemResponse(product.getName(), orderItemRequest.quantity(), price, discountPrice, totalPrice));
-            var orderItem = OrderItem.builder()
-                    .order(orderSave)
-                    .product(product)
-                    .quantity(orderItemRequest.quantity())
-                    .totalPrice(BigDecimal.valueOf(totalPrice))
-                    .build();
-            // Lưu order item vào database
+            Optional<OrderItem> orderItemExist = orderItemRepository.findById(
+                    OrderItemKey.builder()
+                            .product(product)
+                            .order(orderSave)
+                            .build()
+            );
+
+            OrderItem orderItem;
+            if (orderItemExist.isPresent()) {
+                orderItem = orderItemExist.get();
+                orderItem.setQuantity(orderItem.getQuantity() + orderItemRequest.quantity());
+                orderItem.setTotalPrice(orderItem.getTotalPrice().add(BigDecimal.valueOf(totalPrice)));
+
+            } else {
+                orderItem = OrderItem.builder()
+                        .order(orderSave)
+                        .product(product)
+                        .quantity(orderItemRequest.quantity())
+                        .totalPrice(BigDecimal.valueOf(totalPrice))
+                        .build();
+            }
             orderItemRepository.save(orderItem);
             // Tính tổng số tiền cũng như tổng tiền khuyến mại
             total += totalPrice;
         }
+
         double change = orderRequest.customerPayment() - total;
         if (change < 0) {
             throw new BadRequestUserException("Số tiền không đủ");
         }
+        orderSave.setCustomerPayment(BigDecimal.valueOf(orderRequest.customerPayment()));
+        orderRepository.save(orderSave);
         return new CreateOrderResponse(orderItemResponses, total, orderRequest.customerPayment(), change);
     }
 

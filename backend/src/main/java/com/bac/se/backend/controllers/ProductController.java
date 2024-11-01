@@ -7,10 +7,7 @@ import com.bac.se.backend.payload.request.ProductPriceRequest;
 import com.bac.se.backend.payload.request.ProductUpdateRequest;
 import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.common.PageResponse;
-import com.bac.se.backend.payload.response.product.CreateProductResponse;
-import com.bac.se.backend.payload.response.product.ProductPriceResponse;
-import com.bac.se.backend.payload.response.product.ProductQueryResponse;
-import com.bac.se.backend.payload.response.product.ProductResponse;
+import com.bac.se.backend.payload.response.product.*;
 import com.bac.se.backend.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -134,7 +131,7 @@ public class ProductController {
 
     @GetMapping("/category/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<List<ProductQueryResponse>>> getProductsByCategory(@PathVariable("id") Long categoryId){
+    public ResponseEntity<ApiResponse<List<ProductCategoryResponse>>> getProductsByCategory(@PathVariable("id") Long categoryId){
         try{
             return ResponseEntity.ok()
                     .body(new ApiResponse<>(REQUEST_SUCCESS,productService.getProductsByCategory(categoryId)));

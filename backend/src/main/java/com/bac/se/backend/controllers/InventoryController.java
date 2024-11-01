@@ -3,14 +3,12 @@ package com.bac.se.backend.controllers;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.payload.request.ShipmentRequest;
-import com.bac.se.backend.payload.response.StockResponse;
 import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.invoice.ImportInvoice;
 import com.bac.se.backend.payload.response.shipment.ShipmentItemResponse;
 import com.bac.se.backend.payload.response.shipment.ShipmentResponse;
 import com.bac.se.backend.services.ShipmentService;
-import com.bac.se.backend.services.StockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,7 +25,6 @@ import java.text.ParseException;
 public class InventoryController {
     private final ShipmentService shipmentService;
     final String REQUEST_SUCCESS = "success";
-    private final StockService stockService;
 
 
     @PostMapping("/import")
@@ -85,18 +82,5 @@ public class InventoryController {
     }
 
 
-    @GetMapping("/stock")
-    @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<PageResponse<StockResponse>>> getStocksByProduct(
-            @RequestParam(defaultValue = "0") Integer pageNumber,
-            @RequestParam(defaultValue = "10") Integer pageSize
-    ) {
-        try {
-            PageResponse<StockResponse> stockResponse = stockService.getStocksByProduct(pageNumber, pageSize);
-            return ResponseEntity.ok(new ApiResponse<>("success", stockResponse));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body(new ApiResponse<>(e.getMessage(), null));
-        }
-    }
+
 }
