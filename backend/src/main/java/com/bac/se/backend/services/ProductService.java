@@ -5,10 +5,7 @@ import com.bac.se.backend.payload.request.CreateProductRequest;
 import com.bac.se.backend.payload.request.ProductPriceRequest;
 import com.bac.se.backend.payload.request.ProductUpdateRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
-import com.bac.se.backend.payload.response.product.CreateProductResponse;
-import com.bac.se.backend.payload.response.product.ProductPriceResponse;
-import com.bac.se.backend.payload.response.product.ProductQueryResponse;
-import com.bac.se.backend.payload.response.product.ProductResponse;
+import com.bac.se.backend.payload.response.product.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -36,5 +33,5 @@ public interface ProductService {
 
     List<ProductQueryResponse> getProductsBySupplier(Long supplierId);
 
-    List<ProductQueryResponse> getProductsByCategory(Long categoryId);
+    List<ProductCategoryResponse> getProductsByCategory(Long categoryId);
 }

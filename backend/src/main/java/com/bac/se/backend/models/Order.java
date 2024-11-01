@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class Order  {
     private OrderStatus orderStatus;
     @Enumerated(EnumType.STRING)
     private PaymentType paymentType;
+    private BigDecimal customerPayment;
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;

@@ -9,10 +9,7 @@ import com.bac.se.backend.payload.request.CreateProductRequest;
 import com.bac.se.backend.payload.request.ProductPriceRequest;
 import com.bac.se.backend.payload.request.ProductUpdateRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
-import com.bac.se.backend.payload.response.product.CreateProductResponse;
-import com.bac.se.backend.payload.response.product.ProductPriceResponse;
-import com.bac.se.backend.payload.response.product.ProductQueryResponse;
-import com.bac.se.backend.payload.response.product.ProductResponse;
+import com.bac.se.backend.payload.response.product.*;
 import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.services.ProductService;
 import com.bac.se.backend.utils.UploadImage;
@@ -209,13 +206,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductQueryResponse> getProductsByCategory(Long categoryId) {
+    public List<ProductCategoryResponse> getProductsByCategory(Long categoryId) {
         List<Object[]> productList = productRepository.getProductsByCategory(categoryId);
-        return productList.stream()
-                .map(p -> new ProductQueryResponse(
-                        Long.parseLong(p[0].toString()),
-                        p[1].toString()
-                )).toList();
+        return  productList.stream()
+                .map(productMapper::mapObjectToProductCategoryResponse)
+                .toList();
     }
 
     // Helper method to create ProductResponse

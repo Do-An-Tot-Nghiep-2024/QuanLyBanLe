@@ -1,6 +1,7 @@
 package com.bac.se.backend.mapper;
 
 import com.bac.se.backend.payload.response.product.BestSellingProductResponse;
+import com.bac.se.backend.payload.response.product.ProductCategoryResponse;
 import com.bac.se.backend.payload.response.product.ProductResponse;
 import com.bac.se.backend.payload.response.product.ProductShipmentResponse;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,16 @@ public class ProductMapper {
         return new BestSellingProductResponse(
                 object[0].toString(),
                 Integer.parseInt(object[1].toString())
+        );
+    }
+
+    public ProductCategoryResponse mapObjectToProductCategoryResponse(Object[] object) {
+        return new ProductCategoryResponse(
+                Long.parseLong(object[0].toString()),
+                object[1].toString(),
+                object[2].toString(),
+                Double.parseDouble(object[3].toString()),
+                Double.parseDouble(object[4].toString())
         );
     }
 
