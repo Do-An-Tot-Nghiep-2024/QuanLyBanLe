@@ -54,7 +54,7 @@ export default function LoginEmployeePage() {
     try {
       const response = await loginService(data);
       console.log(response);
-      if (response && response?.status) {
+      if (response && response?.message) {
         console.log("Login success");
         const { accessToken } = response.data as { accessToken: string };
         Cookies.set("accessToken", accessToken);

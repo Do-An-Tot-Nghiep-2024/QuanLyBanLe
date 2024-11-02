@@ -79,7 +79,7 @@ export default function StockPage() {
         <TableBody>
           {data !== undefined &&
           data.responseList !== undefined &&
-          data.responseList.length > 0 ? (
+          data.responseList?.length > 0 ? (
             data.responseList.map((row: StockResponse) => (
               <TableRow hover key={row.id}>
                 <TableCell align={"left"}>{row.name}</TableCell>

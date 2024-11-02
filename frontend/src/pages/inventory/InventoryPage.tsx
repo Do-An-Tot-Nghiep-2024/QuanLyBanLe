@@ -109,30 +109,6 @@ export default function InventoryPage() {
             ))}
           </TableRow>
         </TableHead>
-        <TableBody>
-          {data !== undefined &&
-          data.responseList !== undefined &&
-          data.responseList.length > 0 ? (
-            data.responseList.map((row: ImportInvoice) => (
-              <TableRow hover key={row.numberInvoice}>
-                <TableCell align={"center"}>{row.numberInvoice}</TableCell>
-                <TableCell align={"center"}>{row.name}</TableCell>
-                <TableCell align={"center"}>
-                  {formatDateTime(row.createdAt)}
-                </TableCell>
-                <TableCell align={"center"}>
-                  {formatMoneyThousand(row.total)}
-                </TableCell>
-                <TableCell align={"center"}>
-                  <IconButton
-                    onClick={() => navigate(`/inventory/${row.numberInvoice}`)}
-                  >
-                    <RemoveRedEyeIcon color="success" />
-                  </IconButton>
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
           <TableBody>
             {data?.responseList?.length > 0 ? (
               data.responseList.map((row: ImportInvoice) => (

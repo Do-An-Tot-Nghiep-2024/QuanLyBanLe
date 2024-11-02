@@ -1,11 +1,16 @@
-import * as React from 'react';
+import React from 'react';
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import OrderPage from './OrderPage1';
-import OrderPage2 from './OrderPage2';
+
+const tabs = [
+  { label: 'Đơn hàng 1', value: '1', component: <OrderPage /> },
+  { label: 'Đơn hàng 2', value: '2', component: <OrderPage /> },
+  { label: 'Đơn hàng tự đến lấy', value: '3', component: <div>Item Three</div> },
+];
 
 export default function OrderTabs() {
   const [value, setValue] = React.useState('1');
@@ -15,24 +20,24 @@ export default function OrderTabs() {
   };
 
   return (
-    <Box sx={{ width: '100%', typography: 'body1' }
-    }>
+    <Box sx={{ width: '100%', typography: 'body1' }}>
       <TabContext value={value}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <TabList onChange={handleChange} aria-label="lab API tabs example">
-            <Tab label="Đơn hàng 1" value="1" />
-            <Tab label="Đơn hàng 2" value="2" />
-            <Tab label="Đơn hàng tự đến lấy" value="3" />
+          <TabList onChange={handleChange} aria-label="Order tabs">
+            {tabs.map(tab => (
+              <Tab key={tab.value} label={tab.label} value={tab.value} />
+            ))}
           </TabList>
         </Box>
-        <TabPanel value="1" >
-          <OrderPage />
-        </TabPanel>
-        <TabPanel value="2">
-          <OrderPage2 />
-        </TabPanel>
-        <TabPanel value="3">Item Three</TabPanel>
+        {tabs.map(tab => (
+          <TabPanel key={tab.value} value={tab.value}>
+            {tab.component}
+          </TabPanel>
+        ))}
       </TabContext>
     </Box>
   );
 }
+
+
+
