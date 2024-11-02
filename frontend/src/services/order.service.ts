@@ -1,13 +1,14 @@
 import api from "../config/axios";
 import ApiResponse from "../types/apiResponse";
 
-const createOrderService = async (itemList: any[]) => {
+const createOrderService = async (itemList: any[], customerPayment : number) => {
     try {
       console.log(itemList);
 
   
       const response: ApiResponse = await api.post(`/orders/live`, {
         orderItems: itemList,
+        customerPayment : customerPayment
       });
   
       const { message, data } = response;

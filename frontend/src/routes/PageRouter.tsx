@@ -26,7 +26,6 @@ const Sidebar = lazy(() => import("../layout/Sidebar"));
 const CategoryPage = lazy(() => import("../pages/product/CategoryPage"));
 const ProductPage = lazy(() => import("../pages/product/ProductPage"));
 const UpdateProduct = lazy(() => import("../pages/product/UpdateProduct"));
-
 // statistic
 const StatisticsProduct = lazy(
   () => import("../pages/report/SalesStatisticsProduct")

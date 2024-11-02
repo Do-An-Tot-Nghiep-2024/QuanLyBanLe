@@ -136,12 +136,12 @@ export default function ProductPage() {
     .sort();
 
 
-  const normalizeString = (str: string) => {
-    return str
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-  };
+  // const normalizeString = (str: string) => {
+  //   return str
+  //     .normalize("NFD")
+  //     .replace(/[\u0300-\u036f]/g, "")
+  //     .toLowerCase();
+  // };
 
   // const filteredProducts =
   // Array.isArray(products)

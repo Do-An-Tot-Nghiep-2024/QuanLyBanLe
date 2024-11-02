@@ -30,8 +30,6 @@ import AddBoxIcon from "@mui/icons-material/AddBox";
 interface OrderItem {
   product: GetProductSchema;
   quantity: number;
-  productionDate?: string;
-  expirationDate?: string;
   price: number;
   selectedShipment?: string;
 }
@@ -39,7 +37,6 @@ interface OrderItem {
 interface Category {
   name: string;
 }
-
 
 const OrderPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,7 +46,8 @@ const OrderPage: React.FC = () => {
   const [products, setProducts] = useState<GetProductSchema[]>([]);
   const [page] = useState(1);
   const [limit] = useState(10);
-
+  const [customerPayment, setCustomerPayment] = useState(0);
+  const [customerChange, setCustomerChange] = useState(0);
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -59,15 +57,11 @@ const OrderPage: React.FC = () => {
 
   const handleAddToOrder = (product: GetProductSchema) => {
     setOrderItems((prev) => {
-      const existingItem = prev.find((item) => item.product.id === product.id);
-      if (existingItem) {
-        return prev.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { product, quantity: 1, price: Number(product.price), selectedShipment: "" }];
+      console.log(prev);
+      return [
+        ...prev,
+        { product, quantity: 1, price: Number(product.price), selectedShipment: "" },
+      ];
     });
   };
 
@@ -79,22 +73,41 @@ const OrderPage: React.FC = () => {
     );
   };
 
+  const isShipmentSelected = () => {
+    return orderItems.every(item => item.selectedShipment);
+  };
+
+  const isCustomerPaymentValid = (payment: number) => {
+    const regex = /^\d+(\.\d{1,2})?$/; 
+    return regex.test(String(payment));
+  };
+
   const handleCreateBill = async () => {
+    const totalPayment = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     if (orderItems.length === 0) {
-      alert("Please add at least one item to the order.");
+      alert("Chưa thêm sản phẩm nào");
+      return;
+    }
+    
+    if (!isShipmentSelected()) {
+      alert("Vui lòng chọn mã lô hàng cho tất cả sản phẩm");
       return;
     }
 
-    const formattedOrderItems = orderItems.map(item => ({
+    if (customerPayment == 0 || customerPayment < totalPayment || !isCustomerPaymentValid(customerPayment)) {
+      alert("Vui lòng nhập số tiền hợp lệ");
+      return;
+    }
+
+    const formattedOrderItems = orderItems.map((item) => ({
       productId: item.product.id,
       quantity: item.quantity,
-      shipmentId: item.selectedShipment
+      shipmentId: item.selectedShipment,
     }));
 
-    console.log(formattedOrderItems);
 
     try {
-      const response = await createOrderService(formattedOrderItems);
+      const response = await createOrderService(formattedOrderItems, customerPayment);
       console.log("Order created:", response);
       setOrderItems([]);
     } catch (error) {
@@ -115,46 +128,91 @@ const OrderPage: React.FC = () => {
     }
   };
 
-
-
-
   useEffect(() => {
     fetchCategories();
     fetchProducts();
-
   }, []);
 
-  const normalizeString = (str : string) => {
+  const normalizeString = (str: string) => {
     return str
-      .normalize("NFD") 
-      .replace(/[\u0300-\u036f]/g, "") 
-      .toLowerCase(); 
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
   };
 
   const filteredProducts =
-  Array.isArray(products)
-    ? products.filter(
+    Array.isArray(products)
+      ? products.filter(
         (product) =>
           normalizeString(String(product.name)).includes(normalizeString(searchTerm)) &&
           (selectedCategory ? product.category === selectedCategory : true)
       )
-    : [];
+      : [];
 
   const startIndex = (page - 1) * limit;
   const paginatedProducts = filteredProducts.slice(
     startIndex,
     startIndex + limit
   );
+  const handleUpdateShipment = async (productId: number, selectedShipment: string) => {
+    console.log(selectedShipment);
+    const existingItemIndex = orderItems.findIndex(
+      (item) => item.product.id === productId && item.selectedShipment === selectedShipment
+    );
+
+    if (existingItemIndex != -1) {
+      console.log("existed");
+      setOrderItems((prev) =>
+        prev.map((orderItem, index) =>
+          index === existingItemIndex
+            ? {
+              ...orderItem,
+              quantity: orderItem.quantity + 1,
+              selectedShipment,
+            }
+            : { ...orderItem }
+        )
+
+      );
+
+      setOrderItems((prevItems) =>
+        prevItems.filter((itm) => itm.selectedShipment !== "")
+      );
 
 
+    }
 
+    else {
+      console.log("new item");
+
+
+      setOrderItems((orderItems) =>
+        orderItems.map((itm) => {
+          if (Number(itm.product.id) === Number(productId) && itm.selectedShipment === "") {
+            console.log("duplicate");
+
+            return { ...itm, selectedShipment }
+          }
+          return itm
+        })
+      )
+    }
+    console.log("Updated order items:", orderItems);
+  };
+
+const updateCustomerPayment = (customerPayment: number) => {
+  const totalPayment = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  setCustomerPayment(customerPayment);
+  setCustomerChange(customerPayment - totalPayment);
+};
 
   return (
     <Box
       display="flex"
       p={3}
       sx={{
-        backgroundColor: "#f5f5f5", height: "100vh"
+        backgroundColor: "#f5f5f5",
+        height: "100vh",
       }}
     >
       <Box flexBasis="30%" mr={2}>
@@ -196,7 +254,7 @@ const OrderPage: React.FC = () => {
                 primary={`${product.name} - ${formatCurrency(Number(product.price))}`}
                 primaryTypographyProps={{
                   style: { whiteSpace: 'normal', overflowWrap: 'break-word' },
-                  variant: 'body2'
+                  variant: 'body2',
                 }}
               />
               <Tooltip title="Thêm sản phẩm" arrow>
@@ -234,7 +292,7 @@ const OrderPage: React.FC = () => {
               </TableHead>
               <TableBody>
                 {orderItems.map((item) => (
-                  <TableRow key={Number(item.product.id)}>
+                  <TableRow key={`${item.product.id}-${item.selectedShipment}`}>
                     <TableCell sx={{ textAlign: "left" }}>{item.product.name}</TableCell>
                     <TableCell sx={{ textAlign: "left" }}>
                       <TextField
@@ -249,16 +307,10 @@ const OrderPage: React.FC = () => {
                     <TableCell sx={{ flex: 1 }}>
                       <Select
                         value={item.selectedShipment || ""}
-                        onChange={(e) => {
-                          const selectedValue = e.target.value;
-                          setOrderItems((prev) =>
-                            prev.map((orderItem) =>
-                              orderItem.product.id === item.product.id
-                                ? { ...orderItem, selectedShipment: selectedValue }
-                                : orderItem
-                            )
-                          );
-                        }}
+                        onChange={(e) => handleUpdateShipment(Number(item.product.id), e.target.value).then(() => {
+                          console.log(orderItems);
+                          console.log(item.selectedShipment);
+                        })}
                         sx={{ width: "100%", textAlign: 'left' }}
                       >
                         <MenuItem value="">Chọn mã lô hàng</MenuItem>
@@ -277,27 +329,30 @@ const OrderPage: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
-
-          <Box display="flex" justifyContent="space-between" mt={2}>
-            <Typography variant="h6" fontWeight="bold">
-              Tổng cộng
+          <Box display="flex" flexDirection="column" mt={2} alignItems='flex-end' width='100%'>
+            <Typography sx={{ mb: 2, fontWeight: 'bold' }}>
+              Tổng tiền hàng: {formatCurrency(orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0))}
             </Typography>
-            <Typography variant="h6" fontWeight="bold">
-              {formatCurrency(
-                orderItems.reduce(
-                  (sum, item) => sum + item.price * item.quantity,
-                  0
-                )
-              )}
+            <TextField
+              fullWidth
+              variant="outlined"
+              label="Tiền khách hàng đưa"
+              value={customerPayment}
+              onChange={(e) => updateCustomerPayment(Number(e.target.value))}
+              sx={{ mb: 2, width: '30%' }}
+            />
+            <Typography sx={{ mb: 2 }}>
+              Tiền thừa: {formatCurrency(customerChange)}
             </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleCreateBill}
+              sx={{width:'100%'}}
+            >
+              Tạo đơn hàng
+            </Button>
           </Box>
-          <Button
-            variant="contained"
-            onClick={handleCreateBill}
-            sx={{ mt: 2 }}
-          >
-            Tạo hóa đơn
-          </Button>
         </Paper>
       </Box>
     </Box>
