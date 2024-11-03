@@ -90,8 +90,8 @@ const NAVIGATION: Navigation = [
         icon: <WarehouseIcon />,
       },
       {
-        segment: "",
-        title: "Thêm chương trình khuyến mãi",
+        segment: "create-promotion",
+        title: "Tạo chương trình khuyến mãi",
         icon: <AddBusinessIcon />,
       },
     ],
