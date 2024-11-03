@@ -24,7 +24,6 @@ export default function Category({ navigation }) {
                 try {
                     const data =  getAllCategoryService().then((data) =>{
                         console.log("page", data);
-                    
                         setCategories(data.data);
                     })
                    console.log("data", data);
@@ -49,9 +48,9 @@ export default function Category({ navigation }) {
             <FlatList
                 decelerationRate={1}
                 data={categories}
-                keyExtractor={item => item.id.toString()}
+                keyExtractor={item => item.id?.toString()}
                 renderItem={({ item }) => (
-                    <TouchableHighlight
+                    <TouchableHighlight key={item.id}
                         underlayColor={colors.primaryColor}
                         style={styles.itemContainer}
                         onPress={() =>

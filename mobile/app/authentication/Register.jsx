@@ -13,11 +13,11 @@ import { RegisterService } from "../services/auth.service";
 
 const Register = () => {
     const navigation = useNavigation();
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [password, setPassword] = useState("");
-    const [email, setEmail] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
+    const [name, setName] = useState("tuong lan vu");
+    const [phone, setPhone] = useState("0465397895");
+    const [password, setPassword] = useState("123456");
+    const [email, setEmail] = useState("tuong@gmail.com");
+    const [confirmPassword, setConfirmPassword] = useState("123456");
     const [nameError, setNameError] = useState("");
     const [phoneError, setPhoneError] = useState("");
     const [emailError, setEmailError] = useState("");
@@ -56,7 +56,11 @@ const Register = () => {
         if (!name) {
             setNameError("*Tên là bắt buộc.");
             valid = false;
+        } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+            setNameError("*Tên chỉ được chứa ký tự chữ cái.");
+            valid = false;
         }
+        
 
         if (!validateEmail(email)) {
             setEmailError("*Địa chỉ email không hợp lệ.");
@@ -68,8 +72,8 @@ const Register = () => {
             valid = false;
         }
 
-        if (!password) {
-            setPasswordError("*Mật khẩu là bắt buộc.");
+        if (!password || password.length < 6) {
+            setPasswordError("*Mật khẩu là bắt buộc và lớn hơn 6 kí tự.");
             valid = false;
         }
 

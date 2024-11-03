@@ -26,6 +26,7 @@ const Sidebar = lazy(() => import("../layout/Sidebar"));
 const CategoryPage = lazy(() => import("../pages/product/CategoryPage"));
 const ProductPage = lazy(() => import("../pages/product/ProductPage"));
 const UpdateProduct = lazy(() => import("../pages/product/UpdateProduct"));
+const CreatePromotion = lazy(()=> import("../pages/promotion/CreatePromotion"))
 // statistic
 const StatisticsProduct = lazy(
   () => import("../pages/report/SalesStatisticsProduct")
@@ -170,6 +171,7 @@ const PageRouter = () => {
 
 
 
+
               <Route
                 path="/inventory/create-inventory"
                 element={<CreateInventoryOrder />}
@@ -178,6 +180,8 @@ const PageRouter = () => {
                 path="/print/import-invoice"
                 element={<PrintImportInvoice />}
               />
+
+              <Route path="/promotions/create-promotion" element={<CreatePromotion />}/>
             </Route>
           </Route>
           {/* Not found page */}

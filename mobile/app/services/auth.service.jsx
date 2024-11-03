@@ -40,12 +40,17 @@ const RegisterService = async (name, email, phone, password, navigation) => {
 
     const data = await response.json();
     console.log(response);
+    console.log(data);
+    
     
     if (response.status === 200) {
        showToastWithGravityAndOffset("Đăng ký thành công");
-        navigation.navigate('authentication/login');
+       const accessToken = data.data.accessToken;
+       await setItem("accessToken", accessToken);   
+       navigation.navigate('MyTabs');
+
     } else {
-        showToastWithGravityAndOffset("Đăng ký không thành công");
+        showToastWithGravityAndOffset("Số điện thoại hoặc email đã được sử dụng");
       
     }
 
