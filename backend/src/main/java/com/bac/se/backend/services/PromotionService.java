@@ -14,4 +14,6 @@ public interface PromotionService {
 
     PromotionResponse createGiftProductPromotion(GiftPromotionRequest request) throws BadRequestUserException;
 
+    PromotionResponse createDiscountProductPromotion(GiftPromotionRequest request) throws BadRequestUserException;
+
 }
