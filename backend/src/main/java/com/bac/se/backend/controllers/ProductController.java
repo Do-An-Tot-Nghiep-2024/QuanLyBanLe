@@ -130,7 +130,6 @@ public class ProductController {
     }
 
     @GetMapping("/category/{id}")
-    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<List<ProductCategoryResponse>>> getProductsByCategory(@PathVariable("id") Long categoryId){
         try{
             return ResponseEntity.ok()

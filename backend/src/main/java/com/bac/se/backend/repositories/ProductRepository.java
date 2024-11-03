@@ -75,4 +75,61 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                           @Param("fromDate") Date fromDate,
                                           @Param("toDate") Date toDate);
 
+
+
+
+
+    @Query(value = "WITH LatestProductPrice AS ( " +
+            "    SELECT  " +
+            "        pp.product_id, " +
+            "        pp.price, " +
+            "        pp.discount_price, " +
+            "        pp.product_price_id " +
+            "    FROM  " +
+            "        t_product_price pp " +
+            "    INNER JOIN  " +
+            "        (SELECT  " +
+            "            product_id, MAX(created_at) AS latest_created_at " +
+            "         FROM  " +
+            "            t_product_price  " +
+            "         GROUP BY  " +
+            "            product_id " +
+            "        ) AS latest_pp ON pp.product_id = latest_pp.product_id  " +
+            "        AND pp.created_at = latest_pp.latest_created_at " +
+            "), " +
+            "MaxAvbTable AS ( " +
+            "    SELECT  " +
+            "        si.product_id,  " +
+            "        MAX(s.quantity - s.sold_quantity) AS max_avb " +
+            "    FROM  " +
+            "        t_shipment_item si " +
+            "    INNER JOIN  " +
+            "        t_stock s ON si.stock_id = s.stock_id " +
+            "    GROUP BY  " +
+            "        si.product_id " +
+            ") " +
+            " " +
+            "SELECT  " +
+            "    p.name, " +
+            "    p.image, " +
+            "    lpp.price, " +
+            "    lpp.discount_price, " +
+            "    si.shipment_id, " +
+            "    (s.quantity - s.sold_quantity) AS avb " +
+            "FROM " +
+            "    t_product p " +
+            "INNER JOIN  " +
+            "    LatestProductPrice lpp ON p.product_id = lpp.product_id " +
+            "INNER JOIN  " +
+            "    t_shipment_item si ON si.product_id = p.product_id " +
+            "INNER JOIN  " +
+            "    t_stock s ON s.stock_id = si.stock_id " +
+            "INNER JOIN  " +
+            "    MaxAvbTable max_avb_table ON si.product_id = max_avb_table.product_id " +
+            "    AND (s.quantity - s.sold_quantity) = max_avb_table.max_avb " +
+            "WHERE  " +
+            "    p.is_active = 1 AND p.category_id = ?1 " +
+            "ORDER BY  p.name",nativeQuery = true)
+    Page<Object[]> getProductsMobile(Long categoryId, Pageable pageable);
+
 }

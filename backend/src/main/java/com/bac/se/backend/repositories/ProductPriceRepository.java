@@ -19,4 +19,6 @@ public interface ProductPriceRepository extends JpaRepository<ProductPrice, Long
     @Query("select p.originalPrice,p.price,p.createdAt from ProductPrice p where p.product.id = :productId")
     List<Object[]> getProductPricesByProduct(Long productId);
 
+
+
 }

@@ -157,4 +157,9 @@ public class PromotionServiceImpl implements PromotionService {
         return new PromotionResponse(promotion.getName(),promotion.getDescription(),
                 promotion.getStartDate().toString(),promotion.getEndDate().toString(),promotion.getPromotionType().getId());
     }
+
+    @Override
+    public PromotionResponse createDiscountProductPromotion(GiftPromotionRequest request) throws BadRequestUserException {
+        return null;
+    }
 }
