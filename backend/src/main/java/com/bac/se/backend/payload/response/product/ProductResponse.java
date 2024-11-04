@@ -4,10 +4,11 @@ import java.util.List;
 
 public record ProductResponse(Long id, String name,
                               String image,
-                              String category, String supplier,
-                              double originalPrice, double price,
-                              double discountPrice,
+                              String category,
                               String unit,
+                              String promotion,
+                              double price,
+                              double discountPrice,
                               List<Long> shipmentIds
 ) {
 }

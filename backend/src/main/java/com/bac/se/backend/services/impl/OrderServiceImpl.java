@@ -1,6 +1,7 @@
 package com.bac.se.backend.services.impl;
 
 import com.bac.se.backend.enums.OrderStatus;
+import com.bac.se.backend.enums.PageLimit;
 import com.bac.se.backend.enums.PaymentType;
 import com.bac.se.backend.enums.PromotionScope;
 import com.bac.se.backend.exceptions.BadRequestUserException;
@@ -8,12 +9,14 @@ import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.keys.OrderItemKey;
 import com.bac.se.backend.keys.ShipmentItemKey;
 import com.bac.se.backend.mapper.OrderMapper;
+import com.bac.se.backend.mapper.PromotionMapper;
 import com.bac.se.backend.mapper.StockMapper;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.OrderItemRequest;
 import com.bac.se.backend.payload.request.OrderRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.order.*;
+import com.bac.se.backend.payload.response.promotion.OrderPromotionResponse;
 import com.bac.se.backend.payload.response.stock.StockResponse;
 import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.services.OrderService;
@@ -47,11 +50,12 @@ public class OrderServiceImpl implements OrderService {
     private final QuantityPromotionRepository quantityPromotionRepository;
     private final GiftPromotionRepository giftPromotionRepository;
     private final StockMapper stockMapper;
+    private final PromotionRepository promotionRepository;
+    private final PromotionMapper promotionMapper;
 
 
     void minusStock(Long shipmenId, Long productId, int quantity) throws BadRequestUserException {
-        PageRequest pageRequest = PageRequest.of(0, 1);
-        var availableQuantityStock = stockRepository.getAvailableQuantityStock(shipmenId, productId, pageRequest);
+        var availableQuantityStock = stockRepository.getAvailableQuantityStock(shipmenId, productId, PageLimit.ONLY.getPageable());
         if (availableQuantityStock.isEmpty()) {
             throw new BadRequestUserException("Khong tim thay lo hang cua san pham");
         }
@@ -67,19 +71,23 @@ public class OrderServiceImpl implements OrderService {
 
     // create order with request are shipment id and product id for each item
     @Override
-    public CreateOrderResponse createOrderLive(OrderRequest orderRequest, HttpServletRequest request) throws BadRequestUserException {
+    public CreateOrderResponse createOrder(OrderRequest orderRequest, HttpServletRequest request) throws BadRequestUserException {
         String phoneCustomer = "";
         String emailEmployee = jwtParse.decodeTokenWithRequest(request);
         Map<Long, Integer> map = new HashMap<>();
         // Kiểm tra thông tin nhân viên
         Employee employee = employeeRepository.findByEmail(emailEmployee)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thông tin nhân viên"));
+
+        OrderStatus orderStatus = orderRequest.isLive() ? OrderStatus.COMPLETED : OrderStatus.PENDING;
+        PaymentType paymentType = orderRequest.paymentType().equals("CASH") ? PaymentType.CASH : PaymentType.E_WALLET;
         Order order = Order.builder()
                 .employee(employee)
-                .orderStatus(OrderStatus.COMPLETED)
+                .orderStatus(orderStatus)
                 .createdAt(new Date())
-                .paymentType(PaymentType.CASH)
+                .paymentType(paymentType)
                 .build();
+
         // Kiểm tra nó khách hàng của đăng ký tài khoản
         if (orderRequest.customerPhone().isPresent()) {
             phoneCustomer = orderRequest.customerPhone().get();
@@ -93,7 +101,7 @@ public class OrderServiceImpl implements OrderService {
 
         var orderItemRequests = orderRequest.orderItems();
         Order orderSave = orderRepository.save(order);
-        double total = 0;
+        BigDecimal total = BigDecimal.ZERO, totalDiscount = BigDecimal.ZERO;
         int remain = 0;
         // Kiểm tra số các mặt hàng trong đơn
         List<OrderItemResponse> orderItemResponses = new LinkedList<>();
@@ -120,7 +128,7 @@ public class OrderServiceImpl implements OrderService {
             minusStock(orderItemRequest.shipmentId(),
                     orderItemRequest.productId(), orderItemRequest.quantity());
             // Lấy ra giá mới nhất của sản phẩm và tính tổng thành tiền của sản phẩm
-            var productPriceLatest = productPriceRepository.getProductPriceLatest(product.getId(), PageRequest.of(0, 1));
+            var productPriceLatest = productPriceRepository.getProductPriceLatest(product.getId(), PageLimit.ONLY.getPageable());
             double price = Double.parseDouble(productPriceLatest.get(0)[1].toString());
             double discountPrice = Double.parseDouble(productPriceLatest.get(0)[2].toString());
             double totalPrice = 0;
@@ -157,17 +165,24 @@ public class OrderServiceImpl implements OrderService {
             }
 
             // Kiem tra san pham co khuyen mai hay khong
-            if (product.getPromotion() != null && product.getPromotion().getScope() == PromotionScope.PRODUCT) {
+            if (product.getPromotion() != null
+                    && product.getPromotion().getScope() == PromotionScope.PRODUCT
+                    && product.getPromotion().getEndDate().after(new Date())
+                    && product.getPromotion().getOrderLimit() > 0) {
                 // check quantity promotion
                 log.info("existing promotion");
                 Promotion promotion = product.getPromotion();
                 var existQuantityPromotion = quantityPromotionRepository.findByPromotion(promotion);
                 var existGiftPromotion = giftPromotionRepository.findByPromotion(promotion);
-                if (existQuantityPromotion.isPresent()) {
+                if (existQuantityPromotion.isPresent() && product.getPromotion().getOrderLimit() > 0) {
                     log.info("Quantity Promotion found");
                     QuantityPromotion quantityPromotion = existQuantityPromotion.get();
                     int freeQuantity = (map.get(product.getId()) / quantityPromotion.getBuyQuantity()) * quantityPromotion.getFreeQuantity();
                     totalPrice = totalPrice - (freeQuantity * price);
+                    promotion.setOrderLimit(promotion.getOrderLimit() - 1);
+                    product.setPromotion(promotion);
+                    productRepository.save(product);
+                    promotionRepository.save(promotion);
                 }
                 if (existGiftPromotion.isPresent()) {
                     GiftPromotion giftPromotion = existGiftPromotion.get();
@@ -188,6 +203,10 @@ public class OrderServiceImpl implements OrderService {
                         log.info("Trừ số lượng khuyến mãi");
                         giftQuantity = giftQuantity - remainQuantity;
                         minusStock(giftPromotion.getGiftShipmentId(), giftPromotion.getGiftProductId(), giftQuantity);
+                        promotion.setOrderLimit(promotion.getOrderLimit() - 1);
+                        product.setPromotion(promotion);
+                        productRepository.save(product);
+                        promotionRepository.save(promotion);
                     }
                 }
             }
@@ -216,16 +235,32 @@ public class OrderServiceImpl implements OrderService {
             }
             orderItemRepository.save(orderItem);
             // Tính tổng số tiền cũng như tổng tiền khuyến mại
-            total += totalPrice;
+            total = total.add(BigDecimal.valueOf(totalPrice));
         }
 
-        double change = orderRequest.customerPayment() - total;
+        double change = orderRequest.customerPayment() - total.doubleValue();
         if (change < 0) {
             throw new BadRequestUserException("Số tiền không đủ");
         }
+        
+        var promotionOrderLatest = promotionRepository.getPromotionOrderLatest(PageLimit.ONLY.getPageable());
+        if (!promotionOrderLatest.isEmpty()) {
+            OrderPromotionResponse promotionResponse = promotionMapper.mapToPromotionResponse(promotionOrderLatest.get(0));
+            Promotion promotion = promotionRepository.findById(promotionResponse.promotionId()).orElseThrow(
+                    () -> new ResourceNotFoundException("Không tìm thấy khuyến mãi")
+            );
+            if (total.compareTo(promotionResponse.minOrderValue()) > 0 && promotion.getOrderLimit() > 0) {
+                promotion.setOrderLimit(promotion.getOrderLimit() - 1);
+                promotionRepository.save(promotion);
+                totalDiscount = totalDiscount.add(total.multiply(BigDecimal.valueOf(promotionResponse.discountPercent())));
+                total = total.subtract(totalDiscount);
+                orderSave.setTotalDiscount(totalDiscount);
+            }
+        }
         orderSave.setCustomerPayment(BigDecimal.valueOf(orderRequest.customerPayment()));
+
         orderRepository.save(orderSave);
-        return new CreateOrderResponse(orderItemResponses, total, orderRequest.customerPayment(), change);
+        return new CreateOrderResponse(orderItemResponses, total.doubleValue(), orderRequest.customerPayment(), change);
     }
 
     // get orders customer bought

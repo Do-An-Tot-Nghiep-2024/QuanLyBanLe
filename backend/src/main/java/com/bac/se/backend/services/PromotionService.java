@@ -1,6 +1,7 @@
 package com.bac.se.backend.services;
 
 import com.bac.se.backend.exceptions.BadRequestUserException;
+import com.bac.se.backend.payload.request.promotion.DiscountProductPromotionRequest;
 import com.bac.se.backend.payload.request.promotion.GiftPromotionRequest;
 import com.bac.se.backend.payload.request.promotion.OrderPromotionRequest;
 import com.bac.se.backend.payload.request.promotion.QuantityPromotionRequest;
@@ -14,6 +15,6 @@ public interface PromotionService {
 
     PromotionResponse createGiftProductPromotion(GiftPromotionRequest request) throws BadRequestUserException;
 
-    PromotionResponse createDiscountProductPromotion(GiftPromotionRequest request) throws BadRequestUserException;
+    PromotionResponse createDiscountProductPromotion(DiscountProductPromotionRequest request) throws BadRequestUserException;
 
 }

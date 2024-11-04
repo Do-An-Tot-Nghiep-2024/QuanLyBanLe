@@ -23,11 +23,11 @@ public class OrderController {
     private final OrderService orderService;
     static final String REQUEST_SUCCESS = "success";
 
-    @PostMapping("/live")
+    @PostMapping
     public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrderLive(@RequestBody OrderRequest orderRequest, HttpServletRequest request) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ApiResponse<>(REQUEST_SUCCESS, orderService.createOrderLive(orderRequest, request)));
+                    .body(new ApiResponse<>(REQUEST_SUCCESS, orderService.createOrder(orderRequest, request)));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(e.getMessage(), null));

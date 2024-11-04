@@ -25,6 +25,7 @@ public class Promotion {
     private String description;
     private Date startDate;
     private Date endDate;
+    private int orderLimit;
     @Enumerated(EnumType.STRING)
     private PromotionScope scope;
 

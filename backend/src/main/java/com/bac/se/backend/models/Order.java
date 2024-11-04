@@ -29,6 +29,8 @@ public class Order  {
     @Enumerated(EnumType.STRING)
     private PaymentType paymentType;
     private BigDecimal customerPayment;
+    private BigDecimal totalDiscount;
+
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;

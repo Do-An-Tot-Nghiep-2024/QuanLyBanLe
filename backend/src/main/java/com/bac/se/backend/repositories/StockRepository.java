@@ -21,4 +21,18 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
             , @Param("productId") Long productId
             , Pageable pageable);
 
+    @Query(value = "SELECT " +
+            "    si.shipment_id,  " +
+            "   (s.quantity - s.sold_quantity) as available_quantity   " +
+            "FROM   " +
+            "    t_shipment_item si   " +
+            "INNER JOIN   " +
+            "    t_stock s on s.stock_id = si.stock_id   " +
+            "WHERE   " +
+            "    si.product_id = ?1 " +
+            "GROUP BY si.shipment_id   " +
+            "ORDER BY available_quantity DESC",nativeQuery = true)
+    List<Object[]> getMaxAvailableQuantityStock(Long productId, Pageable pageable);
+
+
 }

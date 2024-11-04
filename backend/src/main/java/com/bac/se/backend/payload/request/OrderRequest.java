@@ -5,6 +5,8 @@ import java.util.Optional;
 
 public record OrderRequest(List<OrderItemRequest> orderItems,
                            Optional<String> customerPhone,
-                           double customerPayment) // tiền khách đưa
+                           double customerPayment,
+                           Boolean isLive,
+                           String paymentType) // tiền khách đưa
 {
 }

@@ -7,6 +7,7 @@ public record PromotionRequest(
         String description,
         Date startDate,
         Date endDate,
-        Long promotionTypeId
+        Long promotionTypeId,
+        Integer orderLimit
 ) {
 }

@@ -4,17 +4,17 @@ import com.bac.se.backend.enums.PromotionScope;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.models.*;
-import com.bac.se.backend.payload.request.promotion.GiftPromotionRequest;
-import com.bac.se.backend.payload.request.promotion.OrderPromotionRequest;
-import com.bac.se.backend.payload.request.promotion.PromotionRequest;
-import com.bac.se.backend.payload.request.promotion.QuantityPromotionRequest;
+import com.bac.se.backend.payload.request.promotion.*;
 import com.bac.se.backend.payload.response.promotion.PromotionResponse;
 import com.bac.se.backend.repositories.*;
+import com.bac.se.backend.services.ProductPriceService;
 import com.bac.se.backend.services.PromotionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -29,19 +29,19 @@ public class PromotionServiceImpl implements PromotionService {
     private final QuantityPromotionRepository quantityPromotionRepository;
     private final GiftPromotionRepository giftPromotionRepository;
     private final StockRepository stockRepository;
-
+    private final ProductPriceService productPriceService;
+    private final DiscountProductPromotionRepository discountProductPromotionRepository;
 
 
     void validatePromotion(PromotionRequest promotionRequest) throws BadRequestUserException {
-        if(promotionRequest.promotionTypeId() == null
-    || promotionRequest.endDate() == null
-    || promotionRequest.startDate() == null
-    || promotionRequest.name() == null
-    || promotionRequest.description() == null)
-        {
+        if (promotionRequest.promotionTypeId() == null
+                || promotionRequest.endDate() == null
+                || promotionRequest.startDate() == null
+                || promotionRequest.name() == null
+                || promotionRequest.description() == null) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
         }
-        if(promotionRequest.endDate().before(promotionRequest.startDate())){
+        if (promotionRequest.endDate().before(promotionRequest.startDate())) {
             throw new BadRequestUserException("Ngày kết thúc phải lớn hơn ngày bắt đầu");
         }
     }
@@ -49,8 +49,7 @@ public class PromotionServiceImpl implements PromotionService {
     @Override
     public PromotionResponse createOrderPromotion(OrderPromotionRequest request) throws BadRequestUserException {
         validatePromotion(request.promotionRequest());
-        if(request.minOrderValue() == null || request.discountPercent() == null)
-        {
+        if (request.minOrderValue() == null || request.discountPercent() == null) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
         }
         PromotionType promotionType = promotionTypeRepository.findById(request.promotionRequest().promotionTypeId())
@@ -63,6 +62,7 @@ public class PromotionServiceImpl implements PromotionService {
                 .endDate(request.promotionRequest().endDate())
                 .promotionType(promotionType)
                 .scope(PromotionScope.ORDER)
+                .orderLimit(request.promotionRequest().orderLimit())
                 .build();
         var save = promotionRepository.save(promotion);
         OrderPromotion orderPromotion = OrderPromotion.builder()
@@ -71,15 +71,14 @@ public class PromotionServiceImpl implements PromotionService {
                 .promotion(save)
                 .build();
         orderPromotionRepository.save(orderPromotion);
-        return new PromotionResponse(promotion.getName(),promotion.getDescription(),
-                promotion.getStartDate().toString(),promotion.getEndDate().toString(),promotion.getPromotionType().getId());
+        return new PromotionResponse(promotion.getName(), promotion.getDescription(),
+                promotion.getStartDate().toString(), promotion.getEndDate().toString(), promotion.getPromotionType().getId());
     }
 
     @Override
     public PromotionResponse createQuantityProductPromotion(QuantityPromotionRequest request) throws BadRequestUserException {
         validatePromotion(request.promotionRequest());
-        if(request.buyQuantity() == null || request.freeQuantity() == null || request.productId() == null)
-        {
+        if (request.buyQuantity() == null || request.freeQuantity() == null || request.productId() == null) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
         }
 
@@ -95,6 +94,7 @@ public class PromotionServiceImpl implements PromotionService {
                 .endDate(request.promotionRequest().endDate())
                 .promotionType(promotionType)
                 .scope(PromotionScope.PRODUCT)
+                .orderLimit(request.promotionRequest().orderLimit())
                 .build();
         var save = promotionRepository.save(promotion);
 
@@ -106,16 +106,15 @@ public class PromotionServiceImpl implements PromotionService {
         quantityPromotionRepository.save(quantityPromotion);
         product.setPromotion(save);
         productRepository.save(product);
-        return new PromotionResponse(promotion.getName(),promotion.getDescription(),
-                promotion.getStartDate().toString(),promotion.getEndDate().toString(),promotion.getPromotionType().getId());
+        return new PromotionResponse(promotion.getName(), promotion.getDescription(),
+                promotion.getStartDate().toString(), promotion.getEndDate().toString(), promotion.getPromotionType().getId());
     }
 
     @Override
     public PromotionResponse createGiftProductPromotion(GiftPromotionRequest request) throws BadRequestUserException {
         validatePromotion(request.promotionRequest());
-        if(request.buyQuantity() == null || request.giftQuantity() == null || request.productId() == null
-                || request.giftProductId() == null || request.giftShipmentId() == null)
-        {
+        if (request.buyQuantity() == null || request.giftQuantity() == null || request.productId() == null
+                || request.giftProductId() == null || request.giftShipmentId() == null) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
         }
 
@@ -127,10 +126,10 @@ public class PromotionServiceImpl implements PromotionService {
 
         var availableQuantityStock = stockRepository.getAvailableQuantityStock(request.giftShipmentId(), request.giftProductId(),
                 PageRequest.of(0, 1));
-        if(availableQuantityStock.isEmpty()){
+        if (availableQuantityStock.isEmpty()) {
             throw new BadRequestUserException("Không có số lượng lô hàng");
         }
-        if(Integer.parseInt(availableQuantityStock.get(0)[0].toString()) < request.giftQuantity()){
+        if (Integer.parseInt(availableQuantityStock.get(0)[0].toString()) < request.giftQuantity()) {
             throw new BadRequestUserException("Số lượng không đủ");
         }
 
@@ -141,6 +140,7 @@ public class PromotionServiceImpl implements PromotionService {
                 .endDate(request.promotionRequest().endDate())
                 .promotionType(promotionType)
                 .scope(PromotionScope.PRODUCT)
+                .orderLimit(request.promotionRequest().orderLimit())
                 .build();
         var save = promotionRepository.save(promotion);
 
@@ -154,12 +154,53 @@ public class PromotionServiceImpl implements PromotionService {
         giftPromotionRepository.save(giftPromotion);
         product.setPromotion(save);
         productRepository.save(product);
-        return new PromotionResponse(promotion.getName(),promotion.getDescription(),
-                promotion.getStartDate().toString(),promotion.getEndDate().toString(),promotion.getPromotionType().getId());
+        return new PromotionResponse(promotion.getName(), promotion.getDescription(),
+                promotion.getStartDate().toString(), promotion.getEndDate().toString(), promotion.getPromotionType().getId());
     }
 
     @Override
-    public PromotionResponse createDiscountProductPromotion(GiftPromotionRequest request) throws BadRequestUserException {
-        return null;
+    public PromotionResponse createDiscountProductPromotion(DiscountProductPromotionRequest request) throws BadRequestUserException {
+        validatePromotion(request.promotionRequest());
+        if (request.productId() == null || request.discount() == null) {
+            throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
+        }
+        PromotionType promotionType = promotionTypeRepository.findById(request.promotionRequest().promotionTypeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy loại khuyến mại"));
+
+        Product product = productRepository.findById(request.productId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+
+        Promotion promotion = Promotion.builder()
+                .name(request.promotionRequest().name())
+                .description(request.promotionRequest().description())
+                .startDate(request.promotionRequest().startDate())
+                .endDate(request.promotionRequest().endDate())
+                .promotionType(promotionType)
+                .scope(PromotionScope.PRODUCT)
+                .orderLimit(request.promotionRequest().orderLimit())
+                .build();
+        var save = promotionRepository.save(promotion);
+        product.setPromotion(save);
+        productRepository.save(product);
+
+        var priceLatest = productPriceService.getPriceLatest(request.productId());
+
+
+        ProductPrice productPrice = ProductPrice.builder()
+                .product(product)
+                .createdAt(new Date())
+                .originalPrice(priceLatest.originalPrice())
+                .price(priceLatest.price())
+                .isPromotion(true)
+                .discountPrice(priceLatest.price() - (priceLatest.price() * request.discount()))
+                .build();
+        productPriceService.createProductPrice(productPrice);
+        DiscountProductPromotion discountProductPromotion = DiscountProductPromotion.builder()
+                .promotion(save)
+                .discount(request.discount())
+                .build();
+        discountProductPromotionRepository.save(discountProductPromotion);
+        return new PromotionResponse(promotion.getName(), promotion.getDescription(),
+                promotion.getStartDate().toString(), promotion.getEndDate().toString(), promotion.getPromotionType().getId());
     }
 }

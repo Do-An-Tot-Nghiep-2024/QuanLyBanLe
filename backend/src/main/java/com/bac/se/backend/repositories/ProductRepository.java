@@ -13,20 +13,44 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-
-    @Query("SELECT p.id, p.name, p.image, c.name, s.name, " +
-            "COALESCE(pp.originalPrice, 0) as originalPrice, " +
-            "COALESCE(pp.price, 0) as price, " +
-            "COALESCE(pp.discountPrice, 0) as discountPrice, " +
-            "u.name " +
-            "FROM Product p " +
-            "JOIN p.category c " +
-            "JOIN p.supplier s " +
-            "LEFT JOIN Unit u on u.id = p.unit.id " +
-            "LEFT JOIN ProductPrice pp ON pp.product.id = p.id " +
-            "AND pp.createdAt = (SELECT MAX(p1.createdAt) FROM ProductPrice p1 WHERE p1.product.id = p.id) " +
-            "WHERE p.isActive = true order by p.name asc")
+    @Query(value = "SELECT   " +
+            "    p.product_id,  " +
+            "    p.name,  " +
+            "    p.image,  " +
+            "    c.name as category,  " +
+            "    u.name as unit, pro" +
+            ".name,  " +
+            "    pp.price AS latest_price,  " +
+            "    CASE  " +
+            "        WHEN pp.is_promotion = 1   " +
+            "             AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date AND pr.order_limit > 0  " +
+            "             AND pr.promotion_type_id = 4  " +
+            "        THEN pp.discount_price  " +
+            "        ELSE 0  " +
+            "    END AS discount  " +
+            "FROM   " +
+            "    t_product p  " +
+            "INNER JOIN  " +
+            "    t_category c on c.category_id = p.category_id  " +
+            "INNER JOIN  " +
+            "    t_unit u on p.unit_id = u.unit_id  " +
+            "LEFT JOIN t_promotion pro ON p.promotion_id = pro.promotion_id AND pro.end_date > CURRENT_DATE AND pro.order_limit > 0 " +
+            "JOIN   " +
+            "    t_product_price pp ON p.product_id = pp.product_id   " +
+            "                       AND pp.created_at = (  " +
+            "                           SELECT MAX(sub_pp.created_at)  " +
+            "                           FROM t_product_price sub_pp  " +
+            "                           WHERE sub_pp.product_id = p.product_id  " +
+            "                       )  " +
+            "LEFT JOIN   " +
+            "    t_promotion pr ON p.promotion_id = pr.promotion_id   " +
+            "                   AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date  " +
+            "                   AND pr.promotion_type_id = 4  " +
+            "                   AND pr.order_limit > 0  " +
+            "WHERE   " +
+            "    p.is_active = 1",nativeQuery = true)
     Page<Object[]> getProducts(Pageable pageable);
+
 
 
     @Query(value = "select count(*) from t_product where is_active = 0", nativeQuery = true)
@@ -36,22 +60,41 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "select p.id, p.name from Product p where p.supplier.id = ?1 and p.isActive = true")
     List<Object[]> getProductsBySupplier(Long supplierId);
 
-    @Query(value = "SELECT  " +
-            "    p.product_id, p.name, p.image,pp.price,pp.discount_price " +
-            "FROM " +
-            "    t_product p " +
-            "        INNER JOIN " +
-            "    t_category c ON c.category_id = p.category_id " +
-            "        INNER JOIN " +
-            "    t_product_price pp ON p.product_id = pp.product_id " +
-            "WHERE " +
-            "    pp.created_at = (SELECT  " +
-            "            MAX(pp2.created_at) " +
-            "        FROM " +
-            "            t_product_price pp2 " +
-            "        WHERE " +
-            "            pp2.product_id = pp.product_id) " +
-            "        AND p.is_active = 1 AND c.category_id = ?1", nativeQuery = true)
+    @Query(value = "SELECT   " +
+            "    p.product_id,  " +
+            "    p.name,  " +
+            "    p.image,  " +
+            "    c.name as category,  " +
+            "    u.name as unit, pro" +
+            ".name,  " +
+            "    pp.price AS latest_price,  " +
+            "    CASE  " +
+            "        WHEN pp.is_promotion = 1   " +
+            "             AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date AND pr.order_limit > 0  " +
+            "             AND pr.promotion_type_id = 4  " +
+            "        THEN pp.discount_price  " +
+            "        ELSE 0  " +
+            "    END AS discount  " +
+            "FROM   " +
+            "    t_product p  " +
+            "INNER JOIN  " +
+            "    t_category c on c.category_id = p.category_id  " +
+            "INNER JOIN  " +
+            "    t_unit u on p.unit_id = u.unit_id  " +
+            "LEFT JOIN t_promotion pro ON p.promotion_id = pro.promotion_id AND pro.end_date > CURRENT_DATE AND pro.order_limit > 0 " +
+            "JOIN   " +
+            "    t_product_price pp ON p.product_id = pp.product_id   " +
+            "                       AND pp.created_at = (  " +
+            "                           SELECT MAX(sub_pp.created_at)  " +
+            "                           FROM t_product_price sub_pp  " +
+            "                           WHERE sub_pp.product_id = p.product_id  " +
+            "                       )  " +
+            "LEFT JOIN   " +
+            "    t_promotion pr ON p.promotion_id = pr.promotion_id   " +
+            "                   AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date  " +
+            "                   AND pr.promotion_type_id = 4  " +
+            "                   AND pr.order_limit > 0  " +
+            "WHERE  p.is_active = 1 AND p.category_id = ?1", nativeQuery = true)
     List<Object[]> getProductsByCategory(Long categoryId);
 
 
@@ -76,60 +119,69 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                           @Param("toDate") Date toDate);
 
 
+    @Query(value = "SELECT " +
+            "    p.product_id," +
+            "    p.name,      " +
+            "    p.image, pro.name,     " +
+            "    pp.price AS latest_price,      " +
+            "    CASE      " +
+            "        WHEN pp.is_promotion = 1       " +
+            "             AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date AND pr.order_limit > 0      " +
+            "             AND pr.promotion_type_id = 4      " +
+            "        THEN pp.discount_price      " +
+            "        ELSE 0      " +
+            "    END AS discount      " +
+            "FROM       " +
+            "    t_product p      " +
+            "JOIN       " +
+            "    t_product_price pp ON p.product_id = pp.product_id       " +
+            "                       AND pp.created_at = (      " +
+            "                           SELECT MAX(sub_pp.created_at)      " +
+            "                           FROM t_product_price sub_pp      " +
+            "                           WHERE sub_pp.product_id = p.product_id      " +
+            "                       )      " +
+            "LEFT JOIN t_promotion pro ON p.promotion_id = pro.promotion_id AND pro.end_date > CURRENT_DATE AND pro.order_limit > 0 " +
+            "LEFT JOIN       " +
+            "    t_promotion pr ON p.promotion_id = pr.promotion_id       " +
+            "                   AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date      " +
+            "                   AND pr.promotion_type_id = 4      " +
+            "                   AND pr.order_limit > 0      " +
+            "WHERE       " +
+            "    p.is_active = 1 " +
+            "ORDER BY p.name", nativeQuery = true)
+    Page<Object[]> getProductsMobile(Pageable pageable);
 
 
-
-    @Query(value = "WITH LatestProductPrice AS ( " +
-            "    SELECT  " +
-            "        pp.product_id, " +
-            "        pp.price, " +
-            "        pp.discount_price, " +
-            "        pp.product_price_id " +
-            "    FROM  " +
-            "        t_product_price pp " +
-            "    INNER JOIN  " +
-            "        (SELECT  " +
-            "            product_id, MAX(created_at) AS latest_created_at " +
-            "         FROM  " +
-            "            t_product_price  " +
-            "         GROUP BY  " +
-            "            product_id " +
-            "        ) AS latest_pp ON pp.product_id = latest_pp.product_id  " +
-            "        AND pp.created_at = latest_pp.latest_created_at " +
-            "), " +
-            "MaxAvbTable AS ( " +
-            "    SELECT  " +
-            "        si.product_id,  " +
-            "        MAX(s.quantity - s.sold_quantity) AS max_avb " +
-            "    FROM  " +
-            "        t_shipment_item si " +
-            "    INNER JOIN  " +
-            "        t_stock s ON si.stock_id = s.stock_id " +
-            "    GROUP BY  " +
-            "        si.product_id " +
-            ") " +
-            " " +
-            "SELECT  " +
-            "    p.name, " +
-            "    p.image, " +
-            "    lpp.price, " +
-            "    lpp.discount_price, " +
-            "    si.shipment_id, " +
-            "    (s.quantity - s.sold_quantity) AS avb " +
-            "FROM " +
-            "    t_product p " +
-            "INNER JOIN  " +
-            "    LatestProductPrice lpp ON p.product_id = lpp.product_id " +
-            "INNER JOIN  " +
-            "    t_shipment_item si ON si.product_id = p.product_id " +
-            "INNER JOIN  " +
-            "    t_stock s ON s.stock_id = si.stock_id " +
-            "INNER JOIN  " +
-            "    MaxAvbTable max_avb_table ON si.product_id = max_avb_table.product_id " +
-            "    AND (s.quantity - s.sold_quantity) = max_avb_table.max_avb " +
-            "WHERE  " +
+    @Query(value = "SELECT " +
+            "    p.product_id, " +
+            "    p.name,      " +
+            "    p.image, pro.name, " +
+            "    pp.price AS latest_price,      " +
+            "    CASE      " +
+            "        WHEN pp.is_promotion = 1       " +
+            "             AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date AND pr.order_limit > 0      " +
+            "             AND pr.promotion_type_id = 4      " +
+            "        THEN pp.discount_price      " +
+            "        ELSE 0      " +
+            "    END AS discount      " +
+            "FROM       " +
+            "    t_product p      " +
+            "LEFT JOIN t_promotion pro ON p.promotion_id = pro.promotion_id AND pro.end_date > CURRENT_DATE AND pro.order_limit > 0 " +
+            "JOIN       " +
+            "    t_product_price pp ON p.product_id = pp.product_id       " +
+            "                       AND pp.created_at = (      " +
+            "                           SELECT MAX(sub_pp.created_at)      " +
+            "                           FROM t_product_price sub_pp      " +
+            "                           WHERE sub_pp.product_id = p.product_id      " +
+            "                       )      " +
+            "LEFT JOIN       " +
+            "    t_promotion pr ON p.promotion_id = pr.promotion_id       " +
+            "                   AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date      " +
+            "                   AND pr.promotion_type_id = 4      " +
+            "                   AND pr.order_limit > 0      " +
+            "WHERE       " +
             "    p.is_active = 1 AND p.category_id = ?1 " +
-            "ORDER BY  p.name",nativeQuery = true)
-    Page<Object[]> getProductsMobile(Long categoryId, Pageable pageable);
+            "ORDER BY p.name", nativeQuery = true)
+    Page<Object[]> getProductsMobileByCategory(Long categoryId,Pageable pageable);
 
 }

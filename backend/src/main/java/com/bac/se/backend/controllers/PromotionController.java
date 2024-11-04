@@ -2,6 +2,7 @@ package com.bac.se.backend.controllers;
 
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
+import com.bac.se.backend.payload.request.promotion.DiscountProductPromotionRequest;
 import com.bac.se.backend.payload.request.promotion.GiftPromotionRequest;
 import com.bac.se.backend.payload.request.promotion.OrderPromotionRequest;
 import com.bac.se.backend.payload.request.promotion.QuantityPromotionRequest;
@@ -87,6 +88,21 @@ public class PromotionController {
             );
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @PostMapping("/create-discount-product")
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public ResponseEntity<ApiResponse<PromotionResponse>> createDiscountProductPromotion(@RequestBody DiscountProductPromotionRequest request) {
+        try {
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(new ApiResponse<>(REQUEST_ACCEPT,
+                            promotionService.createDiscountProductPromotion(request)));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
