@@ -14,7 +14,7 @@ public interface UnitService {
 
     UnitResponse createUnit(Unit unit) throws BadRequestUserException;
 
-    String deleteUnit(Long id);
+    void deleteUnit(Long id);
 
     UnitResponse updateUnit(Long id,Unit unit) throws BadRequestUserException;
 }
