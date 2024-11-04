@@ -39,20 +39,6 @@ export default function CreateProduct() {
     setSuppliers(response.data.responseList);
   };
 
-  // const handleChange = (
-  //   event: React.ChangeEvent<{ name?: string; value: unknown }>
-  // ) => {
-  //   const { name, value } = event.target;
-
-  //   console.log(name, value);
-
-  //   setProduct((prev) => ({
-  //     ...prev,
-  //     [String(name)]:
-  //       name === "categoryId" || name === "supplierId" ? Number(value) : value,
-  //   }));
-  // };
-
   const handleChange = (
     event: SelectChangeEvent<unknown> | React.ChangeEvent<{ name?: string; value: unknown }>
   ) => {
