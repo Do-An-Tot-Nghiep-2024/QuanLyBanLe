@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.Date;
 
@@ -23,6 +24,8 @@ public class ProductPrice {
     private double price;
     private double discountPrice;
     private Date createdAt;
+    @ColumnDefault("false") // change to true if promotion
+    private boolean isPromotion;
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;

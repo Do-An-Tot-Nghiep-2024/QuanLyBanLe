@@ -80,7 +80,7 @@ class OrderServiceTest {
         orderRequest = new OrderRequest(List.of(
                 new OrderItemRequest(1L, 1L, 1),
                 new OrderItemRequest(2L, 2L, 2)
-        ), Optional.of("123456789"), 50000.0);
+        ), Optional.of("123456789"), 50000.0,true,"CASH");
         expectedDate = simpleDateFormat.parse("01-01-2027");
         request = mock(HttpServletRequest.class);
     }

@@ -119,7 +119,6 @@ public class ProductController {
 
 
     @GetMapping("/supplier/{id}")
-    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<List<ProductQueryResponse>>> getProductsBySupplier(@PathVariable("id") Long supplierId){
         try{
             return ResponseEntity.ok()
@@ -136,6 +135,32 @@ public class ProductController {
                     .body(new ApiResponse<>(REQUEST_SUCCESS,productService.getProductsByCategory(categoryId)));
         }catch (Exception e){
             return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+
+    @GetMapping("/mobile")
+    public ResponseEntity<ApiResponse<PageResponse<ProductMobileResponse>>> getProductsMobile(
+            @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, productService.getProductsMobile(pageNumber, pageSize)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/mobile/category/{id}")
+    public ResponseEntity<ApiResponse<PageResponse<ProductMobileResponse>>> getProductsMobileByCategory(
+            @PathVariable("id") Long categoryId,
+            @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, productService.getProductsMobileByCategory(categoryId, pageNumber, pageSize)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 }

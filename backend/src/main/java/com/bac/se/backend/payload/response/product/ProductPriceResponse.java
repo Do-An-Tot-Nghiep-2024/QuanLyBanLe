@@ -1,4 +1,7 @@
 package com.bac.se.backend.payload.response.product;
 
-public record ProductPriceResponse(double originalPrice, double price,double discountPrice) {
+public record ProductPriceResponse(
+        Long productPriceId,
+        double originalPrice, double price,
+        double discountPrice) {
 }

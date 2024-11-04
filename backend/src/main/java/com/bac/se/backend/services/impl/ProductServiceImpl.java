@@ -1,9 +1,9 @@
 package com.bac.se.backend.services.impl;
 
+import com.bac.se.backend.enums.PageLimit;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.mapper.ProductMapper;
-import com.bac.se.backend.mapper.ProductPriceMapper;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.CreateProductRequest;
 import com.bac.se.backend.payload.request.ProductPriceRequest;
@@ -11,6 +11,7 @@ import com.bac.se.backend.payload.request.ProductUpdateRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.product.*;
 import com.bac.se.backend.repositories.*;
+import com.bac.se.backend.services.ProductPriceService;
 import com.bac.se.backend.services.ProductService;
 import com.bac.se.backend.utils.UploadImage;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +33,13 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
     private final SupplierRepository supplierRepository;
-    private final ProductPriceRepository productPriceRepository;
-    private final ProductPriceMapper productPriceMapper;
-//    private final StockRepository stockRepository;
+    private final ProductPriceService productPriceService;
+    //    private final StockRepository stockRepository;
     private final ShipmentItemRepository shipmentItemRepository;
     static final String NOT_FOUND_PRODUCT = "Không tìm thấy sản phẩm";
     private final UploadImage uploadImage;
     private final UnitRepository unitRepository;
+    private final StockRepository stockRepository;
 
     // validate product input
     private void validateInput(ProductUpdateRequest productUpdateRequest) throws BadRequestUserException {
@@ -61,12 +62,13 @@ public class ProductServiceImpl implements ProductService {
         for (Long productId : productIds) {
             List<Long> shipmentIds = shipmentItemRepository.getShipmentItemByProduct(productId).stream()
                     .map(x -> Long.parseLong(x[0].toString())).toList();
+
             shipmentItemMap.put(productId, shipmentIds);
         }
         List<ProductResponse> employeeResponseList = productList.stream()
                 .map(res -> {
                     List<Long> shipmentItemIds = shipmentItemMap.getOrDefault(Long.parseLong(res[0].toString()), Collections.emptyList());
-                    
+
                     return productMapper.mapObjectToProductResponse(res, shipmentItemIds);
                 }).toList();
         return new PageResponse<>(employeeResponseList, pageNumber,
@@ -78,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse getProductById(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_PRODUCT));
-        var productPriceResponse = getProductPriceResponse(productId);
+        var productPriceResponse = productPriceService.getPriceLatest(productId);
         List<Long> shipmentIds = new ArrayList<>();
         List<Object[]> shipmentItems = shipmentItemRepository.getShipmentItemByProduct(productId);
         if (!shipmentItems.isEmpty()) {
@@ -88,11 +90,11 @@ public class ProductServiceImpl implements ProductService {
         return new ProductResponse(product.getId(),
                 product.getName(), product.getImage(),
                 product.getCategory().getName(),
-                product.getSupplier().getName(),
+                product.getUnit().getName(),
+                product.getPromotion().getName() == null ? "" : product.getPromotion().getName(),
                 productPriceResponse.originalPrice(),
                 productPriceResponse.price(),
-                productPriceResponse.discountPrice(),
-                product.getUnit().getName(),
+
                 shipmentIds);
     }
 
@@ -161,13 +163,14 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new BadRequestUserException("Không tìm thấy nhà cung cấp"));
 
         // Get the latest product price
-        var productPriceResponse = getProductPriceResponse(productId);
+        var productPriceResponse = productPriceService.getPriceLatest(productId);
 
         // Update basic product information
         product.setName(productUpdateRequest.name());
         product.setCategory(category);
         product.setSupplier(supplier);
         product.setImage(imageURL);
+        productRepository.save(product);
         return createProductResponse(product, productPriceResponse);
     }
 
@@ -191,8 +194,8 @@ public class ProductServiceImpl implements ProductService {
                 .price(request.price())
                 .createdAt(new Date())
                 .build();
-        productPriceRepository.save(productPrice);
-        return new ProductPriceResponse(productPrice.getOriginalPrice(),productPrice.getPrice(),0);
+        var save = productPriceService.createProductPrice(productPrice);
+        return new ProductPriceResponse(save.getId(), productPrice.getOriginalPrice(), productPrice.getPrice(), 0);
     }
 
     @Override
@@ -206,9 +209,45 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public PageResponse<ProductMobileResponse> getProductsMobile(Integer pageNumber, Integer pageSize) {
+        var productsMobile = productRepository.getProductsMobile(PageLimit.DEFAULT.getPageable());
+        var mobileResponses = productsMobile.getContent()
+                .stream()
+                .map(productMapper::mapObjectToProductMobileResponse).toList();
+        for (ProductMobileResponse productMobileResponse : mobileResponses) {
+            var maxAvailableQuantityStock = stockRepository
+                    .getMaxAvailableQuantityStock(productMobileResponse.getProductId(),
+                            PageLimit.ONLY.getPageable());
+            if (!maxAvailableQuantityStock.isEmpty()) {
+                productMobileResponse.setShipmentId(Long.parseLong(maxAvailableQuantityStock.get(0)[0].toString()));
+            }
+        }
+        return new PageResponse<>(mobileResponses, pageNumber,
+                productsMobile.getTotalPages(), productsMobile.getTotalElements(), productsMobile.isLast());
+    }
+
+    @Override
+    public PageResponse<ProductMobileResponse> getProductsMobileByCategory(Long categoryId, Integer pageNumber, Integer pageSize) {
+        var productsMobile = productRepository.getProductsMobileByCategory(categoryId, PageLimit.DEFAULT.getPageable());
+        var mobileResponses = productsMobile.getContent()
+                .stream()
+                .map(productMapper::mapObjectToProductMobileResponse).toList();
+        for (ProductMobileResponse productMobileResponse : mobileResponses) {
+            var maxAvailableQuantityStock = stockRepository
+                    .getMaxAvailableQuantityStock(productMobileResponse.getProductId(),
+                            PageLimit.ONLY.getPageable());
+            if (!maxAvailableQuantityStock.isEmpty()) {
+                productMobileResponse.setShipmentId(Long.parseLong(maxAvailableQuantityStock.get(0)[0].toString()));
+            }
+        }
+        return new PageResponse<>(mobileResponses, pageNumber,
+                productsMobile.getTotalPages(), productsMobile.getTotalElements(), productsMobile.isLast());
+    }
+
+    @Override
     public List<ProductCategoryResponse> getProductsByCategory(Long categoryId) {
         List<Object[]> productList = productRepository.getProductsByCategory(categoryId);
-        return  productList.stream()
+        return productList.stream()
                 .map(productMapper::mapObjectToProductCategoryResponse)
                 .toList();
     }
@@ -220,20 +259,13 @@ public class ProductServiceImpl implements ProductService {
                 product.getName(),
                 product.getImage(),
                 product.getCategory().getName(),
-                product.getSupplier().getName(),
-                productPrice.originalPrice(),
+                product.getUnit().getName(),
+                product.getPromotion().getName() == null ? "" : product.getPromotion().getName(),
                 productPrice.price(),
                 productPrice.discountPrice(),
-                product.getUnit().getName(),
                 null
         );
     }
 
-    private ProductPriceResponse getProductPriceResponse(Long productId) {
-        var productPriceLatest = productPriceRepository.getProductPriceLatest(productId, PageRequest.of(0, 1));
-        if (productPriceLatest.isEmpty()) {
-            return new ProductPriceResponse(0, 0, 0);
-        }
-        return productPriceMapper.mapObjectToProductPriceResponse(productPriceLatest.get(0));
-    }
+
 }

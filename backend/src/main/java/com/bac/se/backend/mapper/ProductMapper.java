@@ -11,14 +11,13 @@ public class ProductMapper {
     public ProductResponse mapObjectToProductResponse(Object[] object, List<Long> shipmentIds) {
         return new ProductResponse(
                 Long.parseLong(object[0].toString()), // id
-                (String) object[1], // name
-                (String) object[2], // image
-                (String) object[3], // category
-                (String) object[4], // supplier
-                Double.parseDouble(object[5].toString()), // originalPrice
+                object[1].toString(), // name
+                object[2].toString(), // image
+                object[3].toString(), // category
+                object[4].toString(), // unit
+                object[5] == null ? "" : object[5].toString(), // promotion
                 Double.parseDouble(object[6].toString()), // price
-                Double.parseDouble(object[7].toString()),
-                object[8] == null ? "" : object[8].toString(), // unit
+                Double.parseDouble(object[7].toString()), // discountPrice
                 shipmentIds // isInShipment
         );
     }
@@ -57,11 +56,13 @@ public class ProductMapper {
 
     public ProductMobileResponse mapObjectToProductMobileResponse(Object[] object) {
         return new ProductMobileResponse(
-                object[0].toString(),
+                Long.parseLong(object[0].toString()),
                 object[1].toString(),
-                Double.parseDouble(object[2].toString()),
-                Double.parseDouble(object[3].toString()),
-                Long.parseLong(object[4].toString())
+                object[2].toString(),
+                object[3] == null ? "" : object[3].toString(),
+                Double.parseDouble(object[4].toString()),
+                Double.parseDouble(object[5].toString()),
+                null
         );
     }
 }
