@@ -72,10 +72,11 @@ public class UnitController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<String>> deleteUnit(@PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse<Long>> deleteUnit(@PathVariable("id") Long id) {
         try {
+            unitService.deleteUnit(id);
             return ResponseEntity.ok()
-                    .body(new ApiResponse<>(REQUEST_SUCCESS, unitService.deleteUnit(id)));
+                    .body(new ApiResponse<>(REQUEST_SUCCESS, id));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity
                     .status(404)

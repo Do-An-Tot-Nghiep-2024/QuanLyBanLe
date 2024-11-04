@@ -39,12 +39,12 @@ public class UnitServiceImpl implements UnitService {
     }
 
     @Override
-    public String deleteUnit(Long id) {
-        unitRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Không tìm thấy đơn vị tính với mã là : " + id)
-        );
+    public void deleteUnit(Long id) {
+        var present = unitRepository.findById(id);
+        if (present.isEmpty()) {
+            throw new ResourceNotFoundException("Không tìm thấy đơn vị tính với mã là : " + id);
+        }
         unitRepository.deleteById(id);
-        return "Unit deleted successfully";
     }
 
     @Override
