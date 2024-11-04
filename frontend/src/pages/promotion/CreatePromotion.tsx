@@ -41,6 +41,14 @@ const CreatePromotion: React.FC = () => {
     const [searchTerm] = useState('');
     const [quantityOfOrder, setQuantityOfOrder] = useState<string>(); 
 
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('vi-VN', {
+          style: 'currency',
+          currency: 'VND',
+        }).format(amount);
+      };
+    
     // Snackbar state
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -310,7 +318,7 @@ const CreatePromotion: React.FC = () => {
                         fullWidth
                         type="number"
                         label="Giá trị đơn hàng tối thiểu"
-                        value={minOrderValue}
+                        value={formatCurrency(Number(minOrderValue))}
                         onChange={handleMinOrderValueChange}
                         sx={{ mb: 2 }}
                     />

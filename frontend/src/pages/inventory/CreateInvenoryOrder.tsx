@@ -116,13 +116,53 @@ const CreateInventoryOrder: React.FC = () => {
             return;
         }
 
-        const formattedOrderItems = orderItems.map(item => ({
-            id: item.product.id,
-            quantity: item.quantity,
-            price: item.price,
-            mxp: item.mxp ? formatDate(item.mxp) : null,
-            exp: item.exp ? formatDate(item.exp) : null,
-        }));
+        const formattedOrderItems = orderItems.map(item => {
+
+            const quantityStr = String(item.quantity);
+            const priceStr = String(item.price);
+
+            const quantityRegex = /^[1-9]\d*$/; // Quantity must be a positive integer
+         
+
+            // Validate quantity
+            if (!quantityRegex.test(quantityStr)) {
+                alert("Số lượng phải nguyên dương lớn hơn 0");
+                return null;
+            }
+
+            // Validate price
+            if (!quantityRegex.test(priceStr) || !priceStr || item.price <= 0) {
+                alert("Giá phải hợp lệ");
+                return null;
+            }
+
+            // Check dates
+            if (!item.mxp || !item.exp) {
+                alert("Điền đầy đủ thông tin ngày sản xuất/ngày hết hạn");
+                return null; 
+            }
+
+            const mxpDate = new Date(item.mxp);
+            const expDate = new Date(item.exp);
+
+            if (expDate <= mxpDate) {
+                alert("Ngày hết hạn phải sau ngày sản xuất");
+                return null; 
+            }
+
+           
+            return {
+                id: item.product.id,
+                quantity: item.quantity,
+                price: item.price,
+                mxp: formatDate(item.mxp),
+                exp: formatDate(item.exp),
+            };
+        }).filter(item => item !== null); 
+
+        if (formattedOrderItems.length === 0) {
+            return; // No valid items to create the order
+        }
 
         console.log(formattedOrderItems);
 
@@ -155,20 +195,20 @@ const CreateInventoryOrder: React.FC = () => {
         setSearchTerm("");
     };
 
-    const normalizeString = (str : string) => {
+    const normalizeString = (str: string) => {
         return str
-          .normalize("NFD") 
-          .replace(/[\u0300-\u036f]/g, "") 
-          .toLowerCase(); 
-      };
-    
-      const filteredProducts =
-      Array.isArray(products)
-        ? products.filter(
-            (product) =>
-              normalizeString(String(product.productName)).includes(normalizeString(searchTerm))
-          )
-        : [];
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase();
+    };
+
+    const filteredProducts =
+        Array.isArray(products)
+            ? products.filter(
+                (product) =>
+                    normalizeString(String(product.productName)).includes(normalizeString(searchTerm))
+            )
+            : [];
 
     useEffect(() => {
         fetchProducts();
@@ -223,7 +263,7 @@ const CreateInventoryOrder: React.FC = () => {
 
                             <Tooltip title="Thêm sản phẩm" arrow>
                                 <IconButton
-                                    onClick={() => handleAddToOrder(product) }
+                                    onClick={() => handleAddToOrder(product)}
                                     size="large"
                                     color="success"
                                 >

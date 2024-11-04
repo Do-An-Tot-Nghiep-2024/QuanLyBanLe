@@ -78,7 +78,7 @@ const OrderPage: React.FC = () => {
   };
 
   const isCustomerPaymentValid = (payment: number) => {
-    const regex = /^\d+(\.\d{1,2})?$/; 
+    const regex = /^\d+(\.\d{1,2})?$/;
     return regex.test(String(payment));
   };
 
@@ -88,28 +88,44 @@ const OrderPage: React.FC = () => {
       alert("Chưa thêm sản phẩm nào");
       return;
     }
-    
     if (!isShipmentSelected()) {
       alert("Vui lòng chọn mã lô hàng cho tất cả sản phẩm");
       return;
     }
 
-    if (customerPayment == 0 || customerPayment < totalPayment || !isCustomerPaymentValid(customerPayment)) {
+    if (customerPayment === 0 || customerPayment < totalPayment || !isCustomerPaymentValid(customerPayment)) {
       alert("Vui lòng nhập số tiền hợp lệ");
       return;
     }
 
-    const formattedOrderItems = orderItems.map((item) => ({
-      productId: item.product.id,
-      quantity: item.quantity,
-      shipmentId: item.selectedShipment,
-    }));
 
+
+    const formattedOrderItems = orderItems.map(item => {
+      if (item.quantity === 0 || !item.quantity) {
+        alert("Số lượng sản phẩm không hợp lệ")
+        return;
+      }
+      return {
+        productId: item.product.id,
+        quantity: item.quantity,
+        shipmentId: item.selectedShipment,
+      }
+
+    }).filter(item => item !== null);
+
+    if (formattedOrderItems.length === 0) {
+      return;
+    }
 
     try {
       const response = await createOrderService(formattedOrderItems, customerPayment);
       console.log("Order created:", response);
-      setOrderItems([]);
+      if (response.message === 'success') {
+        setOrderItems([]);
+        setCustomerChange(0);
+        setCustomerPayment(0);
+      }
+
     } catch (error) {
       console.error("Error creating order:", error);
       alert("An error occurred while creating the order.");
@@ -200,11 +216,11 @@ const OrderPage: React.FC = () => {
     console.log("Updated order items:", orderItems);
   };
 
-const updateCustomerPayment = (customerPayment: number) => {
-  const totalPayment = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  setCustomerPayment(customerPayment);
-  setCustomerChange(customerPayment - totalPayment);
-};
+  const updateCustomerPayment = (customerPayment: number) => {
+    const totalPayment = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    setCustomerPayment(customerPayment);
+    setCustomerChange(customerPayment - totalPayment);
+  };
 
   return (
     <Box
@@ -337,8 +353,10 @@ const updateCustomerPayment = (customerPayment: number) => {
               fullWidth
               variant="outlined"
               label="Tiền khách hàng đưa"
-              value={customerPayment}
-              onChange={(e) => updateCustomerPayment(Number(e.target.value))}
+              value={customerPayment} 
+              onChange={(e) => {
+                updateCustomerPayment(Number(e.target.value));
+              }}
               sx={{ mb: 2, width: '30%' }}
             />
             <Typography sx={{ mb: 2 }}>
@@ -348,7 +366,7 @@ const updateCustomerPayment = (customerPayment: number) => {
               variant="contained"
               color="primary"
               onClick={handleCreateBill}
-              sx={{width:'100%'}}
+              sx={{ width: '100%' }}
             >
               Tạo đơn hàng
             </Button>
