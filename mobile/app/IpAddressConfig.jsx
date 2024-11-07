@@ -1,5 +1,5 @@
 const IpAddress = {
-    ipAddress: '172.0.2.12',  
+    ipAddress: '192.168.102.16',  
 };
 
 export {IpAddress}

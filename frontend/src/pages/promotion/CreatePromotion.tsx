@@ -14,7 +14,7 @@ import {
     SnackbarCloseReason,
     Autocomplete,
 } from '@mui/material';
-import { createOrderPromotion } from '../../services/promotion.service';
+import { createDiscountProductPromotion, createGiftProductPromotion, createOrderPromotion, createQuantityPromotion } from '../../services/promotion.service';
 import { getAllProductsService } from '../../services/product.service';
 import { GetProductSchema } from '../../types/getProductSchema';
 
@@ -22,6 +22,7 @@ const promotionTypes = [
     { id: 1, label: 'Khuyến mãi theo giá trị đơn hàng' },
     { id: 2, label: 'Khuyến mãi theo số lượng sản phẩm' },
     { id: 3, label: 'Khuyến mãi tặng kèm sản phẩm' },
+    { id: 4, label: 'Khuyến mãi theo loại sản phẩm' },
 ];
 
 const CreatePromotion: React.FC = () => {
@@ -34,21 +35,20 @@ const CreatePromotion: React.FC = () => {
     const [discountPercent, setDiscountPercent] = useState<number | ''>(0);
     const [buyQuantity, setBuyQuantity] = useState<number | ''>(0);
     const [freeQuantity, setFreeQuantity] = useState<number | ''>(0);
-    const [giftQuantity, setGiftQuantity] = useState<number | ''>(1); 
+    const [giftQuantity, setGiftQuantity] = useState<number | ''>(1);
     const [productId, setProductId] = useState<number | ''>(0);
-    const [giftProductId, setGiftProductId] = useState<number | ''>(0); 
+    const [giftProductId, setGiftProductId] = useState<number | ''>(0);
     const [products, setProducts] = useState<GetProductSchema[]>([]);
     const [searchTerm] = useState('');
-    const [quantityOfOrder, setQuantityOfOrder] = useState<string>(); 
+    const [quantityOfOrder, setQuantityOfOrder] = useState<string>();
+    const [productCategory, setProductCategory] = useState<number>(0);
+    const [discountAmount, setDiscountAmount] = useState<number | ''>(0);
+    const [giftShipmentId, setGiftShipmentId] = useState<number>();
+    const [giftProduct, setGiftProduct] = useState<GetProductSchema>();
 
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('vi-VN', {
-          style: 'currency',
-          currency: 'VND',
-        }).format(amount);
-      };
-    
+
+
     // Snackbar state
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -76,14 +76,15 @@ const CreatePromotion: React.FC = () => {
         }
     };
 
-    const handleQuantityOfOrder = (e: React.ChangeEvent<HTMLInputElement>) =>{
+    const handleQuantityOfOrder = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQuantityOfOrder(e.target.value);
 
     }
 
     const handleSubmit = async () => {
-        const nameRegex = /^(?!\s).{1,250}$/; 
-        const descriptionRegex = /^(?!\s).{1,250}$/; 
+        const nameRegex = /^(?!\s).{1,250}$/;
+        const descriptionRegex = /^(?!\s).{1,250}$/;
+        let response;
 
         if (!nameRegex.test(name)) {
             setSnackbarMessage("Tên khuyến mãi không được để trống và tối đa 250 ký tự!");
@@ -118,6 +119,7 @@ const CreatePromotion: React.FC = () => {
 
         let promotionData;
 
+
         if (promotionTypeId === 1) {
             const minOrderValueNum = Number(minOrderValue);
             if (minOrderValueNum <= 1000) {
@@ -141,10 +143,15 @@ const CreatePromotion: React.FC = () => {
                     startDate: reformattedStartDate,
                     endDate: reformattedEndDate,
                     promotionTypeId,
+                    orderLimit: quantityOfOrder
                 },
                 minOrderValue: minOrderValue ? Number(minOrderValue) : undefined,
                 discountPercent,
             };
+
+            response = await createOrderPromotion(promotionData);
+            console.log(response);
+            console.log('Promotion Data:', promotionData);
         } else if (promotionTypeId === 2) {
             promotionData = {
                 promotionRequest: {
@@ -153,11 +160,16 @@ const CreatePromotion: React.FC = () => {
                     startDate: reformattedStartDate,
                     endDate: reformattedEndDate,
                     promotionTypeId,
+                    orderLimit: quantityOfOrder
                 },
                 buyQuantity,
                 freeQuantity,
                 productId,
             };
+            response = await createQuantityPromotion(promotionData);
+            console.log(response);
+            console.log('Promotion Data:', promotionData);
+
         } else if (promotionTypeId === 3) {
             promotionData = {
                 promotionRequest: {
@@ -166,19 +178,54 @@ const CreatePromotion: React.FC = () => {
                     startDate: reformattedStartDate,
                     endDate: reformattedEndDate,
                     promotionTypeId,
+                    orderLimit: quantityOfOrder
                 },
-                buyQuantity: 4, // Fixed quantity for promotion type 3
-                freeQuantity: giftQuantity, // Use gift quantity from user input
+                buyQuantity: 4,
+                giftQuantity: giftQuantity,
                 giftProductId,
-                productId: 2, // Fixed product ID for promotion
+                giftShipmentId,
+                productId: 2,
             };
+            response = await createGiftProductPromotion(promotionData);
+            console.log(response);
+            console.log("promotion data", promotionData);
+            
+            
         }
 
-        const response = await createOrderPromotion(promotionData);
-        console.log(response);
-        console.log('Promotion Data:', promotionData);
+        else if (promotionTypeId === 4) {
+            if (Number(discountAmount) < 0.1 || Number(discountAmount) > 1.0) {
+                setSnackbarMessage("Phần trăm giảm giá phải trong khoảng 0.1 đến 1.0!");
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+                return;
+            }
 
-        if (response.message === 'success') {
+
+            if (Number(quantityOfOrder) <= 0 || Number(discountAmount)) {
+                setSnackbarMessage("Phần trăm giảm giá phải trong khoảng 0.1 đến 1.0!");
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+                return;
+            }
+            promotionData = {
+                promotionRequest: {
+                    name,
+                    description,
+                    startDate: reformattedStartDate,
+                    endDate: reformattedEndDate,
+                    promotionTypeId,
+                    orderLimit: quantityOfOrder
+                },
+                productId: productCategory,
+                discount: discountAmount,
+            };
+
+            response = await createDiscountProductPromotion(promotionData);
+            console.log(response);
+            console.log('Promotion Data:', promotionData);
+        }
+        if (response?.message === 'success') {
             setSnackbarMessage("Tạo khuyến mãi thành công");
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -188,10 +235,17 @@ const CreatePromotion: React.FC = () => {
             setStartDate('');
             setMinOrderValue('');
             setDiscountPercent('');
-            setGiftQuantity(1); // Reset gift quantity
+            setGiftQuantity(0); // Reset gift quantity
             setGiftProductId(0); // Reset gift product ID
+            setQuantityOfOrder("");
+            setProductId(0),
+                setBuyQuantity(0),
+                setProductCategory(0),
+                setDiscountAmount(0),
+                setGiftShipmentId(0);
+
         } else {
-            setSnackbarMessage(response.message);
+            setSnackbarMessage(response?.message);
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
         }
@@ -303,14 +357,14 @@ const CreatePromotion: React.FC = () => {
                 />
             </Box>
 
-             <TextField
-                        fullWidth
-                        type="number"
-                        label="Số lượng đơn hàng được áp dụng khuyến mãi"
-                        value={quantityOfOrder}
-                        onChange={handleQuantityOfOrder}
-                        sx={{ mb: 2 }}
-                    />
+            <TextField
+                fullWidth
+                type="number"
+                label="Số lượng đơn hàng được áp dụng khuyến mãi"
+                value={quantityOfOrder}
+                onChange={handleQuantityOfOrder}
+                sx={{ mb: 2 }}
+            />
 
             {promotionTypeId === 1 && (
                 <>
@@ -318,7 +372,7 @@ const CreatePromotion: React.FC = () => {
                         fullWidth
                         type="number"
                         label="Giá trị đơn hàng tối thiểu"
-                        value={formatCurrency(Number(minOrderValue))}
+                        value={(Number(minOrderValue))}
                         onChange={handleMinOrderValueChange}
                         sx={{ mb: 2 }}
                     />
@@ -408,14 +462,15 @@ const CreatePromotion: React.FC = () => {
                         }}
                         sx={{ mb: 2 }}
                     />
-                    <Typography variant="body1" sx={{ mb: 2, fontWeight:'bold' }}>
-                        Chọn sản phẩm và số lượng quà tặng muốn cung cấp.
+                    <Typography variant="body1" sx={{ mb: 2, fontWeight: 'bold' }}>
+                        Chọn sản phẩm và số lượng quà tặng muốn cung cấp
                     </Typography>
                     <Autocomplete
                         options={filteredProducts}
                         getOptionLabel={(option) => String(option.name)}
                         onChange={(_event, newValue) => {
                             setGiftProductId(Number(newValue ? newValue.id : ''));
+                            setGiftProduct(newValue as GetProductSchema);
                         }}
                         renderOption={(props, option) => (
                             <li {...props}>
@@ -436,6 +491,58 @@ const CreatePromotion: React.FC = () => {
                         onChange={(e) => {
                             const value = e.target.value;
                             setGiftQuantity(value === '' ? '' : Number(value));
+                        }}
+                        sx={{ mb: 2 }}
+                    />
+
+                    <InputLabel sx={{textAlign:'left'}}>Chọn lô hàng khuyến mãi</InputLabel>
+                    <Select
+                        value={giftShipmentId}
+                        onChange={(e) => setGiftShipmentId(Number(e.target.value))}
+                        sx={{ width: "100%", textAlign: 'left', mb: 2 }}
+
+                    >
+                        <MenuItem value="">Chọn mã lô hàng</MenuItem>
+                        {giftProduct?.shipmentIds?.map((shipment) => (
+                            <MenuItem key={shipment} value={shipment}>
+                                {shipment}
+                            </MenuItem>
+                        ))}
+                    </Select>
+
+
+                </>
+            )}
+            {promotionTypeId === 4 && (
+                <>
+                    <Typography variant="body1" sx={{ mb: 2 }}>
+                        Chọn sản phẩm và số tiền giảm giá
+                    </Typography>
+                    <Autocomplete
+                        options={products}
+                        getOptionLabel={(option) => String(option.name)}
+                        onChange={(_event, newValue) => {
+                            setProductCategory(Number(newValue ? newValue.id : ''));
+                        }}
+                        renderOption={(props, option) => (
+                            <li {...props}>
+                                <img src={String(option.image)} style={{ width: 50, height: 50, marginRight: 10 }} />
+                                {option.name}
+                            </li>
+                        )}
+                        renderInput={(params) => (
+                            <TextField {...params} label="Chọn sản phẩm" variant="outlined" fullWidth />
+                        )}
+                        sx={{ mb: 2 }}
+                    />
+                    <TextField
+                        fullWidth
+                        type="number"
+                        label="Số tiền giảm giá"
+                        value={discountAmount}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            setDiscountAmount(value === '' ? '' : Number(value));
                         }}
                         sx={{ mb: 2 }}
                     />

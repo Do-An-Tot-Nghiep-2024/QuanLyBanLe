@@ -56,14 +56,19 @@ const OrderPage: React.FC = () => {
   };
 
   const handleAddToOrder = (product: GetProductSchema) => {
-    setOrderItems((prev) => {
-      console.log(prev);
-      return [
+       const missingShipment = orderItems.some(item => !item.selectedShipment);
+      
+      if (missingShipment) {
+        alert("Vui lòng chọn mã lô hàng cho tất cả sản phẩm trước khi thêm sản phẩm mới.");
+        return;
+      }
+    
+      setOrderItems((prev) => [
         ...prev,
         { product, quantity: 1, price: Number(product.price), selectedShipment: "" },
-      ];
-    });
-  };
+      ]);
+    };
+  
 
   const handleUpdateQuantity = (productId: number, quantity: number) => {
     setOrderItems((prev) =>
@@ -194,14 +199,9 @@ const OrderPage: React.FC = () => {
       setOrderItems((prevItems) =>
         prevItems.filter((itm) => itm.selectedShipment !== "")
       );
-
-
-    }
-
+}
     else {
       console.log("new item");
-
-
       setOrderItems((orderItems) =>
         orderItems.map((itm) => {
           if (Number(itm.product.id) === Number(productId) && itm.selectedShipment === "") {
