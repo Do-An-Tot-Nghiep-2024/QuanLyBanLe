@@ -114,7 +114,7 @@ public class OrderController {
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<ApiResponse<String>> updateOrderStatus(@PathVariable("orderId") Long orderId, @RequestParam("orderStatus") String orderStatus){
+    public ResponseEntity<ApiResponse<String>> updateOrderStatus(@PathVariable("id") Long orderId, @RequestParam("orderStatus") String orderStatus){
         try {
             orderService.updateOrderStatus(orderId, orderStatus);
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderStatus));
