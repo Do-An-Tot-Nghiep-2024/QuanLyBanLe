@@ -1,27 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, TouchableHighlight } from 'react-native';
-import products from '@/app/component/data/products';
 import { colors } from '@/app/style';
+import { getProductsByCategoryService } from '@/app/services/product.service';
 
 const ProductList = ({ route, navigation }) => {
   const { categoryId } = route.params || {};
+  const [products, setProducts] = useState([]);
 
-  const filteredProducts = categoryId
-    ? products.filter(product => product.categoryId === categoryId)
-    : [];
 
-  if (filteredProducts.length === 0) {
-    return (
-      <View style={styles.container}>
-        <Text>No products available for this category.</Text>
-      </View>
-    );
+
+  const getProducts = async () =>{
+    console.log(categoryId);
+    
+    if(categoryId){
+      const response = await getProductsByCategoryService(categoryId);
+      setProducts(response.data.responseList);
+    }
+
+    
   }
+
+
+  useEffect(()=> {
+    getProducts();
+  }, [])
 
   return (
     <FlatList
-      data={filteredProducts}
-      keyExtractor={item => item.id.toString()}
+      data={products}
+      keyExtractor={item => item?.id?.toString()}
       numColumns={2}
       renderItem={({ item }) => (
         <TouchableHighlight
@@ -62,7 +69,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   itemContainer: {
-    flex: 1,
+    flex: 1/2,
     alignItems: 'center',
     height: 250,
     borderWidth: 1,
