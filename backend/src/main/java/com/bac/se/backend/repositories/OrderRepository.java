@@ -12,14 +12,36 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    @Query(value = "select o.order_id, e.name as emp,sum(oi.total_price) as total, o.order_status,o.payment_type,o.created_at " +
+    @Query(value = "select o.order_id, e.name as emp,sum(oi.total_price) as total, o.order_status,o.payment_type,o.total_discount,o.created_at,c.name " +
             "from t_order o " +
-            "join t_order_item oi on oi.order_id = o.order_id " +
-            "join t_employee e on e.employee_id = o.employee_id " +
-            "where customer_id = :id " +
+            "inner join t_order_item oi on oi.order_id = o.order_id " +
+            "inner join t_employee e on e.employee_id = o.employee_id " +
+            "inner join t_customer c on c.customer_id = o.customer_id " +
+            "where o.customer_id = :id " +
             "group by oi.order_id", nativeQuery = true)
     Page<Object[]> getOrdersByCustomer(Long id, Pageable pageable);
 
+    @Query(value = "SELECT  " +
+            "    o.order_id, " +
+            "    e.name, " +
+            "    SUM(oi.total_price), " +
+            "    o.order_status, " +
+            "    o.payment_type, " +
+            "    o.total_discount, " +
+            "    o.created_at, " +
+            "    c.phone " +
+            "FROM " +
+            "    t_order o " +
+            "        INNER JOIN " +
+            "    t_order_item oi ON o.order_id = oi.order_id " +
+            "        INNER JOIN " +
+            "    t_employee e ON e.employee_id = o.employee_id " +
+            "        LEFT JOIN  " +
+            "    t_customer c ON c.customer_id = o.customer_id " +
+            "WHERE " +
+            "    o.order_id = ?1 " +
+            "GROUP BY oi.order_id",nativeQuery = true)
+    List<Object[]> getOrderById(Long id, Pageable pageable);
 
     @Query(value = "select o.order_id, e.name as emp,sum(oi.total_price) as total, o.order_status,o.payment_type,o.created_at " +
             "from t_order o " +

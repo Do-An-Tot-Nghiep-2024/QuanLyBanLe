@@ -22,4 +22,12 @@ public interface PromotionRepository extends JpaRepository<Promotion,Long> {
             "ORDER BY p.promotion_id DESC",
             nativeQuery = true)
     List<Object[]> getPromotionOrderLatest(Pageable pageable);
+
+
+    @Query(value = "SELECT pro.promotion_id FROM t_product p  " +
+            "INNER JOIN t_promotion pro ON pro.promotion_id = p.promotion_id AND pro.end_date > CURRENT_DATE AND pro.order_limit > 0 " +
+            "WHERE p.product_id = ?1 ORDER BY pro.promotion_id DESC",nativeQuery = true)
+    List<Object[]> existPromotionByProduct(Long productId,Pageable pageable);
+
+
 }

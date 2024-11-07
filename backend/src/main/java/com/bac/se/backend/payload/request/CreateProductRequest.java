@@ -5,3 +5,4 @@ public record CreateProductRequest(String name,
                                    Long supplierId,
                                    Long unitId) {
 }
+

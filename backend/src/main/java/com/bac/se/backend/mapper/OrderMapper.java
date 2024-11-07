@@ -17,7 +17,9 @@ public class OrderMapper {
                 Double.parseDouble(order[2].toString()), // total
                 order[3].toString(), // order status
                 order[4].toString(), // payment type
-                (Date) order[5] // date
+                Double.parseDouble(order[5].toString()), // total discount
+                (Date) order[6], // date
+                order[7] == null ? "" : order[6].toString() // customer phone
         );
     }
 

@@ -49,13 +49,14 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public UnitResponse updateUnit(Long id,Unit unit) throws BadRequestUserException {
-        var findUnit =  unitRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Không tìm thấy đơn vị tính với mã là : " + id)
-        );
         if (unit.getName() == null) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
         }
+        var findUnit =  unitRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Không tìm thấy đơn vị tính với mã là : " + id)
+        );
         findUnit.setName(unit.getName());
-        return new UnitResponse(unitRepository.save(findUnit).getId(), unit.getName());
+        var save = unitRepository.save(findUnit);
+        return new UnitResponse(save.getId(), unit.getName());
     }
 }

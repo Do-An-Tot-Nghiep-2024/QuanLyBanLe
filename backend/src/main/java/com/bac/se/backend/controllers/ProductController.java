@@ -56,6 +56,8 @@ public class ProductController {
             @RequestPart("productRequest") CreateProductRequest createProductRequest,
             @RequestPart("file") MultipartFile filePath) {
         try {
+            System.out.println( "product request :" + createProductRequest);
+            System.out.println("file path is : " +  filePath);
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS,
                     productService.createProduct(createProductRequest, filePath)));
         } catch (BadRequestUserException e) {

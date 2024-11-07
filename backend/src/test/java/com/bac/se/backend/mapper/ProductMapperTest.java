@@ -13,13 +13,13 @@ class ProductMapperTest {
 
     @Test
     void mapObjectToProductResponse() {
-        ProductResponse productResponse = productMapper.mapObjectToProductResponse(new Object[]{"1", "name", "image", "category","unit","promotion",  "200", "300"}, new ArrayList<>());
-        assertEquals(1L, productResponse.id());
-        assertEquals("name", productResponse.name());
-        assertEquals("image", productResponse.image());
-        assertEquals("category", productResponse.category());
-        assertEquals(200.0, productResponse.price());
-        assertEquals(300.0, productResponse.discountPrice());
-        assertEquals("unit", productResponse.unit());
+        ProductResponse productResponse = productMapper.mapObjectToProductResponse(new Object[]{"1", "name", "image", "category","unit", "200", "300"}, new ArrayList<>());
+        assertEquals(1L, productResponse.getId());
+        assertEquals("name", productResponse.getName());
+        assertEquals("image", productResponse.getImage());
+        assertEquals("category", productResponse.getCategory());
+        assertEquals(200.0, productResponse.getPrice());
+        assertEquals(300.0, productResponse.getDiscountPrice());
+        assertEquals("unit", productResponse.getUnit());
     }
 }

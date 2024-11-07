@@ -1,5 +1,6 @@
 package com.bac.se.backend.services.impl;
 
+import com.bac.se.backend.enums.PageLimit;
 import com.bac.se.backend.enums.PromotionScope;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -202,5 +204,15 @@ public class PromotionServiceImpl implements PromotionService {
         discountProductPromotionRepository.save(discountProductPromotion);
         return new PromotionResponse(promotion.getName(), promotion.getDescription(),
                 promotion.getStartDate().toString(), promotion.getEndDate().toString(), promotion.getPromotionType().getId());
+    }
+
+    @Override
+    public Long getPromotionProduct(Long productId) {
+        long promotionId = 0L;
+        List<Object[]> promotionList = promotionRepository.existPromotionByProduct(productId, PageLimit.ONLY.getPageable());
+        if (!promotionList.isEmpty()) {
+            promotionId = Long.parseLong(promotionList.get(0)[0].toString());
+        }
+        return promotionId;
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
@@ -47,9 +48,12 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getOutputStream().println("{ \"message\": \"" + "Invalid or expired token, you may login and try again! " + "\" }");
         } catch (Exception e) {
-            response.setContentType("application/json");
+            response.setContentType("application/json; charset=UTF-8");
+            response.setCharacterEncoding("UTF-8");
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getOutputStream().println("{ \"message\": \"" + e.getMessage() + "\" }");
+//            ServletOutputStream out = response.getOutputStream();
+//            out.write(("{ \"message\": \"" + e.getMessage() + Arrays.toString("\" }".getBytes(StandardCharsets.UTF_8))).getBytes());
+            response.getOutputStream().write(("{ \"message\": \"" + e.getMessage() + "\" }").getBytes(StandardCharsets.UTF_8));
         }
     }
 

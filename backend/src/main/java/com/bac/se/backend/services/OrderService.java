@@ -13,9 +13,19 @@ import java.util.Date;
 
 public interface OrderService {
     CreateOrderResponse createOrder(OrderRequest orderRequest, HttpServletRequest request) throws BadRequestUserException;
+
     PageResponse<OrderResponse> getOrdersByCustomer(Long customerId, int pageNumber, int pageSize);
+
     PageResponse<OrderResponse> getOrdersByEmployee(Long employeeId, int pageNumber, int pageSize);
+
     PageResponse<OrderResponse> getOrdersEmployeeByDate(Long employeeId, int pageNumber, int pageSize, Date fromDate,Date toDate);
+
     OrderCustomerResponse getOrderDetailByCustomer(Long orderId);
+
+    OrderResponse getOrderById(Long orderId);
+
+    void updateOrderStatus(Long orderId, String orderStatus);
+
+
 
 }
