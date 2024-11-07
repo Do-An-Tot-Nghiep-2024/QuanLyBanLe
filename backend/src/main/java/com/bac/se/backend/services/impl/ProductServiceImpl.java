@@ -4,6 +4,7 @@ import com.bac.se.backend.enums.PageLimit;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.mapper.ProductMapper;
+import com.bac.se.backend.mapper.PromotionMapper;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.CreateProductRequest;
 import com.bac.se.backend.payload.request.ProductPriceRequest;
@@ -40,6 +41,8 @@ public class ProductServiceImpl implements ProductService {
     private final UploadImage uploadImage;
     private final UnitRepository unitRepository;
     private final StockRepository stockRepository;
+    private final GiftPromotionRepository giftPromotionRepository;
+    private final PromotionMapper promotionMapper;
 
     // validate product input
     private void validateInput(ProductUpdateRequest productUpdateRequest) throws BadRequestUserException {
@@ -65,13 +68,18 @@ public class ProductServiceImpl implements ProductService {
 
             shipmentItemMap.put(productId, shipmentIds);
         }
-        List<ProductResponse> employeeResponseList = productList.stream()
+        List<ProductResponse> productResponseList = productList.stream()
                 .map(res -> {
-                    List<Long> shipmentItemIds = shipmentItemMap.getOrDefault(Long.parseLong(res[0].toString()), Collections.emptyList());
-
-                    return productMapper.mapObjectToProductResponse(res, shipmentItemIds);
+                    Long productId = Long.parseLong(res[0].toString());
+                    List<Long> shipmentItemIds = shipmentItemMap.getOrDefault(productId, Collections.emptyList());
+                    var response = productMapper.mapObjectToProductResponse(res, shipmentItemIds);
+                    var giftPromotionByProduct = giftPromotionRepository.getGiftPromotionByProduct(response.getId(), PageLimit.ONLY.getPageable());
+                    if(!giftPromotionByProduct.isEmpty()){
+                        response.setGiftPromotion(promotionMapper.mapToGiftPromotionResponse(giftPromotionByProduct.get(0)));
+                    }
+                    return response;
                 }).toList();
-        return new PageResponse<>(employeeResponseList, pageNumber,
+        return new PageResponse<>(productResponseList, pageNumber,
                 productPage.getTotalPages(), productPage.getTotalElements(), productPage.isLast());
     }
 
@@ -86,16 +94,14 @@ public class ProductServiceImpl implements ProductService {
         if (!shipmentItems.isEmpty()) {
             shipmentIds = shipmentItems.stream().map(x -> Long.parseLong(x[0].toString())).toList();
         }
-//        System.out.println(shipmentItems.size());
         return new ProductResponse(product.getId(),
                 product.getName(), product.getImage(),
                 product.getCategory().getName(),
                 product.getUnit().getName(),
-                product.getPromotion().getName() == null ? "" : product.getPromotion().getName(),
-                productPriceResponse.originalPrice(),
                 productPriceResponse.price(),
-
-                shipmentIds);
+                productPriceResponse.discountPrice(),
+                shipmentIds,
+                null);
     }
 
 
@@ -210,16 +216,23 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PageResponse<ProductMobileResponse> getProductsMobile(Integer pageNumber, Integer pageSize) {
-        var productsMobile = productRepository.getProductsMobile(PageLimit.DEFAULT.getPageable());
+        PageRequest pageRequest = PageRequest.of(pageNumber,pageSize);
+        var productsMobile = productRepository.getProductsMobile(pageRequest);
         var mobileResponses = productsMobile.getContent()
                 .stream()
                 .map(productMapper::mapObjectToProductMobileResponse).toList();
+
         for (ProductMobileResponse productMobileResponse : mobileResponses) {
             var maxAvailableQuantityStock = stockRepository
                     .getMaxAvailableQuantityStock(productMobileResponse.getProductId(),
                             PageLimit.ONLY.getPageable());
             if (!maxAvailableQuantityStock.isEmpty()) {
                 productMobileResponse.setShipmentId(Long.parseLong(maxAvailableQuantityStock.get(0)[0].toString()));
+
+            }
+            var giftPromotionByProduct = giftPromotionRepository.getGiftPromotionByProduct(productMobileResponse.getProductId(), PageLimit.ONLY.getPageable());
+            if(!giftPromotionByProduct.isEmpty()){
+                productMobileResponse.setGiftPromotionResponse(promotionMapper.mapToGiftPromotionResponse(giftPromotionByProduct.get(0)));
             }
         }
         return new PageResponse<>(mobileResponses, pageNumber,
@@ -260,9 +273,9 @@ public class ProductServiceImpl implements ProductService {
                 product.getImage(),
                 product.getCategory().getName(),
                 product.getUnit().getName(),
-                product.getPromotion().getName() == null ? "" : product.getPromotion().getName(),
                 productPrice.price(),
                 productPrice.discountPrice(),
+                null,
                 null
         );
     }

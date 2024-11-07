@@ -7,6 +7,8 @@ public record OrderResponse(
         String employee,
         double total, String orderStatus,
         String paymentType,
-        Date createdAt
+        double totalDiscount,
+        Date createdAt,
+        String customerPhone
 ) {
 }

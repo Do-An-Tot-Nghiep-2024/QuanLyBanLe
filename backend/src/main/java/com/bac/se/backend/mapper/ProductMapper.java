@@ -15,10 +15,10 @@ public class ProductMapper {
                 object[2].toString(), // image
                 object[3].toString(), // category
                 object[4].toString(), // unit
-                object[5] == null ? "" : object[5].toString(), // promotion
-                Double.parseDouble(object[6].toString()), // price
-                Double.parseDouble(object[7].toString()), // discountPrice
-                shipmentIds // isInShipment
+                Double.parseDouble(object[5].toString()), // price
+                Double.parseDouble(object[6].toString()), // discountPrice
+                shipmentIds, // isInShipment,
+                null
         );
     }
 
@@ -59,9 +59,9 @@ public class ProductMapper {
                 Long.parseLong(object[0].toString()),
                 object[1].toString(),
                 object[2].toString(),
-                object[3] == null ? "" : object[3].toString(),
+                Double.parseDouble(object[3].toString()),
                 Double.parseDouble(object[4].toString()),
-                Double.parseDouble(object[5].toString()),
+                null,
                 null
         );
     }

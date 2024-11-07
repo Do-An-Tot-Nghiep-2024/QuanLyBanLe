@@ -18,8 +18,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    p.name,  " +
             "    p.image,  " +
             "    c.name as category,  " +
-            "    u.name as unit, pro" +
-            ".name,  " +
+            "    u.name as unit, " +
             "    pp.price AS latest_price,  " +
             "    CASE  " +
             "        WHEN pp.is_promotion = 1   " +
@@ -34,7 +33,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    t_category c on c.category_id = p.category_id  " +
             "INNER JOIN  " +
             "    t_unit u on p.unit_id = u.unit_id  " +
-            "LEFT JOIN t_promotion pro ON p.promotion_id = pro.promotion_id AND pro.end_date > CURRENT_DATE AND pro.order_limit > 0 " +
             "JOIN   " +
             "    t_product_price pp ON p.product_id = pp.product_id   " +
             "                       AND pp.created_at = (  " +
@@ -122,7 +120,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "SELECT " +
             "    p.product_id," +
             "    p.name,      " +
-            "    p.image, pro.name,     " +
+            "    p.image,   " +
             "    pp.price AS latest_price,      " +
             "    CASE      " +
             "        WHEN pp.is_promotion = 1       " +
@@ -140,7 +138,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "                           FROM t_product_price sub_pp      " +
             "                           WHERE sub_pp.product_id = p.product_id      " +
             "                       )      " +
-            "LEFT JOIN t_promotion pro ON p.promotion_id = pro.promotion_id AND pro.end_date > CURRENT_DATE AND pro.order_limit > 0 " +
             "LEFT JOIN       " +
             "    t_promotion pr ON p.promotion_id = pr.promotion_id       " +
             "                   AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date      " +
@@ -155,7 +152,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "SELECT " +
             "    p.product_id, " +
             "    p.name,      " +
-            "    p.image, pro.name, " +
+            "    p.image, " +
             "    pp.price AS latest_price,      " +
             "    CASE      " +
             "        WHEN pp.is_promotion = 1       " +
@@ -166,7 +163,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    END AS discount      " +
             "FROM       " +
             "    t_product p      " +
-            "LEFT JOIN t_promotion pro ON p.promotion_id = pro.promotion_id AND pro.end_date > CURRENT_DATE AND pro.order_limit > 0 " +
             "JOIN       " +
             "    t_product_price pp ON p.product_id = pp.product_id       " +
             "                       AND pp.created_at = (      " +

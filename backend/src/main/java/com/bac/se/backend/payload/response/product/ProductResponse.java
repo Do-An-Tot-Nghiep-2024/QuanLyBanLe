@@ -1,14 +1,25 @@
 package com.bac.se.backend.payload.response.product;
 
+import com.bac.se.backend.payload.response.promotion.GiftPromotionResponse;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
-public record ProductResponse(Long id, String name,
-                              String image,
-                              String category,
-                              String unit,
-                              String promotion,
-                              double price,
-                              double discountPrice,
-                              List<Long> shipmentIds
-) {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Data
+public class ProductResponse {
+    private Long id;
+    private String name;
+    private String image;
+    private String category;
+    private String unit;
+    private double price;
+    private double discountPrice;
+    private List<Long> shipmentIds;
+    private GiftPromotionResponse giftPromotion;
 }

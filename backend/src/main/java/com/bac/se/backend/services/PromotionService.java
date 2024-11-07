@@ -17,4 +17,6 @@ public interface PromotionService {
 
     PromotionResponse createDiscountProductPromotion(DiscountProductPromotionRequest request) throws BadRequestUserException;
 
+    Long getPromotionProduct(Long productId);
+
 }
