@@ -33,7 +33,7 @@ public interface PromotionRepository extends JpaRepository<Promotion,Long> {
 
 
     @Query(value = "SELECT p.id,p.name,p.description,p.startDate,p.endDate,pt.name,p.scope,p.orderLimit FROM Promotion p " +
-            "INNER JOIN PromotionType pt ON pt.id = p.promotionType.id ")
+            "INNER JOIN PromotionType pt ON pt.id = p.promotionType.id ORDER BY p.id DESC ")
     Page<Object[]> getPromotions(Pageable pageable);
 
 
