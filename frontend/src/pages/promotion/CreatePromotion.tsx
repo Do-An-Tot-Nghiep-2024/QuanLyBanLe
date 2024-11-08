@@ -100,7 +100,7 @@ const CreatePromotion: React.FC = () => {
             return;
         }
 
-        if (!startDate || !endDate) {
+        if (!startDate || !endDate ) {
             setSnackbarMessage("Thông tin ngày bắt đầu và ngày kết thúc không hợp lệ!!!");
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
@@ -110,7 +110,14 @@ const CreatePromotion: React.FC = () => {
         const reformattedStartDate = reformatDate(startDate);
         const reformattedEndDate = reformatDate(endDate);
 
-        if (new Date(reformattedEndDate) <= new Date(reformattedStartDate)) {
+        if (new Date(reformattedStartDate) <= new Date() ) {
+            setSnackbarMessage("Ngày bắt đầu phải lớn hơn ngày hiện tại!");
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+            return;
+        }
+
+        if (new Date(reformattedEndDate) <= new Date(reformattedStartDate) ) {
             setSnackbarMessage("Ngày kết thúc phải lớn hơn ngày bắt đầu!");
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
@@ -194,7 +201,8 @@ const CreatePromotion: React.FC = () => {
         }
 
         else if (promotionTypeId === 4) {
-            if (Number(discountAmount) < 0.1 || Number(discountAmount) > 1.0) {
+            
+            if (Number(discountAmount) < 0.1 || Number(discountAmount) > 1.0 || !Number(discountAmount) ) {
                 setSnackbarMessage("Phần trăm giảm giá phải trong khoảng 0.1 đến 1.0!");
                 setSnackbarSeverity('error');
                 setSnackbarOpen(true);
@@ -202,8 +210,8 @@ const CreatePromotion: React.FC = () => {
             }
 
 
-            if (Number(quantityOfOrder) <= 0 || Number(discountAmount)) {
-                setSnackbarMessage("Phần trăm giảm giá phải trong khoảng 0.1 đến 1.0!");
+            if (Number(quantityOfOrder) <= 0 ) {
+                setSnackbarMessage("Số lượng order phải lớn hơn 0!");
                 setSnackbarSeverity('error');
                 setSnackbarOpen(true);
                 return;
@@ -243,7 +251,6 @@ const CreatePromotion: React.FC = () => {
                 setProductCategory(0),
                 setDiscountAmount(0),
                 setGiftShipmentId(0);
-
         } else {
             setSnackbarMessage(response?.message);
             setSnackbarSeverity('error');
@@ -302,7 +309,6 @@ const CreatePromotion: React.FC = () => {
             </Typography>
 
             <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel>Chọn loại khuyến mãi</InputLabel>
                 <Select
                     value={promotionTypeId}
                     onChange={handlePromotionTypeChange}
@@ -372,7 +378,7 @@ const CreatePromotion: React.FC = () => {
                         fullWidth
                         type="number"
                         label="Giá trị đơn hàng tối thiểu"
-                        value={(Number(minOrderValue))}
+                        value={(minOrderValue)}
                         onChange={handleMinOrderValueChange}
                         sx={{ mb: 2 }}
                     />
