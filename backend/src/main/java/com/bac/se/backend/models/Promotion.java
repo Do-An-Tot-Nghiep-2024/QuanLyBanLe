@@ -3,6 +3,7 @@ package com.bac.se.backend.models;
 import com.bac.se.backend.enums.PromotionScope;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.Date;
 import java.util.List;
@@ -24,6 +25,8 @@ public class Promotion {
     private Date startDate;
     private Date endDate;
     private int orderLimit;
+    @ColumnDefault("true")
+    private boolean isActive;
     @Enumerated(EnumType.STRING)
     private PromotionScope scope;
 

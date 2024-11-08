@@ -33,4 +33,19 @@ public interface GiftPromotionRepository extends JpaRepository<GiftPromotion,Lon
             "    t_gift_promotion gf ON gf.promotion_id = pr.promotion_id " +
             "WHERE p.product_id = ?1",nativeQuery = true)
     List<Object[]> getGiftPromotionByProduct(Long productId, Pageable pageable);
+
+
+    @Query(value = "SELECT  " +
+            "    main_product.name AS product, " +
+            "    gp.buy_quantity, " +
+            "    gift_product.name AS gift_product_name, " +
+            "    gp.gift_quantity, " +
+            "    gp.gift_shipment_id " +
+            "FROM  " +
+            "    t_gift_promotion gp " +
+            "    INNER JOIN t_product main_product ON main_product.promotion_id = gp.promotion_id " +
+            "    INNER JOIN t_product gift_product ON gp.gift_product_id = gift_product.product_id " +
+            "WHERE  " +
+            "    gp.promotion_id = ?1",nativeQuery = true)
+    List<Object[]> getGiftPromotionByPromotion(Long promotionId);
 }
