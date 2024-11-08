@@ -145,6 +145,8 @@ const OrderPage: React.FC = () => {
   const fetchProducts = async () => {
     const response = await getAllProductsService();
     if (response.data) {
+      console.log(response.data);
+      
       setProducts(response.data.responseList);
     }
   };
