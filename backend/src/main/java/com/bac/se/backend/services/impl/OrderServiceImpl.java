@@ -238,7 +238,7 @@ public class OrderServiceImpl implements OrderService {
 
         var promotionOrderLatest = promotionRepository.getPromotionOrderLatest(PageLimit.ONLY.getPageable());
         if (!promotionOrderLatest.isEmpty()) {
-            OrderPromotionResponse promotionResponse = promotionMapper.mapToPromotionResponse(promotionOrderLatest.get(0));
+            OrderPromotionResponse promotionResponse = promotionMapper.mapToOrderPromotionResponse(promotionOrderLatest.get(0));
             Promotion promotion = promotionRepository.findById(promotionResponse.promotionId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khuyến mãi"));
             if (total.compareTo(promotionResponse.minOrderValue()) > 0 && promotion.getOrderLimit() > 0) {
                 promotion.setOrderLimit(promotion.getOrderLimit() - 1);

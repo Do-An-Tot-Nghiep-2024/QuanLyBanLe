@@ -5,18 +5,22 @@ import com.bac.se.backend.payload.request.promotion.DiscountProductPromotionRequ
 import com.bac.se.backend.payload.request.promotion.GiftPromotionRequest;
 import com.bac.se.backend.payload.request.promotion.OrderPromotionRequest;
 import com.bac.se.backend.payload.request.promotion.QuantityPromotionRequest;
+import com.bac.se.backend.payload.response.common.PageResponse;
+import com.bac.se.backend.payload.response.promotion.CreatePromotionResponse;
 import com.bac.se.backend.payload.response.promotion.PromotionResponse;
 
 public interface PromotionService {
 
-    PromotionResponse createOrderPromotion(OrderPromotionRequest request) throws BadRequestUserException;
+    CreatePromotionResponse createOrderPromotion(OrderPromotionRequest request) throws BadRequestUserException;
 
-    PromotionResponse createQuantityProductPromotion(QuantityPromotionRequest request) throws BadRequestUserException;
+    CreatePromotionResponse createQuantityProductPromotion(QuantityPromotionRequest request) throws BadRequestUserException;
 
-    PromotionResponse createGiftProductPromotion(GiftPromotionRequest request) throws BadRequestUserException;
+    CreatePromotionResponse createGiftProductPromotion(GiftPromotionRequest request) throws BadRequestUserException;
 
-    PromotionResponse createDiscountProductPromotion(DiscountProductPromotionRequest request) throws BadRequestUserException;
+    CreatePromotionResponse createDiscountProductPromotion(DiscountProductPromotionRequest request) throws BadRequestUserException;
 
     Long getPromotionProduct(Long productId);
+
+    PageResponse<PromotionResponse> getPromotions(Integer pageNumber, Integer pageSize);
 
 }

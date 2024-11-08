@@ -1,10 +1,15 @@
 package com.bac.se.backend.payload.response.promotion;
 
+import java.util.Date;
+
 public record PromotionResponse(
+        Long id,
         String name,
         String description,
-        String startDate,
-        String endDate,
-        Long promotionTypeId
+        Date startDate,
+        Date endDate,
+        String typePromotion,
+        String scope,
+        int orderLimit
 ) {
 }

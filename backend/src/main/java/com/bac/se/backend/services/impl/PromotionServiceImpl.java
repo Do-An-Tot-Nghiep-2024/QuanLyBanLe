@@ -4,15 +4,20 @@ import com.bac.se.backend.enums.PageLimit;
 import com.bac.se.backend.enums.PromotionScope;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
+import com.bac.se.backend.mapper.PromotionMapper;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.promotion.*;
+import com.bac.se.backend.payload.response.common.PageResponse;
+import com.bac.se.backend.payload.response.promotion.CreatePromotionResponse;
 import com.bac.se.backend.payload.response.promotion.PromotionResponse;
 import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.services.ProductPriceService;
 import com.bac.se.backend.services.PromotionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -26,14 +31,13 @@ public class PromotionServiceImpl implements PromotionService {
     private final PromotionTypeRepository promotionTypeRepository;
     private final PromotionRepository promotionRepository;
     private final ProductRepository productRepository;
-    private final ShipmentRepository shipmentRepository;
     private final OrderPromotionRepository orderPromotionRepository;
     private final QuantityPromotionRepository quantityPromotionRepository;
     private final GiftPromotionRepository giftPromotionRepository;
     private final StockRepository stockRepository;
     private final ProductPriceService productPriceService;
     private final DiscountProductPromotionRepository discountProductPromotionRepository;
-
+    private final PromotionMapper promotionMapper;
 
     void validatePromotion(PromotionRequest promotionRequest) throws BadRequestUserException {
         if (promotionRequest.promotionTypeId() == null
@@ -49,7 +53,7 @@ public class PromotionServiceImpl implements PromotionService {
     }
 
     @Override
-    public PromotionResponse createOrderPromotion(OrderPromotionRequest request) throws BadRequestUserException {
+    public CreatePromotionResponse createOrderPromotion(OrderPromotionRequest request) throws BadRequestUserException {
         validatePromotion(request.promotionRequest());
         if (request.minOrderValue() == null || request.discountPercent() == null) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
@@ -73,12 +77,12 @@ public class PromotionServiceImpl implements PromotionService {
                 .promotion(save)
                 .build();
         orderPromotionRepository.save(orderPromotion);
-        return new PromotionResponse(promotion.getName(), promotion.getDescription(),
+        return new CreatePromotionResponse(promotion.getName(), promotion.getDescription(),
                 promotion.getStartDate().toString(), promotion.getEndDate().toString(), promotion.getPromotionType().getId());
     }
 
     @Override
-    public PromotionResponse createQuantityProductPromotion(QuantityPromotionRequest request) throws BadRequestUserException {
+    public CreatePromotionResponse createQuantityProductPromotion(QuantityPromotionRequest request) throws BadRequestUserException {
         validatePromotion(request.promotionRequest());
         if (request.buyQuantity() == null || request.freeQuantity() == null || request.productId() == null) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
@@ -108,12 +112,12 @@ public class PromotionServiceImpl implements PromotionService {
         quantityPromotionRepository.save(quantityPromotion);
         product.setPromotion(save);
         productRepository.save(product);
-        return new PromotionResponse(promotion.getName(), promotion.getDescription(),
+        return new CreatePromotionResponse(promotion.getName(), promotion.getDescription(),
                 promotion.getStartDate().toString(), promotion.getEndDate().toString(), promotion.getPromotionType().getId());
     }
 
     @Override
-    public PromotionResponse createGiftProductPromotion(GiftPromotionRequest request) throws BadRequestUserException {
+    public CreatePromotionResponse createGiftProductPromotion(GiftPromotionRequest request) throws BadRequestUserException {
         validatePromotion(request.promotionRequest());
         if (request.buyQuantity() == null || request.giftQuantity() == null || request.productId() == null
                 || request.giftProductId() == null || request.giftShipmentId() == null) {
@@ -156,12 +160,12 @@ public class PromotionServiceImpl implements PromotionService {
         giftPromotionRepository.save(giftPromotion);
         product.setPromotion(save);
         productRepository.save(product);
-        return new PromotionResponse(promotion.getName(), promotion.getDescription(),
+        return new CreatePromotionResponse(promotion.getName(), promotion.getDescription(),
                 promotion.getStartDate().toString(), promotion.getEndDate().toString(), promotion.getPromotionType().getId());
     }
 
     @Override
-    public PromotionResponse createDiscountProductPromotion(DiscountProductPromotionRequest request) throws BadRequestUserException {
+    public CreatePromotionResponse createDiscountProductPromotion(DiscountProductPromotionRequest request) throws BadRequestUserException {
         validatePromotion(request.promotionRequest());
         if (request.productId() == null || request.discount() == null) {
             throw new BadRequestUserException("Vui lòng nhập đầy đủ thông tin");
@@ -202,7 +206,7 @@ public class PromotionServiceImpl implements PromotionService {
                 .discount(request.discount())
                 .build();
         discountProductPromotionRepository.save(discountProductPromotion);
-        return new PromotionResponse(promotion.getName(), promotion.getDescription(),
+        return new CreatePromotionResponse(promotion.getName(), promotion.getDescription(),
                 promotion.getStartDate().toString(), promotion.getEndDate().toString(), promotion.getPromotionType().getId());
     }
 
@@ -215,4 +219,15 @@ public class PromotionServiceImpl implements PromotionService {
         }
         return promotionId;
     }
+
+    @Override
+    public PageResponse<PromotionResponse> getPromotions(Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Object[]> page = promotionRepository.getPromotions(pageable);
+        List<PromotionResponse> promotionResponseList = page.getContent()
+                .stream().map(promotionMapper::mapToPromotionResponse).toList();
+        return new PageResponse<>(promotionResponseList, pageNumber,
+                page.getTotalPages(), page.getTotalElements(), page.isLast());
+    }
+
 }
