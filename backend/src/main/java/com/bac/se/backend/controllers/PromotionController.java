@@ -7,16 +7,15 @@ import com.bac.se.backend.payload.request.promotion.GiftPromotionRequest;
 import com.bac.se.backend.payload.request.promotion.OrderPromotionRequest;
 import com.bac.se.backend.payload.request.promotion.QuantityPromotionRequest;
 import com.bac.se.backend.payload.response.common.ApiResponse;
+import com.bac.se.backend.payload.response.common.PageResponse;
+import com.bac.se.backend.payload.response.promotion.CreatePromotionResponse;
 import com.bac.se.backend.payload.response.promotion.PromotionResponse;
 import com.bac.se.backend.services.PromotionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/promotions")
@@ -27,9 +26,23 @@ public class PromotionController {
     final String REQUEST_ACCEPT = "success";
 
 
+    @GetMapping
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public ResponseEntity<ApiResponse<PageResponse<PromotionResponse>>> getPromotions(
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_ACCEPT, promotionService.getPromotions(pageNumber, pageSize)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
     @PostMapping("/create-order-promotion")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<PromotionResponse>> createOrderPromotion(@RequestBody OrderPromotionRequest request) {
+    public ResponseEntity<ApiResponse<CreatePromotionResponse>> createOrderPromotion(@RequestBody OrderPromotionRequest request) {
         try {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
@@ -51,7 +64,7 @@ public class PromotionController {
 
     @PostMapping("/create-quantity-product-promotion")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<PromotionResponse>> createQuantityProductPromotion(@RequestBody QuantityPromotionRequest request) {
+    public ResponseEntity<ApiResponse<CreatePromotionResponse>> createQuantityProductPromotion(@RequestBody QuantityPromotionRequest request) {
         try {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
@@ -73,7 +86,7 @@ public class PromotionController {
 
     @PostMapping("/create-gift-product-promotion")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<PromotionResponse>> createGiftProductPromotion(@RequestBody GiftPromotionRequest request) {
+    public ResponseEntity<ApiResponse<CreatePromotionResponse>> createGiftProductPromotion(@RequestBody GiftPromotionRequest request) {
         try {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
@@ -94,7 +107,7 @@ public class PromotionController {
 
     @PostMapping("/create-discount-product")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<PromotionResponse>> createDiscountProductPromotion(@RequestBody DiscountProductPromotionRequest request) {
+    public ResponseEntity<ApiResponse<CreatePromotionResponse>> createDiscountProductPromotion(@RequestBody DiscountProductPromotionRequest request) {
         try {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
