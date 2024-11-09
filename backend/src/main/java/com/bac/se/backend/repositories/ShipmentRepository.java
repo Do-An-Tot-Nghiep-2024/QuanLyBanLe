@@ -44,5 +44,4 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
     List<Object[]> getShipmentById(Long id);
 
 
-
 }

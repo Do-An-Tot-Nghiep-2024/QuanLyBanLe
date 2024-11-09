@@ -6,6 +6,7 @@ import com.bac.se.backend.mapper.InvoiceMapper;
 import com.bac.se.backend.mapper.ProductMapper;
 import com.bac.se.backend.mapper.ProductPriceMapper;
 import com.bac.se.backend.models.*;
+import com.bac.se.backend.payload.request.DateRequest;
 import com.bac.se.backend.payload.request.ShipmentRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.invoice.ImportInvoice;
@@ -14,6 +15,7 @@ import com.bac.se.backend.payload.response.shipment.ShipmentItemResponse;
 import com.bac.se.backend.payload.response.shipment.ShipmentResponse;
 import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.services.ShipmentService;
+import com.bac.se.backend.utils.DateConvert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -21,12 +23,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -42,12 +40,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final InvoiceMapper invoiceMapper;
     private final SupplierRepository supplierRepository;
     private final ProductMapper productMapper;
-    private final UnitRepository unitRepository;
-
-    static final String DEFAULT_TO_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
-            .format(LocalDate.now().plusDays(1));
-    static final String DEFAULT_FROM_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
-            .format(LocalDate.now().minusDays(2));
+    private final DateConvert dateConvert;
 
     static final int defaultQuantityNotify = 5;
 
@@ -141,12 +134,10 @@ public class ShipmentServiceImpl implements ShipmentService {
                                                          String fromDate,
                                                          String toDate) throws ParseException {
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date from = fromDate != null ? dateFormat.parse(fromDate) : dateFormat.parse(DEFAULT_FROM_DATE);
-        Date to = toDate != null ? dateFormat.parse(toDate) : dateFormat.parse(DEFAULT_TO_DATE);
-        log.info("from: {} ",from);
-        log.info("to: {}",to);
-        var shipments = shipmentRepository.getShipments(pageRequest, from, to);
+        DateRequest dateRequest = dateConvert.convertDateRequest(fromDate, toDate);
+        var shipments = shipmentRepository.getShipments(pageRequest,
+                dateRequest.fromDate(),
+                dateRequest.toDate());
         var content = shipments.getContent();
         var response = content.stream().map(invoiceMapper::mapObjectToImportInvoice).toList();
         return new PageResponse<>(

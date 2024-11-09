@@ -2,6 +2,7 @@ package com.bac.se.backend.services.impl;
 
 import com.bac.se.backend.mapper.ProductMapper;
 import com.bac.se.backend.mapper.ProductPriceMapper;
+import com.bac.se.backend.payload.request.DateRequest;
 import com.bac.se.backend.payload.response.product.BestSellingProductResponse;
 import com.bac.se.backend.payload.response.product.StatisticPriceProductResponse;
 import com.bac.se.backend.payload.response.statistic.StatisticResponse;
@@ -9,6 +10,7 @@ import com.bac.se.backend.repositories.OrderItemRepository;
 import com.bac.se.backend.repositories.ProductPriceRepository;
 import com.bac.se.backend.repositories.ProductRepository;
 import com.bac.se.backend.services.StatisticService;
+import com.bac.se.backend.utils.DateConvert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -17,12 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -34,12 +31,7 @@ public class StatisticServiceImpl implements StatisticService {
     private final ProductPriceMapper productPriceMapper;
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
-
-    static final String DEFAULT_FROM_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
-            .format(LocalDate.now().minusMonths(1));
-
-    static final String DEFAULT_TO_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
-            .format(LocalDate.now().plusDays(1));
+    private final DateConvert dateConvert;
 
 
     @Override
@@ -65,12 +57,9 @@ public class StatisticServiceImpl implements StatisticService {
     @Override
     public List<BestSellingProductResponse> statisticsBestSellingProduct(String fromDate, String toDate) throws ParseException {
         Pageable request = PageRequest.of(0,10);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date from = fromDate != null ? dateFormat.parse(fromDate) : dateFormat.parse(DEFAULT_FROM_DATE);
-        Date to = toDate != null ? dateFormat.parse(toDate) : dateFormat.parse(DEFAULT_TO_DATE);
-        log.info("from: {} ",from);
-        log.info("to: {}",to);
-        return productRepository.getBestSellingProducts(request,from,to)
+        DateRequest dateRequest = dateConvert.convertDateRequest(fromDate, toDate);
+        return productRepository.getBestSellingProducts(request,dateRequest.fromDate(),
+                        dateRequest.toDate())
                 .stream()
                 .map(productMapper::mapObjectToBestSellingProduct)
                 .toList();

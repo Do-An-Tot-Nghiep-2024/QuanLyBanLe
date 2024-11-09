@@ -2,9 +2,11 @@ package com.bac.se.backend.mapper;
 
 import com.bac.se.backend.payload.response.order.OrderEmployeeResponse;
 import com.bac.se.backend.payload.response.order.OrderItemQueryResponse;
+import com.bac.se.backend.payload.response.order.OrderItemResponse;
 import com.bac.se.backend.payload.response.order.OrderResponse;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 @Service
@@ -14,12 +16,11 @@ public class OrderMapper {
         return new OrderResponse(
                 Long.parseLong(order[0].toString()), // id
                 order[1].toString(), // employee
-                Double.parseDouble(order[2].toString()), // total
-                order[3].toString(), // order status
-                order[4].toString(), // payment type
-                Double.parseDouble(order[5].toString()), // total discount
-                (Date) order[6], // date
-                order[7] == null ? "" : order[6].toString() // customer phone
+                order[2].toString(), // order status
+                order[3].toString(), // payment type
+                Double.parseDouble(order[4].toString()), // total
+                (Date) order[5], // date
+                order[6] == null ? "" : order[6].toString() // customer phone
         );
     }
 
@@ -36,6 +37,21 @@ public class OrderMapper {
         return new OrderEmployeeResponse(
                 orderEmployee[0].toString(),
                 orderEmployee[1].toString()
+        );
+    }
+
+    public OrderItemResponse mapToOrderItemResponse(Object[] orderItem) {
+        return new OrderItemResponse(
+                Long.parseLong(orderItem[0].toString()), // id
+                orderItem[1].toString(), // employee
+                orderItem[2].toString(), // order status
+                orderItem[3].toString(), // payment type
+                Double.parseDouble(orderItem[4].toString()), // total
+                Double.parseDouble(orderItem[5].toString()), // total discount
+                Double.parseDouble(orderItem[6].toString()), // customer payment
+                (Date) orderItem[7], // date
+                orderItem[8] == null ? "" : orderItem[8].toString(),
+                new ArrayList<>()
         );
     }
 

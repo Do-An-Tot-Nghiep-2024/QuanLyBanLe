@@ -7,9 +7,11 @@ import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.keys.ShipmentItemKey;
 import com.bac.se.backend.mapper.OrderMapper;
+import com.bac.se.backend.mapper.ProductMapper;
 import com.bac.se.backend.mapper.PromotionMapper;
 import com.bac.se.backend.mapper.StockMapper;
 import com.bac.se.backend.models.*;
+import com.bac.se.backend.payload.request.DateRequest;
 import com.bac.se.backend.payload.request.OrderItemRequest;
 import com.bac.se.backend.payload.request.OrderRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
@@ -20,8 +22,8 @@ import com.bac.se.backend.payload.response.stock.StockResponse;
 import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.services.OrderService;
 import com.bac.se.backend.services.ProductPriceService;
+import com.bac.se.backend.utils.DateConvert;
 import com.bac.se.backend.utils.JwtParse;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -54,6 +57,8 @@ public class OrderServiceImpl implements OrderService {
     private final PromotionRepository promotionRepository;
     private final PromotionMapper promotionMapper;
     private final ProductPriceService productPriceService;
+    private final DateConvert dateConvert;
+    private final ProductMapper productMapper;
 
 
     void minusStock(Long shipmenId, Long productId, int quantity, String optional) throws BadRequestUserException {
@@ -106,8 +111,8 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal total = BigDecimal.ZERO, totalDiscount = BigDecimal.ZERO;
         int prevGift = 0;
         // Kiểm tra số các mặt hàng trong đơn
-        List<OrderItemResponse> orderItemResponses = new ArrayList<>();
-        List<OrderItemResponse> giftProducts = new ArrayList<>();
+        List<ProductOrderItemResponse> orderItemResponses = new ArrayList<>();
+        List<ProductOrderItemResponse> giftProducts = new ArrayList<>();
 
         // Get product ids and shipment ids for batching
         Set<Long> productIds = orderItemRequests.stream().map(OrderItemRequest::productId).collect(Collectors.toSet());
@@ -164,11 +169,11 @@ public class OrderServiceImpl implements OrderService {
                 // increment quantity if product duplicate name
                 double finalTotalPrice = totalPrice;
                 orderItemResponses.replaceAll(response -> Objects.equals(response.name(), product.getName()) ?
-                        new OrderItemResponse(response.name(), response.quantity() + orderItemRequest.quantity(), price, discountPrice, response.totalPrice() + finalTotalPrice)
+                        new ProductOrderItemResponse(response.name(), response.quantity() + orderItemRequest.quantity(), price, discountPrice, response.totalPrice() + finalTotalPrice)
                         : response);
             } else {
                 map.put(productId, orderItemRequest.quantity());
-                orderItemResponses.add(new OrderItemResponse(product.getName(), orderItemRequest.quantity(), price, discountPrice, totalPrice));
+                orderItemResponses.add(new ProductOrderItemResponse(product.getName(), orderItemRequest.quantity(), price, discountPrice, totalPrice));
             }
             long promotionId = 0L;
             List<Object[]> promotionList = promotionRepository.existPromotionByProduct(productId, PageLimit.ONLY.getPageable());
@@ -186,10 +191,10 @@ public class OrderServiceImpl implements OrderService {
                     if (mapGift.containsKey(product.getName())) {
                         // filter product name and delete in giftProducts
                         giftProducts.removeIf(x -> x.name().equals(product.getName()));
-                        OrderItemResponse giftResponse = new OrderItemResponse(product.getName(), freeQuantity, 0, 0, 0);
+                        ProductOrderItemResponse giftResponse = new ProductOrderItemResponse(product.getName(), freeQuantity, 0, 0, 0);
                         giftProducts.add(giftResponse);
                     } else {
-                        OrderItemResponse giftResponse = new OrderItemResponse(product.getName(), freeQuantity, 0, 0, 0);
+                        ProductOrderItemResponse giftResponse = new ProductOrderItemResponse(product.getName(), freeQuantity, 0, 0, 0);
                         giftProducts.add(giftResponse);
                         mapGift.put(product.getName(), freeQuantity);
                     }
@@ -210,10 +215,10 @@ public class OrderServiceImpl implements OrderService {
                         if (mapGift.containsKey(product.getName())) {
                             // filter product name and delete in giftProducts
                             giftProducts.removeIf(x -> x.name().equals(product.getName()));
-                            OrderItemResponse giftResponse = new OrderItemResponse(product.getName(), giftQuantity, 0, 0, 0);
+                            ProductOrderItemResponse giftResponse = new ProductOrderItemResponse(product.getName(), giftQuantity, 0, 0, 0);
                             giftProducts.add(giftResponse);
                         } else {
-                            OrderItemResponse giftResponse = new OrderItemResponse(product.getName(), giftQuantity, 0, 0, 0);
+                            ProductOrderItemResponse giftResponse = new ProductOrderItemResponse(product.getName(), giftQuantity, 0, 0, 0);
                             giftProducts.add(giftResponse);
                             mapGift.put(product.getName(), giftQuantity);
                         }
@@ -253,7 +258,17 @@ public class OrderServiceImpl implements OrderService {
         return new CreateOrderResponse(orderItemResponses, total.doubleValue(), orderRequest.customerPayment(), change, giftProducts);
     }
 
-    // get orders customer bought
+    @Override
+    public PageResponse<OrderResponse> getOrders(Integer pageNumber, Integer pageSize, String fromDate, String toDate) throws ParseException {
+        DateRequest dateRequest = dateConvert.convertDateRequest(fromDate, toDate);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        var orders = orderRepository.getOrders(pageable, dateRequest.fromDate(), dateRequest.toDate());
+        List<Object[]> orderList = orders.getContent();
+        List<OrderResponse> orderResponseList = orderList.stream().map(orderMapper::mapObjectToResponse).toList();
+        return new PageResponse<>(orderResponseList, pageNumber, orders.getTotalPages(), orders.getTotalElements(), orders.isLast());
+    }
+
+
     @Override
     public PageResponse<OrderResponse> getOrdersByCustomer(Long id, int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -264,22 +279,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public PageResponse<OrderResponse> getOrdersByEmployee(Long employeeId, int pageNumber, int pageSize) {
+    public PageResponse<OrderResponse> getOrdersByEmployee(
+            Long employeeId, Integer pageNumber, Integer pageSize,
+            String fromDate, String toDate) throws ParseException {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        var ordersByCustomer = orderRepository.getOrdersByEmployee(employeeId, pageable);
+        DateRequest dateRequest = dateConvert.convertDateRequest(fromDate, toDate);
+        var ordersByCustomer = orderRepository.getOrdersByEmployee(employeeId, pageable,
+                dateRequest.fromDate(),dateRequest.toDate());
         List<Object[]> orderList = ordersByCustomer.getContent();
         List<OrderResponse> orderResponseList = orderList.stream().map(orderMapper::mapObjectToResponse).toList();
         return new PageResponse<>(orderResponseList, pageNumber, ordersByCustomer.getTotalPages(), ordersByCustomer.getTotalElements(), ordersByCustomer.isLast());
 
-    }
-
-    @Override
-    public PageResponse<OrderResponse> getOrdersEmployeeByDate(Long employeeId, int pageNumber, int pageSize, @JsonFormat(pattern = "yyyy-MM-dd") Date fromDate, @JsonFormat(pattern = "yyyy-MM-dd") Date toDate) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        var ordersEmployeeByDate = orderRepository.getOrdersEmployeeByDate(employeeId, pageable, fromDate, toDate);
-        List<Object[]> orderList = ordersEmployeeByDate.getContent();
-        List<OrderResponse> orderResponseList = orderList.stream().map(orderMapper::mapObjectToResponse).toList();
-        return new PageResponse<>(orderResponseList, pageNumber, ordersEmployeeByDate.getTotalPages(), ordersEmployeeByDate.getTotalElements(), ordersEmployeeByDate.isLast());
     }
 
 
@@ -288,7 +298,7 @@ public class OrderServiceImpl implements OrderService {
         if (orderRepository.findById(orderId).isEmpty()) {
             throw new ResourceNotFoundException("Không tìm thấy hóa đơn");
         }
-        var ordersByCustomer = orderRepository.getOrderItemByOrderId(orderId);
+        var ordersByCustomer = orderItemRepository.getProductInOrderItem(orderId);
         List<OrderItemQueryResponse> orderItemResponses = ordersByCustomer.stream().map(orderMapper::mapObjectToOrderItem).toList();
         BigDecimal totalPrice = BigDecimal.valueOf(0);
         for (OrderItemQueryResponse orderItemQueryResponse : orderItemResponses) {
@@ -301,12 +311,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderResponse getOrderById(Long orderId) {
+    public OrderItemResponse getOrderById(Long orderId) {
         var orderById = orderRepository.getOrderById(orderId, PageLimit.ONLY.getPageable());
         if(orderById.isEmpty()){
             throw new ResourceNotFoundException("Không tìm thấy hóa đơn");
         }
-        return orderMapper.mapObjectToResponse(orderById.get(0));
+        var orderItemResponse = orderMapper.mapToOrderItemResponse(orderById.get(0));
+        var products = orderItemRepository.getProductInOrderItem(orderId);
+        var productList = products.stream().map(productMapper::mapToProductOrderItemResponse);
+        orderItemResponse.orderItemResponses().addAll(productList.toList());
+        return orderItemResponse;
+
     }
 
     @Override

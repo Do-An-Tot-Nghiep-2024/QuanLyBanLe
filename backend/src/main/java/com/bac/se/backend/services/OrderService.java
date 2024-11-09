@@ -5,27 +5,31 @@ import com.bac.se.backend.payload.request.OrderRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.order.CreateOrderResponse;
 import com.bac.se.backend.payload.response.order.OrderCustomerResponse;
+import com.bac.se.backend.payload.response.order.OrderItemResponse;
 import com.bac.se.backend.payload.response.order.OrderResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.Date;
+import java.text.ParseException;
 
 
 public interface OrderService {
     CreateOrderResponse createOrder(OrderRequest orderRequest, HttpServletRequest request) throws BadRequestUserException;
 
+    PageResponse<OrderResponse> getOrders(Integer pageNumber, Integer pageSize, String fromDate, String toDate) throws ParseException;
+
     PageResponse<OrderResponse> getOrdersByCustomer(Long customerId, int pageNumber, int pageSize);
 
-    PageResponse<OrderResponse> getOrdersByEmployee(Long employeeId, int pageNumber, int pageSize);
-
-    PageResponse<OrderResponse> getOrdersEmployeeByDate(Long employeeId, int pageNumber, int pageSize, Date fromDate,Date toDate);
+    PageResponse<OrderResponse> getOrdersByEmployee(Long employeeId,
+                                                    Integer pageNumber,
+                                                    Integer pageSize,
+                                                    String fromDate,
+                                                    String toDate) throws ParseException;
 
     OrderCustomerResponse getOrderDetailByCustomer(Long orderId);
 
-    OrderResponse getOrderById(Long orderId);
+    OrderItemResponse getOrderById(Long orderId);
 
     void updateOrderStatus(Long orderId, String orderStatus);
-
 
 
 }
