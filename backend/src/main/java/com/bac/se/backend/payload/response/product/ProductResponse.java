@@ -1,6 +1,5 @@
 package com.bac.se.backend.payload.response.product;
 
-import com.bac.se.backend.payload.response.promotion.GiftPromotionResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,5 +20,4 @@ public class ProductResponse {
     private double price;
     private double discountPrice;
     private List<Long> shipmentIds;
-    private GiftPromotionResponse giftPromotion;
 }

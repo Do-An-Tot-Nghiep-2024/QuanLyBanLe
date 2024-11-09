@@ -19,34 +19,23 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    p.image,  " +
             "    c.name as category,  " +
             "    u.name as unit, " +
-            "    pp.price AS latest_price,  " +
-            "    CASE  " +
-            "        WHEN pp.is_promotion = 1   " +
-            "             AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date AND pr.order_limit > 0  " +
-            "             AND pr.promotion_type_id = 4  " +
-            "        THEN pp.discount_price  " +
-            "        ELSE 0  " +
-            "    END AS discount  " +
+            "   COALESCE(pp.price, 0) AS latest_price,      " +
+            "   COALESCE(pp.discount_price, 0) AS discount_price " +
             "FROM   " +
             "    t_product p  " +
             "INNER JOIN  " +
             "    t_category c on c.category_id = p.category_id  " +
             "INNER JOIN  " +
             "    t_unit u on p.unit_id = u.unit_id  " +
-            "JOIN   " +
+            "LEFT JOIN   " +
             "    t_product_price pp ON p.product_id = pp.product_id   " +
             "                       AND pp.created_at = (  " +
             "                           SELECT MAX(sub_pp.created_at)  " +
             "                           FROM t_product_price sub_pp  " +
             "                           WHERE sub_pp.product_id = p.product_id  " +
             "                       )  " +
-            "LEFT JOIN   " +
-            "    t_promotion pr ON p.promotion_id = pr.promotion_id   " +
-            "                   AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date  " +
-            "                   AND pr.promotion_type_id = 4  " +
-            "                   AND pr.order_limit > 0  " +
             "WHERE   " +
-            "    p.is_active = 1",nativeQuery = true)
+            "    p.is_active = 1 ORDER BY p.product_id DESC",nativeQuery = true)
     Page<Object[]> getProducts(Pageable pageable);
 
 
@@ -63,35 +52,22 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    p.name,  " +
             "    p.image,  " +
             "    c.name as category,  " +
-            "    u.name as unit, pro" +
-            ".name,  " +
-            "    pp.price AS latest_price,  " +
-            "    CASE  " +
-            "        WHEN pp.is_promotion = 1   " +
-            "             AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date AND pr.order_limit > 0  " +
-            "             AND pr.promotion_type_id = 4  " +
-            "        THEN pp.discount_price  " +
-            "        ELSE 0  " +
-            "    END AS discount  " +
+            "    u.name as unit," +
+            "   COALESCE(pp.price, 0) AS latest_price,      " +
+            "   COALESCE(pp.discount_price, 0) AS discount_price " +
             "FROM   " +
             "    t_product p  " +
             "INNER JOIN  " +
             "    t_category c on c.category_id = p.category_id  " +
             "INNER JOIN  " +
             "    t_unit u on p.unit_id = u.unit_id  " +
-            "LEFT JOIN t_promotion pro ON p.promotion_id = pro.promotion_id AND pro.end_date > CURRENT_DATE AND pro.order_limit > 0 " +
-            "JOIN   " +
+            "LEFT JOIN   " +
             "    t_product_price pp ON p.product_id = pp.product_id   " +
             "                       AND pp.created_at = (  " +
             "                           SELECT MAX(sub_pp.created_at)  " +
             "                           FROM t_product_price sub_pp  " +
             "                           WHERE sub_pp.product_id = p.product_id  " +
             "                       )  " +
-            "LEFT JOIN   " +
-            "    t_promotion pr ON p.promotion_id = pr.promotion_id   " +
-            "                   AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date  " +
-            "                   AND pr.promotion_type_id = 4  " +
-            "                   AND pr.order_limit > 0  " +
             "WHERE  p.is_active = 1 AND p.category_id = ?1", nativeQuery = true)
     List<Object[]> getProductsByCategory(Long categoryId);
 
@@ -121,31 +97,21 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    p.product_id," +
             "    p.name,      " +
             "    p.image,   " +
-            "    pp.price AS latest_price,      " +
-            "    CASE      " +
-            "        WHEN pp.is_promotion = 1       " +
-            "             AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date AND pr.order_limit > 0      " +
-            "             AND pr.promotion_type_id = 4      " +
-            "        THEN pp.discount_price      " +
-            "        ELSE 0      " +
-            "    END AS discount      " +
+            "   COALESCE(pp.price, 0) AS latest_price,      " +
+            "   COALESCE(pp.discount_price, 0) AS discount_price, u.name " +
             "FROM       " +
             "    t_product p      " +
-            "JOIN       " +
+            "LEFT JOIN       " +
             "    t_product_price pp ON p.product_id = pp.product_id       " +
             "                       AND pp.created_at = (      " +
             "                           SELECT MAX(sub_pp.created_at)      " +
             "                           FROM t_product_price sub_pp      " +
             "                           WHERE sub_pp.product_id = p.product_id      " +
             "                       )      " +
-            "LEFT JOIN       " +
-            "    t_promotion pr ON p.promotion_id = pr.promotion_id       " +
-            "                   AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date      " +
-            "                   AND pr.promotion_type_id = 4      " +
-            "                   AND pr.order_limit > 0      " +
+            "INNER JOIN  t_unit u ON u.unit_id = p.unit_id " +
             "WHERE       " +
             "    p.is_active = 1 " +
-            "ORDER BY p.name", nativeQuery = true)
+            "ORDER BY p.product_id DESC", nativeQuery = true)
     Page<Object[]> getProductsMobile(Pageable pageable);
 
 
@@ -153,28 +119,18 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    p.product_id, " +
             "    p.name,      " +
             "    p.image, " +
-            "    pp.price AS latest_price,      " +
-            "    CASE      " +
-            "        WHEN pp.is_promotion = 1       " +
-            "             AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date AND pr.order_limit > 0      " +
-            "             AND pr.promotion_type_id = 4      " +
-            "        THEN pp.discount_price      " +
-            "        ELSE 0      " +
-            "    END AS discount      " +
+            "    COALESCE(pp.price, 0) AS latest_price,      " +
+            "    COALESCE(pp.discount_price, 0) AS discount_price, u.name  " +
             "FROM       " +
             "    t_product p      " +
-            "JOIN       " +
+            "INNER JOIN t_unit u ON u.unit_id = p.unit_id " +
+            "LEFT JOIN       " +
             "    t_product_price pp ON p.product_id = pp.product_id       " +
             "                       AND pp.created_at = (      " +
             "                           SELECT MAX(sub_pp.created_at)      " +
             "                           FROM t_product_price sub_pp      " +
             "                           WHERE sub_pp.product_id = p.product_id      " +
             "                       )      " +
-            "LEFT JOIN       " +
-            "    t_promotion pr ON p.promotion_id = pr.promotion_id       " +
-            "                   AND CURRENT_DATE BETWEEN pr.start_date AND pr.end_date      " +
-            "                   AND pr.promotion_type_id = 4      " +
-            "                   AND pr.order_limit > 0      " +
             "WHERE       " +
             "    p.is_active = 1 AND p.category_id = ?1 " +
             "ORDER BY p.name", nativeQuery = true)

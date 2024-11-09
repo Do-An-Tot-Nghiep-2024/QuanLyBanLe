@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-public interface GiftPromotionRepository extends JpaRepository<GiftPromotion,Long> {
+public interface GiftPromotionRepository extends JpaRepository<GiftPromotion, Long> {
 
     Optional<GiftPromotion> findByPromotion(Promotion promotion);
 
@@ -31,7 +31,7 @@ public interface GiftPromotionRepository extends JpaRepository<GiftPromotion,Lon
             "        AND pr.order_limit > 0 " +
             "        INNER JOIN " +
             "    t_gift_promotion gf ON gf.promotion_id = pr.promotion_id " +
-            "WHERE p.product_id = ?1",nativeQuery = true)
+            "WHERE p.product_id = ?1", nativeQuery = true)
     List<Object[]> getGiftPromotionByProduct(Long productId, Pageable pageable);
 
 
@@ -42,10 +42,11 @@ public interface GiftPromotionRepository extends JpaRepository<GiftPromotion,Lon
             "    gp.gift_quantity, " +
             "    gp.gift_shipment_id " +
             "FROM  " +
+
             "    t_gift_promotion gp " +
             "    INNER JOIN t_product main_product ON main_product.promotion_id = gp.promotion_id " +
             "    INNER JOIN t_product gift_product ON gp.gift_product_id = gift_product.product_id " +
             "WHERE  " +
-            "    gp.promotion_id = ?1",nativeQuery = true)
+            "    gp.promotion_id = ?1", nativeQuery = true)
     List<Object[]> getGiftPromotionByPromotion(Long promotionId);
 }
