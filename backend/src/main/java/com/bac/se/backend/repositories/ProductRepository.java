@@ -44,7 +44,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     long getTotalQuantityProduct();
 
 
-    @Query(value = "select p.id, p.name from Product p where p.supplier.id = ?1 and p.isActive = true")
+    @Query(value = "select p.id, p.name,u.name from Product p INNER JOIN Unit u ON u.id = p.unit.id where p.supplier.id = ?1  and p.isActive = true")
     List<Object[]> getProductsBySupplier(Long supplierId);
 
     @Query(value = "SELECT   " +

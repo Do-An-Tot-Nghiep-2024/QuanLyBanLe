@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 contact = @Contact(
                         name = "Viet Bac",
                         email = "vietbacnguyen2002@gmail.com",
-                        url = "https://aliboucoding.com/course"
+                        url = "https://vietbac.com/course"
                 ),
                 description = "OpenApi documentation for Spring Security",
                 title = "OpenApi specification - Viet Bac",
@@ -49,4 +49,5 @@ import io.swagger.v3.oas.annotations.servers.Server;
         in = SecuritySchemeIn.HEADER
 )
 public class OpenAPIConfig {
+
 }

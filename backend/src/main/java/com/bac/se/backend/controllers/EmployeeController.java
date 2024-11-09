@@ -93,7 +93,8 @@ public class EmployeeController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<EmployeeResponse>> updateEmployee(@PathVariable("id") Long id, @RequestBody EmployeeRequest employeeRequest) {
+    public ResponseEntity<ApiResponse<EmployeeResponse>> updateEmployee(@PathVariable("id") Long id,
+                                                                        @RequestBody EmployeeRequest employeeRequest) {
         try {
             EmployeeResponse employee = employeeService.updateEmployee(id, employeeRequest);
             log.info("update employee success");
