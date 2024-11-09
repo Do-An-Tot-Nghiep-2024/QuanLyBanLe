@@ -20,6 +20,7 @@ import {
   TableRow,
   Tooltip,
   IconButton,
+  Avatar,
 } from "@mui/material";
 import { getCategoriesService } from "../../services/category.service";
 import { getAllProductsService } from "../../services/product.service";
@@ -56,35 +57,34 @@ const OrderPage: React.FC = () => {
   };
 
   const handleAddToOrder = (product: GetProductSchema) => {
-       const missingShipment = orderItems.some(item => !item.selectedShipment);
-      
-      if (missingShipment) {
-        alert("Vui lòng chọn mã lô hàng cho tất cả sản phẩm trước khi thêm sản phẩm mới.");
-        return;
-      }
-    
-      setOrderItems((prev) => [
-        ...prev,
-        { product, quantity: 1, price: Number(product.price), selectedShipment: "" },
-      ]);
-    };
-  
+    const missingShipment = orderItems.some(item => !item.selectedShipment);
 
-  const handleUpdateQuantity = (productId: number, quantity: number) => {
+    if (missingShipment) {
+      alert("Vui lòng chọn mã lô hàng cho tất cả sản phẩm trước khi thêm sản phẩm mới.");
+      return;
+    }
+
+    setOrderItems((prev) => [
+      ...prev,
+      { product, quantity: 1, price: Number(product.price), selectedShipment: "" },
+    ]);
+  };
+
+
+  const handleUpdateQuantity = (product: OrderItem, quantity: number) => {
+    if (quantity <= 0 || quantity > 100) {
+      alert("Số lượng sản phẩm cho mỗi đơn hàng phải ít hơn 100 và lớn hơn 0");
+      return;
+    }
     setOrderItems((prev) =>
       prev.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
+        item.product.id === product.product.id && item.selectedShipment === product.selectedShipment ? { ...item, quantity } : item
       )
     );
   };
 
   const isShipmentSelected = () => {
     return orderItems.every(item => item.selectedShipment);
-  };
-
-  const isCustomerPaymentValid = (payment: number) => {
-    const regex = /^\d+(\.\d{1,2})?$/;
-    return regex.test(String(payment));
   };
 
   const handleCreateBill = async () => {
@@ -146,7 +146,7 @@ const OrderPage: React.FC = () => {
     const response = await getAllProductsService();
     if (response.data) {
       console.log(response.data);
-      
+
       setProducts(response.data.responseList);
     }
   };
@@ -201,7 +201,7 @@ const OrderPage: React.FC = () => {
       setOrderItems((prevItems) =>
         prevItems.filter((itm) => itm.selectedShipment !== "")
       );
-}
+    }
     else {
       console.log("new item");
       setOrderItems((orderItems) =>
@@ -218,10 +218,23 @@ const OrderPage: React.FC = () => {
     console.log("Updated order items:", orderItems);
   };
 
+
+  const isCustomerPaymentValid = (payment: number) => {
+    const regex = /^(?!0)\d{0,8}$/;
+    return regex.test(String(payment));
+  };
+
   const updateCustomerPayment = (customerPayment: number) => {
+    if(customerPayment === 0){
+      setCustomerPayment(0);
+      return;
+    }
+    console.log(customerPayment);
     const totalPayment = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    setCustomerPayment(customerPayment);
-    setCustomerChange(customerPayment - totalPayment);
+    if(isCustomerPaymentValid(customerPayment)){
+      setCustomerPayment(customerPayment);
+      setCustomerChange(customerPayment - totalPayment);
+    }
   };
 
   return (
@@ -268,6 +281,7 @@ const OrderPage: React.FC = () => {
         >
           {paginatedProducts.map((product) => (
             <ListItem key={Number(product.id)} divider>
+              <Avatar src={String(product.image)} style={{ marginRight: 16 }} />
               <ListItemText
                 primary={`${product.name} - ${formatCurrency(Number(product.price))}`}
                 primaryTypographyProps={{
@@ -286,6 +300,7 @@ const OrderPage: React.FC = () => {
               </Tooltip>
             </ListItem>
           ))}
+
         </List>
       </Box>
 
@@ -299,36 +314,24 @@ const OrderPage: React.FC = () => {
           </Typography>
 
           <TableContainer>
-            <Table>
+            <Table sx={{ minWidth: 650 }}>
               <TableHead>
-                <TableRow>
+                <TableRow sx={{ backgroundColor: "#f5f5f5", textAlign: 'center' }}>
                   <TableCell sx={{ textAlign: "left", fontWeight: 'bold' }}>Tên sản phẩm</TableCell>
-                  <TableCell sx={{ textAlign: "left", fontWeight: 'bold' }}>Số lượng</TableCell>
                   <TableCell sx={{ textAlign: "left", fontWeight: 'bold' }}>Mã lô hàng</TableCell>
+                  <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Số lượng</TableCell>
                   <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Giá</TableCell>
+                  <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Thành tiền</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {orderItems.map((item) => (
-                  <TableRow key={`${item.product.id}-${item.selectedShipment}`}>
-                    <TableCell sx={{ textAlign: "left" }}>{item.product.name}</TableCell>
-                    <TableCell sx={{ textAlign: "left" }}>
-                      <TextField
-                        type="number"
-                        value={item.quantity}
-                        onChange={(e) =>
-                          handleUpdateQuantity(Number(item.product.id), parseInt(e.target.value))
-                        }
-                        sx={{ width: "50%" }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ flex: 1 }}>
+                {orderItems.map((item, index) => (
+                  <TableRow key={`${item.product.id}-${item.selectedShipment}`} sx={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f9f9f9' }}>
+                    <TableCell sx={{ textAlign: "left", padding: '16px 8px' }}>{item.product.name}</TableCell>
+                    <TableCell sx={{ textAlign: "left", padding: '16px 8px' }}>
                       <Select
                         value={item.selectedShipment || ""}
-                        onChange={(e) => handleUpdateShipment(Number(item.product.id), e.target.value).then(() => {
-                          console.log(orderItems);
-                          console.log(item.selectedShipment);
-                        })}
+                        onChange={(e) => handleUpdateShipment(Number(item.product.id), e.target.value)}
                         sx={{ width: "100%", textAlign: 'left' }}
                       >
                         <MenuItem value="">Chọn mã lô hàng</MenuItem>
@@ -339,8 +342,20 @@ const OrderPage: React.FC = () => {
                         ))}
                       </Select>
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center", width: "30%" }}>
+                    <TableCell sx={{ textAlign: "center", padding: '16px 8px' }}>
+                      <TextField
+                        type="number"
+                        value={item.quantity}
+                        onChange={(e) => handleUpdateQuantity(item, parseInt(e.target.value))}
+                        sx={{ width: "50%" }}
+                        inputProps={{ style: { textAlign: 'center' } }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center", padding: '16px 8px' }}>
                       {formatCurrency(Number(item.price))}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center", padding: '16px 8px' }}>
+                      {formatCurrency(item.price * item.quantity)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -351,19 +366,41 @@ const OrderPage: React.FC = () => {
             <Typography sx={{ mb: 2, fontWeight: 'bold' }}>
               Tổng tiền hàng: {formatCurrency(orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0))}
             </Typography>
+            <Typography sx={{ mb: 2, fontWeight: 'bold' }}>
+              Tổng tiền giảm giá khuyến mãi: 0
+            </Typography>
+
+
             <TextField
               fullWidth
               variant="outlined"
               label="Tiền khách hàng đưa"
-              value={customerPayment} 
+              value={customerPayment}
               onChange={(e) => {
                 updateCustomerPayment(Number(e.target.value));
               }}
               sx={{ mb: 2, width: '30%' }}
             />
+            {/* <TextField
+              fullWidth
+              variant="outlined"
+              label="Tiền khách hàng đưa"
+              value={customerPayment}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+                if (!isNaN(value) && value >= 0) {
+                  updateCustomerPayment(value);
+                } else {
+                  setCustomerPayment(0);
+                  setCustomerChange(0); 
+                }
+              }}
+              sx={{ mb: 2, width: '30%' }}
+            /> */}
             <Typography sx={{ mb: 2 }}>
               Tiền thừa: {formatCurrency(customerChange)}
             </Typography>
+
             <Button
               variant="contained"
               color="primary"

@@ -1,5 +1,3 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { lazy, useState } from "react";
 import {
   Box,
   IconButton,
@@ -15,298 +13,269 @@ import {
   TableBody,
   TableFooter,
   TablePagination,
+  Snackbar,
+  Alert,
+  Modal,
+  Button,
+  Tooltip
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import {
-  deleteEmployeeService,
-  getEmployeesService,
-} from "../../services/employee.service";
-import ResponsePagination from "../../types/responsePagination";
-import { SearchIcon } from "../../assets/svg/Icon";
 import AddBoxIcon from "@mui/icons-material/AddBox";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import {
-  defaultEmployeeSchema,
-  EmployeeSchema,
-} from "../../types/employeeSchema";
-import { useNavigate, useLocation } from "react-router-dom";
-import DialogDetail from "../../components/DialogDetail";
-import DownloadBtn from "../../components/DownloadBtn";
+import { useNavigate } from "react-router-dom";
 import colors from "../../constants/color";
-const MessageAlert = lazy(() => import("../../components/MessageAlert"));
+import { getEmployeesService, deleteEmployeeService } from "../../services/employee.service";
+import { useEffect, useState } from "react";
+
+interface Employee {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  dob: string;
+}
 
 export default function EmployeePage() {
-  const updateSuccess: string = useLocation().state?.updateSuccess ?? "";
-  const [deleteSuccess, setDeleteSuccess] = useState<string>("");
-  const [page, setPage] = useState(0); // Removed setPage since it's not used
-  const [limit, setLimit] = useState(10);
-  const navigate = useNavigate(); // Removed setLimit since it's not used
-  const [employee, setEmployee] = useState<EmployeeSchema | null>(null);
-  const [openAlert, setOpenAlert] = useState(true);
-  const queryClient = useQueryClient();
-  const columns: readonly string[] = [
-    "Tên",
-    "Số điện thoại",
-    "Email",
-    "Ngày sinh",
-    "Tác động",
+  const navigate = useNavigate();
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
+  const [sortField, setSortField] = useState<keyof Employee | null>("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page] = useState(0); // Removed setPage since it's not used
+  const [limit] = useState(10);
+  const getEmployees = async () => {
+    const response = await getEmployeesService(page, limit);
+    let sortedEmployees = response.data.responseList;
+
+    // Filter based on search term
+    if (searchTerm) {
+      sortedEmployees = sortedEmployees.filter((employee: { name: string; }) =>
+        employee.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Sort employees
+    if (sortField) {
+      sortedEmployees.sort((a: { [key: string]: string; }, b: { [key: string]: string; }) => {
+        const aValue = a[sortField] as string; 
+        const bValue = b[sortField] as string; 
+        if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    setEmployees(sortedEmployees);
+  };
+
+  const handleDeleteClick = (employee: Employee) => {
+    setEmployeeToDelete(employee);
+    setConfirmOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!employeeToDelete) return;
+
+    try {
+      await deleteEmployeeService(employeeToDelete.id);
+      setAlertMessage("Nhân viên đã được xóa thành công!");
+      setSnackbarOpen(true);
+      getEmployees();
+    } catch (error) {
+      setAlertMessage("Có lỗi xảy ra khi xóa nhân viên.");
+      setSnackbarOpen(true);
+    } finally {
+      setConfirmOpen(false);
+      setEmployeeToDelete(null);
+    }
+  };
+
+  const columns: Array<{ label: string; field?: keyof Employee; width?: string; maxWidth?: string }> = [
+    { label: "Tên", field: "name", width: "25%", maxWidth: "200px" },
+    { label: "Số điện thoại", field: "phone", width: "20%", maxWidth: "150px" },
+    { label: "Email", field: "email", width: "20%", maxWidth: "200px" },
+    { label: "Ngày sinh", field: "dob", width: "15%", maxWidth: "150px" },
+    { label: "Hành động", width: "20%", maxWidth: "100px" }
   ];
 
-  const getEmployees = async (
-    page: number,
-    limit: number
-  ): Promise<ResponsePagination<EmployeeSchema>> => {
-    try {
-      const response = await getEmployeesService(page, limit);
-      console.log(response);
-      if (!response.status) {
-        throw new Error("Error fetching employees");
-      }
-      return response.data as ResponsePagination<EmployeeSchema>;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  };
-
-  const { isLoading, isError, error, data, isFetching } = useQuery({
-    queryKey: ["employees", page, limit],
-    queryFn: () => getEmployees(page, limit),
-  });
-
-  // how to detructuring data from useQuery
-  const handleChangePage = (
-    _event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number
-  ) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setLimit(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const handleOpenAlert = () => {
-    setOpenAlert(false);
-  };
-  const handleDeleteEmployee = async (id: number) => {
-    try {
-      const response = await deleteEmployeeService(id);
-      if (response?.message === "success") {
-        console.log("Delete employee success");
-        setDeleteSuccess("Xóa nhân viên thành công");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  // create a mutate with delete employee service
-  const { mutate: deleteEmployee } = useMutation({
-    mutationFn: (id: number) => handleDeleteEmployee(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employees", page, limit] });
-    },
-    onError: (error) => {
-      console.error(error);
-    },
-  });
-  const [open, setOpen] = useState(false);
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  console.log("Total pages: ", data?.totalPages ?? 0);
-
-  console.log(data);
+  useEffect(() => {
+    getEmployees();
+  }, [sortField, sortOrder, searchTerm]);
 
   return (
     <>
-      {updateSuccess && (
-        <MessageAlert
-          open={openAlert}
-          setOpen={handleOpenAlert}
-          message={updateSuccess}
-        />
-      )}
-      {deleteSuccess && (
-        <MessageAlert
-          open={openAlert}
-          setOpen={handleOpenAlert}
-          message={deleteSuccess}
-        />
-      )}
-      {isLoading || isFetching ? (
-        <div>Loading...</div>
-      ) : isError ? (
-        <div>Error: {error.message}</div>
-      ) : (
-        <>
-          <Typography variant="h4" align="center" padding={"5px"}>
-            Quản lý nhân viên
-          </Typography>
-          <Box>
-            <Stack
-              mb={2}
-              display="flex"
-              flexDirection={"row"}
-              justifyContent={"space-between"}
-              sx={{ width: "100%" }}
+      <Typography variant="h5" align="center" padding={"5px"}>
+        Quản lý nhân viên
+      </Typography>
+      <Box>
+        <Stack
+          mb={2}
+          display="flex"
+          flexDirection={"row"}
+          justifyContent={"space-between"}
+          sx={{ width: "100%" }}
+        >
+          <TextField
+            id="search"
+            label="Tìm kiếm"
+            variant="filled"
+            size="small"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              getEmployees();
+            }}
+            sx={{
+              display: { xs: "none", md: "inline-block", sm: "flex" },
+              mr: 1,
+              width: "90%",
+            }}
+          />
+          <Tooltip title="Thêm nhân viên" arrow>
+            <IconButton
+              onClick={() => navigate("/create-employee")}
+              aria-label="import"
+              size="small"
+              color="success"
+              sx={{ width: "10%" }}
             >
-              <TextField
-                id="search"
-                label="Tìm kiếm"
-                variant="filled"
-                size="small"
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <IconButton
-                        type="button"
-                        aria-label="Tìm kiếm"
-                        size="small"
-                      >
-                        <SearchIcon />
-                      </IconButton>
-                    ),
-                    sx: { pr: 0.5 },
-                  },
-                }}
-                sx={{
-                  display: { xs: "none", md: "inline-block", sm: "flex" },
-                  mr: 1,
-                  width: "90%",
-                }}
-              />
+              <AddBoxIcon />
+            </IconButton>
+          </Tooltip>
+        </Stack>
 
-              <Stack direction="row" spacing={2}>
-                <DownloadBtn fileName="danh-sach-nhan-vien" />
-
-                <IconButton
-                  onClick={() => {
-                    navigate("/create-employee");
-                  }}
-                  type="button"
-                  aria-label="import"
-                  size="small"
-                  color="success"
-                >
-                  <AddBoxIcon />
-                </IconButton>
-              </Stack>
-            </Stack>
-
-            <TableContainer
-              component={Paper}
-              sx={{ width: "100%", backgroundColor: "white" }}
-            >
-              <Table aria-label="custom pagination table">
-                <TableHead>
-                  <TableRow
-                    sx={{
-                      backgroundColor: colors.secondaryColor,
-                      width: "100%",
+        <TableContainer component={Paper} sx={{ width: "900px", margin: "auto", backgroundColor: 'white', maxHeight: "700px", overflowY: "auto" }}>
+          <Table aria-label="custom pagination table">
+            <TableHead sx={{ backgroundColor: colors.secondaryColor }}>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.label}
+                    align={"center"}
+                    sx={{ width: column.width, maxWidth: column.maxWidth, ...styles.tableCellHeader }}
+                    onClick={() => {
+                      if (column.field) {
+                        setSortField((column.field));
+                        setSortOrder(prevOrder => (prevOrder === "asc" ? "desc" : "asc"));
+                      }
                     }}
+                    style={{ cursor: column.field ? "pointer" : "default" }}
                   >
-                    {columns.map((column: string) => (
-                      <TableCell
-                        colSpan={column === "Tác động" ? 3 : 1}
-                        key={column}
-                        align={"center"}
-                        sx={{ fontSize: "16px", fontWeight: "bold" }}
-                      >
-                        {column}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data !== undefined &&
-                  data.responseList !== undefined &&
-                  data.responseList.length > 0 ? (
-                    data.responseList.map((row: EmployeeSchema) => (
-                      <TableRow hover key={row.id}>
-                        <TableCell align={"center"}>{row.name}</TableCell>
-                        <TableCell align={"center"}>{row.phone}</TableCell>
-                        <TableCell align={"center"}>{row.email}</TableCell>
-                        <TableCell align={"center"}>{row.dob}</TableCell>
-                        <TableCell align={"center"}>
-                          <IconButton
-                            color="success"
-                            onClick={() => {
-                              setEmployee(row);
-                              setOpen(true);
-                            }}
-                          >
-                            <RemoveRedEyeIcon />
-                          </IconButton>
-                        </TableCell>
+                    {column.label}
+                    {column.field && (
+                      <span style={{ marginLeft: "15px" }}>
+                        {sortField === column.field ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                      </span>
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {employees.map((employee) => (
+                <TableRow hover key={employee.id} sx={{ height: "60px", overflow: "hidden" }}>
+                  <TableCell align={"center"} sx={styles.tableCell}>{employee.name}</TableCell>
+                  <TableCell align={"center"} sx={styles.tableCell}>{employee.phone}</TableCell>
+                  <TableCell align={"center"} sx={styles.tableCell}>{employee.email}</TableCell>
+                  <TableCell align={"center"} sx={styles.tableCell}>{employee.dob}</TableCell>
+                  <TableCell align={"center"}>
+                    <IconButton color="error" onClick={() => handleDeleteClick(employee)}>
+                      <DeleteForeverIcon />
+                    </IconButton>
+                    <IconButton color="warning" onClick={() => navigate(`/update-employee/${employee.id}`)}>
+                      <EditIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={5}
+                  count={employees.length}
+                  rowsPerPage={10}
+                  page={0}
+                  onPageChange={() => { }}
+                  onRowsPerPageChange={() => { }}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </TableContainer>
+      </Box>
 
-                        <TableCell align={"center"}>
-                          <IconButton
-                            color="error"
-                            onClick={() => {
-                              deleteEmployee(row.id !== undefined ? row.id : 0);
-                            }}
-                          >
-                            <DeleteForeverIcon />
-                          </IconButton>
-                        </TableCell>
+      {/* Snackbar for alerts */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
+          {alertMessage}
+        </Alert>
+      </Snackbar>
 
-                        <TableCell align={"center"}>
-                          <IconButton
-                            color="warning"
-                            onClick={() => {
-                              navigate(`/update-employee/${row.id}`);
-                            }}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={6} />
-                    </TableRow>
-                  )}
-                </TableBody>
-
-                <TableFooter>
-                  <TableRow>
-                    <TablePagination
-                      rowsPerPageOptions={[5, 10, 25]}
-                      colSpan={3}
-                      count={data !== undefined ? data.totalElements : 0}
-                      rowsPerPage={limit}
-                      page={page}
-                      onPageChange={handleChangePage}
-                      onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
-                  </TableRow>
-                </TableFooter>
-              </Table>
-            </TableContainer>
-            <DialogDetail<EmployeeSchema>
-              open={open}
-              onClose={handleClose}
-              selectedValue={
-                employee !== null ? employee : defaultEmployeeSchema
-              }
-              columns={
-                new Map([
-                  ["name", "Tên"],
-                  ["phone", "Số điện thoại"],
-                  ["email", "Email"],
-                  ["dob", "Ngày sinh"],
-                ])
-              }
-            />
-          </Box>
-        </>
-      )}
+      <Modal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        aria-labelledby="delete-confirmation-modal"
+        aria-describedby="delete-confirmation-modal-description"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "auto"
+        }}
+      >
+        <Box style={styles.modalContent}>
+          <h3 id="delete-confirmation-modal">Xác nhận xóa nhân viên</h3>
+          <p>Bạn có chắc chắn muốn xóa nhân viên <strong>{employeeToDelete?.name}</strong> không?</p>
+          <div style={styles.buttonContainer}>
+            <Button onClick={() => setConfirmOpen(false)} style={styles.closeButton}>
+              Hủy
+            </Button>
+            <Button onClick={handleDelete} style={styles.addButton}>
+              Xóa
+            </Button>
+          </div>
+        </Box>
+      </Modal>
     </>
   );
 }
+
+const styles: { [key: string]: React.CSSProperties } = {
+  modalContent: {
+    backgroundColor: "white",
+    padding: "20px",
+    borderRadius: "8px",
+    outline: "none",
+  },
+  buttonContainer: {
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: "20px",
+  },
+  closeButton: {
+    marginRight: "10px",
+  },
+  addButton: {
+    backgroundColor: colors.primaryColor,
+    color: "white",
+  },
+  tableCell: {
+    wordWrap: "break-word",
+    whiteSpace: "normal",
+  },
+  tableCellHeader: {
+    fontWeight: "bold",
+    cursor: "pointer",
+  },
+};

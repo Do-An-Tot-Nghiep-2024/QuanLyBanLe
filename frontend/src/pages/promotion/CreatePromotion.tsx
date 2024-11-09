@@ -17,6 +17,7 @@ import {
 import { createDiscountProductPromotion, createGiftProductPromotion, createOrderPromotion, createQuantityPromotion } from '../../services/promotion.service';
 import { getAllProductsService } from '../../services/product.service';
 import { GetProductSchema } from '../../types/getProductSchema';
+import { useNavigate } from 'react-router-dom';
 
 const promotionTypes = [
     { id: 1, label: 'Khuyến mãi theo giá trị đơn hàng' },
@@ -26,6 +27,7 @@ const promotionTypes = [
 ];
 
 const CreatePromotion: React.FC = () => {
+    const navigate = useNavigate();
     const [promotionTypeId, setPromotionTypeId] = useState<number | ''>('');
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -251,6 +253,8 @@ const CreatePromotion: React.FC = () => {
                 setProductCategory(0),
                 setDiscountAmount(0),
                 setGiftShipmentId(0);
+                navigate("/promotions")
+                
         } else {
             setSnackbarMessage(response?.message);
             setSnackbarSeverity('error');

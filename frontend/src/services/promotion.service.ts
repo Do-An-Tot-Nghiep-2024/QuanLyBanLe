@@ -1,6 +1,18 @@
 import api from "../config/axios";
 import ApiResponse from "../types/apiResponse";
+import { PromotionSchema } from "../types/promotionSchema";
 
+
+interface PromotionResponse {
+  message: string;
+  data: {
+      lastPage: boolean;
+      pageNumber: number;
+      responseList: PromotionSchema[];
+      totalElements: number;
+      totalPages: number;
+  } | null;
+}
 const createOrderPromotion = async (promotionData: any) => {
   try {
     console.log(promotionData);
@@ -128,6 +140,48 @@ const createDiscountProductPromotion = async (promotionData: any) => {
     };
   }
 }
+// const getAllProductsService = async (): Promise<GetProductResponse> => {
+//   try {
+//     const response: GetProductResponse = await api.get(`/products`);
+//     const { message, data } = response;
+
+//     console.log(data);
+
+//     return {
+//       message,
+//       data: message === "success" ? data : null,
+//     };
+//   } catch (error) {
+//     console.error("Error fetching products:", error);
+    
+//     return {
+//       message: String(error),
+//       data: null,
+//     };
+//   }
+// };
+
+const getAllPromotionService = async (): Promise<PromotionResponse> => {
+  try {
+    const response: PromotionResponse = await api.get(`/promotions`);
+
+    const { message, data } = response;
+
+        console.log(data);
+    
+        return {
+          message,
+          data: message === "success" ? data : null,
+        };
+      } catch (error) {
+        console.error("Error fetching promotions:", error);
+        
+        return {
+          message: String(error),
+          data: null,
+        };
+  }
+}
 
 
-export { createOrderPromotion, createQuantityPromotion, createGiftProductPromotion, createDiscountProductPromotion }
+export { createOrderPromotion, createQuantityPromotion, createGiftProductPromotion, createDiscountProductPromotion, getAllPromotionService}
