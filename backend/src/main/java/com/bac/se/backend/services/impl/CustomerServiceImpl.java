@@ -11,7 +11,6 @@ import com.bac.se.backend.services.CustomerService;
 import com.bac.se.backend.utils.ValidateInput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,8 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@RequiredArgsConstructor
+
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
@@ -46,15 +46,16 @@ public class CustomerServiceImpl implements CustomerService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Object[]> customerPage = customerRepository.getCustomers(pageable);
         List<Object[]> customerList = customerPage.getContent();
-        var list = customerList.stream().map(objects -> new CustomerResponse(Long.valueOf(objects[0].toString()),// customer_id
-                (String) objects[1],                   // name
-                (String) objects[2],                   // email
-                (String) objects[3]                    // phone
+        var list = customerList.stream().map(objects -> new CustomerResponse(
+                Long.valueOf(objects[0].toString()),// customer_id
+                 objects[1].toString(),                   // name
+                objects[2].toString(),                   // email
+                objects[3].toString()                    // phone
         )).toList();
         return new PageResponse<>(list, pageNumber, customerPage.getTotalPages(), customerPage.getTotalElements(), customerPage.isLast());
     }
 
-    @Autowired
+    @Override
     public CustomerResponse getCustomer(String email) {
         Customer customer = customerRepository.getCustomerByEmail(email).orElseThrow(() -> new ResourceNotFoundException(CUSTOMER_NOT_FOUND));
         return customerMapper.mapToCustomerResponse(customer);

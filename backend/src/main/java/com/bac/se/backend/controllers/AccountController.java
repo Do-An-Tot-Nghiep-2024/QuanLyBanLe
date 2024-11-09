@@ -14,6 +14,7 @@ import com.bac.se.backend.services.AccountService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -82,7 +83,10 @@ public class AccountController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<ApiResponse<LoginResponse>> resetPassword(String email, String newPassword, String confirmPassword) {
+    public ResponseEntity<ApiResponse<LoginResponse>> resetPassword(
+            @Param("email") String email,
+            @RequestParam("newPassword") String newPassword,
+            @RequestParam("confirmPassword") String confirmPassword) {
         try {
             LoginResponse login = accountService.resetPassword(email, newPassword, confirmPassword);
             return ResponseEntity.ok().body(new ApiResponse<>(REQUEST_SUCCESS, login));

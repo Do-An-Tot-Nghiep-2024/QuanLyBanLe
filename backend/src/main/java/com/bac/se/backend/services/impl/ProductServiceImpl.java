@@ -204,7 +204,8 @@ public class ProductServiceImpl implements ProductService {
         return productList.stream()
                 .map(p -> new ProductQueryResponse(
                         Long.parseLong(p[0].toString()),
-                        p[1].toString()
+                        p[1].toString(),
+                        p[2].toString()
                 )).toList();
     }
 
