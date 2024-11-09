@@ -33,7 +33,7 @@ public interface ProductService {
 
     List<ProductQueryResponse> getProductsBySupplier(Long supplierId);
 
-    List<ProductCategoryResponse> getProductsByCategory(Long categoryId);
+    List<ProductResponse> getProductsByCategory(Long categoryId);
 
     PageResponse<ProductMobileResponse> getProductsMobile(Integer pageNumber, Integer pageSize);
 

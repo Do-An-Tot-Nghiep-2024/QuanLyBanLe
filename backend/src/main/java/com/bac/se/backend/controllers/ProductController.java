@@ -131,7 +131,7 @@ public class ProductController {
     }
 
     @GetMapping("/category/{id}")
-    public ResponseEntity<ApiResponse<List<ProductCategoryResponse>>> getProductsByCategory(@PathVariable("id") Long categoryId){
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getProductsByCategory(@PathVariable("id") Long categoryId){
         try{
             return ResponseEntity.ok()
                     .body(new ApiResponse<>(REQUEST_SUCCESS,productService.getProductsByCategory(categoryId)));

@@ -72,12 +72,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(res -> {
                     Long productId = Long.parseLong(res[0].toString());
                     List<Long> shipmentItemIds = shipmentItemMap.getOrDefault(productId, Collections.emptyList());
-                    var response = productMapper.mapObjectToProductResponse(res, shipmentItemIds);
-                    var giftPromotionByProduct = giftPromotionRepository.getGiftPromotionByProduct(response.getId(), PageLimit.ONLY.getPageable());
-                    if(!giftPromotionByProduct.isEmpty()){
-                        response.setGiftPromotion(promotionMapper.mapToGiftPromotionResponse(giftPromotionByProduct.get(0)));
-                    }
-                    return response;
+                    return productMapper.mapObjectToProductResponse(res, shipmentItemIds);
                 }).toList();
         return new PageResponse<>(productResponseList, pageNumber,
                 productPage.getTotalPages(), productPage.getTotalElements(), productPage.isLast());
@@ -100,8 +95,7 @@ public class ProductServiceImpl implements ProductService {
                 product.getUnit().getName(),
                 productPriceResponse.price(),
                 productPriceResponse.discountPrice(),
-                shipmentIds,
-                null);
+                shipmentIds);
     }
 
 
@@ -215,6 +209,25 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<ProductResponse> getProductsByCategory(Long categoryId) {
+        List<Object[]> productList = productRepository.getProductsByCategory(categoryId);
+        List<Long> productIds = productList.stream().map(x -> Long.parseLong(x[0].toString())).toList();
+        Map<Long, List<Long>> shipmentItemMap = new HashMap<>();
+        for (Long productId : productIds) {
+            List<Long> shipmentIds = shipmentItemRepository.getShipmentItemByProduct(productId).stream()
+                    .map(x -> Long.parseLong(x[0].toString())).toList();
+
+            shipmentItemMap.put(productId, shipmentIds);
+        }
+        return productList.stream()
+                .map(res -> {
+                    Long productId = Long.parseLong(res[0].toString());
+                    List<Long> shipmentItemIds = shipmentItemMap.getOrDefault(productId, Collections.emptyList());
+                    return productMapper.mapObjectToProductResponse(res, shipmentItemIds);
+                }).toList();
+    }
+
+    @Override
     public PageResponse<ProductMobileResponse> getProductsMobile(Integer pageNumber, Integer pageSize) {
         PageRequest pageRequest = PageRequest.of(pageNumber,pageSize);
         var productsMobile = productRepository.getProductsMobile(pageRequest);
@@ -229,10 +242,6 @@ public class ProductServiceImpl implements ProductService {
             if (!maxAvailableQuantityStock.isEmpty()) {
                 productMobileResponse.setShipmentId(Long.parseLong(maxAvailableQuantityStock.get(0)[0].toString()));
 
-            }
-            var giftPromotionByProduct = giftPromotionRepository.getGiftPromotionByProduct(productMobileResponse.getProductId(), PageLimit.ONLY.getPageable());
-            if(!giftPromotionByProduct.isEmpty()){
-                productMobileResponse.setGiftPromotionResponse(promotionMapper.mapToGiftPromotionResponse(giftPromotionByProduct.get(0)));
             }
         }
         return new PageResponse<>(mobileResponses, pageNumber,
@@ -257,14 +266,6 @@ public class ProductServiceImpl implements ProductService {
                 productsMobile.getTotalPages(), productsMobile.getTotalElements(), productsMobile.isLast());
     }
 
-    @Override
-    public List<ProductCategoryResponse> getProductsByCategory(Long categoryId) {
-        List<Object[]> productList = productRepository.getProductsByCategory(categoryId);
-        return productList.stream()
-                .map(productMapper::mapObjectToProductCategoryResponse)
-                .toList();
-    }
-
     // Helper method to create ProductResponse
     private ProductResponse createProductResponse(Product product, ProductPriceResponse productPrice) {
         return new ProductResponse(
@@ -275,7 +276,6 @@ public class ProductServiceImpl implements ProductService {
                 product.getUnit().getName(),
                 productPrice.price(),
                 productPrice.discountPrice(),
-                null,
                 null
         );
     }
