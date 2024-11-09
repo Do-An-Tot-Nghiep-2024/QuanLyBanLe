@@ -5,9 +5,9 @@ import java.util.Date;
 public record OrderResponse(
         Long orderId,
         String employee,
-        double total, String orderStatus,
+        String orderStatus,
         String paymentType,
-        double totalDiscount,
+        double total,
         Date createdAt,
         String customerPhone
 ) {

@@ -3,10 +3,10 @@ package com.bac.se.backend.payload.response.order;
 import java.util.List;
 
 public record CreateOrderResponse(
-        List<OrderItemResponse> orderItemResponses
+        List<ProductOrderItemResponse> orderItemResponses
         , double totalPrice,
         double customerPayment,
         double change,
-        List<OrderItemResponse> giftProducts
+        List<ProductOrderItemResponse> giftProducts
 ) {
 }

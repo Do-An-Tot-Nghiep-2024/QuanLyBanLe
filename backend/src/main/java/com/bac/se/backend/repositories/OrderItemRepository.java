@@ -26,6 +26,36 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
     List<Object[]> salesStatisticsByEmployee();
 
 
+    @Query(value = "SELECT p.name, " +
+            "    oi.quantity, " +
+            "    CASE " +
+            "        WHEN pp.discount_price = 0 THEN pp.price " +
+            "        ELSE pp.discount_price " +
+            "    END AS price, " +
+            "    oi.quantity * (" +
+            "        CASE " +
+            "            WHEN pp.discount_price = 0 THEN pp.price " +
+            "            ELSE pp.discount_price " +
+            "        END " +
+            "    ) AS total_price, " +
+            "    CASE " +
+            "        WHEN pp.discount_price > 0 THEN (oi.quantity * pp.price - oi.quantity * pp.discount_price) " +
+            "        ELSE 0 " +
+            "    END AS total_discount " +
+            "FROM t_order_item oi " +
+            "JOIN t_order o ON oi.order_id = o.order_id " +
+            "JOIN t_product p ON p.product_id = oi.product_id " +
+            "JOIN t_product_price pp ON pp.product_id = p.product_id " +
+            "WHERE oi.order_id = ?1 " +
+            "  AND pp.created_at = (" +
+            "      SELECT MAX(p1.created_at) " +
+            "      FROM t_product_price p1 " +
+            "      WHERE p1.product_id = p.product_id " +
+            "  );", nativeQuery = true)
+    List<Object[]> getProductInOrderItem(Long orderId);
+
+
+
 
 
 
