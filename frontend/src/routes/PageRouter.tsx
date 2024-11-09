@@ -27,6 +27,8 @@ const CategoryPage = lazy(() => import("../pages/product/CategoryPage"));
 const ProductPage = lazy(() => import("../pages/product/ProductPage"));
 const UpdateProduct = lazy(() => import("../pages/product/UpdateProduct"));
 const CreatePromotion = lazy(()=> import("../pages/promotion/CreatePromotion"))
+const PromotionPage = lazy(() => import('../pages/promotion/PromotionPage'))
+const UnitManagement = lazy(() => import('../pages/product/UnitPage'))
 // statistic
 const StatisticsProduct = lazy(
   () => import("../pages/report/SalesStatisticsProduct")
@@ -145,6 +147,8 @@ const PageRouter = () => {
               <Route path="/products" element={<ProductPage />} />
 
               <Route path="/products/categories" element={<CategoryPage />} />
+              <Route path="/products/units" element={<UnitManagement />} />
+
 
               <Route path="/update-employee/:id" element={<UpdateEmployee />} />
               {/* Static pages */}
@@ -182,6 +186,7 @@ const PageRouter = () => {
               />
 
               <Route path="/promotions/create-promotion" element={<CreatePromotion />}/>
+              <Route path="/promotions" element={<PromotionPage/>}/>
             </Route>
           </Route>
           {/* Not found page */}

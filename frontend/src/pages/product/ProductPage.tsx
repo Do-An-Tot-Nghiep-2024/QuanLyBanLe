@@ -152,13 +152,38 @@ export default function ProductPage() {
   //   : [];
 
 
-  const filteredProducts =
-    selectedCategory === "All" && !searchTerm
-      ? data?.responseList
-      : data?.responseList.filter(
-        (product) => product.category === selectedCategory 
-      );
+  // const filteredProducts =
+  //   selectedCategory === "All" && !searchTerm
+  //     ? data?.responseList
+  //     : data?.responseList.filter(
+  //       (product) => product.category === selectedCategory 
+  //     );
 
+
+  const normalizeString = (str: string) => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  };
+  
+  // Assuming `products` is your array of product objects
+  const filteredProducts = Array.isArray(data?.responseList)
+    ? data?.responseList.filter((product) => {
+        const matchesSearchTerm = normalizeString(String(product.name)).includes(normalizeString(searchTerm));
+  
+        // Check if the selected category is "All"
+        if (selectedCategory === "All") {
+          // Only return products that match the search term
+          return searchTerm ? matchesSearchTerm : true; // If no search term, return all
+        } else {
+          // If a specific category is selected, filter by category and search term
+          return product.category === selectedCategory && (!searchTerm || matchesSearchTerm);
+        }
+      })
+    : [];
+  
+  
 
   // const filteredProducts = (): GetProductSchema[] => {
   //   if (!data || !data.responseList) return [];

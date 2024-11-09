@@ -6,9 +6,12 @@ const createOrderService = async (itemList: any[], customerPayment : number) => 
       console.log(itemList);
 
   
-      const response: ApiResponse = await api.post(`/orders/live`, {
+      const response: ApiResponse = await api.post(`/orders`, {
         orderItems: itemList,
-        customerPayment : customerPayment
+        customerPayment : customerPayment,
+        isLive: true,
+        paymentType: "CASH"
+
       });
   
       const { message, data } = response;
