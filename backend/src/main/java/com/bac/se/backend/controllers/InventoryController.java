@@ -6,8 +6,9 @@ import com.bac.se.backend.payload.request.ShipmentRequest;
 import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.invoice.ImportInvoice;
-import com.bac.se.backend.payload.response.shipment.ShipmentItemResponse;
-import com.bac.se.backend.payload.response.shipment.ShipmentResponse;
+import com.bac.se.backend.payload.response.invoice.ImportInvoiceItemResponse;
+import com.bac.se.backend.payload.response.shipment.CreateShipmentResponse;
+import com.bac.se.backend.payload.response.shipment.ProductShipmentResponse;
 import com.bac.se.backend.services.ShipmentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/inventory")
@@ -27,9 +29,21 @@ public class InventoryController {
     final String REQUEST_SUCCESS = "success";
 
 
+    @GetMapping("/shipments")
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public ResponseEntity<ApiResponse<List<ProductShipmentResponse>>> getShipments() {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, shipmentService.getShipments()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+
     @PostMapping("/import")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<ShipmentResponse>> createImportInvoice(@RequestBody ShipmentRequest shipmentRequest) {
+    public ResponseEntity<ApiResponse<CreateShipmentResponse>> createImportInvoice(@RequestBody ShipmentRequest shipmentRequest) {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, shipmentService.createShipment(shipmentRequest)));
         } catch (ResourceNotFoundException e) {
@@ -45,7 +59,7 @@ public class InventoryController {
     }
 
 
-    @GetMapping
+    @GetMapping("/import-invoices")
     @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<PageResponse<ImportInvoice>>> getImportInvoices(
             @RequestParam(defaultValue = "0") Integer pageNumber,
@@ -66,21 +80,20 @@ public class InventoryController {
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
+    
 
-
-    @GetMapping("/{id}")
+    @GetMapping("/import-invoices/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<ShipmentItemResponse>> getShipmentItem(@PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse<ImportInvoiceItemResponse>> getItemImportInvoice(@PathVariable("id") Long id) {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS,
-                    shipmentService.getShipment(id)
+                    shipmentService.getItemImportInvoice(id)
             ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
-
 
 
 }

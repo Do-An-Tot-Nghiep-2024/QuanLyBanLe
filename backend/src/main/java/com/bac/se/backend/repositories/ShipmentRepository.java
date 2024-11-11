@@ -33,10 +33,9 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
             "    s.shipment_id " +
             "ORDER BY " +
             "    s.shipment_id DESC", nativeQuery = true)
-    Page<Object[]> getShipments(Pageable pageable,
+    Page<Object[]> getShipmentsImport(Pageable pageable,
                                 @Param("fromDate") Date fromDate,
                                 @Param("toDate") Date toDate);
-
 
     @Query(value = "select sup.name, s.createdAt from Shipment s " +
             "inner join Supplier sup on sup.id = s.supplier.id " +
