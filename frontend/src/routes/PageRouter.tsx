@@ -26,7 +26,9 @@ const Sidebar = lazy(() => import("../layout/Sidebar"));
 const CategoryPage = lazy(() => import("../pages/product/CategoryPage"));
 const ProductPage = lazy(() => import("../pages/product/ProductPage"));
 const UpdateProduct = lazy(() => import("../pages/product/UpdateProduct"));
-
+const CreatePromotion = lazy(()=> import("../pages/promotion/CreatePromotion"))
+const PromotionPage = lazy(() => import('../pages/promotion/PromotionPage'))
+const UnitManagement = lazy(() => import('../pages/product/UnitPage'))
 // statistic
 const StatisticsProduct = lazy(
   () => import("../pages/report/SalesStatisticsProduct")
@@ -53,12 +55,9 @@ const InventoryPage = lazy(() => import("../pages/inventory/InventoryPage"));
 const InventoryDetailPage = lazy(
   () => import("../pages/inventory/InventoryDetailPage")
 );
-
-const ShipmentPage = lazy(() => import("../pages/inventory/ShipmentPage"));
-const UnitPage = lazy(() => import("../pages/unit/UnitPage"));
-
 const OrderPage1 = lazy(() => import("../pages/order/OrderPage1"));
 const OrderPage2 = lazy(() => import("../pages/order/OrderPage2"));
+
 
 const PrintImportInvoice = lazy(
   () => import("../pages/print/PrintImportInvoice")
@@ -147,6 +146,8 @@ const PageRouter = () => {
               <Route path="/products" element={<ProductPage />} />
 
               <Route path="/products/categories" element={<CategoryPage />} />
+              <Route path="/products/units" element={<UnitManagement />} />
+
 
               <Route path="/update-employee/:id" element={<UpdateEmployee />} />
               {/* Static pages */}
@@ -164,14 +165,14 @@ const PageRouter = () => {
                 path="/inventory/import-invoices"
                 element={<InventoryPage />}
               />
-              <Route path="/inventory/shipment" element={<ShipmentPage />} />
-
-              <Route path="/units" element={<UnitPage />} />
               <Route path="/inventory/:id" element={<InventoryDetailPage />} />
               <Route path="/logout" element={<Logout />} />
               <Route path="/orders" element={<OrderTabs />} />
               <Route path="/order1" element={<OrderPage1 />} />
               <Route path="/order2" element={<OrderPage2 />} />
+
+
+
 
               <Route
                 path="/inventory/create-inventory"
@@ -181,6 +182,9 @@ const PageRouter = () => {
                 path="/print/import-invoice"
                 element={<PrintImportInvoice />}
               />
+
+              <Route path="/promotions/create-promotion" element={<CreatePromotion />}/>
+              <Route path="/promotions" element={<PromotionPage/>}/>
             </Route>
           </Route>
           {/* Not found page */}

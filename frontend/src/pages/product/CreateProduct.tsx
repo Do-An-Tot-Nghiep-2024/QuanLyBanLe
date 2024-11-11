@@ -18,6 +18,12 @@ import { createProductService } from "../../services/product.service";
 import { ProductSchema, defaultProductSchema } from "../../types/productSchema";
 import { getCategoriesService } from "../../services/category.service";
 import { getSuppliersService } from "../../services/supplier.service";
+import { getUnitService } from "../../services/unit.service";
+
+type Unit = {
+  id: number;
+  name: string;
+};
 
 export default function CreateProduct() {
   const [product, setProduct] = useState({ ...defaultProductSchema });
@@ -27,6 +33,7 @@ export default function CreateProduct() {
   const [alertMessage, setAlertMessage] = useState("");
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const [units, setUnits] = useState<Unit[]>([]);
   const navigate = useNavigate();
 
   const getCategories = async () => {
@@ -39,34 +46,23 @@ export default function CreateProduct() {
     setSuppliers(response.data.responseList);
   };
 
-  // const handleChange = (
-  //   event: React.ChangeEvent<{ name?: string; value: unknown }>
-  // ) => {
-  //   const { name, value } = event.target;
-
-  //   console.log(name, value);
-
-  //   setProduct((prev) => ({
-  //     ...prev,
-  //     [String(name)]:
-  //       name === "categoryId" || name === "supplierId" ? Number(value) : value,
-  //   }));
-  // };
+  const getUnits = async () => {
+    const response = await getUnitService();
+    setUnits(response.data);
+  };
 
   const handleChange = (
     event: SelectChangeEvent<unknown> | React.ChangeEvent<{ name?: string; value: unknown }>
   ) => {
     const { name, value } = event.target;
-  
+
     console.log(name, value);
-  
+
     setProduct((prev) => ({
       ...prev,
-      [String(name)]:
-        name === "categoryId" || name === "supplierId" ? Number(value) : value,
+      [String(name)]: name === "categoryId" || name === "supplierId" || name === "unitId" ? Number(value) : value,
     }));
   };
-
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -81,31 +77,62 @@ export default function CreateProduct() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+  
+    // Validation for required fields
+    if (!product.name) {
+      setAlertMessage("Tên sản phẩm là bắt buộc.");
+      setSnackbarOpen(true);
+      return;
+    }
+    if (!imageFile) {
+      setAlertMessage("Vui lòng tải lên hình ảnh.");
+      setSnackbarOpen(true);
+      return;
+    }
+    if (!product.supplierId) {
+      setAlertMessage("Vui lòng chọn nhà cung cấp.");
+      setSnackbarOpen(true);
+      return;
+    }
+    if (!product.categoryId) {
+      setAlertMessage("Vui lòng chọn danh mục sản phẩm.");
+      setSnackbarOpen(true);
+      return;
+    }
+    if (!product.unitId) {
+      setAlertMessage("Vui lòng chọn đơn vị tính.");
+      setSnackbarOpen(true);
+      return;
+    }
+  
     try {
       console.log(product);
-
+  
       const productData = {
         ...product,
         categoryId: Number(product.categoryId),
         supplierId: Number(product.supplierId),
+        unitId: Number(product.unitId),
       };
-
+  
       console.log(productData);
-
+  
       ProductSchema.parse(productData);
-      if (imageFile) {
-        await createProductService(productData, imageFile);
+      const response = await createProductService(productData, imageFile);
+  
+      if (response.message === 'success') {
         setAlertMessage("Sản phẩm đã được tạo thành công!");
         setSnackbarOpen(true);
         setTimeout(() => {
           navigate("/products");
         }, 2000);
+      } else {
+        setAlertMessage(response.message);
+        setSnackbarOpen(true);
       }
-
+  
     } catch (err: any) {
-      setAlertMessage(
-        err?.issues ? err.issues[0].message : "Lỗi khi tạo sản phẩm"
-      );
+      setAlertMessage(err?.issues ? err.issues[0].message : "Lỗi khi tạo sản phẩm");
       setSnackbarOpen(true);
     }
   };
@@ -114,15 +141,16 @@ export default function CreateProduct() {
     navigate("/products");
   };
 
-
   useEffect(() => {
     const fetchData = async () => {
       await getCategories();
       await getSuppliers();
+      await getUnits();
     };
 
     fetchData();
   }, []);
+
   return (
     <Container>
       <Typography
@@ -162,7 +190,7 @@ export default function CreateProduct() {
               variant="outlined"
               value={product.name}
               onChange={handleChange}
-              required
+              
             />
           </FormControl>
 
@@ -170,7 +198,7 @@ export default function CreateProduct() {
             <FormLabel htmlFor="file" sx={styles.formLabel}>
               Tải Lên Hình Ảnh:
             </FormLabel>
-            <input required type="file" accept="image/*" onChange={handleFileChange} />
+            <input type="file" accept="image/*" onChange={handleFileChange} />
           </FormControl>
 
           <FormControl sx={{ width: "60%" }}>
@@ -179,13 +207,11 @@ export default function CreateProduct() {
             </FormLabel>
             <Select
               id="supplierId"
-              // {...register("supplierId")}
               variant="outlined"
               displayEmpty
               native
               onChange={handleChange}
               name="supplierId"
-
             >
               <option value="" disabled>
                 Chọn nhà cung cấp
@@ -205,7 +231,6 @@ export default function CreateProduct() {
             <Select
               id="categoryId"
               name="categoryId"
-              // {...register("categoryId")}
               variant="outlined"
               displayEmpty
               native
@@ -217,6 +242,29 @@ export default function CreateProduct() {
               {categories.map((category: any) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
+                </option>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ width: "60%" }}>
+            <FormLabel htmlFor="unitId" sx={{ textAlign: "left" }}>
+             Đơn vị tính:
+            </FormLabel>
+            <Select
+              id="unitId"
+              name="unitId"
+              variant="outlined"
+              displayEmpty
+              native
+              onChange={handleChange}
+            >
+              <option value="" disabled>
+                Chọn đơn vị tính
+              </option>
+              {units.map((unit: any) => (
+                <option key={unit.id} value={unit.id}>
+                  {unit.name}
                 </option>
               ))}
             </Select>

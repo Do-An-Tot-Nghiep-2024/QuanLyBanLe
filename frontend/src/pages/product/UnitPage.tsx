@@ -21,75 +21,77 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import colors from "../../constants/color";
 import { NoteAddOutlined } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import {
-  createCategoryService,
-  getCategoriesService,
-  updateCategoryService,
-  deleteCategoryService,
-} from "../../services/category.service";
-import { CategorySchema } from "../../types/categorySchema";
-type Category = {
-  id: 0,
-  name: ""
-}
-export default function CategoryPage() {
+  createUnitService,
+  getUnitService,
+  updateUnitService,
+  deleteUnitService,
+} from "../../services/unit.service";
+import { UnitSchema } from "../../types/unitSchema";
+import colors from "../../constants/color";
+
+type Unit = {
+  id: number;
+  name: string;
+};
+
+const UnitPage = () => {
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [category, setCategory] = useState<string>("");
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [currentCategoryId, setCurrentCategoryId] = useState<number | null>(null);
+  const [unit, setUnit] = useState<string>("");
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [currentUnitId, setCurrentUnitId] = useState<number | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); // New state for sort order
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [sortField, setSortField] = useState<"name">("name")
-  const sortCategories = (a: Category, b: Category) => {
+  const sortCategories = (a: Unit, b: Unit) => {
     if (sortField === "name") {
       return sortOrder === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
     }
     return 0;
   };
 
-  const sortedCategories = [...categories].sort(sortCategories);
+  const sortedUnits = [...units].sort(sortCategories);
 
   const toggleSortOrder = () => {
     setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
   };
-
   const handleOpen = () => {
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
-    setCategory("");
-  }
-  const handleEditOpen = (categoryId: number, categoryName: string) => {
-    setCurrentCategoryId(categoryId);
-    setCategory(categoryName);
+    setUnit("");
+  };
+
+  const handleEditOpen = (unitId: number, unitName: string) => {
+    setCurrentUnitId(unitId);
+    setUnit(unitName);
     setEditOpen(true);
   };
 
   const handleEditClose = () => {
     setEditOpen(false);
-    setCategory("");
-    setCurrentCategoryId(null);
-  }
+    setUnit("");
+    setCurrentUnitId(null);
+  };
 
-  const handleDeleteOpen = (categoryId: number) => {
-    setCurrentCategoryId(categoryId);
+  const handleDeleteOpen = (unitId: number) => {
+    setCurrentUnitId(unitId);
     setDeleteConfirmOpen(true);
   };
 
   const handleDeleteClose = () => {
     setDeleteConfirmOpen(false);
-    setCurrentCategoryId(null);
+    setCurrentUnitId(null);
   };
 
   const showSnackbar = (message: string) => {
@@ -97,43 +99,43 @@ export default function CategoryPage() {
     setSnackbarOpen(true);
   };
 
-  async function handleCreateCategory() {
+  const handleCreateUnit = async () => {
     try {
-      if (!category) {
-        showSnackbar("Vui lòng nhập tên danh mục");
+      if (!unit) {
+        showSnackbar("Vui lòng nhập tên đơn vị");
         return;
       }
-      await createCategoryService(category);
-      showSnackbar("Tạo danh mục thành công");
-      getCategories();
+      await createUnitService(unit);
+      showSnackbar("Tạo đơn vị thành công");
+      getUnits();
       handleClose();
     } catch (error) {
       console.error(error);
-      showSnackbar("Tạo danh mục thất bại");
+      showSnackbar("Tạo đơn vị thất bại");
     }
-  }
+  };
 
-  async function handleUpdateCategory() {
-    if (currentCategoryId) {
-      const categorySchema = CategorySchema.parse({ name: category });
+  const handleUpdateUnit = async () => {
+    if (currentUnitId) {
+      const unitSchema = UnitSchema.parse({ name: unit });
       try {
-        await updateCategoryService(currentCategoryId, categorySchema);
-        showSnackbar("Cập nhật danh mục thành công");
-        getCategories();
+        await updateUnitService(currentUnitId, unitSchema);
+        showSnackbar("Cập nhật đơn vị thành công");
+        getUnits();
         handleEditClose();
       } catch (error) {
         console.error(error);
         showSnackbar("Cập nhật thất bại");
       }
     }
-  }
+  };
 
-  const handleDeleteCategory = async () => {
-    if (currentCategoryId) {
+  const handleDeleteUnit = async () => {
+    if (currentUnitId) {
       try {
-        await deleteCategoryService(currentCategoryId);
-        showSnackbar("Xóa danh mục thành công");
-        getCategories();
+        await deleteUnitService(currentUnitId);
+        showSnackbar("Xóa đơn vị thành công");
+        getUnits();
         handleDeleteClose();
       } catch (error) {
         console.error(error);
@@ -142,13 +144,13 @@ export default function CategoryPage() {
     }
   };
 
-  const getCategories = async () => {
-    const response = await getCategoriesService();
-    setCategories(response.data);
+  const getUnits = async () => {
+    const response = await getUnitService();
+    setUnits(response.data);
   };
 
   useEffect(() => {
-    getCategories();
+    getUnits();
   }, []);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -160,31 +162,30 @@ export default function CategoryPage() {
     setPage(0);
   };
 
-
   return (
     <>
       <Typography variant="h5" align="center" padding={"5px"}>
-        Danh mục sản phẩm
+        Danh sách đơn vị tính
       </Typography>
       <Box sx={{ width: "80%" }}>
         <Stack
           mb={2}
           display="flex"
-          flexDirection={"row"}
-          justifyContent={"space-between"}
+          flexDirection="row"
+          justifyContent="space-between"
           sx={{ width: "100%" }}
         >
           <TextField
             id="search"
-            label="Tìm kiếm danh mục"
+            label="Tìm kiếm đơn vị"
             variant="filled"
             size="small"
             sx={styles.searchField}
           />
-          <Tooltip title="Thêm danh mục sản phẩm" arrow>
+          <Tooltip title="Thêm đơn vị" arrow>
             <IconButton
               onClick={handleOpen}
-              aria-label="import"
+              aria-label="add"
               size="large"
               color="success"
             >
@@ -192,150 +193,82 @@ export default function CategoryPage() {
             </IconButton>
           </Tooltip>
 
-
+          {/* Add Unit Modal */}
           <Modal
             open={open}
             onClose={handleClose}
-            aria-labelledby="add-category-modal"
-            aria-describedby="add-category-modal-description"
+            aria-labelledby="add-unit-modal"
+            aria-describedby="add-unit-modal-description"
             sx={styles.modal}
           >
-            <div
-              style={{
-                backgroundColor: "white",
-                padding: "10px",
-                borderRadius: "8px",
-                height: "30vh",
-                width: "30vw",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                margin: "auto",
-                flexDirection: "column",
-                gap: "30px",
-              }}
-            >
-              <h3 id="add-category-modal">Thêm danh mục sản phẩm</h3>
+            <Box sx={styles.modalContent}>
+              <Typography variant="h6" id="add-unit-modal">Thêm đơn vị</Typography>
               <TextField
-                style={styles.inputField}
-                label="Tên danh mục"
+                sx={styles.inputField}
+                label="Tên đơn vị"
                 variant="outlined"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
               />
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: "40px",
-                  width: "100%",
-                  justifyContent: "center",
-                }}
-              >
-                <Button onClick={handleClose} style={styles.closeButton}>
+              <Box sx={styles.buttonContainer}>
+                <Button onClick={handleClose} sx={styles.closeButton}>
                   Đóng
                 </Button>
-                <Button style={styles.addButton} onClick={handleCreateCategory}>
+                <Button sx={styles.addButton} onClick={handleCreateUnit}>
                   Thêm
                 </Button>
-              </div>
-            </div>
+              </Box>
+            </Box>
           </Modal>
 
-
-
+          {/* Edit Unit Modal */}
           <Modal
             open={editOpen}
             onClose={handleEditClose}
-            aria-labelledby="edit-category-modal"
-            aria-describedby="edit-category-modal-description"
+            aria-labelledby="edit-unit-modal"
+            aria-describedby="edit-unit-modal-description"
             sx={styles.modal}
           >
-            <div
-              style={{
-                backgroundColor: "white",
-                padding: "10px",
-                borderRadius: "8px",
-                height: "30vh",
-                width: "30vw",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                margin: "auto",
-                flexDirection: "column",
-                gap: "30px",
-              }}
-            >
-              <h3 id="edit-category-modal">Chỉnh sửa danh mục sản phẩm</h3>
+            <Box sx={styles.modalContent}>
+              <Typography variant="h6" id="edit-unit-modal">Chỉnh sửa đơn vị</Typography>
               <TextField
                 sx={styles.inputField}
-                label="Tên danh mục"
+                label="Tên đơn vị"
                 variant="outlined"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
               />
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: "40px",
-                  width: "100%",
-                  justifyContent: "center",
-                }}
-              >
+              <Box sx={styles.buttonContainer}>
                 <Button onClick={handleEditClose} sx={styles.closeButton}>
                   Đóng
                 </Button>
-                <Button sx={styles.addButton} onClick={handleUpdateCategory}>
+                <Button sx={styles.addButton} onClick={handleUpdateUnit}>
                   Cập nhật
                 </Button>
-              </div>
-            </div>
+              </Box>
+            </Box>
           </Modal>
 
-
-
+          {/* Delete Confirmation Modal */}
           <Modal
             open={deleteConfirmOpen}
             onClose={handleDeleteClose}
-            aria-labelledby="delete-category-modal"
-            aria-describedby="delete-category-modal-description"
+            aria-labelledby="delete-unit-modal"
+            aria-describedby="delete-unit-modal-description"
             sx={styles.modal}
           >
-            <div
-              style={{
-                backgroundColor: "white",
-                padding: "10px",
-                borderRadius: "8px",
-                height: "30vh",
-                width: "30vw",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                margin: "auto",
-                flexDirection: "column",
-                gap: "30px",
-              }}
-            >
-              <h3 id="delete-category-modal">Xác nhận xóa</h3>
-              <Typography>Bạn có chắc chắn muốn xóa danh mục này không?</Typography>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: "40px",
-                  width: "100%",
-                  justifyContent: "center",
-                }}
-              >
+            <Box sx={styles.modalContent}>
+              <Typography variant="h6" id="delete-unit-modal">Xác nhận xóa</Typography>
+              <Typography>Bạn có chắc chắn muốn xóa đơn vị này không?</Typography>
+              <Box sx={styles.buttonContainer}>
                 <Button onClick={handleDeleteClose} sx={styles.closeButton}>
                   Hủy
                 </Button>
-                <Button sx={styles.addButton} onClick={handleDeleteCategory}>
+                <Button sx={styles.addButton} onClick={handleDeleteUnit}>
                   Xóa
                 </Button>
-              </div>
-            </div>
+              </Box>
+            </Box>
           </Modal>
 
         </Stack>
@@ -351,10 +284,10 @@ export default function CategoryPage() {
                     setSortField("name");
                     toggleSortOrder();
                   }}
-                  style={{ cursor: "pointer" }} // Makes the header clickable
+                  style={{ cursor: "pointer" }} 
                 >
-                  Tên danh mục
-                  <span style={{ marginLeft: "15px" }}> {/* Adjust the margin as needed */}
+                  Tên đơn vị tính
+                  <span style={{ marginLeft: "15px" }}> 
                     {sortOrder === "asc" ? "↑" : "↓"}
                   </span>
                 </TableCell>
@@ -364,19 +297,16 @@ export default function CategoryPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sortedCategories.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((category) => (
-                <TableRow hover key={category.id}>
-                  <TableCell align={"left"} sx={styles.tableCell}>
-                    {category.name}
+              {sortedUnits.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((unit) => (
+                <TableRow hover key={unit.id}>
+                  <TableCell align="left" sx={styles.tableCell}>
+                    {unit.name}
                   </TableCell>
-                  <TableCell align={"center"} sx={styles.tableCell}>
-                    <IconButton color="error" onClick={() => handleDeleteOpen(category.id)}>
+                  <TableCell align="center" sx={styles.tableCell}>
+                    <IconButton color="error" onClick={() => handleDeleteOpen(unit.id)}>
                       <DeleteForeverIcon />
                     </IconButton>
-                    <IconButton
-                      color="warning"
-                      onClick={() => handleEditOpen(category.id, category.name)}
-                    >
+                    <IconButton color="warning" onClick={() => handleEditOpen(unit.id, unit.name)}>
                       <EditIcon />
                     </IconButton>
                   </TableCell>
@@ -386,9 +316,9 @@ export default function CategoryPage() {
             <TableFooter>
               <TableRow>
                 <TablePagination
-                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  rowsPerPageOptions={[5, 10, 25, { label: "Tất cả", value: -1 }]}
                   colSpan={3}
-                  count={categories.length}
+                  count={units.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   onPageChange={handleChangePage}
@@ -412,7 +342,7 @@ export default function CategoryPage() {
       </Box>
     </>
   );
-}
+};
 
 const styles = {
   searchField: {
@@ -477,3 +407,5 @@ const styles = {
     border: "1px solid #d4d2d2",
   },
 };
+
+export default UnitPage;
