@@ -49,7 +49,6 @@ function Dashboard() {
     ["totalSales", "#FD8B51"],
     ["totalCustomers", "#72BF78"],
   ]);
-  console.log(data);
   return (
     <Box
       sx={{
@@ -67,7 +66,6 @@ function Dashboard() {
         {
           // loop follow feilds in object
           Object.keys(data).map((key, index) => {
-            console.log(key);
             return (
               <Card key={index}>
                 <CardContent>

@@ -5,12 +5,13 @@ interface ProductItem {
   exp: Date;
   price: number;
   total: number;
+  unit:string;
 }
 
-interface ShipmentItem {
+interface ItemImportInvoice {
   name: string;
   total: number;
   productItems: ProductItem[];
   createdAt: Date;
 }
-export default ShipmentItem;
+export default ItemImportInvoice;

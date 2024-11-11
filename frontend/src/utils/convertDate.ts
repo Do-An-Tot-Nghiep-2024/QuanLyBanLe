@@ -1,7 +1,15 @@
-const convertDate = (date: string | undefined) => {
-  if (!date) return "";
-  const [day, month, year] = date.split("/");
-  return `${year}-${month}-${day}`;
+const convertDate = (date: Date) => {
+  var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [day, month, year].join('-');
 };
 
 const formatDate = (date: Date) => {

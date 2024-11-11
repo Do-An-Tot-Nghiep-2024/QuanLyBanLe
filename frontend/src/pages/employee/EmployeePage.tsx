@@ -70,10 +70,10 @@ export default function EmployeePage() {
     }
   };
 
-  const { isLoading, isError, error, data, isFetching } = useQuery({
-    queryKey: ["employees", page, limit],
-    queryFn: () => getEmployees(page, limit),
-  });
+  // const { isLoading, isError, error, data, isFetching } = useQuery({
+  //   queryKey: ["employees", page, limit],
+  //   queryFn: () => getEmployees(page, limit),
+  // });
 
   // how to detructuring data from useQuery
   const handleChangePage = (
@@ -118,9 +118,26 @@ export default function EmployeePage() {
     setOpen(false);
   };
 
-  console.log("Total pages: ", data?.totalPages ?? 0);
+  // console.log("Total pages: ", data?.totalPages ?? 0);
 
-  console.log(data);
+  // console.log(data);
+  const data = {
+    responseList: [
+      {
+        name: "John",
+        phone: "012345689",
+        email: "abc@gmail.com",
+        date: new Date(),
+      },
+      {
+        name: "Emily",
+        phone: "032345689",
+        email: "abc@gmail.com",
+        date: new Date(),
+      },
+    ] as unknown as EmployeeSchema[],
+    totalElements: 2,
+  };
 
   return (
     <>
@@ -138,175 +155,172 @@ export default function EmployeePage() {
           message={deleteSuccess}
         />
       )}
-      {isLoading || isFetching ? (
+      {/* {isLoading || isFetching ? (
         <div>Loading...</div>
       ) : isError ? (
         <div>Error: {error.message}</div>
-      ) : (
-        <>
-          <Typography variant="h4" align="center" padding={"5px"}>
-            Quản lý nhân viên
-          </Typography>
-          <Box>
-            <Stack
-              mb={2}
-              display="flex"
-              flexDirection={"row"}
-              justifyContent={"space-between"}
-              sx={{ width: "100%" }}
-            >
-              <TextField
-                id="search"
-                label="Tìm kiếm"
-                variant="filled"
-                size="small"
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <IconButton
-                        type="button"
-                        aria-label="Tìm kiếm"
-                        size="small"
-                      >
-                        <SearchIcon />
-                      </IconButton>
-                    ),
-                    sx: { pr: 0.5 },
-                  },
-                }}
-                sx={{
-                  display: { xs: "none", md: "inline-block", sm: "flex" },
-                  mr: 1,
-                  width: "90%",
-                }}
-              />
-
-              <Stack direction="row" spacing={2}>
-                <DownloadBtn fileName="danh-sach-nhan-vien" />
-
-                <IconButton
-                  onClick={() => {
-                    navigate("/create-employee");
-                  }}
-                  type="button"
-                  aria-label="import"
-                  size="small"
-                  color="success"
-                >
-                  <AddBoxIcon />
-                </IconButton>
-              </Stack>
-            </Stack>
-
-            <TableContainer
-              component={Paper}
-              sx={{ width: "100%", backgroundColor: "white" }}
-            >
-              <Table aria-label="custom pagination table">
-                <TableHead>
-                  <TableRow
-                    sx={{
-                      backgroundColor: colors.secondaryColor,
-                      width: "100%",
-                    }}
-                  >
-                    {columns.map((column: string) => (
-                      <TableCell
-                        colSpan={column === "Tác động" ? 3 : 1}
-                        key={column}
-                        align={"center"}
-                        sx={{ fontSize: "16px", fontWeight: "bold" }}
-                      >
-                        {column}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data !== undefined &&
-                  data.responseList !== undefined &&
-                  data.responseList.length > 0 ? (
-                    data.responseList.map((row: EmployeeSchema) => (
-                      <TableRow hover key={row.id}>
-                        <TableCell align={"center"}>{row.name}</TableCell>
-                        <TableCell align={"center"}>{row.phone}</TableCell>
-                        <TableCell align={"center"}>{row.email}</TableCell>
-                        <TableCell align={"center"}>{row.dob}</TableCell>
-                        <TableCell align={"center"}>
-                          <IconButton
-                            color="success"
-                            onClick={() => {
-                              setEmployee(row);
-                              setOpen(true);
-                            }}
-                          >
-                            <RemoveRedEyeIcon />
-                          </IconButton>
-                        </TableCell>
-
-                        <TableCell align={"center"}>
-                          <IconButton
-                            color="error"
-                            onClick={() => {
-                              deleteEmployee(row.id !== undefined ? row.id : 0);
-                            }}
-                          >
-                            <DeleteForeverIcon />
-                          </IconButton>
-                        </TableCell>
-
-                        <TableCell align={"center"}>
-                          <IconButton
-                            color="warning"
-                            onClick={() => {
-                              navigate(`/update-employee/${row.id}`);
-                            }}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={6} />
-                    </TableRow>
-                  )}
-                </TableBody>
-
-                <TableFooter>
-                  <TableRow>
-                    <TablePagination
-                      rowsPerPageOptions={[5, 10, 25]}
-                      colSpan={3}
-                      count={data !== undefined ? data.totalElements : 0}
-                      rowsPerPage={limit}
-                      page={page}
-                      onPageChange={handleChangePage}
-                      onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
-                  </TableRow>
-                </TableFooter>
-              </Table>
-            </TableContainer>
-            <DialogDetail<EmployeeSchema>
-              open={open}
-              onClose={handleClose}
-              selectedValue={
-                employee !== null ? employee : defaultEmployeeSchema
-              }
-              columns={
-                new Map([
-                  ["name", "Tên"],
-                  ["phone", "Số điện thoại"],
-                  ["email", "Email"],
-                  ["dob", "Ngày sinh"],
-                ])
-              }
+      ) : ( */}
+      <>
+        <Typography variant="h4" align="center" padding={"5px"}>
+          Quản lý nhân viên
+        </Typography>
+        <Box>
+          <Stack
+            mb={2}
+            display="flex"
+            flexDirection={"row"}
+            justifyContent={"space-between"}
+          >
+            <TextField
+              id="search"
+              label="Tìm kiếm"
+              variant="filled"
+              size="small"
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <IconButton
+                      type="button"
+                      aria-label="Tìm kiếm"
+                      size="small"
+                    >
+                      <SearchIcon />
+                    </IconButton>
+                  ),
+                  sx: { pr: 0.5 },
+                },
+              }}
+              sx={{
+                display: { xs: "none", md: "inline-block", sm: "flex" },
+                mr: 1,
+                width: "90%",
+              }}
             />
-          </Box>
-        </>
-      )}
+
+            <Stack direction="row" spacing={2}>
+              <DownloadBtn fileName="danh-sach-nhan-vien" />
+
+              <IconButton
+                onClick={() => {
+                  navigate("/create-employee");
+                }}
+                type="button"
+                aria-label="import"
+                size="small"
+                color="success"
+              >
+                <AddBoxIcon />
+              </IconButton>
+            </Stack>
+          </Stack>
+
+          <TableContainer>
+            <Table aria-label="custom pagination table" sx={{ width: "100%" }}>
+              <TableHead>
+                <TableRow
+                  sx={{
+                    backgroundColor: colors.boldBlue,
+                    width: "100%",
+                  }}
+                >
+                  {columns.map((column: string) => (
+                    <TableCell
+                      colSpan={column === "Tác động" ? 3 : 1}
+                      key={column}
+                      align={"center"}
+                      sx={{
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {column}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {data !== undefined &&
+                data.responseList !== undefined &&
+                data.responseList.length > 0 ? (
+                  data.responseList.map((row: EmployeeSchema) => (
+                    <TableRow hover key={row.id}>
+                      <TableCell align={"center"}>{row.name}</TableCell>
+                      <TableCell align={"center"}>{row.phone}</TableCell>
+                      <TableCell align={"center"}>{row.email}</TableCell>
+                      <TableCell align={"center"}>{row.dob}</TableCell>
+                      <TableCell align={"center"}>
+                        <IconButton
+                          color="success"
+                          onClick={() => {
+                            setEmployee(row);
+                            setOpen(true);
+                          }}
+                        >
+                          <RemoveRedEyeIcon />
+                        </IconButton>
+                      </TableCell>
+
+                      <TableCell align={"center"}>
+                        <IconButton
+                          color="error"
+                          onClick={() => {
+                            deleteEmployee(row.id !== undefined ? row.id : 0);
+                          }}
+                        >
+                          <DeleteForeverIcon />
+                        </IconButton>
+                      </TableCell>
+
+                      <TableCell align={"center"}>
+                        <IconButton
+                          color="warning"
+                          onClick={() => {
+                            navigate(`/update-employee/${row.id}`);
+                          }}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} />
+                  </TableRow>
+                )}
+              </TableBody>
+
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    colSpan={3}
+                    count={data !== undefined ? data.totalElements : 0}
+                    rowsPerPage={limit}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                  />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </TableContainer>
+          <DialogDetail<EmployeeSchema>
+            open={open}
+            onClose={handleClose}
+            selectedValue={employee !== null ? employee : defaultEmployeeSchema}
+            columns={
+              new Map([
+                ["name", "Tên"],
+                ["phone", "Số điện thoại"],
+                ["email", "Email"],
+                ["dob", "Ngày sinh"],
+              ])
+            }
+          />
+        </Box>
+      </>
+      {/* )} */}
     </>
   );
 }
