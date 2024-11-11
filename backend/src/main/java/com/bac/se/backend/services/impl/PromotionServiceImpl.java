@@ -11,6 +11,7 @@ import com.bac.se.backend.payload.response.promotion.LatestPromotionResponse;
 import com.bac.se.backend.payload.response.promotion.PromotionResponse;
 import com.bac.se.backend.repositories.PromotionRepository;
 import com.bac.se.backend.services.PromotionService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,18 @@ public class PromotionServiceImpl implements PromotionService {
     private final PromotionRepository promotionRepository;
     private final PromotionMapper promotionMapper;
 
+
+    PromotionResponse createPromotionResponse(Promotion promotion) {
+        return new PromotionResponse(promotion.getId(),
+                promotion.getName(),
+                promotion.getDescription(),
+                promotion.getStartDate(),
+                promotion.getEndDate(),
+                promotion.getOrderLimit(),
+                promotion.getMinOrderValue(),
+                promotion.getPercentage()
+        );
+    }
 
     @Override
     public PageResponse<PromotionResponse> getPromotions(Integer pageNumber, Integer pageSize) {
@@ -54,6 +67,7 @@ public class PromotionServiceImpl implements PromotionService {
     }
 
     @Override
+    @Transactional
     public PromotionResponse createPromotion(PromotionRequest request) throws BadRequestUserException {
         validatePromotion(request);
         Promotion promotion = Promotion.builder()
@@ -63,18 +77,42 @@ public class PromotionServiceImpl implements PromotionService {
                 .endDate(request.endDate())
                 .orderLimit(request.orderLimit())
                 .minOrderValue(request.minOrderValue())
+                .isActive(true)
                 .percentage(request.discountPercent() / 100)
                 .build();
         promotionRepository.save(promotion);
-        return new PromotionResponse(promotion.getId(),
-                promotion.getName(),
-                promotion.getDescription(),
-                promotion.getStartDate(),
-                promotion.getEndDate(),
-                promotion.getOrderLimit(),
-                promotion.getMinOrderValue(),
-                promotion.getPercentage()
-        );
+        return createPromotionResponse(promotion);
+
+    }
+
+    @Override
+    @Transactional
+    public void deletePromotion(Long id) {
+        var promotion = promotionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chương trình khuyến mãi"));
+        promotion.setActive(false);
+        promotionRepository.save(promotion);
+    }
+
+    @Override
+    @Transactional
+    public PromotionResponse updatePromotion(Long id, PromotionRequest request) throws BadRequestUserException {
+        validatePromotion(request);
+        var promotion = promotionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chương trình khuyến mãi"));
+        promotion.setName(request.name());
+        promotion.setDescription(request.description());
+        promotion.setStartDate(request.startDate());
+        promotion.setEndDate(request.endDate());
+        promotion.setOrderLimit(request.orderLimit());
+        promotion.setMinOrderValue(request.minOrderValue());
+        promotion.setPercentage(request.discountPercent());
+        promotionRepository.save(promotion);
+       return createPromotionResponse(promotion);
+    }
+
+    @Override
+    public PromotionResponse getPromotionById(Long id) {
+        var promotion = promotionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chương trình khuyến mãi"));
+        return createPromotionResponse(promotion);
     }
 
     @Override

@@ -18,7 +18,7 @@ public interface PromotionRepository extends JpaRepository<Promotion,Long> {
 
     @Query(value = "SELECT p.id, p.name, p.description, p.startDate, " +
             "p.endDate, p.orderLimit, p.minOrderValue, p.percentage " +
-            "FROM Promotion p " +
+            "FROM Promotion p WHERE p.isActive = true " +
             "ORDER BY p.id DESC")
     Page<Object[]> getPromotions(Pageable pageable);
 

@@ -2,7 +2,6 @@ package com.bac.se.backend.models;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.util.Date;
 import java.util.List;
@@ -26,9 +25,7 @@ public class Promotion {
     private int orderLimit;
     private double minOrderValue;
     private double percentage;
-    @ColumnDefault("true")
     private boolean isActive;
-
     @OneToMany(mappedBy = "promotion")
     private List<Order> orders;
 

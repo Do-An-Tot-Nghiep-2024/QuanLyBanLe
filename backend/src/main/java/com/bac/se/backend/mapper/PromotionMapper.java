@@ -24,10 +24,10 @@ public class PromotionMapper {
     public LatestPromotionResponse mapToLatestPromotionResponse(Object[] obj) {
         return new LatestPromotionResponse(
                 Long.parseLong(obj[0].toString()),
-                Double.parseDouble(obj[0].toString()),
                 Double.parseDouble(obj[1].toString()),
-                Integer.parseInt(obj[2].toString()),
-                (Date) obj[3]
+                Double.parseDouble(obj[2].toString()),
+                Integer.parseInt(obj[3].toString()),
+                (Date) obj[4]
         );
     }
 }
