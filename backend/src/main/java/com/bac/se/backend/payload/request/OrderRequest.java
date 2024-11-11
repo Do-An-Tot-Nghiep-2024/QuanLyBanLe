@@ -8,6 +8,6 @@ public record OrderRequest(List<OrderItemRequest> orderItems,
                            double customerPayment,
                            Boolean isLive,
                            String paymentType,
-                           double totalDiscount) // tiền khách đưa
+                           double totalDiscount)
 {
 }

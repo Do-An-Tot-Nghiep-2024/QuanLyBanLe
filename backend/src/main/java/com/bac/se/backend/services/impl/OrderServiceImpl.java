@@ -56,7 +56,12 @@ public class OrderServiceImpl implements OrderService {
     private final DateConvert dateConvert;
     private final ProductMapper productMapper;
     private final PromotionService promotionService;
+    private final PromotionRepository promotionRepository;
 
+
+    double roundPrice(double price){
+        return (double) Math.round(price * 100) / 100;
+    }
 
     @Transactional
     void minusStock(Long shipmenId, Long productId, int quantity) throws BadRequestUserException {
@@ -93,20 +98,24 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thông tin nhân viên"));
         OrderStatus orderStatus = orderRequest.isLive() ? OrderStatus.COMPLETED : OrderStatus.PENDING;
         PaymentType paymentType = orderRequest.paymentType().equals("CASH") ? PaymentType.CASH : PaymentType.E_WALLET;
-
+        Long promotionId = 0L;
+        if(orderRequest.totalDiscount() > 0){
+            var latestPromotion = promotionService.getLatestPromotion();
+            promotionService.minusOrderLimit(latestPromotion.id());
+            promotionId = latestPromotion.id();
+        }
+        Promotion promotion = promotionRepository.findById(promotionId)
+                .orElse(null);
         Order order = Order.builder()
                 .employee(employee)
                 .orderStatus(orderStatus)
                 .createdAt(new Date())
                 .paymentType(paymentType)
+                .promotion(promotion)
                 .customerPayment(BigDecimal.valueOf(orderRequest.customerPayment()))
                 .totalDiscount(BigDecimal.valueOf(orderRequest.totalDiscount()))
                 .build();
         // minus order limit when ordered
-        if(orderRequest.totalDiscount() != 0){
-            var latestPromotion = promotionService.getLatestPromotion();
-            promotionService.minusOrderLimit(latestPromotion.id());
-        }
         // check exist account customer
         if (orderRequest.customerPhone().isPresent()) {
             phoneCustomer = orderRequest.customerPhone().get();
@@ -180,8 +189,10 @@ public class OrderServiceImpl implements OrderService {
             orderItemRepository.save(orderItem);
             total = total.add(BigDecimal.valueOf(totalPrice));
         }
-        double change = orderRequest.customerPayment() - total.doubleValue() - orderSave.getTotalDiscount().doubleValue();
-        return new CreateOrderResponse(orderItemResponses, total.doubleValue(), orderRequest.customerPayment(), change);
+        double roundTotalPrice = (double) Math.round(total.doubleValue() * 100) / 100;
+        double change = orderRequest.customerPayment() - roundTotalPrice - orderSave.getTotalDiscount().doubleValue();
+        double roundChange = (double) Math.round(change * 100) / 100;
+        return new CreateOrderResponse(orderItemResponses,roundTotalPrice, orderRequest.customerPayment(), roundChange);
     }
 
     @Override
