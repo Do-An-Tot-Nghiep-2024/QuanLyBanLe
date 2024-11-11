@@ -17,12 +17,10 @@ import {
 } from "@mui/material";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { useNavigate } from "react-router-dom";
-import { formatDateTime } from "../../utils/convertDate";
 import { formatMoneyThousand } from "../../utils/formatMoney";
 import ImportInvoice from "../../types/inventory/importInvoice";
 import colors from "../../constants/color";
 export default function InventoryPage() {
-
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const navigate = useNavigate();
@@ -37,13 +35,13 @@ export default function InventoryPage() {
       return response.data;
     } catch (error) {
       console.error(error);
-      throw error; 
+      throw error;
     }
   };
 
   const { isLoading, isError, error, data, isFetching } = useQuery({
     queryKey: ["inventory/stock", pageNumber, pageSize],
-    queryFn: () => getImportInvoices(pageNumber, pageSize), 
+    queryFn: () => getImportInvoices(pageNumber, pageSize),
   });
 
   if (isFetching || isLoading) {
@@ -53,11 +51,16 @@ export default function InventoryPage() {
     return <div>Error: {error.message}</div>;
   }
 
-  const handleChangePage = (_event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
+  const handleChangePage = (
+    _event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
     setPageNumber(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setPageSize(parseInt(event.target.value, 10));
     setPageNumber(0);
   };
@@ -71,59 +74,61 @@ export default function InventoryPage() {
   ];
 
   return (
-    <Box sx={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <Button 
-          variant="contained" 
-          onClick={() => navigate('/inventory/create-inventory')}
-          sx={{ 
-            backgroundColor: '#1976d2', 
-            color: 'white', 
-            '&:hover': { backgroundColor: '#155a8a' }
+    <Box
+      sx={{ flex: 1, width: "100%", display: "flex", flexDirection: "column" }}
+    >
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+        <Button
+          variant="contained"
+          onClick={() => navigate("/inventory/create-inventory")}
+          sx={{
+            backgroundColor: "#1976d2",
+            color: "white",
+            "&:hover": { backgroundColor: "#155a8a" },
           }}
         >
           Tạo phiếu nhập hàng
         </Button>
       </Box>
-      
-    <TableContainer
-      component={Paper}
-      sx={{ width: "100%", backgroundColor: "white" }}
-    >
-      <Table aria-label="custom pagination table">
-        <TableHead
-          sx={{ backgroundColor: colors.secondaryColor, fontSize: 18 }}
-        >
-          <TableRow>
-            {columns.map((column: string) => (
-              <TableCell
-                key={column}
-                align={"center"}
-                sx={{
-                  fontWeight: "bold",
-                  color: "text.primary",
-                }}
-              >
-                {column}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
+
+      <TableContainer
+        component={Paper}
+        sx={{ width: "100%", backgroundColor: "white" }}
+      >
+        <Table aria-label="custom pagination table">
+          <TableHead
+            sx={{ backgroundColor: colors.secondaryColor, fontSize: 18 }}
+          >
+            <TableRow>
+              {columns.map((column: string) => (
+                <TableCell
+                  key={column}
+                  align={"center"}
+                  sx={{
+                    fontWeight: "bold",
+                    color: "text.primary",
+                  }}
+                >
+                  {column}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
           <TableBody>
             {data?.responseList?.length > 0 ? (
               data.responseList.map((row: ImportInvoice) => (
                 <TableRow hover key={row.numberInvoice}>
                   <TableCell align={"center"}>{row.numberInvoice}</TableCell>
                   <TableCell align={"center"}>{row.name}</TableCell>
-                  <TableCell align={"center"}>
-                    {formatDateTime(row.createdAt)}
-                  </TableCell>
+                  <TableCell align={"center"}>{row.createdAt}</TableCell>
                   <TableCell align={"center"}>
                     {formatMoneyThousand(row.total)}
                   </TableCell>
                   <TableCell align={"center"}>
                     <IconButton
-                      onClick={() => navigate(`/inventory/${row.numberInvoice}`)}
+                      onClick={() =>
+                        navigate(`/inventory/${row.numberInvoice}`)
+                      }
                     >
                       <RemoveRedEyeIcon color="success" />
                     </IconButton>

@@ -19,16 +19,16 @@ import {
 import { AppProvider, DashboardLayout } from "@toolpad/core";
 import type { Router, Navigation, Session } from "@toolpad/core";
 import AddAlertIcon from "@mui/icons-material/AddAlert";
+import WarehouseIcon from '@mui/icons-material/Warehouse';
 
-import WarehouseIcon from "@mui/icons-material/Warehouse";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import Cookies from "js-cookie";
 import { logout } from "../redux/auth/authSlice";
 import { useAppDispatch } from "../redux/hook";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import colors from "../constants/color";
-import { Breadcrumbs, Typography } from "@mui/material";
 import ReceiptIcon from "@mui/icons-material/Receipt";
+import ViewColumnIcon from "@mui/icons-material/ViewColumn";
 const NAVIGATION: Navigation = [
   {
     segment: "dashboard",
@@ -46,15 +46,20 @@ const NAVIGATION: Navigation = [
     icon: <InventoryIcon />,
     children: [
       {
-        segment: "stock",
-        title: "Quản lí kho hàng",
-        icon: <WarehouseIcon />,
+        segment: "create-inventory",
+        title: "Tạo hóa đơn nhập hàng",
+        icon: <AddBusinessIcon />,
       },
       {
         segment: "import-invoices",
-        title: "Quản lí phiếu nhập hàng",
+        title: "Hóa đơn nhập hàng",
         icon: <ReceiptIcon />,
       },
+      {
+        segment: "shipment",
+        title: "Quản lý lô hàng",
+        icon: <WarehouseIcon />,
+      }
     ],
   },
   {
@@ -64,7 +69,7 @@ const NAVIGATION: Navigation = [
     children: [
       {
         segment: "",
-        title: "Quản lí sản phẩm",
+        title: "Danh sách sản phẩm",
         icon: <WarehouseIcon />,
       },
       {
@@ -72,24 +77,18 @@ const NAVIGATION: Navigation = [
         title: "Quản lí danh mục",
         icon: <AddBusinessIcon />,
       },
-      {
-        segment: "units",
-        title: "Quản lí đơn vị tính",
-        icon: <ShoppingBagIcon />,
-      },
     ],
+  },
+  {
+    segment: "units",
+    title: "Đơn vị tính",
+    icon: <ViewColumnIcon />,
   },
   {
     segment: "suppliers",
     title: "Nhà cung cấp",
     icon: <NoteAddOutlined />,
   },
-  {
-    segment:"promotions",
-    title:"Chương trình khuyến mãi",
-    icon:<NoteAddOutlined/>,
-  },
-
   {
     segment: "employees",
     title: "Nhân viên",
@@ -147,8 +146,8 @@ const demoTheme = createTheme({
     light: {
       palette: {
         background: {
-          default: "#F9F9FE",
-          paper: "#EEEEF9",
+          default: "#fff",
+          paper: "#fff",
         },
       },
     },
@@ -169,6 +168,15 @@ const demoTheme = createTheme({
       lg: 1200,
       xl: 1536,
     },
+  },
+  components: {
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          fontSize: "16px",
+        },
+      }
+    }
   },
 });
 const Logo = () => (
@@ -243,15 +251,6 @@ export default function Sidebar() {
       }}
     >
       <DashboardLayout>
-        <Breadcrumbs separator="-" sx={{ pl: 2, pt: 3 }}>
-          <Typography key="3" sx={{ color: "text.primary" }}>
-            Quản lý
-          </Typography>
-
-          <Link style={{ textDecoration: "none" }} key="1" to={pathname}>
-            {pathname.replace("/", "").toLocaleUpperCase()}
-          </Link>
-        </Breadcrumbs>
         <Box
           component={"main"}
           sx={{
