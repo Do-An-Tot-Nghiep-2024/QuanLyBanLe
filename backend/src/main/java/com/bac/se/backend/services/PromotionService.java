@@ -14,6 +14,12 @@ public interface PromotionService {
 
     PromotionResponse createPromotion(PromotionRequest promotionRequest) throws BadRequestUserException;
 
+    void deletePromotion(Long id);
+
+    PromotionResponse updatePromotion(Long id, PromotionRequest request) throws BadRequestUserException;
+
+    PromotionResponse getPromotionById(Long id);
+
     void minusOrderLimit(Long id);
 
 }
