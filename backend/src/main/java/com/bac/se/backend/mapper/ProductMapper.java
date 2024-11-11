@@ -22,18 +22,15 @@ public class ProductMapper {
         );
     }
 
-    public ProductShipmentResponse mapObjectToProductShipmentResponse(Object[] object) {
-        return new ProductShipmentResponse(
+    public ProductImportInvoiceResponse mapObjectToProductShipmentResponse(Object[] object) {
+        return new ProductImportInvoiceResponse(
                 (String) object[0], // product name
                 Integer.parseInt(object[1].toString()), // quantity
-                Integer.parseInt(object[2] == null ? "0" : object[2].toString()), // sold quantity
-                Integer.parseInt(object[3] == null ? "0" : object[3].toString()),
-                Integer.parseInt(object[4] == null ? "0" : object[4].toString()),
-                (Date) object[5], // mxp
-                (Date) object[6], // exp
-                Double.parseDouble(object[7].toString()), // price
-                Double.parseDouble(object[8].toString()), // total
-                object[9].toString() // unit
+                (Date) object[2], // mxp
+                (Date) object[3], // exp
+                Double.parseDouble(object[4].toString()), // price
+                Double.parseDouble(object[5].toString()), // total
+                object[6].toString() // unit
         );
     }
 

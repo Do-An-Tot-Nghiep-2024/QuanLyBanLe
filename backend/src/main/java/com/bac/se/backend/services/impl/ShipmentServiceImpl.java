@@ -4,18 +4,21 @@ import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.mapper.InvoiceMapper;
 import com.bac.se.backend.mapper.ProductMapper;
-import com.bac.se.backend.mapper.ProductPriceMapper;
+import com.bac.se.backend.mapper.ShipmentMapper;
 import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.DateRequest;
 import com.bac.se.backend.payload.request.ShipmentRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.invoice.ImportInvoice;
-import com.bac.se.backend.payload.response.product.ProductShipmentResponse;
-import com.bac.se.backend.payload.response.shipment.ShipmentItemResponse;
-import com.bac.se.backend.payload.response.shipment.ShipmentResponse;
+import com.bac.se.backend.payload.response.invoice.ImportInvoiceItemResponse;
+import com.bac.se.backend.payload.response.product.ProductImportInvoiceResponse;
+import com.bac.se.backend.payload.response.shipment.CreateShipmentResponse;
+import com.bac.se.backend.payload.response.shipment.ProductShipmentResponse;
 import com.bac.se.backend.repositories.*;
+import com.bac.se.backend.services.ProductPriceService;
 import com.bac.se.backend.services.ShipmentService;
 import com.bac.se.backend.utils.DateConvert;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -33,23 +36,28 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final StockRepository stockRepository;
     private final ShipmentRepository shipmentRepository;
     private final ShipmentItemRepository shipmentItemRepository;
-    private final ProductPriceRepository productPriceRepository;
-    private final ProductPriceMapper productPriceMapper;
     static final double DEFAULT_PROFIT = 0.05; // 5% profit
     private final ProductRepository productRepository;
     private final InvoiceMapper invoiceMapper;
     private final SupplierRepository supplierRepository;
     private final ProductMapper productMapper;
     private final DateConvert dateConvert;
+    private final ShipmentMapper shipmentMapper;
+
+    private final ProductPriceService productPriceService;
 
     static final int defaultQuantityNotify = 5;
 
 
-
-    ///  create order shipment
+    @Override
+    public List<ProductShipmentResponse> getShipments() {
+        var objects = shipmentItemRepository.geProductInShipment();
+        return objects.stream().map(shipmentMapper::mapToShipmentItemResponse).toList();
+    }
 
     @Override
-    public ShipmentResponse createShipment(ShipmentRequest shipmentRequest) throws BadRequestUserException {
+    @Transactional
+    public CreateShipmentResponse createShipment(ShipmentRequest shipmentRequest) throws BadRequestUserException {
         Supplier supplier = supplierRepository.findById(shipmentRequest.supplierId())
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Không tìm thấy nhà cung cấp với mã là: "
@@ -65,7 +73,6 @@ public class ShipmentServiceImpl implements ShipmentService {
             Product product = productRepository.findById(productItem.id())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với mã là: "
                             + productItem.id()));
-            log.info("find product success");
 
             // Thông báo ngoại lệ nếu sản phẩm không thuộc về nh cung cấp
             if (!product.getSupplier().getId().equals(supplier.getId())) {
@@ -79,36 +86,29 @@ public class ShipmentServiceImpl implements ShipmentService {
                     .product(product)
                     .build();
             log.info("create shipment item success");
-            List<Object[]> productPrices = productPriceRepository.getProductPriceLatest(
-                    productItem.id(), PageRequest.of(0, 1));
-            Object[] productPrice = null;
-            // Tạo mới mới product price nếu không có product price
-            if (productPrices.isEmpty()) {
-                productPrice = new Object[]{productItem.price(), productItem.price() + productItem.price() * DEFAULT_PROFIT, 0};
-                ProductPrice newProductPrice = ProductPrice.builder()
-                        .product(Product.builder().id(productItem.id()).build())
-                        .originalPrice(productItem.price())
-                        .price(productItem.price())
-                        .discountPrice(0)
-                        .createdAt(new Date())
-                        .build();
-                productPriceRepository.save(newProductPrice);
-            } else {
-                productPrice = productPrices.get(0);
-            }
-            double oldPrice = productPriceMapper.mapObjectToProductPriceResponse(productPrice).originalPrice();
-            log.info("find product price success");
-            // So sánh giá nhập với giá mới nhất của sản phẩm
-            if (oldPrice != productItem.price()) {
-                ProductPrice newProductPrice = ProductPrice.builder()
-                        .product(Product.builder().id(productItem.id()).build())
+
+            // update price if product price is empty
+            var productPrice = productPriceService.getPriceLatest(productItem.id());
+            if(productPrice.productPriceId().equals(0L)){
+                ProductPrice newPrice = ProductPrice.builder()
+                        .product(product)
                         .originalPrice(productItem.price())
                         .price(productItem.price() + productItem.price() * DEFAULT_PROFIT)
                         .discountPrice(0)
                         .createdAt(new Date())
                         .build();
-                productPriceRepository.save(newProductPrice);
-
+                productPriceService.createProductPrice(newPrice);
+            }
+            // update price if product have new price
+            if(productPrice.originalPrice() != productItem.price()){
+                ProductPrice newPrice = ProductPrice.builder()
+                        .product(product)
+                        .originalPrice(productItem.price())
+                        .price(productItem.price() + productItem.price() * DEFAULT_PROFIT)
+                        .discountPrice(0)
+                        .createdAt(new Date())
+                        .build();
+                productPriceService.createProductPrice(newPrice);
             }
             // Lưu thông tin chi tiết lô hàng
             Stock stock = Stock.builder()
@@ -123,7 +123,7 @@ public class ShipmentServiceImpl implements ShipmentService {
             shipmentItemRepository.save(shipmentItem);
             total = total.add(BigDecimal.valueOf(productItem.quantity()).multiply(BigDecimal.valueOf(productItem.price())));
         }
-        return new ShipmentResponse(supplier.getName(),
+        return new CreateShipmentResponse(supplier.getName(),
                 total,
                 shipmentRequest.productItems(),
                 shipmentSave.getCreatedAt());
@@ -135,7 +135,7 @@ public class ShipmentServiceImpl implements ShipmentService {
                                                          String toDate) throws ParseException {
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
         DateRequest dateRequest = dateConvert.convertDateRequest(fromDate, toDate);
-        var shipments = shipmentRepository.getShipments(pageRequest,
+        var shipments = shipmentRepository.getShipmentsImport(pageRequest,
                 dateRequest.fromDate(),
                 dateRequest.toDate());
         var content = shipments.getContent();
@@ -150,20 +150,20 @@ public class ShipmentServiceImpl implements ShipmentService {
     }
 
     @Override
-    public ShipmentItemResponse getShipment(Long id) {
+    public ImportInvoiceItemResponse getItemImportInvoice(Long id) {
         Object[] object = shipmentRepository.getShipmentById(id).get(0);
-        List<Object[]> objectList = shipmentItemRepository.getProductsByShipmentId(id);
+        List<Object[]> objectList = shipmentItemRepository.getProductsInImportInvoice(id);
         objectList.forEach(obj -> log.info("objects is {}", obj));
-        List<ProductShipmentResponse> productShipmentResponses = objectList.stream()
+        List<ProductImportInvoiceResponse> productImportInvoiceResponse = objectList.stream()
                 .map(productMapper::mapObjectToProductShipmentResponse).toList();
         BigDecimal total = BigDecimal.ZERO;
-        for (var productShipmentResponse : productShipmentResponses) {
+        for (var productShipmentResponse : productImportInvoiceResponse) {
             total = total.add(BigDecimal.valueOf(productShipmentResponse.total()));
         }
-        return new ShipmentItemResponse(
+        return new ImportInvoiceItemResponse(
                 object[0].toString(),
                 total,
-                productShipmentResponses,
+                productImportInvoiceResponse,
                 (Date) object[1]
         );
 

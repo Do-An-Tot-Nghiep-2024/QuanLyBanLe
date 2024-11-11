@@ -1,7 +1,7 @@
 package com.bac.se.backend;
 
-import com.bac.se.backend.mapper.ProductMapper;
-import com.bac.se.backend.repositories.OrderItemRepository;
+import com.bac.se.backend.mapper.ShipmentMapper;
+import com.bac.se.backend.repositories.ShipmentItemRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -19,20 +19,9 @@ public class BackendApplication {
 
 
     @Autowired
-    OrderItemRepository orderItemRepository;
+    ShipmentItemRepository shipmentItemRepository;
 
-    ProductMapper productMapper = new ProductMapper();
-
-//    @Bean
-//    CommandLineRunner commandLineRunner(){
-//        return args -> {
-//            var productInOrderItem = orderItemRepository.getProductInOrderItem(119L);
-//            if(productInOrderItem.isEmpty()){
-//                log.info("Không tìm thấy sản phẩm trong hóa đơn");
-//            }
-//            productInOrderItem.stream().map(productMapper::mapToProductOrderItemResponse).forEach(System.out::println);
-//        };
-//    }
+    ShipmentMapper shipmentMapper = new ShipmentMapper();
 
 
 

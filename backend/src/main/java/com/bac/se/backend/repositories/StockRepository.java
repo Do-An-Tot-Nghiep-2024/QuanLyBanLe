@@ -14,7 +14,7 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
     int getTotalQuantitySold();
 
 
-    @Query(value = "SELECT s.stock_id, s.quantity,s.sold_quantity FROM t_shipment_item si INNER JOIN t_stock s on s.stock_id = si.stock_id " +
+    @Query(value = "SELECT s.stock_id, s.quantity,s.sold_quantity,s.notify_quantity FROM t_shipment_item si INNER JOIN t_stock s on s.stock_id = si.stock_id " +
             "WHERE si.shipment_id =:shipmentId AND si.product_id =:productId", nativeQuery = true)
     List<Object[]> getAvailableQuantityStock(
             @Param("shipmentId") Long shipmentId

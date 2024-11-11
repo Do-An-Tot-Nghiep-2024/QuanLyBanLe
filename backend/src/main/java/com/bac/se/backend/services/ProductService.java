@@ -38,4 +38,6 @@ public interface ProductService {
     PageResponse<ProductMobileResponse> getProductsMobile(Integer pageNumber, Integer pageSize);
 
     PageResponse<ProductMobileResponse> getProductsMobileByCategory(Long categoryId, Integer pageNumber, Integer pageSize);
+
+    List<ProductResponse> getProductsByName(String name);
 }

@@ -9,7 +9,8 @@ public class StockMapper {
         return new StockResponse(
                 Long.parseLong(obj[0].toString()),
                 Integer.parseInt(obj[1].toString()),
-                Integer.parseInt(obj[2].toString())
+                Integer.parseInt(obj[2].toString()),
+                Integer.parseInt(obj[3].toString())
         );
     }
 }

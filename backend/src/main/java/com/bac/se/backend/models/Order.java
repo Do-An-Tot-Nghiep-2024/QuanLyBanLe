@@ -32,9 +32,15 @@ public class Order  {
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
+
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
+
+    @ManyToOne
+    @JoinColumn(name = "promotion_id")
+    private Promotion promotion;
+
     @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems;
 }
