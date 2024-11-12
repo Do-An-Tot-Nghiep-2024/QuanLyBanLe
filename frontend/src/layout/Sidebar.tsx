@@ -39,6 +39,18 @@ const NAVIGATION: Navigation = [
     segment: "orders",
     title: "Đơn hàng",
     icon: <ShoppingCartIcon />,
+    children: [
+      {
+        segment: "create-order",
+        title: "Tạo đơn hàng mới",
+        icon: <WarehouseIcon />,
+      },
+      {
+        segment: "",
+        title: "Quản lí đơn hàng",
+        icon: <ReceiptIcon />,
+      },
+    ],
   },
   {
     segment: "inventory",

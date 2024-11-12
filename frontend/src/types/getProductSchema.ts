@@ -8,6 +8,7 @@ export interface GetProductSchema {
   originalPrice: Number
   price: Number
   shipmentIds: []
-  supplier: String
+  supplier: String,
+  unit: string
   }
   

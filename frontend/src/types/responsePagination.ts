@@ -1,4 +1,5 @@
 interface ResponsePagination<T> {
+    data: any;
    isLastPage: boolean;
     pageNumber: number;
     responseList: T[];
