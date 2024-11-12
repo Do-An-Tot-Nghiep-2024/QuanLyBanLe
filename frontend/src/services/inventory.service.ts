@@ -62,7 +62,9 @@ const getImportInvoicesService = async (
 
 const getItemImportInvoiceService = async (shipmentId: number) => {
   try {
-    const response: any = await api.get(`/inventory/import-invoices/${shipmentId}`);
+    const response: any = await api.get(
+      `/inventory/import-invoices/${shipmentId}`
+    );
     const { message, data } = response;
     if (message !== "success") {
       return {
@@ -81,8 +83,6 @@ const getItemImportInvoiceService = async (shipmentId: number) => {
     };
   }
 };
-
-
 
 const getShipmentsService = async () => {
   try {

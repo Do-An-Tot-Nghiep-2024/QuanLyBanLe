@@ -85,7 +85,7 @@ export default function InventoryDetailPage() {
       </Box>
 
       <TableContainer component={Paper}>
-        <Table>
+        <Table size="small" sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
               {columns.map((column: string) => (

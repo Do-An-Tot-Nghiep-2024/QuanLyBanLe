@@ -50,12 +50,6 @@ public class ShipmentServiceImpl implements ShipmentService {
 
 
     @Override
-    public List<ProductShipmentResponse> getShipments() {
-        var objects = shipmentItemRepository.geProductInShipment();
-        return objects.stream().map(shipmentMapper::mapToShipmentItemResponse).toList();
-    }
-
-    @Override
     @Transactional
     public CreateShipmentResponse createShipment(ShipmentRequest shipmentRequest) throws BadRequestUserException {
         Supplier supplier = supplierRepository.findById(shipmentRequest.supplierId())
@@ -89,7 +83,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 
             // update price if product price is empty
             var productPrice = productPriceService.getPriceLatest(productItem.id());
-            if(productPrice.productPriceId().equals(0L)){
+            if (productPrice.productPriceId().equals(0L)) {
                 ProductPrice newPrice = ProductPrice.builder()
                         .product(product)
                         .originalPrice(productItem.price())
@@ -100,7 +94,7 @@ public class ShipmentServiceImpl implements ShipmentService {
                 productPriceService.createProductPrice(newPrice);
             }
             // update price if product have new price
-            if(productPrice.originalPrice() != productItem.price()){
+            if (productPrice.originalPrice() != productItem.price()) {
                 ProductPrice newPrice = ProductPrice.builder()
                         .product(product)
                         .originalPrice(productItem.price())
@@ -127,6 +121,13 @@ public class ShipmentServiceImpl implements ShipmentService {
                 total,
                 shipmentRequest.productItems(),
                 shipmentSave.getCreatedAt());
+    }
+
+    @Override
+    public List<ProductShipmentResponse> getShipments() {
+        var shipmentPage = shipmentItemRepository.geProductInShipment();
+        return shipmentPage.stream()
+                .map(shipmentMapper::mapToShipmentItemResponse).toList();
     }
 
     @Override

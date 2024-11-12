@@ -5,10 +5,9 @@ import java.util.Date;
 public record ProductShipmentResponse(
         Long shipmentId,
         String supplier,
-        String productName,
+        String product,
         Date mxp,
         Date exp,
-        double price,
         int soldQuantity,
         int failedQuantity,
         int availableQuantity,

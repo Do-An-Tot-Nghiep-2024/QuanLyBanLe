@@ -16,19 +16,19 @@ import {
   NoteAddOutlined,
   Logout,
 } from "@mui/icons-material";
-import { AppProvider, DashboardLayout } from "@toolpad/core";
+import { AppProvider, DashboardLayout, ThemeSwitcher } from "@toolpad/core";
 import type { Router, Navigation, Session } from "@toolpad/core";
-import AddAlertIcon from "@mui/icons-material/AddAlert";
-import WarehouseIcon from '@mui/icons-material/Warehouse';
-
+import WarehouseIcon from "@mui/icons-material/Warehouse";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import Cookies from "js-cookie";
 import { logout } from "../redux/auth/authSlice";
-import { useAppDispatch } from "../redux/hook";
+import { useAppDispatch, useAppSelector } from "../redux/hook";
 import { Outlet, useNavigate } from "react-router-dom";
 import colors from "../constants/color";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import ViewColumnIcon from "@mui/icons-material/ViewColumn";
+import { Badge, Stack } from "@mui/material";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 const NAVIGATION: Navigation = [
   {
     segment: "dashboard",
@@ -59,7 +59,7 @@ const NAVIGATION: Navigation = [
         segment: "shipment",
         title: "Quản lý lô hàng",
         icon: <WarehouseIcon />,
-      }
+      },
     ],
   },
   {
@@ -93,12 +93,7 @@ const NAVIGATION: Navigation = [
     segment: "employees",
     title: "Nhân viên",
     icon: <BadgeOutlinedIcon />,
-  },
-  {
-    segment: "notifications",
-    title: "Thông báo",
-    icon: <AddAlertIcon />,
-  },
+  },  
   {
     segment: "customers",
     title: "Khách hàng",
@@ -175,8 +170,8 @@ const demoTheme = createTheme({
         root: {
           fontSize: "16px",
         },
-      }
-    }
+      },
+    },
   },
 });
 const Logo = () => (
@@ -186,15 +181,25 @@ const Logo = () => (
     style={{ width: "100%", borderRadius: "50%" }}
   />
 );
+function Search() {
+  return (
+    <Stack direction="row" alignItems="center" spacing={1}>
+      <Badge badgeContent={2} color="error">
+        <NotificationsActiveIcon />
+      </Badge>
+      <ThemeSwitcher />
+    </Stack>
+  );
+}
 
 export default function Sidebar() {
+  const auth = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>({
     user: {
-      // name: "Bharat Kashyap",
-      email: "bharatkashyap@outlook.com",
-      image: "https://avatars.githubusercontent.com/u/19550456",
+      name: auth.usename,
+      image: "https://avatar.iran.liara.run/public/job/designer/male",
     },
   });
   const clearToken = () => {
@@ -210,7 +215,7 @@ export default function Sidebar() {
         setSession({
           user: {
             name: "",
-            image: "https://avatars.githubusercontent.com/u/19550456",
+            image: "https://ui-avatars.com/api/?name=Admin",
           },
         });
       },
@@ -245,12 +250,15 @@ export default function Sidebar() {
       router={router}
       theme={demoTheme}
       branding={{
-        // logo: "https://avatars.githubusercontent.com/u/19550456",
         logo: <Logo />,
         title: "Retail Store",
       }}
     >
-      <DashboardLayout>
+      <DashboardLayout
+        slots={{
+          toolbarActions: Search,
+        }}
+      >
         <Box
           component={"main"}
           sx={{
