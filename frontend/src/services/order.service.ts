@@ -1,5 +1,7 @@
 import api from "../config/axios";
 import ApiResponse from "../types/apiResponse";
+import { OrderSchema } from "../types/orderSchema";
+import ResponsePagination from "../types/responsePagination";
 
 const createOrderService = async (itemList: any[], customerPayment : number) => {
     try {
@@ -34,5 +36,17 @@ const createOrderService = async (itemList: any[], customerPayment : number) => 
       };
     }
   };
-  export 
-  { createOrderService}
+
+  const getAllOrdersService = async (page: number, limit: number): Promise<ResponsePagination<OrderSchema>> => {    
+    const response = await api.get(`/orders?pageNumber=${page}&limit=${limit}`);
+    
+    if (response) { 
+        return response.data; 
+    }
+
+    return null as unknown as ResponsePagination<OrderSchema>; 
+};
+
+
+
+  export { createOrderService, getAllOrdersService}

@@ -290,6 +290,9 @@ export default function ProductPage() {
                       {product.category}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
+                      Đơn vị tính: {product.unit}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
                       {new Intl.NumberFormat("vi-VN", {
                         style: "currency",
                         currency: "VND",

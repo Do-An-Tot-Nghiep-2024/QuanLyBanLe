@@ -1,26 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-    Box,
-    Button,
-    TextField,
-    Typography,
-    MenuItem,
-    Select,
-    List,
-    ListItem,
-    ListItemText,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    FormControl,
-    InputLabel,
-    Tooltip,
-    IconButton,
-} from "@mui/material";
+import { Box, Button, TextField, Typography, MenuItem, Select, List, ListItem, ListItemText, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, FormControl, InputLabel, Tooltip, IconButton, Snackbar, Alert } from "@mui/material";
 import { getProductsBySupplierService } from "../../services/product.service";
 import { createInventoryOrderService } from "../../services/inventory.service";
 import { getSuppliersService } from "../../services/supplier.service";
@@ -32,6 +11,7 @@ interface OrderItem {
     mxp?: Date;
     exp?: Date;
     price: number;
+    unit: string;
 }
 
 interface Supplier {
@@ -45,6 +25,8 @@ interface Supplier {
 interface GetProductBySupplier {
     id: number;
     productName: string;
+    unit: string;
+    price: number;
 }
 
 const CreateInventoryOrder: React.FC = () => {
@@ -53,6 +35,8 @@ const CreateInventoryOrder: React.FC = () => {
     const [products, setProducts] = useState<GetProductBySupplier[]>([]);
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [selectedSupplier, setSelectedSupplier] = useState<number | "">(1);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
 
     const handleAddToOrder = (product: GetProductBySupplier) => {
         setOrderItems((prev) => {
@@ -63,7 +47,7 @@ const CreateInventoryOrder: React.FC = () => {
                         ? { ...item, quantity: item.quantity + 1 }
                         : item
                 )
-                : [...prev, { product, quantity: 1, price: 0 }];
+                : [...prev, { product, quantity: 1, price: product.price, unit: product.unit }];
         });
     };
 
@@ -76,8 +60,6 @@ const CreateInventoryOrder: React.FC = () => {
     };
 
     const handleUpdateProductionDate = (productId: number, date: string) => {
-        console.log(date);
-
         setOrderItems((prev) =>
             prev.map((item) =>
                 item.product.id === productId ? { ...item, mxp: new Date(date) } : item
@@ -109,37 +91,38 @@ const CreateInventoryOrder: React.FC = () => {
         return `${day}/${month}/${year}`;
     };
 
+    const calculateTotalPrice = () => {
+        return orderItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    };
 
     const handleCreateBill = async () => {
         if (orderItems.length === 0) {
-            alert("Please add at least one item to the order.");
+            alert("Chưa thêm sản phẩm vào phiếu nhập hàng");
             return;
         }
 
         const formattedOrderItems = orderItems.map(item => {
-
             const quantityStr = String(item.quantity);
             const priceStr = String(item.price);
-
-            const quantityRegex = /^[1-9]\d*$/; // Quantity must be a positive integer
-         
+            const quantityRegex = /^(?:[1-9][0-9]?|100)$/; 
+            const price = parseFloat(priceStr);
 
             // Validate quantity
             if (!quantityRegex.test(quantityStr)) {
-                alert("Số lượng phải nguyên dương lớn hơn 0");
-                return null;
+                alert("Số lượng phải từ 1 đến 100");
+                return;
             }
 
-            // Validate price
-            if (!quantityRegex.test(priceStr) || !priceStr || item.price <= 0) {
-                alert("Giá phải hợp lệ");
-                return null;
+            // Validate price range
+            if (price < 200 || price > 10000000) {
+                alert("Giá phải từ 200 đến 10.000.000");
+                return;
             }
 
             // Check dates
             if (!item.mxp || !item.exp) {
                 alert("Điền đầy đủ thông tin ngày sản xuất/ngày hết hạn");
-                return null; 
+                return ;
             }
 
             const mxpDate = new Date(item.mxp);
@@ -147,35 +130,44 @@ const CreateInventoryOrder: React.FC = () => {
 
             if (expDate <= mxpDate) {
                 alert("Ngày hết hạn phải sau ngày sản xuất");
-                return null; 
+                return;
             }
 
-           
+            if (expDate < new Date() || mxpDate > new Date()){
+                alert("Ngày hết hạn/ngày sản xuất không hợp lệ");
+                return;
+            }
+
             return {
                 id: item.product.id,
                 quantity: item.quantity,
-                price: item.price,
+                price,
                 mxp: formatDate(item.mxp),
                 exp: formatDate(item.exp),
             };
-        }).filter(item => item !== null); 
+        }).filter(item => item !== null);
 
         if (formattedOrderItems.length === 0) {
-            return; // No valid items to create the order
+            return; 
         }
-
-        console.log(formattedOrderItems);
 
         try {
             const response = await createInventoryOrderService(formattedOrderItems, Number(selectedSupplier));
-            console.log("Order created:", response);
-            setOrderItems([]);
+            if (response.message === "success") {
+                setOrderItems([]);
+                setAlertMessage("Tạo phiếu nhập hàng thành công!");
+                setSnackbarOpen(true);
+            }
+            else {
+                setAlertMessage("Đã xảy ra lỗi khi tạo phiếu nhập hàng.");
+                setSnackbarOpen(true);
+            }
         } catch (error) {
             console.error("Error creating order:", error);
-            alert("An error occurred while creating the order.");
+            setAlertMessage("Đã xảy ra lỗi khi tạo phiếu nhập hàng.");
+            setSnackbarOpen(true);
         }
     };
-
 
     const fetchProducts = async () => {
         const response = await getProductsBySupplierService(Number(selectedSupplier));
@@ -225,7 +217,7 @@ const CreateInventoryOrder: React.FC = () => {
             flexDirection="column"
             sx={{ backgroundColor: "#f5f5f5", height: "100vh", width: "100%", padding: 2 }}
         >
-            <Paper elevation={3} sx={{ padding: 3, borderRadius: 2, marginBottom: 2 }}>
+            <Paper elevation={3} sx={{ padding: 3, borderRadius: 2, marginBottom: 2, backgroundColor: 'white' }}>
                 <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
                     <InputLabel>Nhà cung cấp</InputLabel>
                     <Select
@@ -257,10 +249,6 @@ const CreateInventoryOrder: React.FC = () => {
                     {filteredProducts.map((product) => (
                         <ListItem key={product.id} divider>
                             <ListItemText primary={product.productName} />
-                            {/* <Button variant="contained" onClick={() => handleAddToOrder(product)}>
-                              
-                            </Button> */}
-
                             <Tooltip title="Thêm sản phẩm" arrow>
                                 <IconButton
                                     onClick={() => handleAddToOrder(product)}
@@ -275,7 +263,7 @@ const CreateInventoryOrder: React.FC = () => {
                 </List>
             </Paper>
 
-            <Paper elevation={3} sx={{ padding: 3, borderRadius: 2 }}>
+            <Paper elevation={3} sx={{ padding: 3, borderRadius: 2, backgroundColor: 'white' }}>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
                     Chi tiết phiếu nhập hàng
                 </Typography>
@@ -285,9 +273,11 @@ const CreateInventoryOrder: React.FC = () => {
                             <TableRow>
                                 <TableCell sx={{ textAlign: "left", fontWeight: 'bold' }}>Tên sản phẩm</TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Số lượng</TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Đơn vị</TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Ngày sản xuất</TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Ngày hết hạn</TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Giá nhập</TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Thành tiền</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -301,10 +291,11 @@ const CreateInventoryOrder: React.FC = () => {
                                             onChange={(e) =>
                                                 handleUpdateQuantity(item.product.id, parseInt(e.target.value))
                                             }
-                                            inputProps={{ min: 1 }}
+                                            inputProps={{ min: 1, max: 100 }}
                                             sx={{ width: "100%" }}
                                         />
                                     </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>{item.unit}</TableCell>
                                     <TableCell sx={{ textAlign: "center" }}>
                                         <TextField
                                             type="date"
@@ -330,31 +321,37 @@ const CreateInventoryOrder: React.FC = () => {
                                             sx={{ width: "100%" }}
                                         />
                                     </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                        {formatCurrency(item.price * item.quantity)}
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <Box display="flex" flexDirection="column" justifyContent="space-between" mt={3}>
-                    <Box display="flex" flexDirection="row" justifyContent="space-between" mt={3}>
-                        <Typography variant="h6" fontWeight="bold">Tổng tiền hàng</Typography>
-                        <Typography variant="h6" fontWeight="bold">
-                            {formatCurrency(orderItems.reduce((total, item) => total + (item.price * item.quantity), 0))}
-                        </Typography>
-                    </Box>
 
-                    <Typography textAlign="left" fontStyle={"italic"}> (Giá trên đã bao gồm VAT)</Typography>
-
-                    <Box display="flex" flexDirection="row" justifyContent="space-between" mt={3}>
-                        <Typography variant="h6" fontWeight="bold"> Thành tiền</Typography>
-                        <Typography variant="h6" fontWeight="bold">
-                            {formatCurrency(orderItems.reduce((total, item) => total + (item.price * item.quantity), 0))}
-                        </Typography>
-                    </Box>
+                <Box display="flex" justifyContent="space-between" mt={3}>
+                    <Typography variant="h6" fontWeight="bold">Tổng tiền hàng</Typography>
+                    <Typography variant="h6" fontWeight="bold">
+                        {formatCurrency(calculateTotalPrice())}
+                    </Typography>
                 </Box>
 
-                <Button variant="contained" onClick={handleCreateBill} sx={{ mt: 2 }}>Tạo</Button>
+                <Button variant="contained" onClick={handleCreateBill} sx={{ mt: 2 }}>
+                    Tạo phiếu nhập hàng
+                </Button>
             </Paper>
+
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={() => setSnackbarOpen(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+                    {alertMessage}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };
