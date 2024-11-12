@@ -1,40 +1,12 @@
 import api from "../config/axios";
 
-const getStocksByProductService = async (
-  pageNumber: number,
-  pageSize: number
-) => {
-  try {
-    const response: any = await api.get(
-      `/inventory/stock?pageNumber=${pageNumber}&pageSize=${pageSize}`
-    );
-    const { message, data } = response;
-    if (message !== "success") {
-      return {
-        message: message,
-        data: [],
-      };
-    }
-    return {
-      message: message,
-      data: data,
-    };
-  } catch (error) {
-    console.error(error);
-    return {
-      message: "An error occurred",
-      data: [],
-    };
-  }
-};
 import ApiResponse from "../types/apiResponse";
 
-const createInventoryOrderService = async (itemList: any[], supplierId:number) => {
+const createInventoryOrderService = async (
+  itemList: any[],
+  supplierId: number
+) => {
   try {
-    console.log(itemList);
-    console.log(supplierId);
-    
-
     const response: ApiResponse = await api.post(`/inventory/import`, {
       supplierId: supplierId,
       productItems: itemList,
@@ -67,7 +39,7 @@ const getImportInvoicesService = async (
 ) => {
   try {
     const response: any = await api.get(
-      `/inventory?pageNumber=${pageNumber}&pageSize=${pageSize}`
+      `/inventory/import-invoices?pageNumber=${pageNumber}&pageSize=${pageSize}`
     );
     const { message, data } = response;
     if (message !== "success") {
@@ -88,9 +60,11 @@ const getImportInvoicesService = async (
   }
 };
 
-const getShipmentItemsService = async (shipmentId: number) => {
+const getItemImportInvoiceService = async (shipmentId: number) => {
   try {
-    const response: any = await api.get(`/inventory/${shipmentId}`);
+    const response: any = await api.get(
+      `/inventory/import-invoices/${shipmentId}`
+    );
     const { message, data } = response;
     if (message !== "success") {
       return {
@@ -112,7 +86,9 @@ const getShipmentItemsService = async (shipmentId: number) => {
 
 const getShipmentsService = async () => {
   try {
-    const response: any = await api.get(`/inventory`);
+    const response: any = await api.get(
+      `/inventory/shipments`
+    );
     const { message, data } = response;
     if (message !== "success") {
       return {
@@ -132,12 +108,9 @@ const getShipmentsService = async () => {
   }
 };
 
-
-
 export {
   createInventoryOrderService,
-  getStocksByProductService,
   getImportInvoicesService,
-  getShipmentItemsService,
-  getShipmentsService
+  getItemImportInvoiceService,
+  getShipmentsService,
 };

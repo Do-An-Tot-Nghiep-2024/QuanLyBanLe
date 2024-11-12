@@ -14,15 +14,15 @@ import {
   Container,
   FormControl,
   FormLabel,
+  IconButton,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { convertDate } from "../../utils/convertDate";
 import { useEffect, useState } from "react";
-
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 export default function UpdateEmployee() {
   const id = useParams().id || "";
   const navigate = useNavigate();
@@ -72,13 +72,17 @@ export default function UpdateEmployee() {
     }
   };
 
+  const formatDate = (date: string) => {
+    const dateArray = date.split("/");
+    return `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}`;
+  };
   useEffect(() => {
     if (data) {
       // setUpdateEmployee(data);
       setValue("name", data?.name ?? " ");
       setValue("phone", data?.phone ?? " ");
       setValue("email", data?.email ?? " ");
-      setValue("dob", convertDate(data?.dob ?? " "));
+      setValue("dob", data.dob !== undefined ? formatDate(data.dob) : "");
     }
   }, [data]);
 
@@ -87,9 +91,23 @@ export default function UpdateEmployee() {
       {isLoading && isFetching && <p>Loading...</p>}
       {isError && <Alert severity="error">{error.message}</Alert>}
       {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
-      <Typography variant="h4" align="center" padding={"5px"}>
-        Cập nhật thông tin nhân viên
-      </Typography>
+      <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <IconButton onClick={() => navigate("/employees")}>
+          <ArrowBackIcon  />
+        </IconButton>
+        <Typography
+          variant="h4"
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "5px",
+          }}
+        >
+          Cập nhật nhân viên  
+        </Typography>
+      </Stack>
       <Stack direction="row" spacing={2} mb={2}>
         <FormControl fullWidth>
           <FormLabel

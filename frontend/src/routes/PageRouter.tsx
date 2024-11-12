@@ -31,6 +31,9 @@ const PromotionPage = lazy(() => import('../pages/promotion/PromotionPage'))
 const UnitManagement = lazy(() => import('../pages/product/UnitPage'))
 const OrderList = lazy(() => import('../pages/order/OrderList'))
 
+
+const ShipmentPage = lazy(() => import("../pages/inventory/ShipmentPage"));
+
 // statistic
 const StatisticsProduct = lazy(
   () => import("../pages/report/SalesStatisticsProduct")
@@ -44,7 +47,6 @@ const StatisticsProductPrice = lazy(
 );
 
 // inventory
-const StockPage = lazy(() => import("../pages/inventory/StockPage"));
 const Logout = lazy(() => import("../pages/login/Logout"));
 const CreateProduct = lazy(() => import("../pages/product/CreateProduct"));
 const OrderTabs = lazy(() => import("../pages/order/OrderTabs"));
@@ -61,6 +63,8 @@ const InventoryDetailPage = lazy(
 // const OrderPage1 = lazy(() => import("../pages/order/OrderPage1"));
 // const OrderPage2 = lazy(() => import("../pages/order/OrderPage2"));
 
+
+const UnitPage = lazy(() => import("../pages/unit/UnitPage"));
 
 const PrintImportInvoice = lazy(
   () => import("../pages/print/PrintImportInvoice")
@@ -150,9 +154,9 @@ const PageRouter = () => {
 
               <Route path="/products/categories" element={<CategoryPage />} />
               <Route path="/products/units" element={<UnitManagement />} />
-
-
               <Route path="/update-employee/:id" element={<UpdateEmployee />} />
+
+              <Route path="/units" element={<UnitPage />} />
               {/* Static pages */}
               <Route path="/reports/product" element={<StatisticsProduct />} />
               <Route
@@ -164,7 +168,6 @@ const PageRouter = () => {
                 element={<StatisticsProductPrice />}
               />
               {/* inventory */}
-              <Route path="/inventory/stock" element={<StockPage />} />
               <Route
                 path="/inventory/import-invoices"
                 element={<InventoryPage />}
@@ -189,7 +192,7 @@ const PageRouter = () => {
                 path="/print/import-invoice"
                 element={<PrintImportInvoice />}
               />
-
+              <Route path="/inventory/shipment" element={<ShipmentPage />} />
               <Route path="/promotions/create-promotion" element={<CreatePromotion />}/>
               <Route path="/promotions" element={<PromotionPage/>}/>
             </Route>

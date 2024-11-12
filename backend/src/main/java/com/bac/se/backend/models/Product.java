@@ -33,10 +33,6 @@ public class Product  {
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
-    @ManyToOne
-    @JoinColumn(name = "promotion_id")
-    private Promotion promotion;
-
     @OneToMany(mappedBy = "product",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<ProductPrice> productPrices;
 

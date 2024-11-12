@@ -23,10 +23,13 @@ import Cookies from "js-cookie";
 import { useAppDispatch } from "../../redux/hook";
 import { getAccount } from "../../redux/auth/authSlice";
 import colors from "../../constants/color";
+import MessageAlert from "../../components/MessageAlert";
 export default function LoginEmployeePage() {
   const navigation = useNavigate();
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState("");
+  const [open, setOpen] = useState(false);
   // event handlers
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleMouseDownPassword = (
@@ -54,18 +57,18 @@ export default function LoginEmployeePage() {
     try {
       const response = await loginService(data);
       console.log(response);
-      if (response && response?.message) {
+      if (response?.message === "success") {
         console.log("Login success");
         const { accessToken } = response.data as { accessToken: string };
         Cookies.set("accessToken", accessToken);
         dispatch(getAccount());
-        // console.log("Auth at login employee page", auth?.role);
         navigation("/");
       } else {
-        console.log("Login failed");
+        setMessage("Tên đăng nhập hoặc mật khẩu không đúng");
+        setOpen(true);
       }
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      setMessage(error.message);
     }
   };
 
@@ -78,6 +81,9 @@ export default function LoginEmployeePage() {
         backgroundColor: "#fff",
       }}
     >
+      {message && (
+        <MessageAlert open={open} setOpen={setOpen} message={message} />
+      )}
       <Grid container spacing={2}>
         <Grid size={{ xs: 6, md: 6, sm: 12 }}>
           <Typography
@@ -92,67 +98,6 @@ export default function LoginEmployeePage() {
           >
             WELCOME
           </Typography>
-          {/* <Stack
-            onSubmit={handleSubmit(onSubmit)}
-            component="form"
-            spacing={2}
-            sx={{
-              width: "500px",
-              marginTop: "50px",
-            }}
-            alignItems={"center"}
-          >
-            <TextField
-              {...register("username")}
-              label="userame"
-              variant="outlined"
-              sx={{ width: "300px", color: "white" }}
-              type="text"
-              name="username"
-              error={!!errors.username}
-              helperText={errors.username?.message}
-            ></TextField>
-
-            <FormControl sx={{ m: 1, width: "300px" }} variant="outlined">
-              <InputLabel htmlFor="outlined-adornment-password" color="error">
-                Password
-              </InputLabel>
-              <OutlinedInput
-                {...register("password")}
-                error={!!errors.password}
-                id="outlined-adornment-password"
-                type={showPassword ? "text" : "password"}
-                name="password"
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      onMouseUp={handleMouseUpPassword}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-                label="Password"
-              />
-              <FormHelperText error>{errors.password?.message}</FormHelperText>
-            </FormControl>
-            <Button
-              sx={{
-                width: "300px",
-                fontWeight: "bold",
-                background:
-                  "linear-gradient(to right bottom, #579AFF, #345D99)",
-              }}
-              variant="contained"
-              type="submit"
-            >
-              ĐĂNG NHẬP
-            </Button>
-          </Stack> */}
           <Stack
             onSubmit={handleSubmit(onSubmit)}
             component="form"

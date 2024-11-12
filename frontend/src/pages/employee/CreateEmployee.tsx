@@ -4,6 +4,7 @@ import {
   Container,
   FormControl,
   FormLabel,
+  IconButton,
   Stack,
   TextField,
   Typography,
@@ -14,6 +15,7 @@ import {
   defaultEmployeeSchema,
   EmployeeSchema,
 } from "../../types/employeeSchema";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { createEmployeeService } from "../../services/employee.service";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -50,9 +52,24 @@ export default function CreateEmployee() {
     // create a pretty form with mui with fields: name, phone, email, dob
     <Container component={"form"} onSubmit={handleSubmit(onSubmit)}>
       {error && <Alert severity="error">{error}</Alert>}
-      <Typography variant="h4" align="center" padding={"5px"}>
-        Thêm mới nhân viên
-      </Typography>
+      <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <IconButton onClick={() => navigate("/employees")}>
+          <ArrowBackIcon  />
+        </IconButton>
+        <Typography
+          variant="h4"
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "5px",
+          }}
+        >
+          Thêm mới nhân viên
+        </Typography>
+      </Stack>
+
       <Stack direction="row" spacing={2} mb={2}>
         <FormControl fullWidth>
           <FormLabel

@@ -27,15 +27,6 @@ const loginService = async (login: LoginSchema) => {
 };
 const getAccountService = async () => {
   try {
-    // const response = await axios.get(
-    //   `${import.meta.env.VITE_URL_BE}/auth/account`,
-    //   {
-    //     headers: {
-    //       Authorization: `Bearer ${Cookies.get("accessToken")}`,
-    //     },
-    //   }
-    // );
-
     const response: any = await api.get("/auth/account");
     if (response.message !== "success") {
       return {

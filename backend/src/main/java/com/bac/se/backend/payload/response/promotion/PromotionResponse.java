@@ -8,8 +8,8 @@ public record PromotionResponse(
         String description,
         Date startDate,
         Date endDate,
-        String typePromotion,
-        String scope,
-        int orderLimit
+        int orderLimit,
+        double minOrderPrice,
+        double percentage
 ) {
 }

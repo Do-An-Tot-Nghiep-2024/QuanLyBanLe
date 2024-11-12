@@ -8,7 +8,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
   TableBody,
   TableFooter,
@@ -17,15 +16,19 @@ import {
   Alert,
   Modal,
   Button,
-  Tooltip
+  Tooltip,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { useNavigate } from "react-router-dom";
 import colors from "../../constants/color";
-import { getEmployeesService, deleteEmployeeService } from "../../services/employee.service";
+import {
+  getEmployeesService,
+  deleteEmployeeService,
+} from "../../services/employee.service";
 import { useEffect, useState } from "react";
+import TextSearch from "../../components/TextSeatch";
 
 interface Employee {
   id: number;
@@ -41,32 +44,36 @@ export default function EmployeePage() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
+  const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(
+    null
+  );
   const [sortField, setSortField] = useState<keyof Employee | null>("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchTerm, setSearchTerm] = useState("");
   const [page] = useState(0); // Removed setPage since it's not used
-  const [limit] = useState(10);
+  const [limit] = useState(5);
   const getEmployees = async () => {
     const response = await getEmployeesService(page, limit);
     let sortedEmployees = response.data.responseList;
 
     // Filter based on search term
     if (searchTerm) {
-      sortedEmployees = sortedEmployees.filter((employee: { name: string; }) =>
+      sortedEmployees = sortedEmployees.filter((employee: { name: string }) =>
         employee.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Sort employees
     if (sortField) {
-      sortedEmployees.sort((a: { [key: string]: string; }, b: { [key: string]: string; }) => {
-        const aValue = a[sortField] as string; 
-        const bValue = b[sortField] as string; 
-        if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
-        if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
-        return 0;
-      });
+      sortedEmployees.sort(
+        (a: { [key: string]: string }, b: { [key: string]: string }) => {
+          const aValue = a[sortField] as string;
+          const bValue = b[sortField] as string;
+          if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+          if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+          return 0;
+        }
+      );
     }
 
     setEmployees(sortedEmployees);
@@ -94,13 +101,22 @@ export default function EmployeePage() {
     }
   };
 
-  const columns: Array<{ label: string; field?: keyof Employee; width?: string; maxWidth?: string }> = [
+  const columns: Array<{
+    label: string;
+    field?: keyof Employee;
+    width?: string;
+    maxWidth?: string;
+  }> = [
     { label: "Tên", field: "name", width: "25%", maxWidth: "200px" },
     { label: "Số điện thoại", field: "phone", width: "20%", maxWidth: "150px" },
     { label: "Email", field: "email", width: "20%", maxWidth: "200px" },
     { label: "Ngày sinh", field: "dob", width: "15%", maxWidth: "150px" },
-    { label: "Hành động", width: "20%", maxWidth: "100px" }
+    { label: "Hành động", width: "20%", maxWidth: "100px" },
   ];
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
 
   useEffect(() => {
     getEmployees();
@@ -108,59 +124,64 @@ export default function EmployeePage() {
 
   return (
     <>
-      <Typography variant="h5" align="center" padding={"5px"}>
-        Quản lý nhân viên
+      <Typography
+        variant="h5"
+        align="center"
+        padding={"5px"}
+        fontWeight={"600"}
+      >
+        DANH SÁCH NHÂN VIÊN
       </Typography>
       <Box>
-        <Stack
-          mb={2}
-          display="flex"
-          flexDirection={"row"}
-          justifyContent={"space-between"}
-          sx={{ width: "100%" }}
-        >
-          <TextField
-            id="search"
-            label="Tìm kiếm"
-            variant="filled"
-            size="small"
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              getEmployees();
-            }}
-            sx={{
-              display: { xs: "none", md: "inline-block", sm: "flex" },
-              mr: 1,
-              width: "90%",
+        <Stack flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} paddingBottom={5}>
+          <TextSearch
+            props={{
+              placeholder: "Nhập tên nhân viên cần tìm",
+              state: searchTerm,
+              setState: handleSearchChange,
             }}
           />
           <Tooltip title="Thêm nhân viên" arrow>
-            <IconButton
+            <IconButton 
               onClick={() => navigate("/create-employee")}
               aria-label="import"
-              size="small"
+              size="medium"
               color="success"
-              sx={{ width: "10%" }}
+              sx={{ width: "50px" }}
             >
-              <AddBoxIcon />
+              <AddBoxIcon fontSize="large" />
             </IconButton>
           </Tooltip>
         </Stack>
 
-        <TableContainer component={Paper} sx={{ width: "900px", margin: "auto", backgroundColor: 'white', maxHeight: "700px", overflowY: "auto" }}>
-          <Table aria-label="custom pagination table">
+        <TableContainer
+          component={Paper}
+          sx={{
+            width: "900px",
+            margin: "auto",
+            backgroundColor: "white",
+            maxHeight: "700px",
+            overflowY: "auto",
+          }}
+        >
+          <Table size="small" aria-label="custom pagination table">
             <TableHead sx={{ backgroundColor: colors.secondaryColor }}>
               <TableRow>
                 {columns.map((column) => (
                   <TableCell
                     key={column.label}
                     align={"center"}
-                    sx={{ width: column.width, maxWidth: column.maxWidth, ...styles.tableCellHeader }}
+                    sx={{
+                      width: column.width,
+                      maxWidth: column.maxWidth,
+                      ...styles.tableCellHeader,
+                    }}
                     onClick={() => {
                       if (column.field) {
-                        setSortField((column.field));
-                        setSortOrder(prevOrder => (prevOrder === "asc" ? "desc" : "asc"));
+                        setSortField(column.field);
+                        setSortOrder((prevOrder) =>
+                          prevOrder === "asc" ? "desc" : "asc"
+                        );
                       }
                     }}
                     style={{ cursor: column.field ? "pointer" : "default" }}
@@ -168,7 +189,11 @@ export default function EmployeePage() {
                     {column.label}
                     {column.field && (
                       <span style={{ marginLeft: "15px" }}>
-                        {sortField === column.field ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                        {sortField === column.field
+                          ? sortOrder === "asc"
+                            ? "↑"
+                            : "↓"
+                          : ""}
                       </span>
                     )}
                   </TableCell>
@@ -177,16 +202,36 @@ export default function EmployeePage() {
             </TableHead>
             <TableBody>
               {employees.map((employee) => (
-                <TableRow hover key={employee.id} sx={{ height: "60px", overflow: "hidden" }}>
-                  <TableCell align={"center"} sx={styles.tableCell}>{employee.name}</TableCell>
-                  <TableCell align={"center"} sx={styles.tableCell}>{employee.phone}</TableCell>
-                  <TableCell align={"center"} sx={styles.tableCell}>{employee.email}</TableCell>
-                  <TableCell align={"center"} sx={styles.tableCell}>{employee.dob}</TableCell>
+                <TableRow
+                  hover
+                  key={employee.id}
+                  sx={{ height: "60px", overflow: "hidden" }}
+                >
+                  <TableCell align={"center"} sx={styles.tableCell}>
+                    {employee.name}
+                  </TableCell>
+                  <TableCell align={"center"} sx={styles.tableCell}>
+                    {employee.phone}
+                  </TableCell>
+                  <TableCell align={"center"} sx={styles.tableCell}>
+                    {employee.email}
+                  </TableCell>
+                  <TableCell align={"center"} sx={styles.tableCell}>
+                    {employee.dob}
+                  </TableCell>
                   <TableCell align={"center"}>
-                    <IconButton color="error" onClick={() => handleDeleteClick(employee)}>
+                    <IconButton
+                      color="error"
+                      onClick={() => handleDeleteClick(employee)}
+                    >
                       <DeleteForeverIcon />
                     </IconButton>
-                    <IconButton color="warning" onClick={() => navigate(`/update-employee/${employee.id}`)}>
+                    <IconButton
+                      color="warning"
+                      onClick={() =>
+                        navigate(`/update-employee/${employee.id}`)
+                      }
+                    >
                       <EditIcon />
                     </IconButton>
                   </TableCell>
@@ -201,8 +246,8 @@ export default function EmployeePage() {
                   count={employees.length}
                   rowsPerPage={10}
                   page={0}
-                  onPageChange={() => { }}
-                  onRowsPerPageChange={() => { }}
+                  onPageChange={() => {}}
+                  onRowsPerPageChange={() => {}}
                 />
               </TableRow>
             </TableFooter>
@@ -217,7 +262,7 @@ export default function EmployeePage() {
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
+        <Alert onClose={() => setSnackbarOpen(false)} sx={{ width: "100%" }}>
           {alertMessage}
         </Alert>
       </Snackbar>
@@ -231,14 +276,20 @@ export default function EmployeePage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          margin: "auto"
+          margin: "auto",
         }}
       >
         <Box style={styles.modalContent}>
           <h3 id="delete-confirmation-modal">Xác nhận xóa nhân viên</h3>
-          <p>Bạn có chắc chắn muốn xóa nhân viên <strong>{employeeToDelete?.name}</strong> không?</p>
+          <p>
+            Bạn có chắc chắn muốn xóa nhân viên{" "}
+            <strong>{employeeToDelete?.name}</strong> không?
+          </p>
           <div style={styles.buttonContainer}>
-            <Button onClick={() => setConfirmOpen(false)} style={styles.closeButton}>
+            <Button
+              onClick={() => setConfirmOpen(false)}
+              style={styles.closeButton}
+            >
               Hủy
             </Button>
             <Button onClick={handleDelete} style={styles.addButton}>

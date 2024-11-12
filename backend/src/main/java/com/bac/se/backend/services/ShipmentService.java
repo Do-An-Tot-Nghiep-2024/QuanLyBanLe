@@ -4,26 +4,27 @@ import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.payload.request.ShipmentRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.invoice.ImportInvoice;
-import com.bac.se.backend.payload.response.shipment.ShipmentItemResponse;
-import com.bac.se.backend.payload.response.shipment.ShipmentResponse;
+import com.bac.se.backend.payload.response.invoice.ImportInvoiceItemResponse;
+import com.bac.se.backend.payload.response.shipment.CreateShipmentResponse;
+import com.bac.se.backend.payload.response.shipment.ProductShipmentResponse;
 
 import java.text.ParseException;
+import java.util.List;
 
 
 public interface ShipmentService {
     // create unit test for code above
-    ShipmentResponse createShipment(ShipmentRequest shipmentRequest) throws BadRequestUserException;
+    CreateShipmentResponse createShipment(ShipmentRequest shipmentRequest) throws BadRequestUserException;
 
-    // create order shipment
-//    PageResponse<ImportInvoice> getImportInvoices(Integer pageNumber, Integer pageSize,
-//                                                  Date fromDate,
-//                                                  Date toDate) throws ParseException;
+
+    List<ProductShipmentResponse> getShipments();
+
 
 
     PageResponse<ImportInvoice> getImportInvoices(Integer pageNumber, Integer pageSize,
                                                   String fromDate,
                                                   String toDate) throws ParseException;
 
-    ShipmentItemResponse getShipment(Long id);
+    ImportInvoiceItemResponse getItemImportInvoice(Long id);
 
 }

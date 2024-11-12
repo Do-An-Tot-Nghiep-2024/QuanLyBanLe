@@ -165,4 +165,14 @@ public class ProductController {
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getProductsByName(@RequestParam(defaultValue = "") String name){
+        try{
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(REQUEST_SUCCESS,productService.getProductsByName(name)));
+        }catch (Exception e){
+            return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
 }

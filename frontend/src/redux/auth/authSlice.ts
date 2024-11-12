@@ -7,25 +7,21 @@ export interface Auth {
   isLogin: boolean;
   token: string;
   role: string;
+  usename: string;
 }
 const initialState: Auth = {
   isLogin: false,
   token: Cookies.get("accessToken")?.toString() ?? "",
   role: "",
+  usename: "",
 };
 const getAccount = createAsyncThunk("auth/get-user-token", async () => {
   try {
-    const res = await getAccountService().then((res) => res.data );
+    const res = await getAccountService().then((res) => res.data);
     // console.log( Cookies.get("accessToken"));
-    
-    
-    
     const responseData = res;
-   
-      // console.log("account is ", res.data.data);
-      return responseData as Account;
-    
- 
+    // console.log("account is ", res.data.data);
+    return responseData as Account;
   } catch (error) {
     throw error;
   }
@@ -46,6 +42,7 @@ export const authSlice = createSlice({
         (state, action: PayloadAction<Account>) => {
           state.isLogin = true;
           state.role = action.payload.role;
+          state.usename = action.payload.username;
         }
       )
       .addCase(getAccount.rejected, (state) => {

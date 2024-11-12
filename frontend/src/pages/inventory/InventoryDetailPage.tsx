@@ -1,9 +1,9 @@
-import {  useParams } from "react-router-dom";
-import { getShipmentItemsService } from "../../services/inventory.service";
+import { useNavigate, useParams } from "react-router-dom";
+import { getItemImportInvoiceService } from "../../services/inventory.service";
 import { useQuery } from "@tanstack/react-query";
 import {
   Box,
-  // Button,
+  Button,
   Container,
   Paper,
   Stack,
@@ -16,18 +16,18 @@ import {
   Typography,
 } from "@mui/material";
 
-import ShipmentItem from "../../types/inventory/shipmentItem";
-import { formatMoney, formatMoneyThousand } from "../../utils/formatMoney";
+import ShipmentItem from "../../types/inventory/itemImportInvoice";
+import { formatMoney } from "../../utils/formatMoney";
 import { formatDate, formatDateTime } from "../../utils/convertDate";
-// import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
 export default function InventoryDetailPage() {
   const id = useParams().id;
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const shipmentId = Number(id?.substring(5));
   const getShipmentItems = async (id: number) => {
     try {
-      const response = await getShipmentItemsService(id);
+      const response = await getItemImportInvoiceService(id);
       console.log(response);
       if (response.message !== "success") {
         throw new Error("Error fetching employees");
@@ -54,6 +54,7 @@ export default function InventoryDetailPage() {
     "Số lượng",
     "Ngày sản xuất",
     "Ngày hết hạn",
+    "Đơn vị tính",
     "Đơn giá",
     "Thành tiền",
   ];
@@ -84,7 +85,7 @@ export default function InventoryDetailPage() {
       </Box>
 
       <TableContainer component={Paper}>
-        <Table>
+        <Table size="small" sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
               {columns.map((column: string) => (
@@ -109,18 +110,19 @@ export default function InventoryDetailPage() {
                 <TableCell align={"center"}>{item.quantity}</TableCell>
                 <TableCell align={"center"}>{formatDate(item.mxp)}</TableCell>
                 <TableCell align={"center"}>{formatDate(item.exp)}</TableCell>
+                <TableCell align={"center"}>{item.unit}</TableCell>
                 <TableCell align={"center"}>
-                  {formatMoneyThousand(item.price)}
+                  {formatMoney(item.price)}
                 </TableCell>
                 <TableCell align={"center"}>
-                  {formatMoneyThousand(item.total)}
+                  {formatMoney(item.total)}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-      {/* <Button
+      <Button
         onClick={() => {
           navigate("/print/import-invoice", {
             state: data,
@@ -134,7 +136,7 @@ export default function InventoryDetailPage() {
         }}
       >
         In hóa đơn
-      </Button> */}
+      </Button>
     </Container>
   );
 }
