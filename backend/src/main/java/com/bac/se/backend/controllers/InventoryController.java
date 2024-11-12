@@ -80,7 +80,7 @@ public class InventoryController {
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
-    
+
 
     @GetMapping("/import-invoices/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")

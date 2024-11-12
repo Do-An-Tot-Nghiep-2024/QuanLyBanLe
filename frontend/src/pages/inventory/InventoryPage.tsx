@@ -95,7 +95,7 @@ export default function InventoryPage() {
         component={Paper}
         sx={{ width: "100%", backgroundColor: "white" }}
       >
-        <Table aria-label="custom pagination table">
+        <Table aria-label="custom pagination table" size="small">
           <TableHead
             sx={{ backgroundColor: colors.secondaryColor, fontSize: 18 }}
           >

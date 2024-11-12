@@ -19,7 +19,6 @@ public interface ShipmentService {
 
     List<ProductShipmentResponse> getShipments();
 
-//    ShipmentItemResponse getShipment(Long id);
 
 
     PageResponse<ImportInvoice> getImportInvoices(Integer pageNumber, Integer pageSize,

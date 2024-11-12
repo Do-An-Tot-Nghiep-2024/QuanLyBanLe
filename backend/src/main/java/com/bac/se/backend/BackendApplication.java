@@ -1,7 +1,6 @@
 package com.bac.se.backend;
 
-import com.bac.se.backend.mapper.ShipmentMapper;
-import com.bac.se.backend.repositories.ShipmentItemRepository;
+import com.bac.se.backend.services.ShipmentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -18,10 +17,19 @@ public class BackendApplication {
     }
 
 
-    @Autowired
-    ShipmentItemRepository shipmentItemRepository;
 
-    ShipmentMapper shipmentMapper = new ShipmentMapper();
+    @Autowired
+    ShipmentService shipmentService;
+
+//    @Bean
+//    CommandLineRunner commandLineRunner(){
+//        return args -> {
+//            var desc = shipmentService.getShipments(0, 10, "", "shipment_id", "DESC", "20");
+//            for (var productShipmentResponse : desc.getResponseList()) {
+//                log.info(productShipmentResponse.toString());
+//            }
+//        };
+//    }
 
 
 

@@ -23,11 +23,10 @@ public class ShipmentMapper {
                 object[2].toString(),
                 (Date) object[3],
                 (Date) object[4],
-                Double.parseDouble(object[5].toString()),
+                Integer.parseInt(object[5].toString()),
                 Integer.parseInt(object[6].toString()),
                 Integer.parseInt(object[7].toString()),
-                Integer.parseInt(object[8].toString()),
-                object[9].toString()
+                object[8].toString()
         );
     }
 }
