@@ -44,19 +44,24 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "group by oi.order_id", nativeQuery = true)
     Page<Object[]> getOrdersByCustomer(Long id, Pageable pageable);
 
-    @Query(value = "select o.order_id, e.name as emp,o.order_status,o.payment_type," +
-            "sum(oi.total_price) as total, o.created_at," +
-            "COALESCE(c.phone,'') as customer_phone " +
+    @Query(value = "select o.order_id as orderId, e.name as emp,o.order_status as status," +
+            "o.payment_type as paymentType," +
+            "sum(oi.total_price) as total, o.created_at as createdAt," +
+            "COALESCE(c.phone,'') as customerPhone " +
             "from t_order o " +
             "join t_order_item oi on oi.order_id = o.order_id " +
             "join t_employee e on e.employee_id = o.employee_id " +
             "left join t_customer c on c.customer_id = o.customer_id " +
             "where o.created_at between :fromDate and :toDate " +
-            "group by oi.order_id order by o.created_at desc", nativeQuery = true)
+            "AND o.order_status LIKE CONCAT(:status,'%') " +
+            "AND (:phone = '' OR (c.phone IS NOT NULL AND c.phone LIKE CONCAT(:phone, '%'))) " +
+            "group by oi.order_id", nativeQuery = true)
     Page<Object[]> getOrders(
             Pageable pageable,
             @Param("fromDate") Date fromDate,
-            @Param("toDate") Date toDate);
+            @Param("toDate") Date toDate,
+            @Param("status") String status,
+            @Param("phone") String phone);
 
     @Query(value = "select o.order_id, e.name as emp,o.order_status,o.payment_type," +
             "sum(oi.total_price) as total, o.created_at," +

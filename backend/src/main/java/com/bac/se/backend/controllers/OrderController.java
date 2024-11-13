@@ -34,10 +34,15 @@ public class OrderController {
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String fromDate,
-            @RequestParam(required = false) String toDate
+            @RequestParam(required = false) String toDate,
+            @RequestParam(defaultValue = "createdAt") String orderBy,
+            @RequestParam(defaultValue = "DESC") String order,
+            @RequestParam(defaultValue = "") String status,
+            @RequestParam(defaultValue = "") String customerPhone
     ) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrders(pageNumber, pageSize, fromDate, toDate)));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrders(pageNumber, pageSize, fromDate,
+                    toDate,orderBy,order,status,customerPhone)));
         } catch (ParseException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse<>("Invalid date format. Please use 'yyyy-MM-dd'.", null));

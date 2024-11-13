@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -196,10 +197,29 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public PageResponse<OrderResponse> getOrders(Integer pageNumber, Integer pageSize, String fromDate, String toDate) throws ParseException {
+    public PageResponse<OrderResponse> getOrders(Integer pageNumber, Integer pageSize,
+                                                 String fromDate, String toDate,
+                                                 String orderBy,String order,
+                                                 String status,
+                                                 String customerPhone
+                                 ) throws ParseException {
+        Map<String, String> map = new HashMap<>();
+        map.put("orderId","orderId");
+        map.put("createdAt", "createdAt");
+        map.put("total", "total");
+        map.put("orderStatus", "orderStatus");
+        map.put("paymentType", "paymentType");
+        map.put("customerPhone", "customerPhone");
+        map.put("emp", "emp");
+        String column = map.get(orderBy);
+        if(column == null){
+           column = map.get("createdAt");
+        }
         DateRequest dateRequest = dateConvert.convertDateRequest(fromDate, toDate);
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        var orders = orderRepository.getOrders(pageable, dateRequest.fromDate(), dateRequest.toDate());
+        Sort sort = Sort.by(Sort.Direction.fromString(order), column);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,sort);
+        var orders = orderRepository.getOrders(pageable, dateRequest.fromDate(),
+                dateRequest.toDate(),status,customerPhone);
         List<Object[]> orderList = orders.getContent();
         List<OrderResponse> orderResponseList = orderList.stream().map(orderMapper::mapObjectToResponse).toList();
         return new PageResponse<>(orderResponseList, pageNumber, orders.getTotalPages(), orders.getTotalElements(), orders.isLast());

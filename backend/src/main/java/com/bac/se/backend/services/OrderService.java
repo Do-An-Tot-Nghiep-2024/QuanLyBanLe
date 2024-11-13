@@ -15,7 +15,9 @@ import java.text.ParseException;
 public interface OrderService {
     CreateOrderResponse createOrder(OrderRequest orderRequest, HttpServletRequest request) throws BadRequestUserException;
 
-    PageResponse<OrderResponse> getOrders(Integer pageNumber, Integer pageSize, String fromDate, String toDate) throws ParseException;
+    PageResponse<OrderResponse> getOrders(Integer pageNumber, Integer pageSize,
+                                          String fromDate, String toDate,
+                                          String orderBy,String order,String status,String customerPhone) throws ParseException;
 
     PageResponse<OrderResponse> getOrdersByCustomer(Long customerId, int pageNumber, int pageSize);
 
