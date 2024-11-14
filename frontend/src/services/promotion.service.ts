@@ -1,16 +1,17 @@
 import api from "../config/axios";
 import ApiResponse from "../types/apiResponse";
+import { GetPromotion } from "../types/getPromotion";
 import { PromotionSchema } from "../types/promotionSchema";
 
 
 interface PromotionResponse {
   message: string;
   data: {
-      lastPage: boolean;
-      pageNumber: number;
-      responseList: PromotionSchema[];
-      totalElements: number;
-      totalPages: number;
+    lastPage: boolean;
+    pageNumber: number;
+    responseList: PromotionSchema[];
+    totalElements: number;
+    totalPages: number;
   } | null;
 }
 const createOrderPromotion = async (promotionData: any) => {
@@ -153,7 +154,7 @@ const createDiscountProductPromotion = async (promotionData: any) => {
 //     };
 //   } catch (error) {
 //     console.error("Error fetching products:", error);
-    
+
 //     return {
 //       message: String(error),
 //       data: null,
@@ -167,21 +168,29 @@ const getAllPromotionService = async (): Promise<PromotionResponse> => {
 
     const { message, data } = response;
 
-        console.log(data);
-    
-        return {
-          message,
-          data: message === "success" ? data : null,
-        };
-      } catch (error) {
-        console.error("Error fetching promotions:", error);
-        
-        return {
-          message: String(error),
-          data: null,
-        };
+    console.log(data);
+
+    return {
+      message,
+      data: message === "success" ? data : null,
+    };
+  } catch (error) {
+    console.error("Error fetching promotions:", error);
+
+    return {
+      message: String(error),
+      data: null,
+    };
   }
 }
 
+const getLatestPromotion = async (): Promise<GetPromotion> => {
+    const response = await api.get(`/promotions/latest`);
+    if (response) {
+      return response.data as GetPromotion;
 
-export { createOrderPromotion, createQuantityPromotion, createGiftProductPromotion, createDiscountProductPromotion, getAllPromotionService}
+    }
+    return null as unknown as GetPromotion;
+}
+
+export { createOrderPromotion, createQuantityPromotion, createGiftProductPromotion, createDiscountProductPromotion, getAllPromotionService, getLatestPromotion }

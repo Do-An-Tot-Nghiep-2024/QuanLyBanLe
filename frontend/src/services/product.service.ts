@@ -3,6 +3,7 @@ import { GetProductSchema } from "../types/getProductSchema";
 import { ProductSchema } from "../types/productSchema";
 import ApiResponse from "../types/apiResponse";
 import { UpdateProductSchema } from "../types/updateProductSchema";
+import ResponsePagination from "../types/responsePagination";
 
 interface GetProductResponse {
   message: string;
@@ -160,6 +161,43 @@ const getAllProductsService = async (): Promise<GetProductResponse> => {
     };
   }
 };
+// const getAllProductsByNameService = async (name : string): Promise<GetProductResponse> => {
+//   console.log("get all products");
+  
+//   try {
+//     let searchName = "";
+//     if(name) {
+//       searchName = name;
+//     }    
+//     const response: GetProductResponse = await api.get(`/products/search?name=${searchName}`);
+//     return null as unknown as ResponsePagination<GetProductSchema>; 
+
+//   } catch (error) {
+//     console.error("Error fetching products:", error);
+    
+//     return {
+//       message: String(error),
+//       data: null,
+//     };
+//   }
+// };
+
+const getAllProductsByNameService = async (name : string): Promise<GetProductSchema[]> => {    
+let searchName = "";
+    if(name) {
+      searchName = name;
+    } 
+    const response = await api.get(`/products/search?name=${searchName}`);
+
+  if (response) { 
+    console.log(response);
+    
+      return response.data; 
+  }
+
+  return null as unknown as GetProductSchema[]; 
+};
+
 
 
 const getProductsBySupplierService = async ( supplierId : number) => {
@@ -225,4 +263,4 @@ const deleteProductService = async (id: number) => {
   }
 };
 
-export { getAllProductsService, createProductService, getProductByIdService, getProductsService, updateProductService, deleteProductService, getProductsBySupplierService };
+export { getAllProductsService, createProductService, getProductByIdService, getProductsService, updateProductService, deleteProductService, getProductsBySupplierService, getAllProductsByNameService };
