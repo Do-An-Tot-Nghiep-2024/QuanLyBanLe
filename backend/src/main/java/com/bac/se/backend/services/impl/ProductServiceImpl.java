@@ -92,7 +92,7 @@ public class ProductServiceImpl implements ProductService {
                 product.getCategory().getName(),
                 product.getUnit().getName(),
                 productPriceResponse.price(),
-                productPriceResponse.discountPrice(),
+                productPriceResponse.originalPrice(),
                 shipmentIds);
     }
 
@@ -193,7 +193,7 @@ public class ProductServiceImpl implements ProductService {
                 .createdAt(new Date())
                 .build();
         var save = productPriceService.createProductPrice(productPrice);
-        return new ProductPriceResponse(save.getId(), productPrice.getOriginalPrice(), productPrice.getPrice(), 0);
+        return new ProductPriceResponse(save.getId(), productPrice.getOriginalPrice(), productPrice.getPrice());
     }
 
     @Override
@@ -297,7 +297,7 @@ public class ProductServiceImpl implements ProductService {
                 product.getCategory().getName(),
                 product.getUnit().getName(),
                 productPrice.price(),
-                productPrice.discountPrice(),
+                productPrice.originalPrice(),
                 null
         );
     }

@@ -1,6 +1,5 @@
 package com.bac.se.backend.mapper;
 
-import com.bac.se.backend.models.ProductPrice;
 import com.bac.se.backend.payload.response.product.ProductPriceResponse;
 import com.bac.se.backend.payload.response.product.StatisticPriceProductResponse;
 import org.springframework.stereotype.Service;
@@ -14,8 +13,7 @@ public class ProductPriceMapper {
         return new ProductPriceResponse(
                 Long.parseLong(objectProductPrice[0].toString()),
                 Double.parseDouble(objectProductPrice[1].toString()),
-                Double.parseDouble(objectProductPrice[2].toString()),
-                Double.parseDouble(objectProductPrice[3].toString())
+                Double.parseDouble(objectProductPrice[2].toString())
         );
     }
 

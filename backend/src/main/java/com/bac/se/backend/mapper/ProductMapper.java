@@ -17,7 +17,7 @@ public class ProductMapper {
                 object[3].toString(), // category
                 object[4].toString(), // unit
                 Double.parseDouble(object[5].toString()), // price
-                Double.parseDouble(object[6].toString()),  // discountPrice
+                Double.parseDouble(object[6].toString()), // original price
                 shipmentIds // isInShipment
         );
     }
@@ -57,8 +57,7 @@ public class ProductMapper {
                 object[1].toString(),
                 object[2].toString(),
                 Double.parseDouble(object[3].toString()),
-                Double.parseDouble(object[4].toString()),
-                object[5].toString(),
+                object[4].toString(),
                 null
         );
     }
@@ -68,8 +67,7 @@ public class ProductMapper {
                 object[0].toString(),
                 Integer.parseInt(object[1].toString()),
                 Double.parseDouble(object[2].toString()),
-                Double.parseDouble(object[3].toString()),
-                Double.parseDouble(object[4].toString())
+                Double.parseDouble(object[3].toString())
         );
     }
 }

@@ -14,7 +14,6 @@ public class ProductMobileResponse {
     private String name;
     private String image;
     private Double price;
-    private Double discountPrice;
     private String unit;
     private Long shipmentId;
 }
