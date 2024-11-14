@@ -3,7 +3,7 @@ import ApiResponse from "../types/apiResponse";
 import { OrderSchema } from "../types/orderSchema";
 import ResponsePagination from "../types/responsePagination";
 
-const createOrderService = async (itemList: any[], customerPayment : number) => {
+const createOrderService = async (itemList: any[], customerPayment : number, totalDiscount: number) => {
     try {
       console.log(itemList);
 
@@ -12,7 +12,8 @@ const createOrderService = async (itemList: any[], customerPayment : number) => 
         orderItems: itemList,
         customerPayment : customerPayment,
         isLive: true,
-        paymentType: "CASH"
+        paymentType: "CASH",
+        totalDiscount
 
       });
   

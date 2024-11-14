@@ -9,8 +9,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  InputLabel,
-  FormControl,
   Paper,
   Table,
   TableBody,
@@ -21,12 +19,17 @@ import {
   Tooltip,
   IconButton,
   Avatar,
+  Modal,
 } from "@mui/material";
-import { getCategoriesService } from "../../services/category.service";
-import { getAllProductsService } from "../../services/product.service";
+import { getAllProductsByNameService, getAllProductsService } from "../../services/product.service";
 import { GetProductSchema } from "../../types/getProductSchema";
 import { createOrderService } from "../../services/order.service";
 import AddBoxIcon from "@mui/icons-material/AddBox";
+import TextSearch from "../../components/TextSeatch";
+import { useQuery } from "@tanstack/react-query";
+import { GetPromotion } from "../../types/getPromotion";
+import { getLatestPromotion } from "../../services/promotion.service";
+import colors from "../../constants/color";
 
 interface OrderItem {
   product: GetProductSchema;
@@ -35,20 +38,18 @@ interface OrderItem {
   selectedShipment?: string;
 }
 
-interface Category {
-  name: string;
-}
-
 const OrderPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [products, setProducts] = useState<GetProductSchema[]>([]);
   const [page] = useState(1);
   const [limit] = useState(10);
   const [customerPayment, setCustomerPayment] = useState(0);
   const [customerChange, setCustomerChange] = useState(0);
+  const [latestPromotion, setLatestPromotion] = useState<GetPromotion>();
+  const [deleteConfirmOpen, setConfirmOpen] = useState(false)
+  const [deleteItem, setDeleteItem] = useState(0);
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -72,6 +73,10 @@ const OrderPage: React.FC = () => {
 
 
   const handleUpdateQuantity = (product: OrderItem, quantity: number) => {
+    if(!product.selectedShipment){
+      alert("Chưa chọn lô hàng");
+      return;
+    }
     if (quantity <= 0 || quantity > 100) {
       alert("Số lượng sản phẩm cho mỗi đơn hàng phải ít hơn 100 và lớn hơn 0");
       return;
@@ -103,19 +108,16 @@ const OrderPage: React.FC = () => {
       return;
     }
 
-
-
     const formattedOrderItems = orderItems.map(item => {
       if (item.quantity === 0 || !item.quantity) {
-        alert("Số lượng sản phẩm không hợp lệ")
-        return;
+        alert("Số lượng sản phẩm không hợp lệ");
+        return null; // Return null for invalid items
       }
       return {
         productId: item.product.id,
         quantity: item.quantity,
         shipmentId: item.selectedShipment,
-      }
-
+      };
     }).filter(item => item !== null);
 
     if (formattedOrderItems.length === 0) {
@@ -123,60 +125,43 @@ const OrderPage: React.FC = () => {
     }
 
     try {
-      const response = await createOrderService(formattedOrderItems, customerPayment);
+      let totalDiscount = 0;
+      if (latestPromotion) {
+        totalDiscount = Number(totalPayment * latestPromotion?.percentage / 100)
+
+      }
+      const response = await createOrderService(formattedOrderItems, customerPayment, totalDiscount);
       console.log("Order created:", response);
       if (response.message === 'success') {
         setOrderItems([]);
         setCustomerChange(0);
         setCustomerPayment(0);
       }
+      else {
+        alert(response.message)
+        return;
+      }
 
     } catch (error) {
       console.error("Error creating order:", error);
-      alert("An error occurred while creating the order.");
+      alert("Có lỗi khi tạo order");
     }
-  };
-
-  const fetchCategories = async () => {
-    const response = await getCategoriesService();
-    setCategories(response.data);
   };
 
   const fetchProducts = async () => {
-    const response = await getAllProductsService();
-    if (response.data) {
-      console.log(response.data);
-
-      setProducts(response.data.responseList);
+    const response = await getAllProductsByNameService(searchTerm);
+    if (!response) {
+      throw new Error("Error fetching products");
     }
+
+    return response as unknown as GetProductSchema[];
   };
 
-  useEffect(() => {
-    fetchCategories();
-    fetchProducts();
-  }, []);
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["products", searchTerm],
+    queryFn: fetchProducts,
+  });
 
-  const normalizeString = (str: string) => {
-    return str
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-  };
-
-  const filteredProducts =
-    Array.isArray(products)
-      ? products.filter(
-        (product) =>
-          normalizeString(String(product.name)).includes(normalizeString(searchTerm)) &&
-          (selectedCategory ? product.category === selectedCategory : true)
-      )
-      : [];
-
-  const startIndex = (page - 1) * limit;
-  const paginatedProducts = filteredProducts.slice(
-    startIndex,
-    startIndex + limit
-  );
   const handleUpdateShipment = async (productId: number, selectedShipment: string) => {
     console.log(selectedShipment);
     const existingItemIndex = orderItems.findIndex(
@@ -218,100 +203,125 @@ const OrderPage: React.FC = () => {
     console.log("Updated order items:", orderItems);
   };
 
-
   const isCustomerPaymentValid = (payment: number) => {
     const regex = /^(?!0)\d{0,8}$/;
     return regex.test(String(payment));
   };
 
   const updateCustomerPayment = (customerPayment: number) => {
-    if(customerPayment === 0){
+    if (customerPayment === 0) {
       setCustomerPayment(0);
       return;
     }
-    console.log(customerPayment);
     const totalPayment = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    if(isCustomerPaymentValid(customerPayment)){
+    if (isCustomerPaymentValid(customerPayment)) {
       setCustomerPayment(customerPayment);
       setCustomerChange(customerPayment - totalPayment);
     }
   };
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleSearchClick = () => {
+    refetch();
+  };
+
+  useEffect(() => {
+    if (!searchTerm) {
+      refetch();
+    }
+  }, [searchTerm, refetch]);
+
+
+  const handleGetLatestPromotion = async () => {
+    const response = await getLatestPromotion();
+    console.log(response);
+
+    if (response != null) {
+      setLatestPromotion(response);
+    }
+  }
+
+  const totalPayment = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+
+  useEffect(() => {
+    handleGetLatestPromotion();
+  }, [])
+
+const handleDeleteClose = () => {
+    setConfirmOpen(false)
+}
+
+const handleDeleteOrderItem = () => {
+  setOrderItems((prevOrderItems) => 
+    prevOrderItems.filter(item => item.product.id !== deleteItem)
+  );
+  setConfirmOpen(false)
+
+}
+
+const handleOpenDelete = (id : number) => {
+  setConfirmOpen(true)
+  setDeleteItem(id)
+}
   return (
-    <Box
-      display="flex"
-      p={3}
-      sx={{
-        backgroundColor: "#f5f5f5",
-        height: "100vh",
-      }}
-    >
-      <Box flexBasis="30%" mr={2}>
-        <TextField
-          fullWidth
-          variant="outlined"
-          label="Tìm kiếm sản phẩm..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-        <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-          <InputLabel>Danh mục</InputLabel>
-          <Select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value as string)}
-            label="Danh mục"
-            sx={{ textAlign: "left" }}
-          >
-            <MenuItem value="">Tất cả danh mục</MenuItem>
-            {categories.map((category, index) => (
-              <MenuItem key={index} value={category.name}>
-                {category.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+    <Box display="flex" p={1} sx={{ backgroundColor: "white", height: "100vh", width: '100%' }}>
+      <Box flexBasis="30%" mr={2} sx={{ backgroundColor: 'white' }}>
+        <Box display={'flex'} flexDirection={'row'} gap={1}>
+          <TextSearch
+            props={{
+              placeholder: "Nhập tên sản phẩm...",
+              state: searchTerm,
+              setState: handleSearchChange,
+            }}
+          />
+          <Button onClick={() => handleSearchClick()} color="primary" variant="contained">Tìm</Button>
+        </Box>
         <List
           sx={{
-            maxHeight: "70vh",
+            maxHeight: '70vh',
             overflowY: "auto",
-            bgcolor: "white",
             borderRadius: 2,
+            mt: 1,
+            backgroundColor: 'white',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1
           }}
         >
-          {paginatedProducts.map((product) => (
-            <ListItem key={Number(product.id)} divider>
-              <Avatar src={String(product.image)} style={{ marginRight: 16 }} />
-              <ListItemText
-                primary={`${product.name} - ${formatCurrency(Number(product.price))}`}
-                primaryTypographyProps={{
-                  style: { whiteSpace: 'normal', overflowWrap: 'break-word' },
-                  variant: 'body2',
-                }}
-              />
-              <Tooltip title="Thêm sản phẩm" arrow>
-                <IconButton
-                  onClick={() => handleAddToOrder(product)}
-                  size="large"
-                  color="success"
-                >
-                  <AddBoxIcon />
-                </IconButton>
-              </Tooltip>
-            </ListItem>
-          ))}
+          {
+            data?.map((product) => (
+              <ListItem key={Number(product.id)} divider sx={{ backgroundColor: 'white', border: 1, padding: 2, borderRadius: 5, boxShadow: 4, borderColor: 'white', height: 80 }}>
+                <Avatar src={String(product.image)} style={{ marginRight: 16 }} />
+                <ListItemText
+                  primary={`${product.name} - ${formatCurrency(Number(product.price))}`}
+                  primaryTypographyProps={{
+                    style: { whiteSpace: 'normal', overflowWrap: 'break-word' },
+
+                  }}
+                />
+                <Tooltip title="Thêm sản phẩm" arrow>
+                  <IconButton
+                    onClick={() => handleAddToOrder(product)}
+                    size="large"
+                    color="success"
+                  >
+                    <AddBoxIcon />
+                  </IconButton>
+                </Tooltip>
+              </ListItem>
+            ))
+          }
 
         </List>
       </Box>
 
       <Box flex={1}>
-        <Paper
-          elevation={3}
-          sx={{ padding: 2, borderRadius: 2, backgroundColor: "#fff" }}
-        >
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
-            Chi tiết đơn hàng
-          </Typography>
+        <Paper elevation={3} sx={{ padding: 2, borderRadius: 2, backgroundColor: "#fff" }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>Chi tiết đơn hàng</Typography>
 
           <TableContainer>
             <Table sx={{ minWidth: 650 }}>
@@ -322,6 +332,7 @@ const OrderPage: React.FC = () => {
                   <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Số lượng</TableCell>
                   <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Giá</TableCell>
                   <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}>Thành tiền</TableCell>
+                  <TableCell sx={{ textAlign: "center", fontWeight: 'bold' }}></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -357,6 +368,9 @@ const OrderPage: React.FC = () => {
                     <TableCell sx={{ textAlign: "center", padding: '16px 8px' }}>
                       {formatCurrency(item.price * item.quantity)}
                     </TableCell>
+                    <Button onClick={() => handleOpenDelete(Number(item.product.id))} sx={{mt: 3, color: 'red'}}>
+                      Xóa
+                    </Button>
                   </TableRow>
                 ))}
               </TableBody>
@@ -366,11 +380,17 @@ const OrderPage: React.FC = () => {
             <Typography sx={{ mb: 2, fontWeight: 'bold' }}>
               Tổng tiền hàng: {formatCurrency(orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0))}
             </Typography>
-            <Typography sx={{ mb: 2, fontWeight: 'bold' }}>
-              Tổng tiền giảm giá khuyến mãi: 0
-            </Typography>
-
-
+            <Box>
+              {latestPromotion != null && latestPromotion != undefined && totalPayment >= (latestPromotion?.minOrderValue) ? (
+                <Typography variant="body1" sx={{ color: 'green', fontWeight: 'bold', mb: 2 }}>
+                  Chúc mừng! Bạn đã đủ điều kiện nhận ưu đãi {latestPromotion.percentage}% cho đơn hàng từ {formatCurrency(latestPromotion.minOrderValue)}
+                </Typography>
+              ) : (
+                <Typography variant="body1" sx={{ color: 'green', fontWeight: 'bold', mb: 2 }}>
+                  Bạn chưa đủ điều kiện nhận ưu đãi {latestPromotion?.percentage}% cho đơn hàng từ {formatCurrency(Number(latestPromotion?.minOrderValue))}.
+                </Typography>
+              )}
+            </Box>
             <TextField
               fullWidth
               variant="outlined"
@@ -381,23 +401,18 @@ const OrderPage: React.FC = () => {
               }}
               sx={{ mb: 2, width: '30%' }}
             />
-            {/* <TextField
-              fullWidth
-              variant="outlined"
-              label="Tiền khách hàng đưa"
-              value={customerPayment}
-              onChange={(e) => {
-                const value = Number(e.target.value);
-                if (!isNaN(value) && value >= 0) {
-                  updateCustomerPayment(value);
-                } else {
-                  setCustomerPayment(0);
-                  setCustomerChange(0); 
-                }
-              }}
-              sx={{ mb: 2, width: '30%' }}
-            /> */}
-            <Typography sx={{ mb: 2 }}>
+
+            {latestPromotion != null && latestPromotion != undefined && totalPayment >= (latestPromotion?.minOrderValue) ? (
+              <Typography sx={{ mb: 2, fontWeight: 'bold', fontStyle: 'italic' }}>
+                Tổng tiền giảm giá khuyến mãi: {formatCurrency(Number(totalPayment * latestPromotion?.percentage / 100))}
+              </Typography>
+            ) : (
+              <Typography sx={{ mb: 2, fontWeight: 'bold', fontStyle: 'italic' }}>
+                Tổng tiền giảm giá khuyến mãi: 0
+              </Typography>
+            )}
+
+            <Typography sx={{ mb: 2, fontStyle: 'italic' }}>
               Tiền thừa: {formatCurrency(customerChange)}
             </Typography>
 
@@ -412,8 +427,75 @@ const OrderPage: React.FC = () => {
           </Box>
         </Paper>
       </Box>
+      <Modal
+            open={deleteConfirmOpen}
+            onClose={handleDeleteClose}
+            aria-labelledby="delete-category-modal"
+            aria-describedby="delete-category-modal-description"
+            sx={styles.modal}
+          >
+            <div
+              style={{
+                backgroundColor: "white",
+                padding: "10px",
+                borderRadius: "8px",
+                height: "30vh",
+                width: "30vw",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                margin: "auto",
+                flexDirection: "column",
+                gap: "30px",
+              }}
+            >
+              <h3 id="delete-category-modal">Xác nhận xóa</h3>
+              <Typography>Bạn có chắc chắn muốn xóa sản phẩm này không?</Typography>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: "40px",
+                  width: "100%",
+                  justifyContent: "center",
+                }}
+              >
+                <Button onClick={handleDeleteClose} sx={styles.closeButton}>
+                  Hủy
+                </Button>
+                <Button onClick={()=> handleDeleteOrderItem()} sx={styles.addButton}>
+                  Xóa
+                </Button>
+              </div>
+            </div>
+          </Modal>
     </Box>
   );
 };
+const styles = {
+  searchField: {
+    display: { xs: "none", md: "inline-block", sm: "flex" },
+    mr: 1,
+    width: "100%",
+    mt: 2,
+  },
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: "auto",
+  },
+  closeButton: {
+    backgroundColor: "#f0f0f0",
+    borderRadius: "8px",
+    width: "30%",
+  },
+  addButton: {
+    backgroundColor: colors.primaryColor,
+    borderRadius: "8px",
+    width: "30%",
+    color: "white",
+  },
+}
 
 export default OrderPage;
