@@ -88,7 +88,6 @@ public class ShipmentServiceImpl implements ShipmentService {
                         .product(product)
                         .originalPrice(productItem.price())
                         .price(productItem.price() + productItem.price() * DEFAULT_PROFIT)
-                        .discountPrice(0)
                         .createdAt(new Date())
                         .build();
                 productPriceService.createProductPrice(newPrice);
@@ -99,7 +98,6 @@ public class ShipmentServiceImpl implements ShipmentService {
                         .product(product)
                         .originalPrice(productItem.price())
                         .price(productItem.price() + productItem.price() * DEFAULT_PROFIT)
-                        .discountPrice(0)
                         .createdAt(new Date())
                         .build();
                 productPriceService.createProductPrice(newPrice);

@@ -19,8 +19,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    p.image,  " +
             "    c.name as category,  " +
             "    u.name as unit, " +
-            "   COALESCE(pp.price, 0) AS latest_price,      " +
-            "   COALESCE(pp.discount_price, 0) AS discount_price " +
+            "   COALESCE(pp.price, 0) AS latest_price," +
+            "   COALESCE(pp.original_price, 0) AS original_price " +
             "FROM   " +
             "    t_product p  " +
             "INNER JOIN  " +
@@ -49,7 +49,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    c.name as category,  " +
             "    u.name as unit," +
             "   COALESCE(pp.price, 0) AS latest_price,      " +
-            "   COALESCE(pp.discount_price, 0) AS discount_price " +
+            "   COALESCE(pp.original_price, 0) AS original_price " +
             "FROM   " +
             "    t_product p  " +
             "INNER JOIN  " +
@@ -92,11 +92,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    p.product_id," +
             "    p.name,      " +
             "    p.image,   " +
-            "   COALESCE(pp.price, 0) AS latest_price,      " +
-            "   COALESCE(pp.discount_price, 0) AS discount_price, u.name " +
+            "   COALESCE(pp.price, 0) AS latest_price, u.name   " +
             "FROM       " +
             "    t_product p      " +
-            "LEFT JOIN       " +
+            "INNER JOIN       " +
             "    t_product_price pp ON p.product_id = pp.product_id       " +
             "                       AND pp.created_at = (      " +
             "                           SELECT MAX(sub_pp.created_at)      " +
@@ -119,7 +118,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "FROM       " +
             "    t_product p      " +
             "INNER JOIN t_unit u ON u.unit_id = p.unit_id " +
-            "LEFT JOIN       " +
+            "INNER JOIN       " +
             "    t_product_price pp ON p.product_id = pp.product_id       " +
             "                       AND pp.created_at = (      " +
             "                           SELECT MAX(sub_pp.created_at)      " +
@@ -145,7 +144,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    t_category c on c.category_id = p.category_id  " +
             "INNER JOIN  " +
             "    t_unit u on p.unit_id = u.unit_id  " +
-            "LEFT JOIN   " +
+            "INNER JOIN   " +
             "    t_product_price pp ON p.product_id = pp.product_id   " +
             "                       AND pp.created_at = (  " +
             "                           SELECT MAX(sub_pp.created_at)  " +

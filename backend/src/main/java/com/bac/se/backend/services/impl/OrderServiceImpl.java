@@ -156,10 +156,10 @@ public class OrderServiceImpl implements OrderService {
                 throw new ResourceNotFoundException("Không tìm thấy lô hàng");
             }
             ShipmentItemKey key = ShipmentItemKey.builder().product(product).shipment(shipment).build();
-            //   Kiểm tra sản phẩm nào có tồn tại trong lô hàng nào không
+            //   check if product exist in shipment
             var shipmentItem = shipmentItemRepository.findById(key).orElseThrow(() -> new ResourceNotFoundException("Không tìm lô của sản phẩm"));
 
-            // Kiểm tra sản phẩm đã hết hạn
+            // check if product is expired
             if (shipmentItem.getExp().before(new Date())) {
                 throw new BadRequestUserException("Sản phẩm đã hết hạn");
             }
@@ -167,33 +167,35 @@ public class OrderServiceImpl implements OrderService {
             minusStock(orderItemRequest.shipmentId(), orderItemRequest.productId(), orderItemRequest.quantity());
             ProductPriceResponse productPriceResponse = productPriceResponseMap.get(productId);
             double price = productPriceResponse.price();
-            double discountPrice = productPriceResponse.discountPrice();
-            double totalPrice = 0;
-            // Check if product has discount or not
-            if (discountPrice > 0) {
-                totalPrice += discountPrice * orderItemRequest.quantity();
-            } else {
-                totalPrice += price * orderItemRequest.quantity();
-            }
+            double amount = price * orderItemRequest.quantity();
+
+            ProductPrice productPrice = productPriceService.getProductPriceById(productPriceResponse.productPriceId());
+
             if (map.containsKey(productId)) {
                 map.put(productId, map.get(productId) + orderItemRequest.quantity());
                 // increment quantity if product duplicate name
-                double finalTotalPrice = totalPrice;
+                double finalAmount = price * map.get(productId);
                 orderItemResponses.replaceAll(response -> Objects.equals(response.name(), product.getName()) ?
-                        new ProductOrderItemResponse(response.name(), response.quantity() + orderItemRequest.quantity(), price, discountPrice, response.totalPrice() + finalTotalPrice)
+                        new ProductOrderItemResponse(response.name(), response.quantity() + orderItemRequest.quantity(), price, finalAmount)
                         : response);
             } else {
                 map.put(productId, orderItemRequest.quantity());
-                orderItemResponses.add(new ProductOrderItemResponse(product.getName(), orderItemRequest.quantity(), price, discountPrice, totalPrice));
+                orderItemResponses.add(new ProductOrderItemResponse(product.getName(), orderItemRequest.quantity(), price, amount));
             }
-            OrderItem orderItem = OrderItem.builder().order(orderSave).product(product).shipment(shipment).quantity(orderItemRequest.quantity()).totalPrice(BigDecimal.valueOf(totalPrice)).build();
+            OrderItem orderItem = OrderItem.builder()
+                    .order(orderSave)
+                    .product(product)
+                    .shipment(shipment)
+                    .quantity(orderItemRequest.quantity())
+                    .productPrice(productPrice)
+                    .amount(BigDecimal.valueOf(amount)).build();
             orderItemRepository.save(orderItem);
-            total = total.add(BigDecimal.valueOf(totalPrice));
+            total = total.add(BigDecimal.valueOf(amount));
         }
-        double roundTotalPrice = (double) Math.round(total.doubleValue() * 100) / 100;
-        double change = orderRequest.customerPayment() - roundTotalPrice - orderSave.getTotalDiscount().doubleValue();
+        double roundTotal = (double) Math.round(total.doubleValue() * 100) / 100;
+        double change = orderRequest.customerPayment() - roundTotal - orderSave.getTotalDiscount().doubleValue();
         double roundChange = (double) Math.round(change * 100) / 100;
-        return new CreateOrderResponse(orderItemResponses,roundTotalPrice, orderRequest.customerPayment(), roundChange);
+        return new CreateOrderResponse(orderItemResponses,roundTotal, orderRequest.customerPayment(), roundChange);
     }
 
     @Override
@@ -275,8 +277,11 @@ public class OrderServiceImpl implements OrderService {
         }
         var orderItemResponse = orderMapper.mapToOrderItemResponse(orderById.get(0));
         var products = orderItemRepository.getProductInOrderItem(orderId);
-        var productList = products.stream().map(productMapper::mapToProductOrderItemResponse);
-        orderItemResponse.orderItemResponses().addAll(productList.toList());
+        var productList = products.stream().map(productMapper::mapToProductOrderItemResponse).toList();
+        for (var product : productList) {
+            log.info("product is {}", product);
+        }
+        orderItemResponse.orderItemResponses().addAll(productList);
         return orderItemResponse;
 
     }

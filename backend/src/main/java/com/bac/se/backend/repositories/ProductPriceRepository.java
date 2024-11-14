@@ -11,8 +11,7 @@ public interface ProductPriceRepository extends JpaRepository<ProductPrice, Long
     @Query(value = "SELECT " +
             "    pp.product_price_id, " +
             "    pp.original_price, " +
-            "    pp.price AS latest_price, " +
-            "    pp.discount_price " +
+            "    pp.price AS latest_price " +
             "FROM " +
             "    t_product p " +
             "INNER JOIN " +

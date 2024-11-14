@@ -18,6 +18,6 @@ public class ProductResponse {
     private String category;
     private String unit;
     private double price;
-    private double discountPrice;
+    private double originalPrice;
     private List<Long> shipmentIds;
 }

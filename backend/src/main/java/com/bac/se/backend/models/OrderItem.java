@@ -18,8 +18,13 @@ import java.math.BigDecimal;
 @Table(name = "t_order_item")
 public class OrderItem {
     private int quantity;
-    private BigDecimal totalPrice;
+    private BigDecimal amount;
     private String note;
+
+    @ManyToOne
+    @JoinColumn(name = "product_price_id")
+    private ProductPrice productPrice;
+
     @Id
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id")
@@ -34,4 +39,5 @@ public class OrderItem {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "shipment_id")
     private Shipment shipment;
+
 }

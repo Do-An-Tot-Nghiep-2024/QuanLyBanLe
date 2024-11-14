@@ -17,7 +17,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "    e.name, " +
             "    o.order_status, " +
             "    o.payment_type, " +
-            "    SUM(oi.total_price) as total, " +
+            "    SUM(oi.amount) as total, " +
             "    o.total_discount, " +
             "    o.customer_payment, " +
             "    o.created_at, " +
@@ -46,7 +46,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(value = "select o.order_id as orderId, e.name as emp,o.order_status as status," +
             "o.payment_type as paymentType," +
-            "sum(oi.total_price) as total, o.created_at as createdAt," +
+            "sum(oi.amount) as total, o.created_at as createdAt," +
             "COALESCE(c.phone,'') as customerPhone " +
             "from t_order o " +
             "join t_order_item oi on oi.order_id = o.order_id " +
@@ -64,7 +64,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("phone") String phone);
 
     @Query(value = "select o.order_id, e.name as emp,o.order_status,o.payment_type," +
-            "sum(oi.total_price) as total, o.created_at," +
+            "sum(oi.amount) as total, o.created_at," +
             "COALESCE(c.phone,'') as customer_phone " +
             "from t_order o " +
             "join t_order_item oi on oi.order_id = o.order_id " +

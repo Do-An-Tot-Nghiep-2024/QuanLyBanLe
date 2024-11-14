@@ -20,7 +20,7 @@ public class ProductPriceServiceImpl implements ProductPriceService {
     public ProductPriceResponse getPriceLatest(Long productId) {
             var productPriceLatest = productPriceRepository.getProductPriceLatest(productId, PageRequest.of(0, 1));
             if (productPriceLatest.isEmpty()) {
-                return new ProductPriceResponse(0L, 0, 0, 0);
+                return new ProductPriceResponse(0L, 0, 0);
             }
             return productPriceMapper.mapObjectToProductPriceResponse(productPriceLatest.get(0));
         }

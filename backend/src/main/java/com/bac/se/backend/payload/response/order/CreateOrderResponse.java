@@ -4,7 +4,7 @@ import java.util.List;
 
 public record CreateOrderResponse(
         List<ProductOrderItemResponse> orderItemResponses,
-        double totalPrice,
+        double total,
         double customerPayment,
         double change
 ) {
