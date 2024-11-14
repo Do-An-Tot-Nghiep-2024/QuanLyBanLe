@@ -21,13 +21,12 @@ class ProductPriceMapperTest {
 
     @Test
     void mapObjectToProductPriceResponse() {
-        Object[] objectProductPrice = new Object[]{"1","100.00", "200.00", "300.00"};
+        Object[] objectProductPrice = new Object[]{"1","100.00", "200.00"};
         ProductPriceMapper productPriceMapper = new ProductPriceMapper();
         ProductPriceResponse productPriceResponse = productPriceMapper.mapObjectToProductPriceResponse(objectProductPrice);
         assertNotNull(productPriceResponse);
         assertEquals(100.00, productPriceResponse.originalPrice());
         assertEquals(200.00, productPriceResponse.price());
-        assertEquals(300.00, productPriceResponse.discountPrice());
     }
 
 
