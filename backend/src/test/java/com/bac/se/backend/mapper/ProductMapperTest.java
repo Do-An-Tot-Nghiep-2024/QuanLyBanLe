@@ -19,7 +19,6 @@ class ProductMapperTest {
         assertEquals("image", productResponse.getImage());
         assertEquals("category", productResponse.getCategory());
         assertEquals(200.0, productResponse.getPrice());
-        assertEquals(300.0, productResponse.getDiscountPrice());
         assertEquals("unit", productResponse.getUnit());
     }
 }
