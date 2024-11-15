@@ -21,7 +21,7 @@ public class DashboardController {
     @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<DashboardResponse>> getDashboard() {
         try{
-            return ResponseEntity.ok(new ApiResponse<>("success", dashboardService.getDashboard()));
+            return ResponseEntity.ok(new ApiResponse<>("success", dashboardService. getDashboard()));
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));

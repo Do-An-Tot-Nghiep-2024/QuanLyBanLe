@@ -55,7 +55,6 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrderLive(@RequestBody OrderRequest orderRequest, HttpServletRequest request) {
-
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>(REQUEST_SUCCESS, orderService.createOrder(orderRequest, request)));
@@ -101,6 +100,7 @@ public class OrderController {
     }
 
     @GetMapping("/employee/{id}")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrdersByEmployee(
             @PathVariable("id") Long id,
             @RequestParam(defaultValue = "0") Integer pageNumber,
@@ -122,6 +122,7 @@ public class OrderController {
 
 
     @GetMapping("/customer-detail/{orderId}")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<ApiResponse<OrderCustomerResponse>> getOrderCustomerDetail(@PathVariable("orderId") Long orderId) {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrderDetailByCustomer(orderId)));
@@ -135,7 +136,9 @@ public class OrderController {
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<ApiResponse<String>> updateOrderStatus(@PathVariable("id") Long orderId, @RequestParam("orderStatus") String orderStatus) {
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'EMPLOYEE')")
+    public ResponseEntity<ApiResponse<String>> updateOrderStatus(@PathVariable("id") Long orderId,
+                                                                 @RequestParam("orderStatus") String orderStatus) {
         try {
             orderService.updateOrderStatus(orderId, orderStatus);
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderStatus));

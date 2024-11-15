@@ -41,7 +41,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('EMPLOYEE') or hasAuthority('MANAGER')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<EmployeeResponse>> getEmployee(@PathVariable("id") Long id) {
         try {
             EmployeeResponse employee = employeeService.getEmployee(id);

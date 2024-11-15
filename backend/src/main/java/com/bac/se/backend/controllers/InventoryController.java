@@ -30,7 +30,7 @@ public class InventoryController {
 
 
     @GetMapping("/shipments")
-    @PreAuthorize("hasAuthority('MANAGER')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<List<ProductShipmentResponse>>> getShipments() {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, shipmentService.getShipments()));

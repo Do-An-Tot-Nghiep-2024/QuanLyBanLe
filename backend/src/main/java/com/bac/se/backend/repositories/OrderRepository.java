@@ -86,6 +86,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "where o.order_id = :orderId;", nativeQuery = true)
     List<Object[]> getEmployeeByOrderId(Long orderId);
 
-    @Query(value = "select count(*) from t_order where order_status = 'COMPLETED'",nativeQuery = true)
-    long getTotalQuantityOrder();
+    @Query(value = "SELECT COUNT(o.order_id) FROM t_order o WHERE o.order_status = 'COMPLETED'",nativeQuery = true)
+    long getTotalOrders();
 }
