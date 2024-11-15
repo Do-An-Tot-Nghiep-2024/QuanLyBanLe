@@ -29,6 +29,7 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import ViewColumnIcon from "@mui/icons-material/ViewColumn";
 import { Badge, Stack } from "@mui/material";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import logo from "../assets/images/logo.png";
 const NAVIGATION: Navigation = [
   {
     segment: "dashboard",
@@ -58,18 +59,13 @@ const NAVIGATION: Navigation = [
     icon: <InventoryIcon />,
     children: [
       {
-        segment: "create-inventory",
-        title: "Tạo hóa đơn nhập hàng",
-        icon: <AddBusinessIcon />,
-      },
-      {
         segment: "import-invoices",
-        title: "Hóa đơn nhập hàng",
+        title: "Quản lí đơn nhập hàng",
         icon: <ReceiptIcon />,
       },
       {
         segment: "shipment",
-        title: "Quản lý lô hàng",
+        title: "Quản lí lô hàng",
         icon: <WarehouseIcon />,
       },
     ],
@@ -81,7 +77,7 @@ const NAVIGATION: Navigation = [
     children: [
       {
         segment: "",
-        title: "Danh sách sản phẩm",
+        title: "Quản lí sản phẩm",
         icon: <WarehouseIcon />,
       },
       {
@@ -89,13 +85,14 @@ const NAVIGATION: Navigation = [
         title: "Quản lí danh mục",
         icon: <AddBusinessIcon />,
       },
+      {
+        segment: "units",
+        title: "Quản lí đơn vị tính",
+        icon: <ViewColumnIcon />,
+      },
     ],
   },
-  {
-    segment: "units",
-    title: "Đơn vị tính",
-    icon: <ViewColumnIcon />,
-  },
+
   {
     segment: "suppliers",
     title: "Nhà cung cấp",
@@ -204,11 +201,7 @@ const demoTheme = createTheme({
   },
 });
 const Logo = () => (
-  <img
-    src="https://res.cloudinary.com/dujylxkra/image/upload/c_thumb,w_200,g_face/v1729824625/logo-product_imja18.png"
-    alt="logo"
-    style={{ width: "100%", borderRadius: "50%" }}
-  />
+  <img src={logo} alt="logo" style={{ width: "100%", borderRadius: "50%" }} />
 );
 function Search() {
   return (
@@ -280,7 +273,7 @@ export default function Sidebar() {
       theme={demoTheme}
       branding={{
         logo: <Logo />,
-        title: "Retail Store",
+        title: "",
       }}
     >
       <DashboardLayout
@@ -294,8 +287,8 @@ export default function Sidebar() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            textAlign: "center",
-            padding: 4,
+            height: "100vh",
+            paddingTop:3
           }}
         >
           <Outlet />

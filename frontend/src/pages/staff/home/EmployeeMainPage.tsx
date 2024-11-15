@@ -1,36 +1,70 @@
-import { createTheme } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import { AppProvider } from "@toolpad/core/AppProvider";
-import DateRangeIcon from "@mui/icons-material/DateRange";
-import StoreIcon from "@mui/icons-material/Store";
-import { DashboardLayout } from "@toolpad/core/DashboardLayout";
-import type { Router, Navigation, Session } from "@toolpad/core";
-import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import SettingsIcon from "@mui/icons-material/Settings";
-import Box from "@mui/material/Box";
 import { useMemo, useState } from "react";
+import { createTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import {
+  Dashboard as DashboardIcon,
+  ShoppingCart as ShoppingCartIcon,
+  BarChart as BarChartIcon,
+  DateRange as DateRangeIcon,
+  Store as StoreIcon,
+  RecentActors as RecentActorsIcon,
+  ShoppingBag as ShoppingBagIcon,
+  Inventory as InventoryIcon,
+  Settings as SettingsIcon,
+  Logout,
+} from "@mui/icons-material";
+import { AppProvider, DashboardLayout} from "@toolpad/core";
+import type { Router, Navigation, Session } from "@toolpad/core";
+import WarehouseIcon from "@mui/icons-material/Warehouse";
 import Cookies from "js-cookie";
-import { useAppDispatch } from "../../../redux/hook";
-import { getAccount } from "../../../redux/auth/authSlice";
-
+import { Outlet, useNavigate } from "react-router-dom";
+// import ReceiptIcon from "@mui/icons-material/Receipt";
+import logo from "../../../assets/images/logo.png";
+import colors from "../../../constants/color";
+import { useAppDispatch, useAppSelector } from "../../../redux/hook";
+import { logout } from "../../../redux/auth/authSlice";
 const NAVIGATION: Navigation = [
   {
-    segment: "orders",
+    segment: "",
+    title: "Dashboard",
+    icon: <DashboardIcon />,
+  },
+  {
+    
+    segment: "staff/orders",
     title: "Đơn hàng",
     icon: <ShoppingCartIcon />,
+    children: [
+      {
+        segment: "create-order",
+        title: "Tạo đơn hàng mới",
+        icon: <WarehouseIcon />,
+      },
+    ],
   },
   {
-    segment: "inventory",
+    segment: "staff/inventory",
     title: "Kho hàng",
     icon: <InventoryIcon />,
+    children: [
+      {
+        segment: "shipment",
+        title: "Quản lí lô hàng",
+        icon: <WarehouseIcon />,
+      },
+    ],
   },
   {
-    segment: "product",
+    segment: "staff/products",
     title: "Sản phẩm",
     icon: <StoreIcon />,
+    // children: [
+    //   {
+    //     segment: "",
+    //     title: "Danh sách sản phẩm",
+    //     icon: <WarehouseIcon />,
+    //   },
+    // ],
   },
   {
     segment: "reports",
@@ -38,9 +72,14 @@ const NAVIGATION: Navigation = [
     icon: <BarChartIcon />,
     children: [
       {
-        segment: "following products",
+        segment: "product",
         title: "Theo sản phẩm",
         icon: <ShoppingBagIcon />,
+      },
+      {
+        segment: "employee",
+        title: "Theo nhân viên",
+        icon: <RecentActorsIcon />,
       },
       {
         segment: "date",
@@ -54,6 +93,11 @@ const NAVIGATION: Navigation = [
     title: "Cài đặt",
     icon: <SettingsIcon />,
   },
+  {
+    segment: "logout",
+    title: "Đăng xuất",
+    icon: <Logout />,
+  },
 ];
 
 const demoTheme = createTheme({
@@ -64,16 +108,16 @@ const demoTheme = createTheme({
     light: {
       palette: {
         background: {
-          default: "#F9F9FE",
-          paper: "#EEEEF9",
+          default: "#fff",
+          paper: "#fff",
         },
       },
     },
     dark: {
       palette: {
         background: {
-          default: "#464667",
-          paper: "#464667",
+          default: colors.dark,
+          paper: colors.dark,
         },
       },
     },
@@ -87,59 +131,49 @@ const demoTheme = createTheme({
       xl: 1536,
     },
   },
+  components: {
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          fontSize: "16px",
+        },
+      },
+    },
+  },
 });
+const Logo = () => (
+  <img src={logo} alt="logo" style={{ width: "100%", borderRadius: "50%" }} />
+);
 
-function DemoPageContent({ pathname }: { pathname: string }) {
-  return (
-    <Box
-      sx={{
-        py: 4,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        textAlign: "center",
-      }}
-    >
-      <Typography>Dashboard content for {pathname}</Typography>
-    </Box>
-  );
-}
-
-interface DemoProps {
-  /**
-   * Injected by the documentation to work in an iframe.
-   * Remove this when copying and pasting into your project.
-   */
-  window?: () => Window;
-}
-
-export default function EmployeeMainPage(props: DemoProps) {
-  const { window } = props;
+export default function Sidebar() {
+  const auth = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
-
+  const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>({
     user: {
-      name: "Bharat Kashyap",
-      email: "bharatkashyap@outlook.com",
-      image: "https://avatars.githubusercontent.com/u/19550456",
+      name: auth.usename,
+      image: "https://avatar.iran.liara.run/public/job/designer/male",
     },
   });
+  const clearToken = () => {
+    setSession(null);
+    Cookies.remove("accessToken");
+    navigate("/login");
+    dispatch(logout());
+  };
 
   const authentication = useMemo(() => {
     return {
       signIn: () => {
         setSession({
           user: {
-            name: "Bharat Kashyap",
-            email: "bharatkashyap@outlook.com",
-            image: "https://avatars.githubusercontent.com/u/19550456",
+            name: "",
+            image: "https://ui-avatars.com/api/?name=Admin",
           },
         });
       },
       signOut: () => {
-        setSession(null);
-        Cookies.remove("accessToken");
-        dispatch(getAccount());
+        clearToken();
       },
     };
   }, []);
@@ -149,12 +183,18 @@ export default function EmployeeMainPage(props: DemoProps) {
     return {
       pathname,
       searchParams: new URLSearchParams(),
-      navigate: (path) => setPathname(String(path)),
+      navigate: (path) => {
+        if (path === "/logout") {
+          clearToken();
+        } else {
+          console.log(path);
+            setPathname(String(path));
+            navigate(path);
+          
+        }
+      },
     };
   }, [pathname]);
-
-  // Remove this const when copying and pasting into your project.
-  const demoWindow = window !== undefined ? window() : undefined;
 
   return (
     // preview-start
@@ -164,13 +204,25 @@ export default function EmployeeMainPage(props: DemoProps) {
       navigation={NAVIGATION}
       router={router}
       theme={demoTheme}
-      window={demoWindow}
       branding={{
-        title: "Retail Store",
+        logo: <Logo />,
+        title: "",
       }}
     >
-      <DashboardLayout>
-        <DemoPageContent pathname={pathname} />
+      <DashboardLayout
+      >
+        <Box
+          component={"main"}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            height: "100vh",
+            pt:3
+          }}
+        >
+          <Outlet />
+        </Box>
       </DashboardLayout>
     </AppProvider>
     // preview-end

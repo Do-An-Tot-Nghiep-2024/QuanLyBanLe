@@ -24,6 +24,7 @@ public class CategoryController {
 
 
     @GetMapping
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getCategories() {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS,

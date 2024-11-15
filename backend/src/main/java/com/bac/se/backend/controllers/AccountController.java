@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +44,7 @@ public class AccountController {
     }
 
     @PostMapping("/createAccount")
+    @PreAuthorize("hasAuthority('EMPLOYEE')")
     public ResponseEntity<ApiResponse<EmployeeAccountResponse>> createAccountEmployee(@RequestBody EmployeeAccountRequest accountRequest) {
         log.info("Request is {}", accountRequest);
         try {

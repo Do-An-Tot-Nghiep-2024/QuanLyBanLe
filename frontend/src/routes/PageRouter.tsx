@@ -26,11 +26,12 @@ const Sidebar = lazy(() => import("../layout/Sidebar"));
 const CategoryPage = lazy(() => import("../pages/product/CategoryPage"));
 const ProductPage = lazy(() => import("../pages/product/ProductPage"));
 const UpdateProduct = lazy(() => import("../pages/product/UpdateProduct"));
-const CreatePromotion = lazy(()=> import("../pages/promotion/CreatePromotion"))
-const PromotionPage = lazy(() => import('../pages/promotion/PromotionPage'))
-const UnitManagement = lazy(() => import('../pages/product/UnitPage'))
-const OrderList = lazy(() => import('../pages/order/OrderList'))
-
+const CreatePromotion = lazy(
+  () => import("../pages/promotion/CreatePromotion")
+);
+const PromotionPage = lazy(() => import("../pages/promotion/PromotionPage"));
+const UnitManagement = lazy(() => import("../pages/product/UnitPage"));
+const OrderList = lazy(() => import("../pages/order/OrderList"));
 
 const ShipmentPage = lazy(() => import("../pages/inventory/ShipmentPage"));
 
@@ -63,8 +64,11 @@ const InventoryDetailPage = lazy(
 // const OrderPage1 = lazy(() => import("../pages/order/OrderPage1"));
 // const OrderPage2 = lazy(() => import("../pages/order/OrderPage2"));
 
+const DashboardEmployee = lazy(() => import("../pages/staff/home/Dashboard"));
 
 const UnitPage = lazy(() => import("../pages/unit/UnitPage"));
+
+const CustomerPage = lazy(() => import("../pages/customer/CustomerPage"));  
 
 const PrintImportInvoice = lazy(
   () => import("../pages/print/PrintImportInvoice")
@@ -125,7 +129,15 @@ const PageRouter = () => {
               />
             }
           >
-            <Route path="/" element={<EmployeeMain />} />
+            <Route element={<EmployeeMain />}>
+              <Route path="/" element={<DashboardEmployee />} />
+              <Route
+                path="/staff/orders/create-order"
+                element={<OrderTabs />}
+              />
+              <Route path="/staff/products" element={<ProductPage />} />
+              <Route path="/staff/inventory/shipment" element={<ShipmentPage />} />
+            </Route>
           </Route>
           {/* route for manager */}
           <Route
@@ -157,6 +169,8 @@ const PageRouter = () => {
               <Route path="/update-employee/:id" element={<UpdateEmployee />} />
 
               <Route path="/units" element={<UnitPage />} />
+              <Route path="/customers" element={<CustomerPage />} />
+
               {/* Static pages */}
               <Route path="/reports/product" element={<StatisticsProduct />} />
               <Route
@@ -179,11 +193,6 @@ const PageRouter = () => {
               <Route path="/order2" element={<OrderPage2 />} /> */}
               <Route path="/orders" element={<OrderList />} />
 
-
-
-
-
-
               <Route
                 path="/inventory/create-inventory"
                 element={<CreateInventoryOrder />}
@@ -193,8 +202,11 @@ const PageRouter = () => {
                 element={<PrintImportInvoice />}
               />
               <Route path="/inventory/shipment" element={<ShipmentPage />} />
-              <Route path="/promotions/create-promotion" element={<CreatePromotion />}/>
-              <Route path="/promotions" element={<PromotionPage/>}/>
+              <Route
+                path="/promotions/create-promotion"
+                element={<CreatePromotion />}
+              />
+              <Route path="/promotions" element={<PromotionPage />} />
             </Route>
           </Route>
           {/* Not found page */}

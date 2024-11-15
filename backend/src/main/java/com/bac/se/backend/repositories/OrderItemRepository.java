@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemKey> {
 
-    @Query(value = "select sum(total_price) from t_order_item",nativeQuery = true)
-    double getTotalPriceOrder();
-
+    @Query(value = "select sum(oi.amount) from t_order_item oi " +
+            "inner join t_order o on o.order_id = oi.order_id where o.order_status = 'COMPLETED'",nativeQuery = true)
+    double getTotalSales();
 
     @Query(value = "select p.name, SUM(oi.total_price) from t_order_item oi " +
             "inner join t_product p on p.product_id = oi.product_id " +
@@ -26,11 +26,18 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
     List<Object[]> salesStatisticsByEmployee();
 
 
+    @Query(value = "SELECT p.name,oi.quantity,pp.price,oi.amount FROM t_order_item oi " +
+            "INNER JOIN t_product p ON p.product_id = oi.product_id " +
+            "INNER JOIN t_product_price pp ON pp.product_price_id = oi.product_price_id " +
+            "WHERE oi.order_id = ?1",nativeQuery = true)
+    List<Object[]> getProductInOrderItemWeb(Long orderId);
+
+
     @Query(value = "SELECT p.name,SUM(oi.quantity),pp.price,SUM(oi.amount) FROM t_order_item oi " +
             "INNER JOIN t_product p ON p.product_id = oi.product_id " +
             "INNER JOIN t_product_price pp ON pp.product_price_id = oi.product_price_id " +
             "WHERE oi.order_id = ?1 GROUP BY p.name,pp.price",nativeQuery = true)
-    List<Object[]> getProductInOrderItem(Long orderId);
+    List<Object[]> getProductInOrderItemMobile(Long orderId);
 
 
 

@@ -50,8 +50,8 @@ export default function EmployeePage() {
   const [sortField, setSortField] = useState<keyof Employee | null>("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchTerm, setSearchTerm] = useState("");
-  const [page] = useState(0); // Removed setPage since it's not used
-  const [limit] = useState(5);
+  const [page,setPage] = useState(0); // Removed setPage since it's not used
+  const [limit,setLimit] = useState(5);
   const getEmployees = async () => {
     const response = await getEmployeesService(page, limit);
     let sortedEmployees = response.data.responseList;
@@ -82,6 +82,14 @@ export default function EmployeePage() {
   const handleDeleteClick = (employee: Employee) => {
     setEmployeeToDelete(employee);
     setConfirmOpen(true);
+  };
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLimit(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   const handleDelete = async () => {
@@ -120,8 +128,9 @@ export default function EmployeePage() {
 
   useEffect(() => {
     getEmployees();
-  }, [sortField, sortOrder, searchTerm]);
-
+  }, [sortField, sortOrder, searchTerm,page,limit]);
+  console.log(employees);
+  
   return (
     <>
       <Typography
@@ -244,10 +253,10 @@ export default function EmployeePage() {
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={5}
                   count={employees.length}
-                  rowsPerPage={10}
-                  page={0}
-                  onPageChange={() => {}}
-                  onRowsPerPageChange={() => {}}
+                  rowsPerPage={limit}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
                 />
               </TableRow>
             </TableFooter>
