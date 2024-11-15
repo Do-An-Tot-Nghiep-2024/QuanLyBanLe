@@ -5,6 +5,6 @@ import java.util.List;
 
 public record OrderCustomerResponse(String employeeName,
                                     String employeePhone,
-                                    List<ProductOrderItemResponse> queryResponses,
+                                    List<ProductOrderItemResponse> orderItems,
                                     BigDecimal total) {
 }

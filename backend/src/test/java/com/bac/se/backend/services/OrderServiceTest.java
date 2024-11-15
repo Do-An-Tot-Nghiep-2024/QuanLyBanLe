@@ -211,22 +211,23 @@ class OrderServiceTest {
 
     @Test
     void getOrdersByCustomer() {
-        Long customerId = 1L;
         int pageNumber = 0;
         int pageSize = 10;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         List<Object[]> orderList = List.of(new Object[]{}, new Object[]{});
-        Page<Object[]> ordersPage = new PageImpl<>(orderList, pageable, 1);
-
-        when(orderRepository.getOrdersByCustomer(customerId, pageable)).thenReturn(ordersPage);
+            Page<Object[]> ordersPage = new PageImpl<>(orderList, pageable, 1);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        String phone = "123456789";
+        when(jwtParse.decodeTokenWithRequest(request)).thenReturn("123456789");
+        when(orderRepository.getOrdersByCustomer(phone, pageable)).thenReturn(ordersPage);
         when(orderMapper.mapObjectToResponse(any(Object[].class))).thenReturn(mock(OrderResponse.class));
-        PageResponse<OrderResponse> result = orderService.getOrdersByCustomer(customerId, pageNumber, pageSize);
+        PageResponse<OrderResponse> result = orderService.getOrdersByCustomer(request, pageNumber, pageSize);
 
         assertEquals(2, result.getTotalElements());
         assertEquals(0, result.getPageNumber());
         assertEquals(1, result.getTotalPages());
         assertTrue(result.isLastPage());
-        verify(orderRepository, times(1)).getOrdersByCustomer(customerId, pageable);
+        verify(orderRepository, times(1)).getOrdersByCustomer(phone, pageable);
         verify(orderMapper, times(orderList.size())).mapObjectToResponse(any());
     }
 

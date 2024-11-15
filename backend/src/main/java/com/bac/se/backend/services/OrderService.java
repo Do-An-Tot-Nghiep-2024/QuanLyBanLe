@@ -19,9 +19,9 @@ public interface OrderService {
                                           String fromDate, String toDate,
                                           String orderBy,String order,String status,String customerPhone) throws ParseException;
 
-    PageResponse<OrderResponse> getOrdersByCustomer(Long customerId, int pageNumber, int pageSize);
+    PageResponse<OrderResponse> getOrdersByCustomer(HttpServletRequest request, Integer pageNumber, Integer pageSize);
 
-    PageResponse<OrderResponse> getOrdersByEmployee(Long employeeId,
+    PageResponse<OrderResponse> getOrdersByEmployee(HttpServletRequest request,
                                                     Integer pageNumber,
                                                     Integer pageSize,
                                                     String fromDate,

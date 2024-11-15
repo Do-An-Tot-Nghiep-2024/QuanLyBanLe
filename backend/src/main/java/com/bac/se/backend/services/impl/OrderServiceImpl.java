@@ -229,9 +229,12 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public PageResponse<OrderResponse> getOrdersByCustomer(Long id, int pageNumber, int pageSize) {
+    public PageResponse<OrderResponse> getOrdersByCustomer(HttpServletRequest request, Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        var ordersByCustomer = orderRepository.getOrdersByCustomer(id, pageable);
+        String email = jwtParse.decodeTokenWithRequest(request);
+        log.info("email is {}", email);
+        var ordersByCustomer = orderRepository.getOrdersByCustomer(email, pageable);
+        log.info("ordersByCustomer size {}", ordersByCustomer.getSize());
         List<Object[]> orderList = ordersByCustomer.getContent();
         List<OrderResponse> orderResponseList = orderList.stream().map(orderMapper::mapObjectToResponse).toList();
         return new PageResponse<>(orderResponseList, pageNumber, ordersByCustomer.getTotalPages(), ordersByCustomer.getTotalElements(), ordersByCustomer.isLast());
@@ -239,11 +242,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public PageResponse<OrderResponse> getOrdersByEmployee(
-            Long employeeId, Integer pageNumber, Integer pageSize,
+            HttpServletRequest request, Integer pageNumber, Integer pageSize,
             String fromDate, String toDate) throws ParseException {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        String email = jwtParse.decodeTokenWithRequest(request);
         DateRequest dateRequest = dateConvert.convertDateRequest(fromDate, toDate);
-        var ordersByCustomer = orderRepository.getOrdersByEmployee(employeeId, pageable,
+        var ordersByCustomer = orderRepository.getOrdersByEmployee(email, pageable,
                 dateRequest.fromDate(),dateRequest.toDate());
         List<Object[]> orderList = ordersByCustomer.getContent();
         List<OrderResponse> orderResponseList = orderList.stream().map(orderMapper::mapObjectToResponse).toList();
