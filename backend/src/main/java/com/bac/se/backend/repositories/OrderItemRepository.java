@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemKey> {
 
-    @Query(value = "select sum(total_price) from t_order_item",nativeQuery = true)
-    double getTotalPriceOrder();
-
+    @Query(value = "select sum(oi.amount) from t_order_item oi " +
+            "inner join t_order o on o.order_id = oi.order_id where o.order_status = 'COMPLETED'",nativeQuery = true)
+    double getTotalSales();
 
     @Query(value = "select p.name, SUM(oi.total_price) from t_order_item oi " +
             "inner join t_product p on p.product_id = oi.product_id " +

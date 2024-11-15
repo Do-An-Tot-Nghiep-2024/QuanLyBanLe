@@ -19,8 +19,8 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public DashboardResponse getDashboard() {
         long totalCustomers = customerRepository.count();
-        double totalSales = orderItemRepository.getTotalPriceOrder();
-        long totalQuantityOrder = orderRepository.getTotalQuantityOrder();
-        return new DashboardResponse(totalQuantityOrder, totalSales, totalCustomers);
+        double totalSales = orderItemRepository.getTotalSales();
+        long totalOrders = orderRepository.getTotalOrders();
+        return new DashboardResponse(totalOrders, totalSales, totalCustomers);
     }
 }

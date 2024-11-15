@@ -38,7 +38,6 @@ public class PromotionController {
         }
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PromotionResponse>> getPromotionById(@PathVariable("id") Long id) {
         try {
@@ -50,7 +49,6 @@ public class PromotionController {
     }
 
     @GetMapping("/latest")
-    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<LatestPromotionResponse>> getLatestPromotion() {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_ACCEPT, promotionService.getLatestPromotion()));
