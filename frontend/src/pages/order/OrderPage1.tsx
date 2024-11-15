@@ -21,7 +21,7 @@ import {
   Avatar,
   Modal,
 } from "@mui/material";
-import { getAllProductsByNameService, getAllProductsService } from "../../services/product.service";
+import { getAllProductsByNameService } from "../../services/product.service";
 import { GetProductSchema } from "../../types/getProductSchema";
 import { createOrderService } from "../../services/order.service";
 import AddBoxIcon from "@mui/icons-material/AddBox";

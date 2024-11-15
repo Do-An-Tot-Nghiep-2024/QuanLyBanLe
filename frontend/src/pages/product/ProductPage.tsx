@@ -34,10 +34,12 @@ import ResponsePagination from "../../types/responsePagination";
 import { useQuery } from "@tanstack/react-query";
 import { GetProductSchema } from "../../types/getProductSchema";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import { useAppSelector } from "../../redux/hook";
 // import * as XLSX from "xlsx";
 
 export default function ProductPage() {
   const navigate = useNavigate();
+  const auth = useAppSelector((state) => state.auth);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -135,7 +137,6 @@ export default function ProductPage() {
     .concat("All")
     .sort();
 
-
   // const normalizeString = (str: string) => {
   //   return str
   //     .normalize("NFD")
@@ -151,14 +152,12 @@ export default function ProductPage() {
   //     )
   //   : [];
 
-
   // const filteredProducts =
   //   selectedCategory === "All" && !searchTerm
   //     ? data?.responseList
   //     : data?.responseList.filter(
-  //       (product) => product.category === selectedCategory 
+  //       (product) => product.category === selectedCategory
   //     );
-
 
   const normalizeString = (str: string) => {
     return str
@@ -166,24 +165,27 @@ export default function ProductPage() {
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase();
   };
-  
+
   // Assuming `products` is your array of product objects
   const filteredProducts = Array.isArray(data?.responseList)
     ? data?.responseList.filter((product) => {
-        const matchesSearchTerm = normalizeString(String(product.name)).includes(normalizeString(searchTerm));
-  
+        const matchesSearchTerm = normalizeString(
+          String(product.name)
+        ).includes(normalizeString(searchTerm));
+
         // Check if the selected category is "All"
         if (selectedCategory === "All") {
           // Only return products that match the search term
           return searchTerm ? matchesSearchTerm : true; // If no search term, return all
         } else {
           // If a specific category is selected, filter by category and search term
-          return product.category === selectedCategory && (!searchTerm || matchesSearchTerm);
+          return (
+            product.category === selectedCategory &&
+            (!searchTerm || matchesSearchTerm)
+          );
         }
       })
     : [];
-  
-  
 
   // const filteredProducts = (): GetProductSchema[] => {
   //   if (!data || !data.responseList) return [];
@@ -203,7 +205,6 @@ export default function ProductPage() {
   //   return categoryFilteredProducts as GetProductSchema[];
   // };
 
-
   return (
     <>
       <Typography variant="h5" align="center" padding="5px">
@@ -222,27 +223,29 @@ export default function ProductPage() {
               display: { xs: "none", md: "inline-block", sm: "flex" },
             }}
             onChange={(e) => setSearchTerm(e.target.value)}
-
           />
-          <Tooltip title="Thêm sản phẩm" arrow>
-            <IconButton
-              onClick={() => navigate("/create-product")}
-              size="large"
-              color="success"
-            >
-              <AddBoxIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Import sản phẩm" arrow>
-            <IconButton
-              onClick={() => navigate("/create-product")}
-              size="large"
-              color="success"
-            >
-              <NoteAddOutlined />
-            </IconButton>
-          </Tooltip>
-
+          {auth.role === "MANAGER" ? (
+            <Box>
+              <Tooltip title="Thêm sản phẩm" arrow>
+                <IconButton
+                  onClick={() => navigate("/create-product")}
+                  size="large"
+                  color="success"
+                >
+                  <AddBoxIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Import sản phẩm" arrow>
+                <IconButton
+                  onClick={() => navigate("/create-product")}
+                  size="large"
+                  color="success"
+                >
+                  <NoteAddOutlined />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          ) : null}
         </Stack>
         <Tabs
           value={selectedCategory}
@@ -263,8 +266,8 @@ export default function ProductPage() {
             <Grid size="auto" display="flex" justifyContent="center">
               <Typography variant="h6">Error: {error.message}</Typography>
             </Grid>
-          ) : filteredProducts?.length && filteredProducts?.length > 0 ?(
-            filteredProducts?.map((product ) => (
+          ) : filteredProducts?.length && filteredProducts?.length > 0 ? (
+            filteredProducts?.map((product) => (
               <Grid size="auto" key={Number(product.id)}>
                 <Card
                   sx={{
@@ -299,32 +302,36 @@ export default function ProductPage() {
                       }).format(Number(product.price))}
                     </Typography>
                   </CardContent>
-                  <Box display="flex" justifyContent="center" padding={1}>
-                    <IconButton
-                      color="error"
-                      onClick={() => {
-                        setProductToDelete(product);
-                        setConfirmOpen(true);
-                      }}
-                    >
-                      <DeleteForeverIcon />
-                    </IconButton>
-                    <IconButton
-                      color="warning"
-                      onClick={() => navigate(`/update-product/${product.id}`)}
-                    >
-                      <EditIcon />
-                    </IconButton>
+                  {auth.role === "MANAGER" ? (
+                    <Box display="flex" justifyContent="center" padding={1}>
+                      <IconButton
+                        color="error"
+                        onClick={() => {
+                          setProductToDelete(product);
+                          setConfirmOpen(true);
+                        }}
+                      >
+                        <DeleteForeverIcon />
+                      </IconButton>
+                      <IconButton
+                        color="warning"
+                        onClick={() =>
+                          navigate(`/update-product/${product.id}`)
+                        }
+                      >
+                        <EditIcon />
+                      </IconButton>
 
-                    <IconButton
-                      color="success"
-                      onClick={() =>
-                        navigate(`/reports/product-price/${product.id}`)
-                      }
-                    >
-                      <TrendingUpIcon />
-                    </IconButton>
-                  </Box>
+                      <IconButton
+                        color="success"
+                        onClick={() =>
+                          navigate(`/reports/product-price/${product.id}`)
+                        }
+                      >
+                        <TrendingUpIcon />
+                      </IconButton>
+                    </Box>
+                  ) : null}
                 </Card>
               </Grid>
             ))
@@ -336,7 +343,8 @@ export default function ProductPage() {
         </Grid>
 
         {/* Pagination Component */}
-        <TablePagination component={Pagination}
+        <TablePagination
+          component={Pagination}
           rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
           count={data ? data.totalPages : 0}
           rowsPerPage={limit}

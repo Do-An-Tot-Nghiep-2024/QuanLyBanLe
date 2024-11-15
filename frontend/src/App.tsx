@@ -1,4 +1,4 @@
-import { createTheme, ThemeProvider } from "@mui/material";
+import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import PageRouter from "./routes/PageRouter";
 const THEME = createTheme({
   typography: {
@@ -12,6 +12,7 @@ const THEME = createTheme({
 function App() {
   return (
     <ThemeProvider theme={THEME}>
+      <CssBaseline />
       <PageRouter />
     </ThemeProvider>
   );
