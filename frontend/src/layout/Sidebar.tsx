@@ -105,11 +105,28 @@ const NAVIGATION: Navigation = [
     segment: "employees",
     title: "Nhân viên",
     icon: <BadgeOutlinedIcon />,
-  },  
+  },
   {
     segment: "customers",
     title: "Khách hàng",
     icon: <PeopleAltOutlinedIcon />,
+  },
+  {
+    segment: "promotions",
+    title: "Chương trình khuyến mãi",
+    icon: <NoteAddOutlined />,
+    children: [
+      {
+        segment: "",
+        title: "Quản lí chương trình khuyến mãi",
+        icon: <WarehouseIcon />,
+      },
+      {
+        segment: "create-promotion",
+        title: "Tạo chương trình khuyến mãi",
+        icon: <AddBusinessIcon />,
+      },
+    ],
   },
   {
     segment: "reports",
