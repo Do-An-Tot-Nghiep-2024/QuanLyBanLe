@@ -257,16 +257,16 @@ public class OrderServiceImpl implements OrderService {
         if (orderRepository.findById(orderId).isEmpty()) {
             throw new ResourceNotFoundException("Không tìm thấy hóa đơn");
         }
-        var ordersByCustomer = orderItemRepository.getProductInOrderItem(orderId);
-        List<OrderItemQueryResponse> orderItemResponses = ordersByCustomer.stream().map(orderMapper::mapObjectToOrderItem).toList();
-        BigDecimal totalPrice = BigDecimal.valueOf(0);
-        for (OrderItemQueryResponse orderItemQueryResponse : orderItemResponses) {
-            totalPrice = totalPrice.add(BigDecimal.valueOf(orderItemQueryResponse.totalPrice()));
+        var productsInOrder = orderItemRepository.getProductInOrderItemMobile(orderId);
+        var productList = productsInOrder.stream().map(productMapper::mapToProductOrderItemResponse).toList();
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        for(var product : productList) {
+            totalPrice = totalPrice.add(BigDecimal.valueOf(product.amount()));
         }
         var emp = orderRepository.getEmployeeByOrderId(orderId);
         log.info("emp is {}", emp.size());
         OrderEmployeeResponse orderEmployee = orderMapper.mapObjectToEmployee(emp.get(0));
-        return new OrderCustomerResponse(orderEmployee.name(), orderEmployee.phone(), orderItemResponses, totalPrice);
+        return new OrderCustomerResponse(orderEmployee.name(), orderEmployee.phone(), productList, totalPrice);
     }
 
     @Override
@@ -276,11 +276,8 @@ public class OrderServiceImpl implements OrderService {
             throw new ResourceNotFoundException("Không tìm thấy hóa đơn");
         }
         var orderItemResponse = orderMapper.mapToOrderItemResponse(orderById.get(0));
-        var products = orderItemRepository.getProductInOrderItem(orderId);
+        var products = orderItemRepository.getProductInOrderItemWeb(orderId);
         var productList = products.stream().map(productMapper::mapToProductOrderItemResponse).toList();
-        for (var product : productList) {
-            log.info("product is {}", product);
-        }
         orderItemResponse.orderItemResponses().addAll(productList);
         return orderItemResponse;
 
