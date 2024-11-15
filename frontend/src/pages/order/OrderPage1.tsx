@@ -40,10 +40,7 @@ interface OrderItem {
 
 const OrderPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
-  const [page] = useState(1);
-  const [limit] = useState(10);
   const [customerPayment, setCustomerPayment] = useState(0);
   const [customerChange, setCustomerChange] = useState(0);
   const [latestPromotion, setLatestPromotion] = useState<GetPromotion>();
@@ -157,7 +154,7 @@ const OrderPage: React.FC = () => {
     return response as unknown as GetProductSchema[];
   };
 
-  const { data, isLoading, isError, error, refetch } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["products", searchTerm],
     queryFn: fetchProducts,
   });
@@ -211,6 +208,7 @@ const OrderPage: React.FC = () => {
   const updateCustomerPayment = (customerPayment: number) => {
     if (customerPayment === 0) {
       setCustomerPayment(0);
+      setCustomerChange(0);
       return;
     }
     const totalPayment = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);

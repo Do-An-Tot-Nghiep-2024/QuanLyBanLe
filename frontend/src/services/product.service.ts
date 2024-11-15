@@ -3,7 +3,6 @@ import { GetProductSchema } from "../types/getProductSchema";
 import { ProductSchema } from "../types/productSchema";
 import ApiResponse from "../types/apiResponse";
 import { UpdateProductSchema } from "../types/updateProductSchema";
-import ResponsePagination from "../types/responsePagination";
 
 interface GetProductResponse {
   message: string;

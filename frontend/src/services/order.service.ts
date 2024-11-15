@@ -36,11 +36,11 @@ const createOrderService = async (itemList: any[], customerPayment : number, tot
         data: {},
       };
     }
-  };
+  };    
 
-  const getAllOrdersService = async (page: number, limit: number): Promise<ResponsePagination<OrderSchema>> => {    
-    const response = await api.get(`/orders?pageNumber=${page}&limit=${limit}`);
-    
+  const getAllOrdersService = async (page: number, limit: number, sortField: string = 'orderId', // Default to 'orderId'
+    sortOrder: string = 'asc'): Promise<ResponsePagination<OrderSchema>> => {    
+    const response = await api.get(`/api/orders?pageNumber=${page}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder}`);    
     if (response) { 
         return response.data; 
     }
