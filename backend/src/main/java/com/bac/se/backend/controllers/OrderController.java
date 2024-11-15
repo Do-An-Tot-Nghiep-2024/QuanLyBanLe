@@ -85,31 +85,32 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/customer/{id}")
+    @GetMapping("/customer")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrderByCustomer(
-            @PathVariable("id") Long id,
+           HttpServletRequest request,
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrdersByCustomer(id, pageNumber, pageSize)));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrdersByCustomer(request, pageNumber, pageSize)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 
-    @GetMapping("/employee/{id}")
+    @GetMapping("/employee")
     @PreAuthorize("hasAnyAuthority('MANAGER', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrdersByEmployee(
-            @PathVariable("id") Long id,
+            HttpServletRequest request,
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate
     ) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrdersByEmployee(id, pageNumber, pageSize, fromDate, toDate)));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrdersByEmployee(request,
+                    pageNumber, pageSize, fromDate, toDate)));
         } catch (ParseException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse<>("Invalid date format. Please use 'yyyy-MM-dd'.", null));

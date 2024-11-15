@@ -35,14 +35,27 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "GROUP BY oi.order_id",nativeQuery = true)
     List<Object[]> getOrderById(Long id, Pageable pageable);
 
-    @Query(value = "select o.order_id, e.name as emp,sum(oi.total_price) as total, o.order_status,o.payment_type,o.total_discount,o.created_at,c.name " +
-            "from t_order o " +
-            "inner join t_order_item oi on oi.order_id = o.order_id " +
-            "inner join t_employee e on e.employee_id = o.employee_id " +
-            "inner join t_customer c on c.customer_id = o.customer_id " +
-            "where o.customer_id = :id " +
-            "group by oi.order_id", nativeQuery = true)
-    Page<Object[]> getOrdersByCustomer(Long id, Pageable pageable);
+    @Query(value = "SELECT  " +
+            "    o.order_id, " +
+            "    e.name, " +
+            "    o.order_status, " +
+            "    o.payment_type, " +
+            "    SUM(oi.amount), " +
+            "    o.created_at, " +
+            "    c.phone " +
+            "FROM " +
+            "    t_customer c " +
+            "        INNER JOIN " +
+            "    t_order o ON c.customer_id = o.customer_id " +
+            "        INNER JOIN " +
+            "    t_order_item oi ON oi.order_id = o.order_id " +
+            "        INNER JOIN " +
+            "    t_employee e ON e.employee_id = o.employee_id " +
+            "WHERE " +
+            "    c.email = :email " +
+            "GROUP BY oi.order_id " +
+            "ORDER BY o.order_id DESC", nativeQuery = true)
+    Page<Object[]> getOrdersByCustomer(String email, Pageable pageable);
 
     @Query(value = "select o.order_id as orderId, e.name as emp,o.order_status as status," +
             "o.payment_type as paymentType," +
@@ -70,10 +83,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "join t_order_item oi on oi.order_id = o.order_id " +
             "join t_employee e on e.employee_id = o.employee_id " +
             "left join t_customer c on c.customer_id = o.customer_id " +
-            "where e.employee_id = :id and o.created_at between :fromDate and :toDate " +
+            "where e.email = :email and o.created_at between :fromDate and :toDate " +
             "group by oi.order_id order by o.created_at desc", nativeQuery = true)
     Page<Object[]> getOrdersByEmployee(
-            @Param("id") Long id, Pageable pageable,
+            @Param("email") String email, Pageable pageable,
             @Param("fromDate") Date fromDate,
             @Param("toDate") Date toDate);
 
