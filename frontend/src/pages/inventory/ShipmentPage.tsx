@@ -9,19 +9,13 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import { visuallyHidden } from "@mui/utils";
-import {
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Paper, Stack, Typography } from "@mui/material";
 import { getShipmentsService } from "../../services/inventory.service";
 import { useQuery } from "@tanstack/react-query";
 import { convertDate } from "../../utils/convertDate";
 import colors from "../../constants/color";
 import TextSearch from "../../components/TextSeatch";
 import ProductShipment from "../../types/inventory/productShipment";
-
-
 
 type Order = "asc" | "desc";
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -115,11 +109,7 @@ interface EnhancedTableProps {
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-  const {
-    order,
-    orderBy,
-    onRequestSort,
-  } = props;
+  const { order, orderBy, onRequestSort } = props;
   const createSortHandler =
     (property: keyof ProductShipment) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
@@ -158,7 +148,8 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export default function EnhancedTable() {
   const [order, setOrder] = React.useState<Order>("desc");
-  const [orderBy, setOrderBy] = React.useState<keyof ProductShipment>("shipmentId");
+  const [orderBy, setOrderBy] =
+    React.useState<keyof ProductShipment>("shipmentId");
   const [selected, setSelected] = React.useState<readonly number[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -235,19 +226,29 @@ export default function EnhancedTable() {
       : 0;
 
   const visibleRows = data
-      ?.filter((row: ProductShipment) => {
-        const matchesShiment = shiment === "" || row.shipmentId.toString().toLowerCase().includes(shiment.toLowerCase());
-        const matchesProduct = product === "" || row.product.toString().toLowerCase().includes(product.toLowerCase());
-        return matchesShiment && matchesProduct;
-      })
-        
+    ?.filter((row: ProductShipment) => {
+      const matchesShiment =
+        shiment === "" ||
+        row.shipmentId.toString().toLowerCase().includes(shiment.toLowerCase());
+      const matchesProduct =
+        product === "" ||
+        row.product.toString().toLowerCase().includes(product.toLowerCase());
+      return matchesShiment && matchesProduct;
+    })
+
     ?.sort(getComparator(order, orderBy))
-    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) as ProductShipment[];
+    .slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    ) as ProductShipment[];
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <Typography variant="h6" sx={{ mb: 2, fontSize: 18, fontWeight: "bold" }}>
-        Danh sách lô hàng
+    <Box sx={{ width: "80%" }}>
+      <Typography
+        variant="h6"
+        sx={{ mb: 2, fontSize: 24, fontWeight: "bold", textAlign: "center" }}
+      >
+        Sản phẩm trong kho
       </Typography>
       <Stack spacing={2} direction="row" sx={{ mb: 2 }}>
         <TextSearch
@@ -281,7 +282,7 @@ export default function EnhancedTable() {
               rowCount={data !== undefined ? data.length : 0}
             />
             <TableBody>
-              {visibleRows.map((row: ProductShipment,_index) => {
+              {visibleRows.map((row: ProductShipment, _index) => {
                 const isItemSelected = selected.includes(row.shipmentId);
                 return (
                   <TableRow
@@ -294,35 +295,42 @@ export default function EnhancedTable() {
                     sx={{ cursor: "pointer" }}
                   >
                     <TableCell
-                    
                       padding="none"
-                      sx={{ fontSize: 14,paddingLeft:2 }}
+                      sx={{ fontSize: 16, paddingLeft: 2 }}
                     >
                       {"MLH-" + row.shipmentId}
                     </TableCell>
-                    <TableCell padding="none" sx={{ fontSize: 14 }}>
+                    <TableCell padding="none" sx={{ fontSize: 16 }}>
                       {row.supplier}
                     </TableCell>
                     <TableCell
                       align="left"
                       padding="checkbox"
-                      sx={{ fontSize: 14 }}
+                      sx={{ fontSize: 16 }}
                     >
                       {row.product}
                     </TableCell>
-                    <TableCell padding="none" align="center" sx={{ fontSize: 14 }}>
+                    <TableCell
+                      padding="none"
+                      align="center"
+                      sx={{ fontSize: 16 }}
+                    >
                       {convertDate(row.mxp)}
                     </TableCell>
-                    <TableCell padding="none" align="center" sx={{ fontSize: 14 }}>
+                    <TableCell
+                      padding="none"
+                      align="center"
+                      sx={{ fontSize: 16 }}
+                    >
                       {convertDate(row.exp)}
                     </TableCell>
-                    <TableCell align="left" sx={{ fontSize: 14 }}>
+                    <TableCell align="left" sx={{ fontSize: 16 }}>
                       {row.soldQuantity}
                     </TableCell>
-                    <TableCell align="left" sx={{ fontSize: 14 }}>
+                    <TableCell align="left" sx={{ fontSize: 16 }}>
                       {row.failedQuantity}
                     </TableCell>
-                    <TableCell align="left" sx={{ fontSize: 14 }}>
+                    <TableCell align="left" sx={{ fontSize: 16 }}>
                       {row.availableQuantity}
                     </TableCell>
                   </TableRow>

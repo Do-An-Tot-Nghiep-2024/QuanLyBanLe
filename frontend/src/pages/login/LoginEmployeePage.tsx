@@ -1,8 +1,6 @@
 import {
   Box,
-  Typography,
   TextField,
-  Stack,
   FormControl,
   InputLabel,
   OutlinedInput,
@@ -22,8 +20,9 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useAppDispatch } from "../../redux/hook";
 import { getAccount } from "../../redux/auth/authSlice";
-import colors from "../../constants/color";
 import MessageAlert from "../../components/MessageAlert";
+import image from "../../assets/images/login.png";
+import logo from "../../assets/images/logo.png";
 export default function LoginEmployeePage() {
   const navigation = useNavigate();
   const dispatch = useAppDispatch();
@@ -73,131 +72,112 @@ export default function LoginEmployeePage() {
   };
 
   return (
-    <Box
-      sx={{
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "#fff",
-      }}
-    >
+    <Grid container sx={{ height: "100vh" }}>
       {message && (
         <MessageAlert open={open} setOpen={setOpen} message={message} />
       )}
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 6, md: 6, sm: 12 }}>
-          <Typography
-            color="white"
-            align="center"
+      {/* Left section */}
+      <Grid
+        size={{ xs: 12, sm: 6 }}
+        sx={{
+          backgroundColor: "white",
+          p: 5,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <Box display="flex" justifyContent="center" alignItems="center" mb={4}>
+          <Box
+            component="img"
+            src={logo}
+            alt="Login"
             sx={{
-              fontSize: "2rem",
-              fontWeight: "bold",
-              marginTop: "20px",
-              fontStyle: "italic",
+              width: 100,
+              height: 100,
+              objectFit: "cover",
+              objectPosition: "left",
+              borderRadius: "50%",
             }}
-          >
-            WELCOME
-          </Typography>
-          <Stack
-            onSubmit={handleSubmit(onSubmit)}
-            component="form"
-            spacing={2}
-            sx={{
-              width: "500px",
-              marginTop: "100px",
-              marginLeft: "250px",
-              marginRight: "auto",
-              backgroundColor: "#ffffff",
-              padding: "50px",
-              height: "70%",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.5)",
-              borderRadius: "10px",
-              textAlign: "center",
-            }}
-            alignItems="center"
-          >
-            <Typography
-              variant="h5"
-              color="black"
-              sx={{ marginBottom: "20px" }}
-            >
-              ĐĂNG NHẬP
-            </Typography>
+          />
+        </Box>
 
-            <TextField
-              {...register("username")}
-              label="Tài khoản"
-              variant="outlined"
-              sx={{ width: "300px", color: "white" }}
-              type="text"
-              name="username"
-              error={!!errors.username}
-              helperText={errors.username?.message}
+        <Box sx={{ width: 300, mx: "auto" }} component="form" onSubmit={handleSubmit(onSubmit)}>
+          {/* Email field */}
+          <TextField
+            {...register("username")}
+            name="username"
+            label="Tài khoản"
+            type="text"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            error={!!errors.username}
+            helperText={errors.username?.message}
+          />
+
+          {/* Password field */}
+          <FormControl variant="outlined" fullWidth>
+            <InputLabel htmlFor="outlined-adornment-password" color={errors.password ? "error" : "primary"}>
+              Password
+            </InputLabel>
+            <OutlinedInput
+              {...register("password")}
+              error={!!errors.password}
+              id="outlined-adornment-password"
+              type={showPassword ? "text" : "password"}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={
+                      showPassword
+                        ? "hide the password"
+                        : "display the password"
+                    }
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    onMouseUp={handleMouseUpPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              label="Password"
             />
-
-            <FormControl sx={{ m: 1, width: "300px" }} variant="outlined">
-              <InputLabel htmlFor="outlined-adornment-password" color="error">
-                Password
-              </InputLabel>
-              <OutlinedInput
-                {...register("password")}
-                error={!!errors.password}
-                id="outlined-adornment-password"
-                type={showPassword ? "text" : "password"}
-                name="password"
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      onMouseUp={handleMouseUpPassword}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-                label="Mật khẩu"
-              />
-              <FormHelperText error>{errors.password?.message}</FormHelperText>
-            </FormControl>
-
-            <Button
-              sx={{
-                width: "300px",
-                fontWeight: "bold",
-                background: colors.accentColor,
-              }}
-              variant="contained"
-              type="submit"
-            >
-              ĐĂNG NHẬP
-            </Button>
-          </Stack>
-        </Grid>
-        <Grid size={{ xs: 6, md: 6, sm: 12 }}>
-          <Grid
-            container
-            justifyContent="center"
-            alignItems="center"
-            sx={{ height: "100%", marginTop: "50px" }}
+            <FormHelperText error>{errors.password?.message}</FormHelperText>
+          </FormControl>
+          {/* Login button */}
+          <Button
+            variant="contained"
+            color="info"
+            size="large"
+            fullWidth
+            type="submit"
+            sx={{ mt: 3 }}
           >
-            <Box
-              component="img"
-              alt="Logo Login"
-              sx={{
-                height: 416,
-                width: 500,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              src="https://res.cloudinary.com/dujylxkra/image/upload/e_background_removal/f_png/v1725956899/login_gy9ckn.jpg"
-            />
-          </Grid>
-        </Grid>
+            ĐĂNG NHẬP
+          </Button>
+        </Box>
       </Grid>
-    </Box>
+
+      {/* Right section with image */}
+      <Grid
+        size={{ xs: 12, sm: 6 }}
+        sx={{ display: { xs: "none", sm: "block" } }}
+      >
+        <Box
+          component="img"
+          src={image}
+          alt="Login"
+          sx={{
+            width: "80%",
+            height: "500px",
+            objectFit: "cover",
+            objectPosition: "left",
+          }}
+        />
+      </Grid>
+    </Grid>
   );
 }

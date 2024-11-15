@@ -75,7 +75,7 @@ export default function InventoryPage() {
 
   return (
     <Box
-      sx={{ flex: 1, width: "100%", display: "flex", flexDirection: "column" }}
+      sx={{ flex: 1, width: "90%", display: "flex", flexDirection: "column" }}
     >
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
         <Button
