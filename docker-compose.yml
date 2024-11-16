@@ -12,6 +12,7 @@ services:
     image: vietbac2002/retail-store-frontend:latest
     ports:
       - 80:80
+      - 443:443
     depends_on:
       - backend
     restart: always
