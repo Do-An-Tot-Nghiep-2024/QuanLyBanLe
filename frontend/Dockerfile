@@ -3,6 +3,8 @@
 
 # build stage
 FROM node:22.3.0-alpine AS build-stage
+ARG VITE_URL_BE=http://backend/v1
+ENV VITE_URL_BE=$VITE_URL_BE
 WORKDIR /app
 COPY package*.json ./
 RUN npm install

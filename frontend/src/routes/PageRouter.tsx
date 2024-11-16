@@ -84,7 +84,6 @@ const PageRouter = () => {
       dispatch(getAccount());
     }
   }, [token, dispatch]);
-
   const isLoggedIn = auth.isLogin;
   const userRole = auth.role;
 
