@@ -60,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
     private final PromotionRepository promotionRepository;
 
 
-    double roundPrice(double price){
+    double roundPrice(double price) {
         return (double) Math.round(price * 100) / 100;
     }
 
@@ -77,7 +77,7 @@ public class OrderServiceImpl implements OrderService {
             log.info("quantity is {}", stockResponse.quantity() - stockResponse.soldQuantity());
             throw new BadRequestUserException("Số lượng sản phẩm không đủ");
         }
-        if(stockResponse.quantity() - stockResponse.notifyQuantity() <= stockResponse.notifyQuantity()){
+        if (stockResponse.quantity() - stockResponse.notifyQuantity() <= stockResponse.notifyQuantity()) {
             log.info("notifyQuantity is {}", stockResponse.notifyQuantity());
         }
         Stock stock = stockRepository.findById(stockResponse.id()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy số lượng sản phẩm"));
@@ -86,12 +86,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
-
     // create order with request are shipment id and product id for each item
     @Override
     @Transactional
     public CreateOrderResponse createOrder(OrderRequest orderRequest, HttpServletRequest request) throws BadRequestUserException {
-        String phoneCustomer = "";
         String emailEmployee = jwtParse.decodeTokenWithRequest(request); // first call
         Map<Long, Integer> map = new HashMap<>();
         // Kiểm tra thông tin nhân viên
@@ -100,7 +98,7 @@ public class OrderServiceImpl implements OrderService {
         OrderStatus orderStatus = orderRequest.isLive() ? OrderStatus.COMPLETED : OrderStatus.PENDING;
         PaymentType paymentType = orderRequest.paymentType().equals("CASH") ? PaymentType.CASH : PaymentType.E_WALLET;
         Long promotionId = 0L;
-        if(orderRequest.totalDiscount() > 0){
+        if (orderRequest.totalDiscount() > 0) {
             var latestPromotion = promotionService.getLatestPromotion();
             promotionService.minusOrderLimit(latestPromotion.id());
             promotionId = latestPromotion.id();
@@ -116,12 +114,8 @@ public class OrderServiceImpl implements OrderService {
                 .customerPayment(BigDecimal.valueOf(orderRequest.customerPayment()))
                 .totalDiscount(BigDecimal.valueOf(orderRequest.totalDiscount()))
                 .build();
-        // minus order limit when ordered
         // check exist account customer
-        Optional<String> existPhone = orderRequest.customerPhone();
-        if (existPhone.isPresent()) {
-            phoneCustomer =existPhone.get();
-        }
+        String phoneCustomer = orderRequest.customerPhone().orElse("");
         // Get customer
         if (!phoneCustomer.isEmpty()) {
             var customer = customerRepository.findByPhone(phoneCustomer) // third call
@@ -140,11 +134,11 @@ public class OrderServiceImpl implements OrderService {
         Map<Long, Product> productMap = productRepository.findAllById(productIds).stream().collect(Collectors.toMap(Product::getId, Function.identity()));
         Map<Long, Shipment> shipmentMap = shipmentRepository.findAllById(shipmentIds).stream().collect(Collectors.toMap(Shipment::getId, Function.identity()));
         Map<Long, ProductPriceResponse> productPriceResponseMap = productIds
-                    .stream()
-                    .collect(Collectors.toMap(
-                            Function.identity(), // The key is the value from the set (the Long ID)
-                            productPriceService::getPriceLatest // The value is the ProductPriceResponse
-                    ));
+                .stream()
+                .collect(Collectors.toMap(
+                        Function.identity(), // The key is the value from the set (the Long ID)
+                        productPriceService::getPriceLatest // The value is the ProductPriceResponse
+                ));
         for (OrderItemRequest orderItemRequest : orderItemRequests) {
             Long productId = orderItemRequest.productId();
             Long shipmentId = orderItemRequest.shipmentId();
@@ -196,18 +190,18 @@ public class OrderServiceImpl implements OrderService {
         double roundTotal = (double) Math.round(total.doubleValue() * 100) / 100;
         double change = orderRequest.customerPayment() - roundTotal - orderSave.getTotalDiscount().doubleValue();
         double roundChange = (double) Math.round(change * 100) / 100;
-        return new CreateOrderResponse(orderItemResponses,roundTotal, orderRequest.customerPayment(), roundChange);
+        return new CreateOrderResponse(orderItemResponses, roundTotal, orderRequest.customerPayment(), roundChange);
     }
 
     @Override
     public PageResponse<OrderResponse> getOrders(Integer pageNumber, Integer pageSize,
                                                  String fromDate, String toDate,
-                                                 String orderBy,String order,
+                                                 String orderBy, String order,
                                                  String status,
                                                  String customerPhone
-                                 ) throws ParseException {
+    ) throws ParseException {
         Map<String, String> map = new HashMap<>();
-        map.put("orderId","orderId");
+        map.put("orderId", "orderId");
         map.put("createdAt", "createdAt");
         map.put("total", "total");
         map.put("orderStatus", "orderStatus");
@@ -215,14 +209,14 @@ public class OrderServiceImpl implements OrderService {
         map.put("customerPhone", "customerPhone");
         map.put("emp", "emp");
         String column = map.get(orderBy);
-        if(column == null){
-           column = map.get("createdAt");
+        if (column == null) {
+            column = map.get("createdAt");
         }
         DateRequest dateRequest = dateConvert.convertDateRequest(fromDate, toDate);
         Sort sort = Sort.by(Sort.Direction.fromString(order), column);
-        Pageable pageable = PageRequest.of(pageNumber, pageSize,sort);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         var orders = orderRepository.getOrders(pageable, dateRequest.fromDate(),
-                dateRequest.toDate(),status,customerPhone);
+                dateRequest.toDate(), status, customerPhone);
         List<Object[]> orderList = orders.getContent();
         List<OrderResponse> orderResponseList = orderList.stream().map(orderMapper::mapObjectToResponse).toList();
         return new PageResponse<>(orderResponseList, pageNumber, orders.getTotalPages(), orders.getTotalElements(), orders.isLast());
@@ -249,7 +243,7 @@ public class OrderServiceImpl implements OrderService {
         String email = jwtParse.decodeTokenWithRequest(request);
         DateRequest dateRequest = dateConvert.convertDateRequest(fromDate, toDate);
         var ordersByCustomer = orderRepository.getOrdersByEmployee(email, pageable,
-                dateRequest.fromDate(),dateRequest.toDate());
+                dateRequest.fromDate(), dateRequest.toDate());
         List<Object[]> orderList = ordersByCustomer.getContent();
         List<OrderResponse> orderResponseList = orderList.stream().map(orderMapper::mapObjectToResponse).toList();
         return new PageResponse<>(orderResponseList, pageNumber, ordersByCustomer.getTotalPages(), ordersByCustomer.getTotalElements(), ordersByCustomer.isLast());
@@ -265,7 +259,7 @@ public class OrderServiceImpl implements OrderService {
         var productsInOrder = orderItemRepository.getProductInOrderItemMobile(orderId);
         var productList = productsInOrder.stream().map(productMapper::mapToProductOrderItemResponse).toList();
         BigDecimal totalPrice = BigDecimal.ZERO;
-        for(var product : productList) {
+        for (var product : productList) {
             totalPrice = totalPrice.add(BigDecimal.valueOf(product.amount()));
         }
         var emp = orderRepository.getEmployeeByOrderId(orderId);
@@ -277,7 +271,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderItemResponse getOrderById(Long orderId) {
         var orderById = orderRepository.getOrderById(orderId, PageLimit.ONLY.getPageable());
-        if(orderById.isEmpty()){
+        if (orderById.isEmpty()) {
             throw new ResourceNotFoundException("Không tìm thấy hóa đơn");
         }
         var orderItemResponse = orderMapper.mapToOrderItemResponse(orderById.get(0));
