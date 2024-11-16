@@ -176,19 +176,20 @@ public class ProductServiceImpl implements ProductService {
     public ProductPriceResponse updatePriceProduct(Long productId, ProductPriceRequest request) throws BadRequestUserException {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_PRODUCT));
-        if (request.price() == null || request.originalPrice() == null) {
-            throw new BadRequestUserException("Vui lòng nhập đẩy đủ thông tin ");
+        var priceLatest = productPriceService.getPriceLatest(productId);
+        if (request.price() == null) {
+            throw new BadRequestUserException("Vui lòng nhập đẩy đủ thông tin");
         }
-        if (request.originalPrice() <= 0 || request.price() <= 0) {
-            throw new BadRequestUserException("Giá không được nhỏ hơn 0 ");
+        if (request.price() <= 0) {
+            throw new BadRequestUserException("Giá không được nhỏ hơn 0");
         }
-        if (request.originalPrice() > request.price()) {
-            throw new BadRequestUserException("Giá nhập lớn hơn giá gốc");
+        if(request.price() < priceLatest.originalPrice()){
+            throw new BadRequestUserException("Giá bán không được nhỏ hơn giá gốc là " + priceLatest.originalPrice());
         }
         // cập nhật giá mới trong db
         ProductPrice productPrice = ProductPrice.builder()
                 .product(product)
-                .originalPrice(request.originalPrice())
+                .originalPrice(priceLatest.originalPrice())
                 .price(request.price())
                 .createdAt(new Date())
                 .build();

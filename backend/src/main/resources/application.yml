@@ -3,7 +3,6 @@ spring:
     active: prod
   main:
     lazy-initialization: true
-
 server:
   http2:
     enabled: true
