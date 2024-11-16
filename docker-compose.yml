@@ -1,17 +1,22 @@
-# version: '3.8'
-
 services:
   backend:
-    image: vietbac2002/retail-store-backend:latest
+    build: backend
     ports:
       - 8080:8080
     environment:
       - spring.profiles.active=prod
     restart: always
+    networks:
+      - app-network
   frontend:
-    image: vietbac2002/retail-store-frontend:latest
+    build: frontend
     ports:
       - 80:80
     depends_on:
-      - server
+      - backend
     restart: always
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
