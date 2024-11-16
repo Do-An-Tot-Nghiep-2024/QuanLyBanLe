@@ -118,8 +118,9 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         // minus order limit when ordered
         // check exist account customer
-        if (orderRequest.customerPhone().isPresent()) {
-            phoneCustomer = orderRequest.customerPhone().get();
+        Optional<String> existPhone = orderRequest.customerPhone();
+        if (existPhone.isPresent()) {
+            phoneCustomer =existPhone.get();
         }
         // Get customer
         if (!phoneCustomer.isEmpty()) {
