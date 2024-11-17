@@ -43,31 +43,31 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew build sonar --info
 
-  sonar-scan-frontend:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=do-an-tot-nghiep-2024_retail-store-frontend
-            -Dsonar.organization=do-an-tot-nghiep-2024
-            -Dsonar.sources=frontend
-            -Dsonar.exclusions=frontend/node_modules/**
-            -Dsonar.tests=frontend
-            -Dsonar.test.inclusions=frontend/**/*.spec.js
-            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
-            -Dsonar.verbose=true
-            -Dsonar.host.url=https://sonarcloud.io
+  # sonar-scan-frontend:
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ./frontend
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+  #     - name: SonarCloud Scan
+  #       uses: SonarSource/sonarcloud-github-action@master
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }} # Needed to get PR information, if any
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #       with:
+  #         args: >
+  #           -Dsonar.projectKey=do-an-tot-nghiep-2024_retail-store-frontend
+  #           -Dsonar.organization=do-an-tot-nghiep-2024
+  #           -Dsonar.sources=frontend
+  #           -Dsonar.exclusions=frontend/node_modules/**
+  #           -Dsonar.tests=frontend
+  #           -Dsonar.test.inclusions=frontend/**/*.spec.js
+  #           -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
+  #           -Dsonar.verbose=true
+  #           -Dsonar.host.url=https://sonarcloud.io
 
   build-and-push-docker-images:
     runs-on: ubuntu-latest

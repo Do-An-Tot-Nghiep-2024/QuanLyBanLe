@@ -114,7 +114,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    p.name,      " +
             "    p.image, " +
             "    COALESCE(pp.price, 0) AS latest_price,      " +
-            "    COALESCE(pp.discount_price, 0) AS discount_price, u.name  " +
+            "    COALESCE(pp.original_price, 0) AS original_price, u.name  " +
             "FROM       " +
             "    t_product p      " +
             "INNER JOIN t_unit u ON u.unit_id = p.unit_id " +
@@ -137,7 +137,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    c.name as category,  " +
             "    u.name as unit, " +
             "   COALESCE(pp.price, 0) AS latest_price,      " +
-            "   COALESCE(pp.discount_price, 0) AS discount_price " +
+            "   COALESCE(pp.original_price, 0) AS original_price " +
             "FROM   " +
             "    t_product p  " +
             "INNER JOIN  " +
