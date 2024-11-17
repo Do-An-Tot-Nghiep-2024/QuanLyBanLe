@@ -1,10 +1,15 @@
 package com.bac.se.backend;
 
-import com.bac.se.backend.services.ShipmentService;
+import com.bac.se.backend.payload.response.order.StockOrderResponse;
+import com.bac.se.backend.repositories.OrderItemRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+import java.util.List;
 
 
 @SpringBootApplication
@@ -19,17 +24,21 @@ public class BackendApplication {
 
 
     @Autowired
-    ShipmentService shipmentService;
+    OrderItemRepository orderItemRepository;
 
-//    @Bean
-//    CommandLineRunner commandLineRunner(){
-//        return args -> {
-//            var desc = shipmentService.getShipments(0, 10, "", "shipment_id", "DESC", "20");
-//            for (var productShipmentResponse : desc.getResponseList()) {
-//                log.info(productShipmentResponse.toString());
-//            }
-//        };
-//    }
+    @Bean
+    CommandLineRunner commandLineRunner(){
+        return args -> {
+            List<Object[]> stocks = orderItemRepository.getStockByOrder(139L);
+            List<StockOrderResponse> stockOrderResponses = stocks.stream().map(stock ->
+                    new StockOrderResponse(Long.parseLong(stock[0].toString()),
+                            Integer.parseInt(stock[1].toString()))).toList();
+            for (StockOrderResponse stockOrderResponse : stockOrderResponses) {
+                log.info("stockOrderResponse {}", stockOrderResponse);
+            }
+
+        };
+    }
 
 
 

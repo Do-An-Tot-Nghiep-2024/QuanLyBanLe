@@ -4,6 +4,7 @@ import com.bac.se.backend.keys.OrderItemKey;
 import com.bac.se.backend.models.OrderItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -38,6 +39,14 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
             "INNER JOIN t_product_price pp ON pp.product_price_id = oi.product_price_id " +
             "WHERE oi.order_id = ?1 GROUP BY p.name,pp.price",nativeQuery = true)
     List<Object[]> getProductInOrderItemMobile(Long orderId);
+
+
+    @Query(value = "SELECT s.stock_id,oi.quantity FROM t_order_item oi " +
+            "INNER JOIN t_shipment_item si ON oi.shipment_id = si.shipment_id AND si.product_id = oi.product_id " +
+            "INNER JOIN t_stock s ON s.stock_id = si.stock_id " +
+            "WHERE oi.order_id = :orderId;", nativeQuery = true)
+    List<Object[]> getStockByOrder(@Param("orderId") Long id);
+
 
 
 

@@ -290,4 +290,23 @@ public class OrderServiceImpl implements OrderService {
         });
     }
 
+    @Override
+    public String cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn"));
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+        // get all order item
+        List<StockOrderResponse> stockOrderResponses = orderItemRepository.getStockByOrder(orderId)
+                .stream().map(stockMapper::mapObjectToStockOrderResponse).toList();
+        // update quantity stock
+        for (StockOrderResponse stockOrderResponse : stockOrderResponses) {
+            Stock stock = stockRepository.findById(stockOrderResponse.stockId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy số lượng sản phẩm"));
+            stock.setSoldQuantity(stock.getSoldQuantity() + stockOrderResponse.quantity());
+            stockRepository.save(stock);
+        }
+        return "Đơn hàng " + orderId + " đã bị hủy";
+    }
+
 }

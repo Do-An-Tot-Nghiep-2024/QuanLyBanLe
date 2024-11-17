@@ -34,4 +34,7 @@ public interface OrderService {
     void updateOrderStatus(Long orderId, String orderStatus);
 
 
+    String cancelOrder(Long orderId);
+
+
 }
