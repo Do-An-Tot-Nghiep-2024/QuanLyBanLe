@@ -190,7 +190,7 @@ public class OrderServiceImpl implements OrderService {
         double roundTotal = (double) Math.round(total.doubleValue() * 100) / 100;
         double change = orderRequest.customerPayment() - roundTotal - orderSave.getTotalDiscount().doubleValue();
         double roundChange = (double) Math.round(change * 100) / 100;
-        return new CreateOrderResponse(orderItemResponses, roundTotal, orderRequest.customerPayment(), roundChange);
+        return new CreateOrderResponse(orderSave.getId(), orderItemResponses, roundTotal, orderRequest.customerPayment(), roundChange);
     }
 
     @Override
