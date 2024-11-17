@@ -144,7 +144,6 @@ public class ProductController {
 
 
     @GetMapping("/mobile")
-    @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<ApiResponse<PageResponse<ProductMobileResponse>>> getProductsMobile(
             @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -157,7 +156,6 @@ public class ProductController {
     }
 
     @GetMapping("/mobile/category/{id}")
-    @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<ApiResponse<PageResponse<ProductMobileResponse>>> getProductsMobileByCategory(
             @PathVariable("id") Long categoryId,
             @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
