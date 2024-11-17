@@ -15,7 +15,12 @@ RUN npm run build
 FROM nginx:stable-alpine AS production-stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY --from=build-stage /app/nginx.conf /etc/nginx/conf.d/default.conf
+# Copy SSL certificates
+COPY nginx.crt /etc/nginx/ssl/nginx.crt
+COPY nginx.key /etc/nginx/ssl/nginx.key
+
 EXPOSE 80
+EXPOSE 443
 CMD ["nginx", "-g", "daemon off;"]
 # how to build image
 # docker build -t my-image .
