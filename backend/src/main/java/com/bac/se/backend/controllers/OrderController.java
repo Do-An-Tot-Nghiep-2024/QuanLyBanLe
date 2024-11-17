@@ -136,13 +136,12 @@ public class OrderController {
         }
     }
 
-    @PutMapping("/{id}/status")
+    @PutMapping("/status/{id}")
     @PreAuthorize("hasAnyAuthority('MANAGER', 'EMPLOYEE')")
-    public ResponseEntity<ApiResponse<String>> updateOrderStatus(@PathVariable("id") Long orderId,
-                                                                 @RequestParam("orderStatus") String orderStatus) {
+    public ResponseEntity<ApiResponse<String>> updateOrderStatus(@PathVariable("id") Long orderId) {
         try {
-            orderService.updateOrderStatus(orderId, orderStatus);
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderStatus));
+            orderService.updateOrderStatus(orderId);
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, "Đơn hàng " + orderId + " đã được hoàn thành"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));

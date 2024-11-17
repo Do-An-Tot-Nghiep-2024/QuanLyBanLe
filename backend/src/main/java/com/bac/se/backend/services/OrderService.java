@@ -31,7 +31,7 @@ public interface OrderService {
 
     OrderItemResponse getOrderById(Long orderId);
 
-    void updateOrderStatus(Long orderId, String orderStatus);
+    void updateOrderStatus(Long orderId);
 
 
     String cancelOrder(Long orderId);
