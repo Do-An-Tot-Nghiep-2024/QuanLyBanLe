@@ -31,10 +31,10 @@ public interface OrderService {
 
     OrderItemResponse getOrderById(Long orderId);
 
-    void updateOrderStatus(Long orderId);
+    void updateOrderStatus(Long orderId) throws BadRequestUserException;
 
 
-    String cancelOrder(Long orderId);
+    String cancelOrder(Long orderId) throws BadRequestUserException;
 
 
 }

@@ -283,18 +283,25 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void updateOrderStatus(Long orderId) {
-        orderRepository.findById(orderId).ifPresent(order -> {
-            order.setOrderStatus(OrderStatus.COMPLETED);
-            orderRepository.save(order);
-        });
+    public void updateOrderStatus(Long orderId) throws BadRequestUserException {
+        var order = orderRepository.findById(orderId).orElseThrow(
+                () -> new ResourceNotFoundException("Không tìm thấy hóa đơn")
+        );
+        if(!order.getOrderStatus().equals(OrderStatus.PENDING)){
+            throw new BadRequestUserException("Đơn hàng đã được hoàn thành");
+        }
+        order.setOrderStatus(OrderStatus.COMPLETED);
+        orderRepository.save(order);
     }
 
     @Override
-    public String cancelOrder(Long orderId) {
+    public String cancelOrder(Long orderId) throws BadRequestUserException {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn"));
         order.setOrderStatus(OrderStatus.CANCELLED);
+        if(!order.getOrderStatus().equals(OrderStatus.PENDING)){
+            throw new BadRequestUserException("Đơn hàng không ở trạng thái chờ không thể hủy");
+        }
         orderRepository.save(order);
         // get all order item
         List<StockOrderResponse> stockOrderResponses = orderItemRepository.getStockByOrder(orderId)
