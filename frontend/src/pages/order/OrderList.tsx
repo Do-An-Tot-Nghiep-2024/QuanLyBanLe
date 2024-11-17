@@ -13,7 +13,13 @@ import {
     Box,
     TextField,
     TablePagination,
-    Button
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    FormControlLabel,
+    Checkbox,
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { getAllOrdersService } from '../../services/order.service';
@@ -22,35 +28,35 @@ import colors from '../../constants/color';
 import { OrderSchema } from '../../types/orderSchema';
 
 const OrderList: React.FC = () => {
-    const [sortField, setSortField] = useState<keyof OrderSchema | null>('orderId');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const [sortField, setSortField] = useState<keyof OrderSchema | null>("orderId");
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
     const [orders, setOrders] = useState<OrderSchema[]>([]);
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [page, setPage] = useState<number>(0);
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [filterModalOpen, setFilterModalOpen] = useState<boolean>(false);
-    const [selectedStatuses] = useState<string[]>([]);
-    const [selectedPayments] = useState<string[]>([]);
+    const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]); 
+    const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
     const [filteredOrders, setFilteredOrders] = useState<OrderSchema[]>([]);
 
     const columns: Array<{ label: string; field?: keyof OrderSchema; width?: string; maxWidth?: string }> = [
-        { label: 'Mã Đơn Hàng', field: 'orderId', width: '10%', maxWidth: '150px' },
-        { label: 'Nhân Viên', field: 'employee', width: '30%', maxWidth: '150px' },
-        { label: 'Trạng Thái', field: 'orderStatus', width: '15%', maxWidth: '200px' },
-        { label: 'Ngày Tạo', field: 'createdAt', width: '15%', maxWidth: '200px' },
-        { label: 'Phương Thức Thanh Toán', field: 'paymentType', width: '15%', maxWidth: '150px' },
-        { label: 'Tổng Cộng', field: 'total', width: '30%', maxWidth: '100px' },
+        { label: "Mã Đơn Hàng", field: "orderId", width: "10%", maxWidth: "150px" },
+        { label: "Nhân Viên", field: "employee", width: "30%", maxWidth: "150px" },
+        { label: "Trạng Thái", field: "orderStatus", width: "15%", maxWidth: "200px" },
+        { label: "Ngày Tạo", field: "createdAt", width: "15%", maxWidth: "200px" },
+        { label: "Phương Thức Thanh Toán", field: "paymentType", width: "15%", maxWidth: "150px" },
+        { label: "Tổng Cộng", field: "total", width: "30%", maxWidth: "100px" },
     ];
 
-    const fetchOrders = async (page: number, limit: number, sortField: string, sortOrder: string) => {
-        const response = await getAllOrdersService(page, limit, sortField, sortOrder);
+    const fetchOrders = async (page: number, limit: number) => {
+        const response = await getAllOrdersService(page, limit);
         return response as ResponsePagination<OrderSchema>;
     };
 
     const { data, isLoading } = useQuery({
-        queryKey: ['orders', page, rowsPerPage, sortField, sortOrder],
-        queryFn: () => fetchOrders(page, rowsPerPage, sortField ?? 'orderId', sortOrder ?? 'asc'),  
+        queryKey: ["orders", page, rowsPerPage],
+        queryFn: () => fetchOrders(page, rowsPerPage),
     });
 
     useEffect(() => {
@@ -59,15 +65,14 @@ const OrderList: React.FC = () => {
         }
     }, [data]);
 
+    // Filter orders based on selected statuses, payments, and date range
     useEffect(() => {
         const newFilteredOrders = orders.filter(order => {
             const createdAt = new Date(order.createdAt);
             const statusMatch = selectedStatuses.length > 0 ? selectedStatuses.includes(order.orderStatus) : true;
             const paymentMatch = selectedPayments.length > 0 ? selectedPayments.includes(order.paymentType) : true;
 
-            if(filterModalOpen){
-                
-            }
+            // Check date range
             if (startDate && endDate) {
                 const start = new Date(startDate);
                 const end = new Date(endDate);
@@ -94,25 +99,38 @@ const OrderList: React.FC = () => {
         setFilterModalOpen(true);
     };
 
-    // const handleFilterClose = () => {
-    //     setFilterModalOpen(false);
-    // };
+    const handleFilterClose = () => {
+        setFilterModalOpen(false);
+    };
 
-    // const handleStatusChange = (status: string) => {
-    //     setSelectedStatuses(prev =>
-    //         prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]
-    //     );
-    // };
+    const handleStatusChange = (status: string) => {
+        setSelectedStatuses(prev =>
+            prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]
+        );
+    };
 
-    // const handlePaymentChange = (payment: string) => {
-    //     setSelectedPayments(prev =>
-    //         prev.includes(payment) ? prev.filter(p => p !== payment) : [...prev, payment]
-    //     );
-    // };
+    const handlePaymentChange = (payment: string) => {
+        setSelectedPayments(prev =>
+            prev.includes(payment) ? prev.filter(p => p !== payment) : [...prev, payment]
+        );
+    };
+
+    const sortedOrders = [...filteredOrders].sort((a, b) => {
+        const aValue = a[sortField as keyof OrderSchema];
+        const bValue = b[sortField as keyof OrderSchema];
+
+        if (typeof aValue === "string" && typeof bValue === "string") {
+            return sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+        }
+        if (typeof aValue === "number" && typeof bValue === "number") {
+            return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+        }
+        return 0;
+    });
 
     return (
-        <Box width={'100%'}>
-            <Typography variant="h5" component="h2" style={{ margin: '16px' }}>
+        <Box width={"90%"}>
+            <Typography variant="h5" component="h2" style={{ margin: '16px', textAlign: 'center' }}>
                 Danh sách đơn hàng
             </Typography>
             <Stack direction="row" justifyContent="flex-end" spacing={3} sx={{ marginBottom: '16px' }}>
@@ -136,23 +154,23 @@ const OrderList: React.FC = () => {
                 />
             </Stack>
 
-            <Box sx={{ gap: 1, display: 'flex', flexDirection: 'row', mb: 2, justifyContent: 'flex-end' }}>
+            <Box sx={{ gap: 1, display: 'flex', flexDirection: 'row', mb: 2, justifyContent: "flex-end" }}>
                 <Button sx={{ textDecoration: 'underline' }} onClick={handleFilterOpen}>
                     Bộ Lọc
                 </Button>
                 <Box sx={{ borderRadius: 10, padding: 1, marginRight: 2, backgroundColor: colors.primaryColor }}>
-                    <Typography color="white" variant="body2">
+                    <Typography color='white' variant="body2">
                         Trạng Thái: {selectedStatuses.length > 0 ? selectedStatuses.join(', ') : 'Tất cả'}
                     </Typography>
                 </Box>
                 <Box sx={{ borderRadius: 10, padding: 1, backgroundColor: colors.primaryColor }}>
-                    <Typography variant="body2" color="white">
+                    <Typography variant="body2" color='white'>
                         Phương Thức Thanh Toán: {selectedPayments.length > 0 ? selectedPayments.join(', ') : 'Tất cả'}
                     </Typography>
                 </Box>
             </Box>
 
-            <TableContainer component={Paper} sx={{ width: '100%', margin: 'auto', backgroundColor: 'white', maxHeight: '700px', overflowY: 'auto' }}>
+            <TableContainer component={Paper} sx={{ width: "100%", margin: "auto", backgroundColor: 'white', maxHeight: "700px", overflowY: "auto" }}>
                 {isLoading ? (
                     <CircularProgress />
                 ) : (
@@ -168,14 +186,14 @@ const OrderList: React.FC = () => {
                                             onClick={() => {
                                                 if (column.field) {
                                                     setSortField(column.field);
-                                                    setSortOrder(prevOrder => (prevOrder === 'asc' ? 'desc' : 'asc'));
+                                                    setSortOrder(prevOrder => (prevOrder === "asc" ? "desc" : "asc"));
                                                 }
                                             }}
                                         >
                                             {column.label}
                                             {sortField === column.field && (
-                                                <span style={{ marginLeft: '5px' }}>
-                                                    {sortOrder === 'asc' ? '↑' : '↓'}
+                                                <span style={{ marginLeft: "5px" }}>
+                                                    {sortOrder === "asc" ? "↑" : "↓"}
                                                 </span>
                                             )}
                                         </TableCell>
@@ -183,40 +201,65 @@ const OrderList: React.FC = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {filteredOrders.map((order) => (
+                                {sortedOrders.map((order) => (
                                     <TableRow key={order.orderId} hover>
                                         {columns.map((column, index) => (
                                             <TableCell key={index} align="center">
                                                 {column.field ? (
                                                     column.field === 'total' ? (
                                                         `${order.total.toLocaleString()} VND`
-                                                    ) : column.field === 'createdAt' ? (
-                                                        new Date(order.createdAt).toLocaleDateString('vi-VN')
                                                     ) : (
-                                                        order[column.field]
+                                                        column.field === 'createdAt' ? (
+                                                            new Date(order.createdAt).toLocaleDateString('vi-VN')
+                                                        ) : (
+                                                            order[column.field]
+                                                        )
                                                     )
-                                                ) : (
-                                                    ''
-                                                )}
+                                                ) : null}
                                             </TableCell>
                                         ))}
                                     </TableRow>
                                 ))}
                             </TableBody>
                         </Table>
+                        <TablePagination
+                            rowsPerPageOptions={[5, 10, 25]}
+                            component="div"
+                            count={data ? data.totalElements : 0}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                        />
                     </>
                 )}
             </TableContainer>
 
-            <TablePagination
-                rowsPerPageOptions={[10, 25, 50]}
-                component="div"
-                count={filteredOrders.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-            />
+            {/* Filter Modal */}
+            <Dialog open={filterModalOpen} onClose={handleFilterClose}>
+                <DialogTitle>Bộ Lọc Đơn Hàng</DialogTitle>
+                <DialogContent sx={{ backgroundColor: 'white' }}>
+                    <Typography variant="subtitle1">Trạng Thái:</Typography>
+                    {["PENDING", "COMPLETED", "CANCELLED"].map(status => (
+                        <FormControlLabel
+                            control={<Checkbox checked={selectedStatuses.includes(status)} onChange={() => handleStatusChange(status)} />}
+                            label={status}
+                            key={status}
+                        />
+                    ))}
+                    <Typography variant="subtitle1">Phương Thức Thanh Toán:</Typography>
+                    {["CASH", "VNPAY", "MOMO"].map(payment => (
+                        <FormControlLabel
+                            control={<Checkbox checked={selectedPayments.includes(payment)} onChange={() => handlePaymentChange(payment)} />}
+                            label={payment}
+                            key={payment}
+                        />
+                    ))}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleFilterClose}>Đóng</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

@@ -1,7 +1,6 @@
 
 export interface GetProductSchema {
   category: String,
-  discountPrice: Number
   id: Number
   image: String,
   name: String
