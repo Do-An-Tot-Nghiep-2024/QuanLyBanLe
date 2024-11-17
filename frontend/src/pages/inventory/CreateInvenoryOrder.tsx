@@ -104,7 +104,7 @@ const CreateInventoryOrder: React.FC = () => {
         const formattedOrderItems = orderItems.map(item => {
             const quantityStr = String(item.quantity);
             const priceStr = String(item.price);
-            const quantityRegex = /^(?:[1-9][0-9]?|100)$/; 
+            const quantityRegex = /^(?:[1-9][0-9]?|100)$/;
             const price = parseFloat(priceStr);
 
             // Validate quantity
@@ -122,7 +122,7 @@ const CreateInventoryOrder: React.FC = () => {
             // Check dates
             if (!item.mxp || !item.exp) {
                 alert("Điền đầy đủ thông tin ngày sản xuất/ngày hết hạn");
-                return ;
+                return;
             }
 
             const mxpDate = new Date(item.mxp);
@@ -133,7 +133,7 @@ const CreateInventoryOrder: React.FC = () => {
                 return;
             }
 
-            if (expDate < new Date() || mxpDate > new Date()){
+            if (expDate < new Date() || mxpDate > new Date()) {
                 alert("Ngày hết hạn/ngày sản xuất không hợp lệ");
                 return;
             }
@@ -148,7 +148,7 @@ const CreateInventoryOrder: React.FC = () => {
         }).filter(item => item !== null);
 
         if (formattedOrderItems.length === 0) {
-            return; 
+            return;
         }
 
         try {
@@ -322,8 +322,9 @@ const CreateInventoryOrder: React.FC = () => {
                                         />
                                     </TableCell>
                                     <TableCell sx={{ textAlign: "center" }}>
-                                        {formatCurrency(item.price * item.quantity)}
+                                        {formatCurrency((item.price && item.quantity) ? item.price * item.quantity : 0)}
                                     </TableCell>
+
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -333,7 +334,7 @@ const CreateInventoryOrder: React.FC = () => {
                 <Box display="flex" justifyContent="space-between" mt={3}>
                     <Typography variant="h6" fontWeight="bold">Tổng tiền hàng</Typography>
                     <Typography variant="h6" fontWeight="bold">
-                        {formatCurrency(calculateTotalPrice())}
+                    {formatCurrency(calculateTotalPrice() ? calculateTotalPrice() : 0)}
                     </Typography>
                 </Box>
 

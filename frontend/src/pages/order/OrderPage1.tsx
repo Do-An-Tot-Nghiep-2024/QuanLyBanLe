@@ -70,7 +70,7 @@ const OrderPage: React.FC = () => {
 
 
   const handleUpdateQuantity = (product: OrderItem, quantity: number) => {
-    if(!product.selectedShipment){
+    if (!product.selectedShipment) {
       alert("Chưa chọn lô hàng");
       return;
     }
@@ -249,22 +249,22 @@ const OrderPage: React.FC = () => {
     handleGetLatestPromotion();
   }, [])
 
-const handleDeleteClose = () => {
+  const handleDeleteClose = () => {
     setConfirmOpen(false)
-}
+  }
 
-const handleDeleteOrderItem = () => {
-  setOrderItems((prevOrderItems) => 
-    prevOrderItems.filter(item => item.product.id !== deleteItem)
-  );
-  setConfirmOpen(false)
+  const handleDeleteOrderItem = () => {
+    setOrderItems((prevOrderItems) =>
+      prevOrderItems.filter(item => item.product.id !== deleteItem)
+    );
+    setConfirmOpen(false)
 
-}
+  }
 
-const handleOpenDelete = (id : number) => {
-  setConfirmOpen(true)
-  setDeleteItem(id)
-}
+  const handleOpenDelete = (id: number) => {
+    setConfirmOpen(true)
+    setDeleteItem(id)
+  }
   return (
     <Box display="flex" p={1} sx={{ backgroundColor: "white", height: "100vh", width: '100%' }}>
       <Box flexBasis="30%" mr={2} sx={{ backgroundColor: 'white' }}>
@@ -364,9 +364,9 @@ const handleOpenDelete = (id : number) => {
                       {formatCurrency(Number(item.price))}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", padding: '16px 8px' }}>
-                      {formatCurrency(item.price * item.quantity)}
+                    {formatCurrency((item.price && item.quantity) ? item.price * item.quantity : 0)}
                     </TableCell>
-                    <Button onClick={() => handleOpenDelete(Number(item.product.id))} sx={{mt: 3, color: 'red'}}>
+                    <Button onClick={() => handleOpenDelete(Number(item.product.id))} sx={{ mt: 3, color: 'red' }}>
                       Xóa
                     </Button>
                   </TableRow>
@@ -376,8 +376,13 @@ const handleOpenDelete = (id : number) => {
           </TableContainer>
           <Box display="flex" flexDirection="column" mt={2} alignItems='flex-end' width='100%'>
             <Typography sx={{ mb: 2, fontWeight: 'bold' }}>
-              Tổng tiền hàng: {formatCurrency(orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0))}
+              Tổng tiền hàng: {formatCurrency(
+                orderItems.length > 0
+                  ? orderItems.reduce((sum, item) => sum + (item.price && item.quantity ? item.price * item.quantity : 0), 0)
+                  : 0
+              )}
             </Typography>
+
             <Box>
               {latestPromotion != null && latestPromotion != undefined && totalPayment >= (latestPromotion?.minOrderValue) ? (
                 <Typography variant="body1" sx={{ color: 'green', fontWeight: 'bold', mb: 2 }}>
@@ -426,47 +431,47 @@ const handleOpenDelete = (id : number) => {
         </Paper>
       </Box>
       <Modal
-            open={deleteConfirmOpen}
-            onClose={handleDeleteClose}
-            aria-labelledby="delete-category-modal"
-            aria-describedby="delete-category-modal-description"
-            sx={styles.modal}
+        open={deleteConfirmOpen}
+        onClose={handleDeleteClose}
+        aria-labelledby="delete-category-modal"
+        aria-describedby="delete-category-modal-description"
+        sx={styles.modal}
+      >
+        <div
+          style={{
+            backgroundColor: "white",
+            padding: "10px",
+            borderRadius: "8px",
+            height: "30vh",
+            width: "30vw",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            margin: "auto",
+            flexDirection: "column",
+            gap: "30px",
+          }}
+        >
+          <h3 id="delete-category-modal">Xác nhận xóa</h3>
+          <Typography>Bạn có chắc chắn muốn xóa sản phẩm này không?</Typography>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: "40px",
+              width: "100%",
+              justifyContent: "center",
+            }}
           >
-            <div
-              style={{
-                backgroundColor: "white",
-                padding: "10px",
-                borderRadius: "8px",
-                height: "30vh",
-                width: "30vw",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                margin: "auto",
-                flexDirection: "column",
-                gap: "30px",
-              }}
-            >
-              <h3 id="delete-category-modal">Xác nhận xóa</h3>
-              <Typography>Bạn có chắc chắn muốn xóa sản phẩm này không?</Typography>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: "40px",
-                  width: "100%",
-                  justifyContent: "center",
-                }}
-              >
-                <Button onClick={handleDeleteClose} sx={styles.closeButton}>
-                  Hủy
-                </Button>
-                <Button onClick={()=> handleDeleteOrderItem()} sx={styles.addButton}>
-                  Xóa
-                </Button>
-              </div>
-            </div>
-          </Modal>
+            <Button onClick={handleDeleteClose} sx={styles.closeButton}>
+              Hủy
+            </Button>
+            <Button onClick={() => handleDeleteOrderItem()} sx={styles.addButton}>
+              Xóa
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </Box>
   );
 };

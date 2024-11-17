@@ -66,7 +66,7 @@ const OrderList: React.FC = () => {
             const paymentMatch = selectedPayments.length > 0 ? selectedPayments.includes(order.paymentType) : true;
 
             if(filterModalOpen){
-                
+
             }
             if (startDate && endDate) {
                 const start = new Date(startDate);
@@ -111,7 +111,7 @@ const OrderList: React.FC = () => {
     // };
 
     return (
-        <Box width={'100%'}>
+        <Box width={'90%'}>
             <Typography variant="h5" component="h2" style={{ margin: '16px' }}>
                 Danh sách đơn hàng
             </Typography>
