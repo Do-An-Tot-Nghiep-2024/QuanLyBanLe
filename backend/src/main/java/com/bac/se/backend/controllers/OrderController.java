@@ -148,4 +148,19 @@ public class OrderController {
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
+    // cancel order by id
+    @PutMapping("/cancel/{id}")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'EMPLOYEE')")
+    public ResponseEntity<ApiResponse<String>> cancelOrder(@PathVariable("id") Long orderId) {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.cancelOrder(orderId)));
+        }catch (ResourceNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
 }
