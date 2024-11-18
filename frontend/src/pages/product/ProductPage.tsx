@@ -22,20 +22,18 @@ import Grid from "@mui/material/Grid2";
 import EditIcon from "@mui/icons-material/Edit";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import NoteAddOutlined from "@mui/icons-material/NoteAddOutlined";
 import { useNavigate } from "react-router-dom";
 import colors from "../../constants/color";
-import { SetStateAction, useEffect, useState } from "react";
+import { SetStateAction, useState } from "react";
 import {
   deleteProductService,
   getAllProductsService,
+  updateProductPriceService,
 } from "../../services/product.service";
-import ResponsePagination from "../../types/responsePagination";
 import { useQuery } from "@tanstack/react-query";
 import { GetProductSchema } from "../../types/getProductSchema";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { useAppSelector } from "../../redux/hook";
-// import * as XLSX from "xlsx";
 
 export default function ProductPage() {
   const navigate = useNavigate();
@@ -49,14 +47,16 @@ export default function ProductPage() {
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [openPriceModal, setOpenPriceModal] = useState(false);
+  const [productToUpdate, setProductToUpdate] = useState<GetProductSchema | null>(null);
+  const [newPrice, setNewPrice] = useState<number | string>("");
+
   const fetchProducts = async () => {
     const response = await getAllProductsService();
     if (!response) {
       throw new Error("Error fetching products");
     }
-    console.log(response.data);
-
-    return response.data as unknown as ResponsePagination<GetProductSchema>;
+    return response.data;
   };
 
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -89,75 +89,46 @@ export default function ProductPage() {
     setPage(0);
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  const handleOpenPriceModal = (product: GetProductSchema) => {
+    setProductToUpdate(product);
+    setNewPrice(Number(product.price));
+    setOpenPriceModal(true);
+  };
 
-  // const handleExcelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = (e) => {
-  //       const data = new Uint8Array(e.target?.result as ArrayBuffer);
-  //       const workbook = XLSX.read(data, { type: "array" });
-  //       const sheetName = workbook.SheetNames[0];
-  //       const sheet = workbook.Sheets[sheetName];
-  //       const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // Get data as an array of arrays
+  const handleClosePriceModal = () => {
+    setOpenPriceModal(false);
+    setNewPrice("");
+    setProductToUpdate(null);
+  };
 
-  //       // Skip the header row
-  //       jsonData.slice(1).forEach((row: any) => {
-  //         const productData = {
-  //           ...data?.responseList,
-  //           name: row[0],
-  //           categoryId: Number(row[1]),
-  //           supplierId: Number(row[2]),
-  //         };
-
-  //         try {
-  //           ProductSchema.parse(productData);
-  //           createProductService(productData, imageFile); // Adjust if needed
-  //         } catch (err: any) {
-  //           setAlertMessage(err?.issues ? err.issues[0].message : "Lỗi khi tạo sản phẩm");
-  //           setAlertSeverity("error");
-  //           setSnackbarOpen(true);
-  //         }
-  //       });
-
-  //       setAlertMessage("Sản phẩm đã được nhập thành công!");
-  //       setAlertSeverity("success");
-  //       setSnackbarOpen(true);
-  //     };
-  //     reader.readAsArrayBuffer(file);
-  //   }
-  // };
+  const handleUpdatePrice = async () => {
+    if (!productToUpdate || !newPrice) return;
+    try {
+      const response = await updateProductPriceService(Number(productToUpdate.id), Number(newPrice));
+      console.log(response);
+      if (response.message === "success") {
+        setAlertMessage("Cập nhật giá thành công");
+        setAlertOpen(true);
+        refetch();
+        handleClosePriceModal();
+        return;
+      }
+      // Make API call to update product price here (e.g., updateProductPriceService(updatedProduct))
+      setAlertMessage("Cập nhật giá thất bại");
+      setAlertOpen(true);
+      refetch();
+      handleClosePriceModal();
+    } catch (error) {
+      setAlertMessage("Cập nhật giá thất bại");
+      setAlertOpen(true);
+    } finally {
+      setTimeout(() => setAlertMessage(""), 3000);
+    }
+  };
 
   const categories = Array.from(
     new Set(data?.responseList.map((product) => product.category))
-  )
-    .concat("All")
-    .sort();
-
-  // const normalizeString = (str: string) => {
-  //   return str
-  //     .normalize("NFD")
-  //     .replace(/[\u0300-\u036f]/g, "")
-  //     .toLowerCase();
-  // };
-
-  // const filteredProducts =
-  // Array.isArray(products)
-  //   ? products.filter(
-  //       (product) =>
-  //         normalizeString(String(product.productName)).includes(normalizeString(searchTerm))
-  //     )
-  //   : [];
-
-  // const filteredProducts =
-  //   selectedCategory === "All" && !searchTerm
-  //     ? data?.responseList
-  //     : data?.responseList.filter(
-  //       (product) => product.category === selectedCategory
-  //     );
+  ).concat("All");
 
   const normalizeString = (str: string) => {
     return str
@@ -166,44 +137,16 @@ export default function ProductPage() {
       .toLowerCase();
   };
 
-  // Assuming `products` is your array of product objects
   const filteredProducts = Array.isArray(data?.responseList)
     ? data?.responseList.filter((product) => {
-        const matchesSearchTerm = normalizeString(
-          String(product.name)
-        ).includes(normalizeString(searchTerm));
-
-        // Check if the selected category is "All"
-        if (selectedCategory === "All") {
-          // Only return products that match the search term
-          return searchTerm ? matchesSearchTerm : true; // If no search term, return all
-        } else {
-          // If a specific category is selected, filter by category and search term
-          return (
-            product.category === selectedCategory &&
-            (!searchTerm || matchesSearchTerm)
-          );
-        }
-      })
+      const matchesSearchTerm = normalizeString(String(product.name)).includes(normalizeString(searchTerm));
+      if (selectedCategory === "All") {
+        return searchTerm ? matchesSearchTerm : true;
+      } else {
+        return product.category === selectedCategory && (!searchTerm || matchesSearchTerm);
+      }
+    })
     : [];
-
-  // const filteredProducts = (): GetProductSchema[] => {
-  //   if (!data || !data.responseList) return [];
-
-  //   const normalizedSearchTerm = normalizeString(searchTerm);
-
-  //   const categoryFilteredProducts = selectedCategory === "All"
-  //     ? data.responseList
-  //     : data.responseList.filter(product => product.category === selectedCategory);
-
-  //   if (normalizedSearchTerm) {
-  //     return categoryFilteredProducts.filter(product =>
-  //       normalizeString(String(product.name)).includes(normalizedSearchTerm)
-  //     );
-  //   }
-
-  //   return categoryFilteredProducts as GetProductSchema[];
-  // };
 
   return (
     <>
@@ -217,41 +160,20 @@ export default function ProductPage() {
             label="Tìm kiếm sản phẩm"
             variant="filled"
             size="small"
-            sx={{
-              width: "100%",
-              mt: 2,
-              display: { xs: "none", md: "inline-block", sm: "flex" },
-            }}
+            sx={{ width: "100%", mt: 2 }}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           {auth.role === "MANAGER" ? (
             <Box>
               <Tooltip title="Thêm sản phẩm" arrow>
-                <IconButton
-                  onClick={() => navigate("/create-product")}
-                  size="large"
-                  color="success"
-                >
+                <IconButton onClick={() => navigate("/create-product")} size="large" color="success">
                   <AddBoxIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Import sản phẩm" arrow>
-                <IconButton
-                  onClick={() => navigate("/create-product")}
-                  size="large"
-                  color="success"
-                >
-                  <NoteAddOutlined />
                 </IconButton>
               </Tooltip>
             </Box>
           ) : null}
         </Stack>
-        <Tabs
-          value={selectedCategory}
-          onChange={(_event, newValue) => setSelectedCategory(newValue)}
-          sx={{ mb: 2 }}
-        >
+        <Tabs value={selectedCategory} onChange={(_event, newValue) => setSelectedCategory(newValue)} sx={{ mb: 2 }}>
           {categories.map((category) => (
             <Tab key={String(category)} label={category} value={category} />
           ))}
@@ -266,68 +188,28 @@ export default function ProductPage() {
             <Grid size="auto" display="flex" justifyContent="center">
               <Typography variant="h6">Error: {error.message}</Typography>
             </Grid>
-          ) : filteredProducts?.length && filteredProducts?.length > 0 ? (
-            filteredProducts?.map((product) => (
+          ) : filteredProducts?.length ? (
+            filteredProducts.map((product) => (
               <Grid size="auto" key={Number(product.id)}>
-                <Card
-                  sx={{
-                    width: 200,
-                    height: 300,
-                    display: "flex",
-                    flexDirection: "column",
-                    backgroundColor: "white",
-                    boxShadow: 3,
-                    borderRadius: 2,
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    height="140"
-                    image={product.image as string}
-                    alt={product.name as string}
-                    sx={{ objectFit: "cover", padding: 1 }}
-                  />
+                <Card sx={{ width: 200, height: 300, display: "flex", flexDirection: "column", backgroundColor: "white", boxShadow: 3, borderRadius: 2 }}>
+                  <CardMedia component="img" height="140" image={product.image as string} alt={product.name as string} sx={{ objectFit: "cover", padding: 1 }} />
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography>{product.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">{product.category}</Typography>
+                    <Typography variant="body2" color="text.secondary">Đơn vị tính: {product.unit}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {product.category}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Đơn vị tính: {product.unit}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(Number(product.price))}
+                      {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(product.price))}
                     </Typography>
                   </CardContent>
                   {auth.role === "MANAGER" ? (
                     <Box display="flex" justifyContent="center" padding={1}>
-                      <IconButton
-                        color="error"
-                        onClick={() => {
-                          setProductToDelete(product);
-                          setConfirmOpen(true);
-                        }}
-                      >
+                      <IconButton color="error" onClick={() => { setProductToDelete(product); setConfirmOpen(true); }}>
                         <DeleteForeverIcon />
                       </IconButton>
-                      <IconButton
-                        color="warning"
-                        onClick={() =>
-                          navigate(`/update-product/${product.id}`)
-                        }
-                      >
+                      <IconButton color="warning" onClick={() => navigate(`/update-product/${product.id}`)}>
                         <EditIcon />
                       </IconButton>
-
-                      <IconButton
-                        color="success"
-                        onClick={() =>
-                          navigate(`/reports/product-price/${product.id}`)
-                        }
-                      >
+                      <IconButton color="success" onClick={() => handleOpenPriceModal(product)}>
                         <TrendingUpIcon />
                       </IconButton>
                     </Box>
@@ -360,24 +242,41 @@ export default function ProductPage() {
         <Box sx={styles.modalContent}>
           <Typography variant="h6">Xác nhận xóa sản phẩm</Typography>
           <Typography>
-            Bạn có chắc chắn muốn xóa sản phẩm{" "}
-            <strong>{productToDelete?.name}</strong> không?
+            Bạn có chắc chắn muốn xóa sản phẩm <strong>{productToDelete?.name}</strong> không?
           </Typography>
-          <Stack
-            direction="row"
-            gap="40px"
-            justifyContent="center"
-            width="100%"
-          >
-            <Button
-              onClick={() => setConfirmOpen(false)}
-              sx={styles.closeButton}
-            >
-              Hủy
-            </Button>
-            <Button onClick={handleDeleteProduct} sx={styles.addButton}>
-              Xóa
-            </Button>
+          <Stack direction="row" gap="40px" justifyContent="center" width="100%">
+            <Button onClick={() => setConfirmOpen(false)} sx={styles.closeButton}>Hủy</Button>
+            <Button onClick={handleDeleteProduct} sx={styles.addButton}>Xóa</Button>
+          </Stack>
+        </Box>
+      </Modal>
+
+      {/* Price Update Modal */}
+      <Modal sx={{}} open={openPriceModal} onClose={handleClosePriceModal}>
+        <Box sx={styles.modalContent}>
+          <Typography variant="h6">Cập nhật giá sản phẩm</Typography>
+          <Typography>Giá nhập: {Number(productToUpdate?.originalPrice)} VND</Typography>
+
+          <Typography>Giá cũ: {Number(productToUpdate?.price)} VND</Typography>
+          <TextField
+            label="Nhập giá mới"
+            variant="outlined"
+            type="text" // Use type="text" for better handling of raw input
+            value={newPrice === "" ? "" : new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(newPrice))} // Show formatted value when newPrice is not empty
+            onChange={(e) => {
+              // Remove any non-numeric characters except for an empty string
+              const newValue = e.target.value.replace(/[^\d]/g, "");
+
+              // Update the raw numeric value or set it to empty string
+              setNewPrice(newValue ? parseFloat(newValue) : ""); // set to empty string if invalid input
+            }}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+
+          <Stack direction="row" gap="40px" justifyContent="center" width="100%">
+            <Button onClick={handleClosePriceModal} sx={styles.closeButton}>Hủy</Button>
+            <Button onClick={handleUpdatePrice} sx={styles.addButton}>Cập nhật</Button>
           </Stack>
         </Box>
       </Modal>
@@ -416,8 +315,8 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     gap: "20px",
-    width: "30vw",
-    height: "30vh",
+    width: "35vw",
+    height: "40vh",
   },
   closeButton: {
     backgroundColor: "#f0f0f0",

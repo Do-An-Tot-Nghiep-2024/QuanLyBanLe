@@ -201,11 +201,13 @@ const OrderPage: React.FC = () => {
   };
 
   const isCustomerPaymentValid = (payment: number) => {
-    const regex = /^(?!0)\d{0,8}$/;
+    const regex = /^[1-9][0-9]{0,7}|^$$/;
     return regex.test(String(payment));
   };
 
   const updateCustomerPayment = (customerPayment: number) => {
+    console.log(customerPayment);
+    
     if (customerPayment === 0) {
       setCustomerPayment(0);
       setCustomerChange(0);
@@ -213,6 +215,7 @@ const OrderPage: React.FC = () => {
     }
     const totalPayment = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     if (isCustomerPaymentValid(customerPayment)) {
+      console.log(customerPayment);
       setCustomerPayment(customerPayment);
       setCustomerChange(customerPayment - totalPayment);
     }
@@ -364,7 +367,7 @@ const OrderPage: React.FC = () => {
                       {formatCurrency(Number(item.price))}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", padding: '16px 8px' }}>
-                    {formatCurrency((item.price && item.quantity) ? item.price * item.quantity : 0)}
+                      {formatCurrency((item.price && item.quantity) ? item.price * item.quantity : 0)}
                     </TableCell>
                     <Button onClick={() => handleOpenDelete(Number(item.product.id))} sx={{ mt: 3, color: 'red' }}>
                       Xóa
@@ -394,7 +397,7 @@ const OrderPage: React.FC = () => {
                 </Typography>
               )}
             </Box>
-            <TextField
+            {/* <TextField
               fullWidth
               variant="outlined"
               label="Tiền khách hàng đưa"
@@ -403,7 +406,21 @@ const OrderPage: React.FC = () => {
                 updateCustomerPayment(Number(e.target.value));
               }}
               sx={{ mb: 2, width: '30%' }}
+            /> */}
+
+            <TextField
+              label="Tiền khách hàng đưa"
+              variant="outlined"
+              type="number"
+              value={customerPayment}
+              onChange={(e) => {
+                updateCustomerPayment(Number(e.target.value));
+              }
+              }
+
+              sx={{ mb: 2, width: '30%' }}
             />
+
 
             {latestPromotion != null && latestPromotion != undefined && totalPayment >= (latestPromotion?.minOrderValue) ? (
               <Typography sx={{ mb: 2, fontWeight: 'bold', fontStyle: 'italic' }}>
