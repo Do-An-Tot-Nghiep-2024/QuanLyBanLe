@@ -24,7 +24,6 @@ public class CategoryController {
 
 
     @GetMapping
-    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getCategories() {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS,
@@ -37,7 +36,6 @@ public class CategoryController {
 
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<CategoryResponse>> getCategory(@PathVariable("id") final Long id) {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS,
