@@ -34,7 +34,8 @@ const UnitManagement = lazy(() => import("../pages/product/UnitPage"));
 const OrderList = lazy(() => import("../pages/order/OrderList"));
 
 const ShipmentPage = lazy(() => import("../pages/inventory/ShipmentPage"));
-
+const OrderDetail = lazy(() => import("../pages/order/OrderDetail"));
+const PrintOrder = lazy(() => import("../pages/print/PrintOrder"));
 // statistic
 const StatisticsProduct = lazy(
   () => import("../pages/report/SalesStatisticsProduct")
@@ -191,6 +192,7 @@ const PageRouter = () => {
               {/* <Route path="/orders/create-order" element={<OrderPage1 />} />
               <Route path="/order2" element={<OrderPage2 />} /> */}
               <Route path="/orders" element={<OrderList />} />
+              <Route path="/orders/:orderId" element={<OrderDetail />} />
 
               <Route
                 path="/inventory/create-inventory"
@@ -199,6 +201,11 @@ const PageRouter = () => {
               <Route
                 path="/print/import-invoice"
                 element={<PrintImportInvoice />}
+              />
+
+<Route
+                path="/print/order-invoice"
+                element={<PrintOrder />}
               />
               <Route path="/inventory/shipment" element={<ShipmentPage />} />
               <Route

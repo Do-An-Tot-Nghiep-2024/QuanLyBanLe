@@ -67,7 +67,7 @@ const PDFTable = ({ data }: { data: any[] }) => (
       </View>
 
       {/* Table Rows */}
-      {data.map((item, index) => (
+      {data?.map((item, index) => (
         <View key={index} style={styles.tableRow}>
           <View style={styles.tableCol}>
             <Text>{index + 1}</Text>
