@@ -1,5 +1,6 @@
 package com.bac.se.backend.services.impl;
 
+import com.bac.se.backend.enums.PageLimit;
 import com.bac.se.backend.mapper.ProductMapper;
 import com.bac.se.backend.mapper.ProductPriceMapper;
 import com.bac.se.backend.payload.request.DateRequest;
@@ -7,10 +8,13 @@ import com.bac.se.backend.payload.response.product.BestSellingProductResponse;
 import com.bac.se.backend.payload.response.product.StatisticPriceProductResponse;
 import com.bac.se.backend.payload.response.statistic.StatisticResponse;
 import com.bac.se.backend.repositories.OrderItemRepository;
+import com.bac.se.backend.repositories.OrderRepository;
 import com.bac.se.backend.repositories.ProductPriceRepository;
 import com.bac.se.backend.repositories.ProductRepository;
 import com.bac.se.backend.services.StatisticService;
 import com.bac.se.backend.utils.DateConvert;
+import com.bac.se.backend.utils.JwtParse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +36,8 @@ public class StatisticServiceImpl implements StatisticService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final DateConvert dateConvert;
+    private final OrderRepository orderRepository;
+    private final JwtParse jwtParse;
 
 
     @Override
@@ -63,6 +69,56 @@ public class StatisticServiceImpl implements StatisticService {
                 .stream()
                 .map(productMapper::mapObjectToBestSellingProduct)
                 .toList();
+    }
+
+//    @Override
+//    public BigDecimal getNetProfitCurrent() {
+//
+//    }
+
+    @Override
+    public BigDecimal getSalesCurrentOfEmployee(HttpServletRequest request) {
+        String email = jwtParse.decodeTokenWithRequest(request);
+        var totalSalesByEmployee = orderRepository.getTotalCurrentSalesByEmployee(email, PageLimit.ONLY.getPageable());
+        if(!totalSalesByEmployee.isEmpty()){
+            Object[] totalSales = totalSalesByEmployee.get(0);
+            if(totalSales == null){
+                return BigDecimal.ZERO;
+            }
+            return BigDecimal.valueOf(Double.parseDouble(totalSales[0].toString()));
+        }
+        return BigDecimal.ZERO;
+    }
+
+    @Override
+    public BigDecimal getCurrentTotalSales() {
+        var currentTotalSales = orderItemRepository.getCurrentTotalSales(PageLimit.ONLY.getPageable());
+        BigDecimal totalSales = BigDecimal.ZERO;
+        if(!currentTotalSales.isEmpty()){
+            Object[] currentTotalSalesObject = currentTotalSales.get(0);
+            if(currentTotalSalesObject != null){
+                totalSales = BigDecimal.valueOf(Double.parseDouble(currentTotalSales.get(0)[0].toString()));
+            }
+        }
+        return totalSales;
+    }
+
+    @Override
+    public Long getCurrentTotalOrders() {
+        return orderRepository.getCurrentTotalOrders();
+    }
+
+    @Override
+    public BigDecimal getCurrentNetTotalProfit() {
+        var netTotalProfitCurrent = orderRepository.getNetTotalProfitCurrent(PageLimit.ONLY.getPageable());
+        if(!netTotalProfitCurrent.isEmpty()){
+            Object[] profit = netTotalProfitCurrent.get(0);
+            if(profit == null){
+                return BigDecimal.ZERO;
+            }
+            return BigDecimal.valueOf(Double.parseDouble(netTotalProfitCurrent.get(0)[0].toString()));
+        }
+        return BigDecimal.ZERO;
     }
 
 

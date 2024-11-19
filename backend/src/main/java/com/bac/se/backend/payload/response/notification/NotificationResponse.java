@@ -1,4 +1,10 @@
 package com.bac.se.backend.payload.response.notification;
 
-public record NotificationRespose() {
+import java.util.Date;
+
+public record NotificationResponse(
+        Long id,
+        String content,
+        Date createdAt
+) {
 }

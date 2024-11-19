@@ -23,9 +23,11 @@ public class Customer {
     private String email;
     @Column(length = 10)
     private String phone;
+
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;
+
     @OneToMany(mappedBy = "customer")
     private List<Order> orders;
 }

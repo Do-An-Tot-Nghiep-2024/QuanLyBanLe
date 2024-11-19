@@ -1,26 +1,28 @@
 package com.bac.se.backend.services.impl;
 
 import com.bac.se.backend.payload.response.DashboardResponse;
-import com.bac.se.backend.repositories.CustomerRepository;
-import com.bac.se.backend.repositories.OrderItemRepository;
-import com.bac.se.backend.repositories.OrderRepository;
 import com.bac.se.backend.services.DashboardService;
+import com.bac.se.backend.services.StatisticService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
 
-    private final OrderItemRepository orderItemRepository;
-    private final CustomerRepository customerRepository;
-    private final OrderRepository orderRepository;
+    private final StatisticService statisticService;
 
     @Override
     public DashboardResponse getDashboard() {
-        long totalCustomers = customerRepository.count();
-        double totalSales = orderItemRepository.getTotalSales();
-        long totalOrders = orderRepository.getTotalOrders();
-        return new DashboardResponse(totalOrders, totalSales, totalCustomers);
+        long currentTotalOrders = statisticService.getCurrentTotalOrders();
+        BigDecimal currentTotalSales = statisticService.getCurrentTotalSales();
+        BigDecimal currentNetTotalProfit = statisticService.getCurrentNetTotalProfit();
+        return new DashboardResponse(
+                currentTotalOrders,
+                currentTotalSales,
+                currentNetTotalProfit
+        );
     }
 }

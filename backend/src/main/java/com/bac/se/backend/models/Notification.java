@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,11 +24,7 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private NotificationStatus status;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @OneToMany(mappedBy = "notification")
+    private List<Employee> employees;
 
-    @ManyToOne
-    @JoinColumn(name = "employee_id")
-    private Employee employee;
 }

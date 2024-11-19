@@ -2,8 +2,8 @@ package com.bac.se.backend.services;
 
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.payload.request.CreateProductRequest;
-import com.bac.se.backend.payload.request.ProductPriceRequest;
-import com.bac.se.backend.payload.request.ProductUpdateRequest;
+import com.bac.se.backend.payload.request.product.ProductPriceRequest;
+import com.bac.se.backend.payload.request.product.ProductUpdateRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.product.*;
 import org.springframework.web.multipart.MultipartFile;
