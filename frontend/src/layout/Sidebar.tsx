@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import {
@@ -13,23 +13,23 @@ import {
   ShoppingBag as ShoppingBagIcon,
   Inventory as InventoryIcon,
   Settings as SettingsIcon,
+  AddBusiness as AddBusinessIcon,
+  Receipt as ReceiptIcon,
+  ViewColumn as ViewColumnIcon,
+  Warehouse as WarehouseIcon,
   NoteAddOutlined,
   Logout,
 } from "@mui/icons-material";
-import { AppProvider, DashboardLayout, ThemeSwitcher } from "@toolpad/core";
+import { AppProvider, DashboardLayout } from "@toolpad/core";
 import type { Router, Navigation, Session } from "@toolpad/core";
-import WarehouseIcon from "@mui/icons-material/Warehouse";
-import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import Cookies from "js-cookie";
 import { logout } from "../redux/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "../redux/hook";
 import { Outlet, useNavigate } from "react-router-dom";
-import colors from "../constants/color";
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import ViewColumnIcon from "@mui/icons-material/ViewColumn";
-import { Badge, Stack } from "@mui/material";
-import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import logo from "../assets/images/logo.png";
+import Notification from "../components/Notification";
+import { connectToSocket } from "../config/socket";
+
 const NAVIGATION: Navigation = [
   {
     segment: "dashboard",
@@ -92,22 +92,6 @@ const NAVIGATION: Navigation = [
       },
     ],
   },
-
-  {
-    segment: "suppliers",
-    title: "Nhà cung cấp",
-    icon: <NoteAddOutlined />,
-  },
-  {
-    segment: "employees",
-    title: "Nhân viên",
-    icon: <BadgeOutlinedIcon />,
-  },
-  {
-    segment: "customers",
-    title: "Khách hàng",
-    icon: <PeopleAltOutlinedIcon />,
-  },
   {
     segment: "promotions",
     title: "Chương trình khuyến mãi",
@@ -124,6 +108,21 @@ const NAVIGATION: Navigation = [
         icon: <AddBusinessIcon />,
       },
     ],
+  },
+  {
+    segment: "suppliers",
+    title: "Nhà cung cấp",
+    icon: <NoteAddOutlined />,
+  },
+  {
+    segment: "employees",
+    title: "Nhân viên",
+    icon: <BadgeOutlinedIcon />,
+  },
+  {
+    segment: "customers",
+    title: "Khách hàng",
+    icon: <PeopleAltOutlinedIcon />,
   },
   {
     segment: "reports",
@@ -172,14 +171,14 @@ const demoTheme = createTheme({
         },
       },
     },
-    dark: {
-      palette: {
-        background: {
-          default: colors.dark,
-          paper: colors.dark,
-        },
-      },
-    },
+    // dark: {
+    //   palette: {
+    //     background: {
+    //       default: colors.dark,
+    //       paper: colors.dark,
+    //     },
+    //   },
+    // },
   },
   breakpoints: {
     values: {
@@ -203,21 +202,16 @@ const demoTheme = createTheme({
 const Logo = () => (
   <img src={logo} alt="logo" style={{ width: "100%", borderRadius: "50%" }} />
 );
-function Search() {
-  return (
-    <Stack direction="row" alignItems="center" spacing={1}>
-      <Badge badgeContent={2} color="error">
-        <NotificationsActiveIcon />
-      </Badge>
-      <ThemeSwitcher />
-    </Stack>
-  );
-}
+
+// function CustomThemeSwitcher() {
+
+// }
 
 export default function Sidebar() {
   const auth = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [messages, setMessages] = useState([]);
   const [session, setSession] = useState<Session | null>({
     user: {
       name: auth.usename,
@@ -263,6 +257,34 @@ export default function Sidebar() {
     };
   }, [pathname]);
 
+  useEffect(() => {
+    // const socket = new SockJS("http://localhost:8080/ws");
+    // const client: Client = Stomp.over(socket);
+
+    // client.connect({}, () => {
+    //   client.subscribe(
+    //     "/topic/messages",
+    //     (message: any) => {
+    //       const chatMessage = JSON.parse(message.body);
+    //       setMessages((prevMessages: any) => {
+    //         if (
+    //           !prevMessages.find(
+    //             (msg: { id: any }) => msg.id === chatMessage.id
+    //           )
+    //         ) {
+    //           return [...prevMessages, chatMessage];
+    //         }
+    //         return prevMessages;
+    //       });
+    //     },
+    //     (err: string) => {
+    //       console.log("Connection error: " + err);
+    //     }
+    //   );
+    // });
+    connectToSocket(setMessages);
+  }, []);
+
   return (
     // preview-start
     <AppProvider
@@ -278,7 +300,7 @@ export default function Sidebar() {
     >
       <DashboardLayout
         slots={{
-          toolbarActions: Search,
+          toolbarActions: () => Notification(messages.length),
         }}
       >
         <Box
@@ -288,7 +310,6 @@ export default function Sidebar() {
             flexDirection: "column",
             alignItems: "center",
             height: "100vh",
-            paddingTop:3
           }}
         >
           <Outlet />
