@@ -85,9 +85,7 @@ const RegisterService = async (name, email, phone, password, navigation) => {
                 'Authorization': `Bearer ${accessToken}`
             }
         });
-        const data = await response.json();   
-        console.log("get inforservice", data);
-             
+        const data = await response.json();                
         if (response.status === 200) {
            return data;
         }
