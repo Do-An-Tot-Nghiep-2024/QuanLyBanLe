@@ -1,11 +1,12 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useLayoutEffect, useState, useEffect } from "react";
+import { useLayoutEffect, useState, useEffect, useCallback } from "react";
 import { View, Text, Pressable, FlatList, StyleSheet, Image, TouchableHighlight, Alert } from "react-native";
 import { colors } from '@/app/style';
 import { TextInput } from "react-native-paper";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addToCart, getCart, removeFromCart, updatedCart, descreaseQuantity } from "@/app/AsyncStorage";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Cart({ navigation }) {
     const [cartItems, setCartItems] = useState([]); 
@@ -70,17 +71,6 @@ export default function Cart({ navigation }) {
             </View>
         );
     };
-
-    // const handleRemoveFromCart = async (productId) => {
-    //     try {
-    //         await removeFromCart(productId);
-    //         loadCartItems();
-    //     } catch (error) {
-    //         console.log("error", error);
-            
-            
-    //     }
-    // }
     const handleRemoveFromCart = async (productId) => {
         // Confirmation Alert before removing item
         Alert.alert(
@@ -132,9 +122,10 @@ export default function Cart({ navigation }) {
     }
 
 
-    useEffect(() => {
-        loadCartItems(); 
-    }, []);
+    useFocusEffect(useCallback(() => {
+        loadCartItems()
+    }, []));
+
 
  
     return (
