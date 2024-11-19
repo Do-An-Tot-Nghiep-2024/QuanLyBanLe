@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -6,7 +6,6 @@ import {
     ScrollView,
     Pressable,
     ToastAndroid,
-    
 } from "react-native";
 import {
     TextInput,
@@ -19,9 +18,10 @@ import { useNavigation } from 'expo-router';
 import { IpAddress } from "../IpAddressConfig";
 import { colors } from "../style";
 import { showToastWithGravityAndOffset } from "../ToastAndroid";
-import { LoginService } from "../services/auth.service";
+import { getAccount, LoginService } from "../services/auth.service";
 import { getItem } from "../AsyncStorage";
 import stylessheet from "../style";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Login = () => {
     const navigation = useNavigation();
@@ -34,16 +34,31 @@ const Login = () => {
 
     const toggleNewPasswordVisibility = () => {
         setShowNewPassword((prevState) => !prevState);
-    
-    };    
-    useEffect(() => {
-        const token = getItem("accessToken").then((token) => {
-            if(token){
-                navigation.navigate("MyTabs");
+    };
+
+    // Correct the async behavior of getAccountLogin function
+    const getAccountLogin = async () => {
+        console.log("login again");
+        
+        const token = await getItem("accessToken"); 
+        // Await token retrieval
+        if (token) {
+            let cleanedToken = token.replace(/"/g, "");      
+            const response = await getAccount(cleanedToken); // Await account information
+            if (response) {
+                navigation.navigate("MyTabs"); // Navigate to MyTabs if account exists
             }
-        })
-      
-    }, [])
+        } else {
+            console.log("No token found, please login first.");
+        }
+    };
+
+    // Call getAccountLogin whenever the login screen is focused
+    useFocusEffect(
+        useCallback(() => {
+            getAccountLogin(); // Trigger the account check on focus
+        }, [])
+    );
 
     const onLogin = async () => {
         setEmailError("");
@@ -57,7 +72,7 @@ const Login = () => {
         }
 
         if (email && password) {
-           await LoginService(email, password, navigation);
+            await LoginService(email, password, navigation);
         }
     };
 
@@ -82,7 +97,7 @@ const Login = () => {
             </View>
             <Paragraph style={styles.signupText}>
                 Chưa có tài khoản?{" "}
-                <Text style={{ color: colors.accentColor, fontWeight:'bold'}} onPress={() => navigation.navigate("authentication/Register")}>
+                <Text style={{ color: colors.accentColor, fontWeight: 'bold' }} onPress={() => navigation.navigate("authentication/Register")}>
                     Đăng ký
                 </Text>
             </Paragraph>

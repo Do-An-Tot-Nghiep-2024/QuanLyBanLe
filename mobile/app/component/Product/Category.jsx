@@ -17,14 +17,27 @@ import { useFocusEffect } from 'expo-router';
 export default function Category({ navigation }) {
     const [categories, setCategories] = useState([]);
     
+    const categoryImages = {
+        "Bánh ngọt": require('../../../assets/images/banh_bao@2.jpg'),          
+        "Đồ tươi":require('../../../assets/images/trung-ga-hop-10.jpg'),       
+        "Đồ tươi sống":require('../../../assets/images/sua_tuoi.jpg'),  
+        "Đồ tươi sống 23":require('../../../assets/images/mi_tom.jpg'), 
+        "Nước giải khát 9900": require('../../../assets/images/24-lon-nuoc-tang-luc.jpg'), 
+        "default": require('../../../assets/images/default.png'), 
+      };
     useFocusEffect(
         React.useCallback(() => {
             const fetchCategories = async () => {
           
                 try {
                     const data =  getAllCategoryService().then((data) =>{
-                        console.log("page", data);
-                        setCategories(data.data);
+                        const categoriesWithImages = data.data.map(category => ({
+                            ...category,
+                            image: categoryImages[category.name] || categoryImages.default, // Add image dynamically
+                          }));
+                      
+                          setCategories(categoriesWithImages);
+                        // setCategories(data.data);
                     })
                    console.log("data", data);
                    
@@ -59,7 +72,7 @@ export default function Category({ navigation }) {
                     >
                         {/* <Shadow style={styles.shadowStyle}> */}
                         <View style={styles.imageContainer}>
-                            <Image source={{ uri: item.image }} style={styles.image} />
+                            <Image source={item.image} style={styles.image} />
                             <View style={styles.imageDarkOverlay} />
                             <View style={styles.textContainer}>
                                 <Text style={styles.title}>{item.name}</Text>
@@ -111,7 +124,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
 
     },
     textContainer: {
@@ -127,10 +140,14 @@ const styles = StyleSheet.create({
     title: {
         color: '#fff',
         textAlign: 'center',
-        fontSize: 18,
+        fontSize: 26,
         marginBottom: 5,
         fontStyle: 'italic',
         fontWeight: 'bold',
+        textShadowColor:'black',
+        textShadowOffset:{width: 3, height: 3},
+        textShadowRadius: 5,
+    
     },
     description: {
         color: '#fff',

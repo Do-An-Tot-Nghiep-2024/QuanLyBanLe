@@ -10,14 +10,11 @@ const ProductList = ({ route, navigation }) => {
 
 
   const getProducts = async () =>{
-    console.log(categoryId);
     
     if(categoryId){
-      const response = await getProductsByCategoryService(categoryId);
+      const response = await getProductsByCategoryService(categoryId);      
       setProducts(response.data.responseList);
     }
-
-    
   }
 
 
@@ -25,6 +22,8 @@ const ProductList = ({ route, navigation }) => {
     getProducts();
   }, [])
 
+  console.log("products", products);
+  
   return (
     <FlatList
       data={products}
@@ -32,7 +31,7 @@ const ProductList = ({ route, navigation }) => {
       numColumns={2}
       renderItem={({ item }) => (
         <TouchableHighlight
-          onPress={() => navigation.navigate('component/Product/DetailProduct', { productId: item.id })}
+          onPress={() => navigation.navigate('component/Product/DetailProduct', { productId: item.productId })}
           underlayColor={"#f0f0f0"}
           style={styles.itemContainer}
         >

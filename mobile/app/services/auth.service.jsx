@@ -53,7 +53,46 @@ const RegisterService = async (name, email, phone, password, navigation) => {
         showToastWithGravityAndOffset("Số điện thoại hoặc email đã được sử dụng");
       
     }
-
-
 }
-export {LoginService, RegisterService}
+
+    const getAccount = async (accessToken) => {
+        const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/auth/account`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        const data = await response.json();
+        console.log(response);
+        console.log(data);
+        
+        
+        if (response.status === 200) {
+           await setItem("accessToken", accessToken);   
+           return true;
+
+        }
+        return false;
+    }
+
+    const getInformationDetailService = async (accessToken) => {
+        const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/customers/detail`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        const data = await response.json();   
+        console.log("get inforservice", data);
+             
+        if (response.status === 200) {
+           return data;
+        }
+        return false;
+    }
+
+
+export {LoginService, RegisterService, getAccount, getInformationDetailService}
