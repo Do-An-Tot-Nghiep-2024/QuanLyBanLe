@@ -26,28 +26,37 @@ const createOrderService = async (itemList: any[], customerPayment: number, tota
       };
     }
 
-    return {
-      message: message,
-      data: data,
-    };
-  } catch (error: any) {
-    return {
-      message: error.response?.data?.message || "An error occurred",
-      data: {},
-    };
-  }
-};
-
-//   const getAllOrdersService = async (page: number, limit: number, sortField: string = 'orderId', // Default to 'orderId'
-//     sortOrder: string = 'asc'): Promise<ResponsePagination<OrderSchema>> => {    
+// <<<<<<< dev
+//   const getAllOrdersService = async (page: number, limit: number, _sortField: string = 'orderId', // Default to 'orderId'
+//     _sortOrder: string = 'asc'): Promise<ResponsePagination<OrderSchema>> => {    
 //     const response = await api.get(`/orders?pageNumber=${page}&limit=${limit}`);    
 //     if (response) { 
 //         return response.data; 
 //     }
-
-//     return null as unknown as ResponsePagination<OrderSchema>; 
+// =======
+//     return {
+//       message: message,
+//       data: data,
+//     };
+//   } catch (error: any) {
+//     return {
+//       message: error.response?.data?.message || "An error occurred",
+//       data: {},
+//     };
+//   }
 // };
 
+// //   const getAllOrdersService = async (page: number, limit: number, sortField: string = 'orderId', // Default to 'orderId'
+// //     sortOrder: string = 'asc'): Promise<ResponsePagination<OrderSchema>> => {    
+// //     const response = await api.get(`/orders?pageNumber=${page}&limit=${limit}`);    
+// //     if (response) { 
+// //         return response.data; 
+// //     }
+
+// //     return null as unknown as ResponsePagination<OrderSchema>; 
+// // };
+
+// >>>>>>> main
 
 const getAllOrdersService = async (
   page: number,

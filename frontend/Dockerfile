@@ -4,7 +4,9 @@
 # build stage
 FROM node:22.3.0-alpine AS build-stage
 ARG VITE_URL_BE=http://windytech.crabdance.com/api/v1
+ARG VITE_SOCKET=http://windytech.crabdance.com/8080/ws
 ENV VITE_URL_BE=$VITE_URL_BE
+ENV VITE_SOCKET=$VITE_SOCKET
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
@@ -16,11 +18,8 @@ FROM nginx:stable-alpine AS production-stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY --from=build-stage /app/nginx.conf /etc/nginx/conf.d/default.conf
 # Copy SSL certificates
-COPY nginx.crt /etc/nginx/ssl/nginx.crt
-COPY nginx.key /etc/nginx/ssl/nginx.key
 
 EXPOSE 80
-EXPOSE 443
 CMD ["nginx", "-g", "daemon off;"]
 # how to build image
 # docker build -t my-image .

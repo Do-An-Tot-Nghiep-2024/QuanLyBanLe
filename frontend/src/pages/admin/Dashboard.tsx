@@ -42,7 +42,7 @@ function Dashboard() {
 
   const map = new Map([
     [
-      "totalOrders",
+      "currentTotalOrders",
       {
         column: "Đơn hàng",
         icon: <ReceiptIcon sx={style} />,
@@ -51,7 +51,7 @@ function Dashboard() {
       },
     ],
     [
-      "totalSales",
+      "currentTotalSales",
       {
         column: "Doanh thu",
         icon: <ShoppingCartIcon sx={style} />,
@@ -60,16 +60,15 @@ function Dashboard() {
       },
     ],
     [
-      "totalCustomers",
+      "currentNetTotalProfit",
       {
-        column: "Khách hàng",
+        column: "Lợi nhuận",
         icon: <PersonIcon sx={style} />,
         color: colors.lightPink,
         iconColor:colors.pink,
       },
     ],
   ]);
-  console.log(map);
   
   return (
     <Box
