@@ -4,7 +4,7 @@
 # build stage
 FROM node:22.3.0-alpine AS build-stage
 ARG VITE_URL_BE=http://windytech.crabdance.com/api/v1
-ARG VITE_SOCKET=http://windytech.crabdance.com/8080/ws
+ARG VITE_SOCKET=http://backend:8080/ws
 ENV VITE_URL_BE=$VITE_URL_BE
 ENV VITE_SOCKET=$VITE_SOCKET
 WORKDIR /app
