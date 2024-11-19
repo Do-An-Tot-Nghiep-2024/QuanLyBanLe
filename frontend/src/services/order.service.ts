@@ -26,6 +26,18 @@ const createOrderService = async (itemList: any[], customerPayment: number, tota
       };
     }
 
+    return {
+      message: message,
+      data: data,
+    };
+  } catch (error: any) {
+    return {
+      message: error.response?.data?.message || "An error occurred",
+      data: {},
+    };
+  }
+};
+
 // <<<<<<< dev
 //   const getAllOrdersService = async (page: number, limit: number, _sortField: string = 'orderId', // Default to 'orderId'
 //     _sortOrder: string = 'asc'): Promise<ResponsePagination<OrderSchema>> => {    
