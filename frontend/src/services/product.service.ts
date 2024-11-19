@@ -262,4 +262,31 @@ const deleteProductService = async (id: number) => {
   }
 };
 
-export { getAllProductsService, createProductService, getProductByIdService, getProductsService, updateProductService, deleteProductService, getProductsBySupplierService, getAllProductsByNameService };
+const updateProductPriceService = async (productId : number, price : number) => {
+  console.log(productId);
+  console.log(price);
+  
+  try {
+    const response: ApiResponse = await api.put(`/products/${productId}/price`, {
+      price: price,
+    });
+    const { message, data } = response;
+
+    console.log(data);
+
+    return {
+      message,
+      data: message === "success" ? data : null,
+    };
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    
+    return {
+      message: String(error),
+      data: null,
+    };
+  }
+
+}
+
+export { getAllProductsService, createProductService, getProductByIdService, getProductsService, updateProductService, deleteProductService, getProductsBySupplierService, getAllProductsByNameService, updateProductPriceService };

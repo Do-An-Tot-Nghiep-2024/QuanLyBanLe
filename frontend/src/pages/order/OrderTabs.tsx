@@ -18,7 +18,6 @@ export default function OrderTabs() {
   const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
-
   return (
     <Box sx={{ width: '100%', typography: 'body1' }}>
       <TabContext value={value}>
@@ -38,6 +37,5 @@ export default function OrderTabs() {
     </Box>
   );
 }
-
 
 
