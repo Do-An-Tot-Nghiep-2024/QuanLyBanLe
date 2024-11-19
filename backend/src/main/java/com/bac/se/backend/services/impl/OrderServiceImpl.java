@@ -94,7 +94,7 @@ public class OrderServiceImpl implements OrderService {
         Map<Long, Integer> map = new HashMap<>();
         // Kiểm tra thông tin nhân viên
         Employee employee = employeeRepository.findByEmail(emailEmployee) // second call
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thông tin nhân viên"));
+                .orElse(null);
         OrderStatus orderStatus = orderRequest.isLive() ? OrderStatus.COMPLETED : OrderStatus.PENDING;
         PaymentType paymentType = orderRequest.paymentType().equals("CASH") ? PaymentType.CASH : PaymentType.E_WALLET;
         Long promotionId = 0L;
