@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
     FlatList,
     Image,
@@ -7,15 +7,27 @@ import {
     TouchableHighlight,
     View,
     Animated,
-    Easing
+    Easing,
+    Pressable
 } from 'react-native';
-import promotion from '@/app/component/data/promotion';
 import { colors } from '@/app/style';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { getLatestPromotionService } from '@/app/services/promotion.service';
 
 export default function PromotionList({ navigation }) {
     const fireIconScale = useRef(new Animated.Value(1)).current;
     const fireIconRotate = useRef(new Animated.Value(0)).current;
+    const [latestPromotion, setLatestPromotion] = useState(null);
+
+    const getLatestPromotion = async () => {
+        try {
+            const response = await getLatestPromotionService();
+            setLatestPromotion(response.data);
+        } catch (error) {
+            console.error("Error fetching latest promotion:", error);
+            setLatestPromotion(null); // in case of error, set to null
+        }
+    };
 
     useEffect(() => {
         const animateFire = () => {
@@ -40,6 +52,7 @@ export default function PromotionList({ navigation }) {
         };
 
         animateFire();
+        getLatestPromotion();
     }, []);
 
     const fireIconStyle = {
@@ -54,6 +67,20 @@ export default function PromotionList({ navigation }) {
         ],
     };
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, '0'); // Adds leading zero if day is less than 10
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Get month and add leading zero if necessary
+        const year = date.getFullYear(); // Get the full year
+    
+        return `${day}/${month}/${year}`; // Format as dd/mm/yyyy
+    };
+    
+    const formattedEndDate = latestPromotion
+        ? formatDate(latestPromotion.endDate)
+        : '';
+    
+
     return (
         <View style={styles.container}>
             <View style={styles.headerContainer}>
@@ -65,30 +92,39 @@ export default function PromotionList({ navigation }) {
                     <MaterialCommunityIcons name="fire" size={24} color="red" />
                 </Animated.View>
             </View>
-            <FlatList
-                decelerationRate={1}
-                data={promotion}
-                keyExtractor={item => item.id.toString()}
-                renderItem={({ item }) => (
-                    <TouchableHighlight
-                        underlayColor={colors.primaryColor}
-                        style={styles.itemContainer}
-                        onPress={() =>
-                            navigation.navigate('component/Promotion/DetailPromotion', { promotionId: item.id })
-                        }
-                    >
-                        <View style={styles.imageContainer}>
-                            <Image source={{ uri: item.image }} style={styles.image} />
-                            <View style={styles.imageDarkOverlay} />
-                            <View style={styles.textContainer}>
-                                <Text style={styles.title}>{item.title}</Text>
-                                <Text style={styles.description}>{item.description}</Text>
-                                <Text style={styles.hyperlink}>Xem thêm</Text>
-                            </View>
-                        </View>
-                    </TouchableHighlight>
-                )}
-            />
+
+            {latestPromotion ? (
+                <View style={styles.detailsContainer}>
+                    <View style={styles.detailCard}>
+                        <Text style={styles.detailTitle}>Giá trị đơn hàng tối thiểu</Text>
+                        <Text style={styles.value}>
+                            {`${latestPromotion.minOrderValue.toLocaleString()}₫`}
+                        </Text>
+                    </View>
+
+                    <View style={styles.detailCard}>
+                        <Text style={styles.detailTitle}>Tỉ lệ giảm giá</Text>
+                        <Text style={styles.value}>{latestPromotion.percentage}% Giảm</Text>
+                    </View>
+
+                    <View style={styles.detailCard}>
+                        <Text style={styles.detailTitle}>Giới hạn đơn hàng</Text>
+                        <Text style={styles.value}>
+                            {latestPromotion.orderLimit} đơn hàng
+                        </Text>
+                    </View>
+
+                    <View style={styles.detailCard}>
+                        <Text style={styles.detailTitle}>Khuyến mãi kết thúc</Text>
+                        <Text style={styles.value}>{formattedEndDate}</Text>
+                    </View>
+                </View>
+            ) : (
+                <Text style={styles.noPromotionText}>Chưa có chương trình khuyến mãi nào</Text>
+            )}
+
+            {/* Call-to-action Button */}
+            
         </View>
     );
 }
@@ -97,82 +133,80 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingBottom: 10,
+        paddingHorizontal: 30,
+        backgroundColor: '#f8f8f8',
+  
     },
     headerContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    itemContainer: {
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-        margin: 5,
-        borderWidth: 1,
-        height: 150,
-        borderRadius: 20,
-        borderColor: colors.primaryColor,
-        marginTop: 20
-    },
-    imageContainer: {
-        position: 'relative',
-    },
-    image: {
-        width: '100%',
-        height: 150,
-        resizeMode: 'cover',
-        borderRadius: 20,
-    },
-    imageDarkOverlay: {
-        borderRadius: 20,
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    },
-    textContainer: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'column',
-    },
-    title: {
-        color: '#fff',
-        textAlign: 'center',
-        fontSize: 18,
-        marginBottom: 5,
-        fontStyle: 'italic',
-        fontWeight: 'bold',
-    },
-    description: {
-        color: '#fff',
-        textAlign: 'center',
-    },
-    hyperlink: {
-        color: colors.accentColor,
-        textAlign: 'center',
         marginTop: 20,
-        textDecorationLine: 'underline',
-        fontStyle: 'italic',
-        fontWeight: 'bold',
-        fontSize: 16,
-        backgroundColor: 'white',
-        padding: 5,
     },
     header: {
-        color: colors.primaryColor,
-        textAlign: 'center',
-        fontSize: 18,
-        marginBottom: 5,
-        fontStyle: 'italic',
+        fontSize: 20,
         fontWeight: 'bold',
+        color: '#2d72d9',
+        marginHorizontal: 10,
+        textAlign: 'center',
     },
     fireIcon: {
         marginHorizontal: 5,
+    },
+    detailsContainer: {
+        marginTop: 20,
+        border: 1,
+        // // backgroundColor: 'white',
+        // borderRadius: 10,
+        // padding: 10,
+        // shadowColor: '#000',
+        // shadowOffset: { width: 0, height: 2 },
+        // shadowOpacity: 0.1,
+        // shadowRadius: 4,
+        // elevation: 3, 
+    },
+    detailCard: {
+        backgroundColor: '#fff',
+        padding: 15,
+        borderRadius: 10,
+        marginBottom: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3, // for Android shadow
+    },
+    detailTitle: {
+        fontSize: 18,
+        color: '#444',
+    },
+    value: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#2d72d9',
+        marginTop: 5,
+    },
+    noPromotionText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: 'red',
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    ctaContainer: {
+        alignItems: 'center',
+        marginTop: 30,
+    },
+    ctaButton: {
+        backgroundColor: '#2d72d9',
+        paddingVertical: 15,
+        paddingHorizontal: 40,
+        borderRadius: 8,
+        elevation: 2, // for Android shadow
+    },
+    ctaText: {
+        fontSize: 18,
+        color: '#fff',
+        fontWeight: 'bold',
     },
 });

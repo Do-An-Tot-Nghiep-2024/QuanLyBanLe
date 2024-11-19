@@ -1,11 +1,13 @@
 import { getItem } from "../AsyncStorage";
 import { IpAddress } from "../IpAddressConfig";
 
-const getAllCategoryService = async () =>{
+const getLatestPromotionService = async () => {
     const accessToken = await getItem("accessToken")
 
-    let cleanedToken = accessToken.replace(/"/g, "");       
-    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/categories`, {
+    let cleanedToken = accessToken.replace(/"/g, "");   
+    console.log("Token" + cleanedToken);
+    
+    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/promotions/latest`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -14,7 +16,7 @@ const getAllCategoryService = async () =>{
     });
 
     const data = await response.json();
-    return data  
+    console.log("service", data);
+    return data;
 }
-
-export {getAllCategoryService}
+export {getLatestPromotionService}

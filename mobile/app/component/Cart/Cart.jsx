@@ -1,11 +1,14 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useLayoutEffect } from "react";
-import { View, Text, Pressable, FlatList, StyleSheet, Image, TouchableHighlight } from "react-native";
-import products from '@/app/component/data/products';
+import { useLayoutEffect, useState, useEffect } from "react";
+import { View, Text, Pressable, FlatList, StyleSheet, Image, TouchableHighlight, Alert } from "react-native";
 import { colors } from '@/app/style';
 import { TextInput } from "react-native-paper";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addToCart, getCart, removeFromCart, updatedCart, descreaseQuantity } from "@/app/AsyncStorage";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 export default function Cart({ navigation }) {
+    const [cartItems, setCartItems] = useState([]); 
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -20,48 +23,131 @@ export default function Cart({ navigation }) {
         });
     }, []);
 
+    // Fetch the cart data from AsyncStorage
+    const loadCartItems = async () => {
+        const storedCart = await getCart();
+        if (storedCart) {
+            setCartItems(storedCart); 
+        } else {
+            setCartItems([]); 
+        }
+    };
+  
 
+  
     const renderItem = ({ item }) => {
+        console.log("item", item);
+        
         return (
             <View style={styles.itemContainer}>
                 <Image source={{ uri: item.image }} style={styles.image} />
                 <View style={styles.detailsContainer}>
                     <Pressable style={styles.details} onPress={() => navigation.navigate('component/Product/DetailProduct', { productId: item.id })}>
-                        <Text numberOfLines={1} style={styles.name}>{item.name}</Text>
-                        <Text numberOfLines={2}>{item.description}</Text>
+                        <Text numberOfLines={2} style={styles.name}>{item.name}</Text>
                         <Text style={styles.price}>
-                            {item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                        {item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+
                         </Text>
                     </Pressable>
                     <View style={styles.quantityContainer}>
-                        <Pressable>
+                        <Pressable onPress={() => handleDescreaseQuantity(item.id)}>
                             <MaterialCommunityIcons name='minus' size={20} color={"gray"} />
                         </Pressable>
                         <TextInput
+                            textAlign="center"
                             style={styles.textInput}
                             keyboardType="numeric"
-                            value="1"
+                            value={item.quantity.toString()}
                         />
-                        <Pressable>
+                        <Pressable onPress={() => handleAddToCart(item)}>
                             <MaterialCommunityIcons name='plus' size={20} color={"gray"} />
                         </Pressable>
                     </View>
                 </View>
-                <Pressable>
+                <Pressable onPress={() => handleRemoveFromCart(item.id)}>
                     <MaterialCommunityIcons name='close-circle' size={20} color={"red"} style={styles.icon} />
                 </Pressable>
             </View>
         );
     };
 
+    // const handleRemoveFromCart = async (productId) => {
+    //     try {
+    //         await removeFromCart(productId);
+    //         loadCartItems();
+    //     } catch (error) {
+    //         console.log("error", error);
+            
+            
+    //     }
+    // }
+    const handleRemoveFromCart = async (productId) => {
+        // Confirmation Alert before removing item
+        Alert.alert(
+            "Xác nhận xóa sản phẩm",
+            "Bạn có chắc chắn muốn xóa sản phẩm này không?",
+            [
+                {
+                    text: "Hủy",
+                    style: "cancel",
+                    
+                },
+                {
+                    text: "Xác nhận",
+                    style: "default",
+                    onPress: async () => {
+                        try {
+                            await removeFromCart(productId);  // Remove from AsyncStorage
+                            loadCartItems();  // Reload cart data
+                        } catch (error) {
+                            console.log("error", error);
+                        }
+                    }
+                }
+            ],
+            { cancelable: true }
+        );
+    };
+
+    const handleAddToCart = async (product) => {        
+        try {
+            await addToCart(product);
+            loadCartItems();
+        } catch (error) {
+            console.log("error", error);
+            
+        }
+
+    }
+    
+    const handleDescreaseQuantity = async (productId) => {
+        try {
+            await descreaseQuantity(productId);
+            loadCartItems();
+        } catch (error) {
+            console.log("error", error);
+            
+            
+        }
+    }
+
+
+    useEffect(() => {
+        loadCartItems(); 
+    }, []);
+
+ 
     return (
         <View style={styles.container}>
-            <FlatList
-                decelerationRate={1}
-                data={products}
-                keyExtractor={item => item.id.toString()}
-                renderItem={renderItem}
-            />
+            {cartItems.length > 0 ? (
+                <FlatList
+                    data={cartItems} 
+                    keyExtractor={item => item?.id?.toString()}
+                    renderItem={renderItem}
+                />
+            ) : (
+                <Text style={styles.noCartText}>Chưa có sản phẩm nào</Text>
+            )}
             <TouchableHighlight underlayColor={"grey"} style={styles.checkoutButton} onPress={() => { navigation.navigate('component/Cart/DetailPayment') }}>
                 <View style={{
                     flexDirection: 'row',
@@ -81,6 +167,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
+        backgroundColor: 'white',
     },
     itemContainer: {
         flexDirection: 'row',
@@ -99,45 +186,43 @@ const styles = StyleSheet.create({
     detailsContainer: {
         flex: 1,
         flexDirection: 'column',
+        gap: 1
+        
     },
     details: {
         flex: 1,
-        marginBottom: 5,
+        gap: 10
+        
     },
     name: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: 'bold',
         textAlign: 'left',
+        
     },
     price: {
-        fontSize: 12,
+        fontSize: 14,
         color: 'green',
     },
     icon: {
         flex: 1,
         marginHorizontal: 0,
-
-    },
-    icon2: {
-        marginBottom: 5
     },
     quantityContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        padding: 5,
+        paddingRight: 5,
         gap: 5,
     },
     textInput: {
-        borderWidth: 1,
-        borderColor: 'gray',
-        borderRadius: 4,
         padding: 0,
         textAlign: 'left',
         width: 40,
         height: 30,
         backgroundColor: 'white',
-
+        textAlignVertical: 'center',
+        
     },
     checkoutButton: {
         backgroundColor: colors.accentColor,
@@ -156,4 +241,9 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 16,
     },
+    noCartText: {
+        textAlign: 'center',
+        fontSize: 18,
+        fontWeight: 'bold',
+    }
 });
