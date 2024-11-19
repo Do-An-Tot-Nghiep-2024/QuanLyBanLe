@@ -35,6 +35,11 @@ public class Employee {
     @JoinColumn(name = "account_id")
     private Account account;
 
+    @ManyToOne
+    @JoinColumn(name = "notification_id")
+    private Notification notification;
+
     @OneToMany(mappedBy = "employee")
     private List<Order> orders;
+
 }

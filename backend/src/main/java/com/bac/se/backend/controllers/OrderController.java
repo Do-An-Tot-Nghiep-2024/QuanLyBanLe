@@ -2,7 +2,7 @@ package com.bac.se.backend.controllers;
 
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
-import com.bac.se.backend.payload.request.OrderRequest;
+import com.bac.se.backend.payload.request.order.OrderRequest;
 import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.order.CreateOrderResponse;

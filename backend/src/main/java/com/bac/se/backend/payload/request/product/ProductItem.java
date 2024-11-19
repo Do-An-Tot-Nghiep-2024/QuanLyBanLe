@@ -1,4 +1,4 @@
-package com.bac.se.backend.payload.request;
+package com.bac.se.backend.payload.request.product;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

@@ -1,9 +1,9 @@
 package com.bac.se.backend;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@ContextConfiguration(classes = {BackendApplication.class})
 class BackendApplicationTests {
 
     @Test
@@ -11,7 +11,6 @@ class BackendApplicationTests {
         String[] args = new String[]{};
         BackendApplication.main(args);
     }
-
-
-
 }
+
+

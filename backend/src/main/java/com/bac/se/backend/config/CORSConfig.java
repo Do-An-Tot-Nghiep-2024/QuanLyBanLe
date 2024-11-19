@@ -15,7 +15,7 @@ import java.util.Collections;
 public class CORSConfig {
 
     @Value("${application.security.url-client}")
-    private  String urlClient;
+    private String urlClient;
 
     @Bean
     public CorsFilter corsFilter() {
@@ -38,5 +38,11 @@ public class CORSConfig {
         ));
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
+
     }
+    //config.setAllowCredentials(true); // Update here
+//        config.addAllowedOriginPattern("*");
+//        config.addAllowedHeader("*");
+//        config.addAllowedMethod("*");
+//        source.registerCorsConfiguration("/**", config);
 }

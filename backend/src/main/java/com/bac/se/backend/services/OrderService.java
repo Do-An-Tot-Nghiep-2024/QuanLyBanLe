@@ -1,7 +1,7 @@
 package com.bac.se.backend.services;
 
 import com.bac.se.backend.exceptions.BadRequestUserException;
-import com.bac.se.backend.payload.request.OrderRequest;
+import com.bac.se.backend.payload.request.order.OrderRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.order.CreateOrderResponse;
 import com.bac.se.backend.payload.response.order.OrderCustomerResponse;

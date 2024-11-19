@@ -1,6 +1,6 @@
 package com.bac.se.backend.payload.response.shipment;
 
-import com.bac.se.backend.payload.request.ProductItem;
+import com.bac.se.backend.payload.request.product.ProductItem;
 
 import java.math.BigDecimal;
 import java.util.Date;

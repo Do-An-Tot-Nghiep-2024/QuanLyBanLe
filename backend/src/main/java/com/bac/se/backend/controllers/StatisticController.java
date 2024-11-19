@@ -66,4 +66,26 @@ public class StatisticController {
             return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
         }
     }
+
+    // Thống kê doanh thu ròng hiện tại của cửa hàng
+//    @GetMapping("/net-profit-current")
+//    @PreAuthorize("hasAuthority('MANAGER')")
+//    public ResponseEntity<ApiResponse<BigDecimal>> getStatisticNetProfitCurrent() {
+//        try {
+//            return ResponseEntity.ok(new ApiResponse<>("success", statisticService.getCurrentNetTotalProfit()));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
+//        }
+//    }
+    // Thống kê doanh số của nhân viên hiện tại
+
+//    @GetMapping("/sales-current-of-employee")
+//    @PreAuthorize("hasAnyAuthority('MANAGER', 'EMPLOYEE')")
+//    public ResponseEntity<ApiResponse<BigDecimal>> getStatisticSalesCurrentOfEmployee(HttpServletRequest request) {
+//        try {
+//            return ResponseEntity.ok(new ApiResponse<>("success", statisticService.getSalesCurrentOfEmployee(request)));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
+//        }
+//    }
 }

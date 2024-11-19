@@ -4,4 +4,7 @@ import com.bac.se.backend.payload.response.DashboardResponse;
 
 public interface DashboardService {
     DashboardResponse getDashboard();
+
+
+
 }
