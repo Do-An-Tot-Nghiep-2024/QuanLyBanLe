@@ -1,6 +1,6 @@
 import api from "../config/axios";
 import ApiResponse from "../types/apiResponse";
-import { GetPromotion } from "../types/getPromotion";
+// import { GetPromotion } from "../types/getPromotion";
 import { PromotionSchema } from "../types/promotionSchema";
 
 
@@ -14,17 +14,11 @@ interface PromotionResponse {
     totalPages: number;
   } | null;
 }
-const createOrderPromotion = async (promotionData: any) => {
+const createPromotionService = async (promotionRequest: any) => {
   try {
-    console.log(promotionData);
 
 
-    const response: ApiResponse = await api.post(`/promotions/create-order-promotion`, {
-      promotionRequest: promotionData.promotionRequest,
-      minOrderValue: promotionData.minOrderValue,
-      discountPercent: promotionData.discountPercent
-    });
-
+    const response: ApiResponse = await api.post("/promotions",promotionRequest);
     const { message, data } = response;
     if (message !== "success") {
       return {
@@ -32,14 +26,13 @@ const createOrderPromotion = async (promotionData: any) => {
         data: {},
       };
     }
-
     return {
       message: message,
       data: data,
     };
   } catch (error: any) {
     return {
-      message: error.response?.data?.message || "An error occurred",
+      message: error.response?.data?.message,
       data: {},
     };
   }
@@ -184,13 +177,21 @@ const getAllPromotionService = async (): Promise<PromotionResponse> => {
   }
 }
 
-const getLatestPromotion = async (): Promise<GetPromotion> => {
-    const response = await api.get(`/promotions/latest`);
-    if (response) {
-      return response.data as GetPromotion;
+const getLatestPromotionService = async () => {
+  try {
+    const response: ApiResponse = await api.get(`/promotions/latest`);
 
-    }
-    return null as unknown as GetPromotion;
+    const { message, data } = response;
+    return {
+      message,
+      data: message === "success" ? data : {},
+    };
+  } catch (error:any) {
+    return {
+      message: error.response.data.message,
+      data: null,
+    };
+  }
 }
 
-export { createOrderPromotion, createQuantityPromotion, createGiftProductPromotion, createDiscountProductPromotion, getAllPromotionService, getLatestPromotion }
+export { createPromotionService, createQuantityPromotion, createGiftProductPromotion, createDiscountProductPromotion, getAllPromotionService, getLatestPromotionService }

@@ -13,11 +13,13 @@ import com.bac.se.backend.models.*;
 import com.bac.se.backend.payload.request.DateRequest;
 import com.bac.se.backend.payload.request.order.OrderItemRequest;
 import com.bac.se.backend.payload.request.order.OrderRequest;
+import com.bac.se.backend.payload.response.auth.AccountResponse;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.order.*;
 import com.bac.se.backend.payload.response.product.ProductPriceResponse;
 import com.bac.se.backend.payload.response.stock.StockResponse;
 import com.bac.se.backend.repositories.*;
+import com.bac.se.backend.services.AccountService;
 import com.bac.se.backend.services.OrderService;
 import com.bac.se.backend.services.ProductPriceService;
 import com.bac.se.backend.services.PromotionService;
@@ -58,6 +60,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductMapper productMapper;
     private final PromotionService promotionService;
     private final PromotionRepository promotionRepository;
+    private final AccountService accountService;
 
 
     double roundPrice(double price) {
@@ -90,11 +93,24 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public CreateOrderResponse createOrder(OrderRequest orderRequest, HttpServletRequest request) throws BadRequestUserException {
-        String emailEmployee = jwtParse.decodeTokenWithRequest(request); // first call
+        AccountResponse accountResponse = accountService.getAccountResponse(request);
+        Customer customer = null;   
+        Employee employee = null;
+        if(Objects.equals(accountResponse.role(), "CUSTOMER")){
+            String customerEmail = jwtParse.decodeTokenWithRequest(request);
+            Optional<Customer> customerOptional = customerRepository.findByEmail(customerEmail);
+            if(customerOptional.isPresent()){
+                customer = customerOptional.get();
+            }
+        }else{
+            String emailEmployee = jwtParse.decodeTokenWithRequest(request);
+            employee = employeeRepository.findByEmail(emailEmployee)
+                    .orElse(null);
+        }
         Map<Long, Integer> map = new HashMap<>();
         // Kiểm tra thông tin nhân viên
-        Employee employee = employeeRepository.findByEmail(emailEmployee) // second call
-                .orElse(null);
+//        Employee employee = employeeRepository.findByEmail(emailEmployee) // second call
+//                .orElse(null);
         OrderStatus orderStatus = orderRequest.isLive() ? OrderStatus.COMPLETED : OrderStatus.PENDING;
         PaymentType paymentType = orderRequest.paymentType().equals("CASH") ? PaymentType.CASH : PaymentType.E_WALLET;
         Long promotionId = 0L;
@@ -107,6 +123,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElse(null);
         Order order = Order.builder()
                 .employee(employee)
+                .customer(customer)
                 .orderStatus(orderStatus)
                 .createdAt(new Date())
                 .paymentType(paymentType)
@@ -118,7 +135,7 @@ public class OrderServiceImpl implements OrderService {
         String phoneCustomer = orderRequest.customerPhone().orElse("");
         // Get customer
         if (!phoneCustomer.isEmpty()) {
-            var customer = customerRepository.findByPhone(phoneCustomer) // third call
+            customer = customerRepository.findByPhone(phoneCustomer) // third call
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thông tin khách hàng"));
             order.setCustomer(customer);
         }
