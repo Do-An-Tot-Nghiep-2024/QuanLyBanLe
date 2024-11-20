@@ -13,7 +13,11 @@ import java.util.List;
 
 public interface ProductService {
 
-    PageResponse<ProductResponse> getProducts(Integer pageNumber, Integer pageSize);
+    PageResponse<ProductResponse> getProducts(
+            String productName,
+            String category,
+            Integer pageNumber,
+            Integer pageSize);
 
     ProductResponse getProductById(Long productId);
 

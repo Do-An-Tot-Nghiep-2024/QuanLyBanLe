@@ -27,10 +27,13 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getProducts(
+            @RequestParam(name = "name", defaultValue = "") String productName,
+            @RequestParam(name = "category", defaultValue = "") String category,
             @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, productService.getProducts(pageNumber, pageSize)));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, productService.getProducts(productName,category,
+                    pageNumber, pageSize)));
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
