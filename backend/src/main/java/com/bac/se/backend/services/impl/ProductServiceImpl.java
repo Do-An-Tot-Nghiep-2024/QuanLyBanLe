@@ -54,9 +54,11 @@ public class ProductServiceImpl implements ProductService {
 
     // get all product with pagination
     @Override
-    public PageResponse<ProductResponse> getProducts(Integer pageNumber, Integer pageSize) {
+    public PageResponse<ProductResponse> getProducts(
+            String productName,String category,
+            Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Object[]> productPage = productRepository.getProducts(pageable);
+        Page<Object[]> productPage = productRepository.getProducts(productName,category,pageable);
         List<Object[]> productList = productPage.getContent();
         List<Long> productIds = productList.stream().map(x -> Long.parseLong(x[0].toString())).toList();
         Map<Long, List<Long>> shipmentItemMap = new HashMap<>();

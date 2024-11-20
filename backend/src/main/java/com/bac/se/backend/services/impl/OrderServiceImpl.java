@@ -315,10 +315,10 @@ public class OrderServiceImpl implements OrderService {
     public String cancelOrder(Long orderId) throws BadRequestUserException {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn"));
-        order.setOrderStatus(OrderStatus.CANCELLED);
         if(!order.getOrderStatus().equals(OrderStatus.PENDING)){
             throw new BadRequestUserException("Đơn hàng không ở trạng thái chờ không thể hủy");
         }
+        order.setOrderStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
         // get all order item
         List<StockOrderResponse> stockOrderResponses = orderItemRepository.getStockByOrder(orderId)

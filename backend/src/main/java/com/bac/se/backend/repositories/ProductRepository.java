@@ -35,8 +35,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "                           WHERE sub_pp.product_id = p.product_id  " +
             "                       )  " +
             "WHERE   " +
-            "    p.is_active = 1 ORDER BY p.product_id DESC",nativeQuery = true)
-    Page<Object[]> getProducts(Pageable pageable);
+            "    p.is_active = 1 AND p.name LIKE CONCAT(:name, '%') AND c.name LIKE CONCAT(:category, '%')" +
+            " ORDER BY p.product_id DESC",nativeQuery = true)
+    Page<Object[]> getProducts(
+            @Param("name") String name,
+            @Param("category") String category, Pageable pageable);
 
 
     @Query(value = "select p.id, p.name,u.name from Product p INNER JOIN Unit u ON u.id = p.unit.id where p.supplier.id = ?1  and p.isActive = true")
