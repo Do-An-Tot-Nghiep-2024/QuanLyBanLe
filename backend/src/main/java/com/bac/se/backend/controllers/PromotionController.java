@@ -48,7 +48,7 @@ public class PromotionController {
         }
     }
 
-    @GetMapping("/latest")
+        @GetMapping("/latest")
     public ResponseEntity<ApiResponse<LatestPromotionResponse>> getLatestPromotion() {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_ACCEPT, promotionService.getLatestPromotion()));
@@ -64,7 +64,7 @@ public class PromotionController {
     @PostMapping
     @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<PromotionResponse>> createPromotion(
-            @RequestBody PromotionRequest promotionRequest
+                @RequestBody PromotionRequest promotionRequest
     ) {
         try {
             return ResponseEntity

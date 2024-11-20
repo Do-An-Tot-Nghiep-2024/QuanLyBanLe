@@ -7,23 +7,28 @@ import { UpdateProductSchema } from "../types/updateProductSchema";
 interface GetProductResponse {
   message: string;
   data: {
-      lastPage: boolean;
-      pageNumber: number;
-      responseList: GetProductSchema[];
-      totalElements: number;
-      totalPages: number;
+    lastPage: boolean;
+    pageNumber: number;
+    responseList: GetProductSchema[];
+    totalElements: number;
+    totalPages: number;
   } | null;
 }
 
-
-const createProductService = async (productRequest: ProductSchema, imageFile: File) => {
+const createProductService = async (
+  productRequest: ProductSchema,
+  imageFile: File
+) => {
   try {
     console.log(productRequest);
     console.log(imageFile);
     const formData = new FormData();
-    formData.append("productRequest", new Blob([JSON.stringify(productRequest)], {
-      type: "application/json",
-    }));
+    formData.append(
+      "productRequest",
+      new Blob([JSON.stringify(productRequest)], {
+        type: "application/json",
+      })
+    );
     formData.append("file", imageFile);
     console.log(formData);
     const response: ApiResponse = await api.post("/products", formData, {
@@ -52,17 +57,23 @@ const createProductService = async (productRequest: ProductSchema, imageFile: Fi
   }
 };
 
-
-const updateProductService = async (id: number, productRequest: UpdateProductSchema, imageFile: File) => {
+const updateProductService = async (
+  id: number,
+  productRequest: UpdateProductSchema,
+  imageFile: File
+) => {
   try {
     console.log(productRequest);
     console.log(imageFile);
 
     const formData = new FormData();
 
-    formData.append("productRequest", new Blob([JSON.stringify(productRequest)], {
-      type: "application/json",
-    }));
+    formData.append(
+      "productRequest",
+      new Blob([JSON.stringify(productRequest)], {
+        type: "application/json",
+      })
+    );
     formData.append("file", imageFile);
     console.log(formData);
     const response: ApiResponse = await api.put(`/products/${id}`, formData, {
@@ -91,10 +102,11 @@ const updateProductService = async (id: number, productRequest: UpdateProductSch
   }
 };
 
-
 const getProductsService = async (page: number, limit: number) => {
   try {
-    const response: ApiResponse = await api.get(`/products?pageNumber=${page}&pageSize=${limit}`);
+    const response: ApiResponse = await api.get(
+      `/products?pageNumber=${page}&pageSize=${limit}`
+    );
     const { message, data } = response;
 
     if (message !== "success") {
@@ -153,7 +165,7 @@ const getAllProductsService = async (): Promise<GetProductResponse> => {
     };
   } catch (error) {
     console.error("Error fetching products:", error);
-    
+
     return {
       message: String(error),
       data: null,
@@ -162,18 +174,18 @@ const getAllProductsService = async (): Promise<GetProductResponse> => {
 };
 // const getAllProductsByNameService = async (name : string): Promise<GetProductResponse> => {
 //   console.log("get all products");
-  
+
 //   try {
 //     let searchName = "";
 //     if(name) {
 //       searchName = name;
-//     }    
+//     }
 //     const response: GetProductResponse = await api.get(`/products/search?name=${searchName}`);
-//     return null as unknown as ResponsePagination<GetProductSchema>; 
+//     return null as unknown as ResponsePagination<GetProductSchema>;
 
 //   } catch (error) {
 //     console.error("Error fetching products:", error);
-    
+
 //     return {
 //       message: String(error),
 //       data: null,
@@ -181,27 +193,28 @@ const getAllProductsService = async (): Promise<GetProductResponse> => {
 //   }
 // };
 
-const getAllProductsByNameService = async (name : string): Promise<GetProductSchema[]> => {    
-let searchName = "";
-    if(name) {
-      searchName = name;
-    } 
-    const response = await api.get(`/products/search?name=${searchName}`);
+const getAllProductsByNameService = async (
+  name: string
+): Promise<GetProductSchema[]> => {
+  let searchName = "";
+  if (name) {
+    searchName = name;
+  }
+  const response = await api.get(`/products/search?name=${searchName}`);
 
-  if (response) { 
-    console.log(response);
-    
-      return response.data; 
+  if (response) {
+    // console.log(response);
+    return response.data;
   }
 
-  return null as unknown as GetProductSchema[]; 
+  return null as unknown as GetProductSchema[];
 };
 
-
-
-const getProductsBySupplierService = async ( supplierId : number) => {
+const getProductsBySupplierService = async (supplierId: number) => {
   try {
-    const response: ApiResponse = await api.get(`/products/supplier/${supplierId}`);
+    const response: ApiResponse = await api.get(
+      `/products/supplier/${supplierId}`
+    );
     const { message, data } = response;
 
     console.log(data);
@@ -212,19 +225,13 @@ const getProductsBySupplierService = async ( supplierId : number) => {
     };
   } catch (error) {
     console.error("Error fetching products:", error);
-    
+
     return {
       message: String(error),
       data: null,
     };
   }
 };
-
-
-
-
-
-
 
 // Define your GetProductSchema interface
 // interface GetProductSchema {
@@ -241,9 +248,6 @@ const getProductsBySupplierService = async ( supplierId : number) => {
 //   message: string;
 //   data: GetProductSchema; // Ensure this reflects the actual expected structure
 // }
-
-
-
 
 const deleteProductService = async (id: number) => {
   try {
@@ -262,14 +266,17 @@ const deleteProductService = async (id: number) => {
   }
 };
 
-const updateProductPriceService = async (productId : number, price : number) => {
+const updateProductPriceService = async (productId: number, price: number) => {
   console.log(productId);
   console.log(price);
-  
+
   try {
-    const response: ApiResponse = await api.put(`/products/${productId}/price`, {
-      price: price,
-    });
+    const response: ApiResponse = await api.put(
+      `/products/${productId}/price`,
+      {
+        price: price,
+      }
+    );
     const { message, data } = response;
 
     console.log(data);
@@ -280,13 +287,22 @@ const updateProductPriceService = async (productId : number, price : number) => 
     };
   } catch (error) {
     console.error("Error fetching products:", error);
-    
+
     return {
       message: String(error),
       data: null,
     };
   }
+};
 
-}
-
-export { getAllProductsService, createProductService, getProductByIdService, getProductsService, updateProductService, deleteProductService, getProductsBySupplierService, getAllProductsByNameService, updateProductPriceService };
+export {
+  getAllProductsService,
+  createProductService,
+  getProductByIdService,
+  getProductsService,
+  updateProductService,
+  deleteProductService,
+  getProductsBySupplierService,
+  getAllProductsByNameService,
+  updateProductPriceService,
+};

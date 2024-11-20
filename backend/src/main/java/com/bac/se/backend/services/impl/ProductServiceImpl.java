@@ -285,8 +285,13 @@ public class ProductServiceImpl implements ProductService {
                 .map(res -> {
                     Long productId = Long.parseLong(res[0].toString());
                     List<Long> shipmentItemIds = shipmentItemMap.getOrDefault(productId, Collections.emptyList());
-                    return productMapper.mapObjectToProductResponse(res, shipmentItemIds);
-                }).toList();
+                    if(!shipmentItemIds.isEmpty()){
+                        return productMapper.mapObjectToProductResponse(res, shipmentItemIds);
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     // Helper method to create ProductResponse
