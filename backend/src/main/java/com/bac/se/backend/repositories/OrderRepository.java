@@ -37,7 +37,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(value = "SELECT  " +
             "    o.order_id, " +
-            "    e.name, " +
+            "    COALESCE(e.name, ''), " +
             "    o.order_status, " +
             "    o.payment_type, " +
             "    SUM(oi.amount), " +
@@ -49,7 +49,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "    t_order o ON c.customer_id = o.customer_id " +
             "        INNER JOIN " +
             "    t_order_item oi ON oi.order_id = o.order_id " +
-            "        INNER JOIN " +
+            "        LEFT JOIN " +
             "    t_employee e ON e.employee_id = o.employee_id " +
             "WHERE " +
             "    c.email = :email " +

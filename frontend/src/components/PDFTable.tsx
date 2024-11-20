@@ -1,13 +1,14 @@
 import { Text, View, Document, StyleSheet } from "@react-pdf/renderer";
+import OrderItemResponse from "../types/order/orderItemResponse";
 
 // Create styles
 const styles = StyleSheet.create({
   // Table container remains the same
   tableContainer: {
     flexDirection: "column", // Column-wise arrangement
-    margin: 10,
     justifyContent: "center",
     alignItems: "center",
+    marginBottom:"10px"
   },
 
   // Header row style to center the header content
@@ -44,8 +45,8 @@ const styles = StyleSheet.create({
 });
 
 // Create Document Component
-const PDFTable = ({ data }: { data: any[] }) => (
-  <Document>
+const PDFTable = ({ data }: { data: OrderItemResponse[] }) => (
+  <Document >
     <View style={styles.tableContainer}>
       {/* Table Header */}
       <View style={styles.tableRow}>
@@ -80,10 +81,10 @@ const PDFTable = ({ data }: { data: any[] }) => (
           </View>
 
           <View style={styles.tableCol}>
-            <Text>{Number(item?.price).toLocaleString("de-DE")}</Text>
+            <Text>{Number(item.price).toLocaleString("de-DE")}</Text>
           </View>
           <View style={styles.tableCol}>
-            <Text>{Number(item?.total).toLocaleString("de-DE")}</Text>
+            <Text>{Number(item.amount).toLocaleString("de-DE")}</Text>
           </View>
         </View>
       ))}

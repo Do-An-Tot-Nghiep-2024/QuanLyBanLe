@@ -76,7 +76,7 @@ const NAVIGATION: Navigation = [
     icon: <StoreIcon />,
     children: [
       {
-        segment: "",
+        segment: "/",
         title: "Quản lí sản phẩm",
         icon: <WarehouseIcon />,
       },
@@ -94,17 +94,17 @@ const NAVIGATION: Navigation = [
   },
   {
     segment: "promotions",
-    title: "Chương trình khuyến mãi",
+    title: "Khuyễn mãi",
     icon: <NoteAddOutlined />,
     children: [
       {
-        segment: "",
-        title: "Quản lí chương trình khuyến mãi",
+        segment: "/",
+        title: "Quản lí khuyến mãi",
         icon: <WarehouseIcon />,
       },
       {
         segment: "create-promotion",
-        title: "Tạo chương trình khuyến mãi",
+        title: "Tạo khuyến mãi",
         icon: <AddBusinessIcon />,
       },
     ],
@@ -214,7 +214,7 @@ export default function Sidebar() {
   const [messages, setMessages] = useState([]);
   const [session, setSession] = useState<Session | null>({
     user: {
-      name: auth.usename,
+      name: auth?.usename,
       image: "https://avatar.iran.liara.run/public/job/designer/male",
     },
   });

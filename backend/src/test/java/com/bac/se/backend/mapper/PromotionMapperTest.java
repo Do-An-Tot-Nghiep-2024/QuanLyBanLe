@@ -25,7 +25,7 @@ class PromotionMapperTest {
         assertEquals(mockObj[3], response.startDate());
         assertEquals(mockObj[4], response.endDate());
         assertEquals(10, response.orderLimit());
-        assertEquals(100.00, response.minOrderPrice());
+        assertEquals(100.00, response.minOrderValue());
         assertEquals(0.05, response.percentage());
     }
 

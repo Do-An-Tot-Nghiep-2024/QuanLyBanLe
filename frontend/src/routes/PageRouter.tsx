@@ -12,67 +12,77 @@ import Cookies from "js-cookie";
 const LoginEmployee = lazy(() => import("../pages/login/LoginEmployeePage"));
 const LoginManager = lazy(() => import("../pages/login/LoginManagerPage"));
 const EmployeeMain = lazy(() => import("../pages/staff/home/EmployeeMainPage"));
-const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
+const Dashboard = lazy(() => import("../pages/manager/Dashboard"));
 const ProtectedRoute = lazy(() => import("./ProtectRoute"));
-const EmployeePage = lazy(() => import("../pages/employee/EmployeePage"));
+const EmployeePage = lazy(() => import("../pages/manager/employee/EmployeePage"));
 const NotFoundPage = lazy(() => import("../pages/error/NotFoundPage"));
 const Loading = lazy(() => import("../components/Loading"));
-const CreateEmployee = lazy(() => import("../pages/employee/CreateEmployee"));
-const UpdateEmployee = lazy(() => import("../pages/employee/UpdateEmployee"));
-const SupplierPage = lazy(() => import("../pages/supplier/SupplierPage"));
-const CreateSupplier = lazy(() => import("../pages/supplier/CreateSupplier"));
-const UpdateSupplier = lazy(() => import("../pages/supplier/UpdateSupplier"));
-const Sidebar = lazy(() => import("../layout/Sidebar"));
-const CategoryPage = lazy(() => import("../pages/product/CategoryPage"));
-const ProductPage = lazy(() => import("../pages/product/ProductPage"));
-const UpdateProduct = lazy(() => import("../pages/product/UpdateProduct"));
-const CreatePromotion = lazy(
-  () => import("../pages/promotion/CreatePromotion")
+const CreateEmployee = lazy(() => import("../pages/manager/employee/CreateEmployee"));
+const UpdateEmployee = lazy(() => import("../pages/manager/employee/UpdateEmployee"));
+const SupplierPage = lazy(
+  () => import("../pages/manager/supplier/SupplierPage")
 );
-const PromotionPage = lazy(() => import("../pages/promotion/PromotionPage"));
-const UnitManagement = lazy(() => import("../pages/product/UnitPage"));
-const OrderList = lazy(() => import("../pages/order/OrderList"));
+const CreateSupplier = lazy(
+  () => import("../pages/manager/supplier/CreateSupplier")
+);
+const UpdateSupplier = lazy(
+  () => import("../pages/manager/supplier/UpdateSupplier")
+);
+const Sidebar = lazy(() => import("../layout/Sidebar"));
+const CategoryPage = lazy(() => import("../pages/manager/product/CategoryPage"));
+const ProductPage = lazy(() => import("../pages/manager/product/ProductPage"));
+const UpdateProduct = lazy(() => import("../pages/manager/product/UpdateProduct"));
+const CreatePromotion = lazy(
+  () => import("../pages/manager/promotion/CreatePromotion")
+);
+const PromotionPage = lazy(
+  () => import("../pages/manager/promotion/PromotionPage")
+);
+const UnitManagement = lazy(() => import("../pages/manager/product/UnitPage"));
+const OrderList = lazy(() => import("../pages/manager/order/OrderList"));
 
-const ShipmentPage = lazy(() => import("../pages/inventory/ShipmentPage"));
-const OrderDetail = lazy(() => import("../pages/order/OrderDetail"));
-const PrintOrder = lazy(() => import("../pages/print/PrintOrder"));
+const ShipmentPage = lazy(
+  () => import("../pages/manager/inventory/ShipmentPage")
+);
+const OrderDetail = lazy(() => import("../pages/manager/order/OrderDetail"));
+const PrintOrder = lazy(() => import("../pages/manager/print/PrintOrder"));
 // statistic
 const StatisticsProduct = lazy(
-  () => import("../pages/report/SalesStatisticsProduct")
+  () => import("../pages/manager/report/SalesStatisticsProduct")
 );
 const StatisticsEmployee = lazy(
-  () => import("../pages/report/SalesStatisticsEmployee")
+  () => import("../pages/manager/report/SalesStatisticsEmployee")
 );
 
 const StatisticsProductPrice = lazy(
-  () => import("../pages/report/StatisticsProductPrice")
+  () => import("../pages/manager/report/StatisticsProductPrice")
 );
 
 // inventory
 const Logout = lazy(() => import("../pages/login/Logout"));
-const CreateProduct = lazy(() => import("../pages/product/CreateProduct"));
-const OrderTabs = lazy(() => import("../pages/order/OrderTabs"));
+const CreateProduct = lazy(() => import("../pages/manager/product/CreateProduct"));
+const OrderTabs = lazy(() => import("../pages/manager/order/OrderTabs"));
 // const OrderPage = lazy(() => import("../pages/order/OrderPage1"));
 const CreateInventoryOrder = lazy(
-  () => import("../pages/inventory/CreateInvenoryOrder")
+  () => import("../pages/manager/inventory/CreateInvenoryOrder")
 );
 
-const InventoryPage = lazy(() => import("../pages/inventory/InventoryPage"));
+const InventoryPage = lazy(
+  () => import("../pages/manager/inventory/InventoryPage")
+);
 
 const InventoryDetailPage = lazy(
-  () => import("../pages/inventory/InventoryDetailPage")
+  () => import("../pages/manager/inventory/InventoryDetailPage")
 );
 // const OrderPage1 = lazy(() => import("../pages/order/OrderPage1"));
 // const OrderPage2 = lazy(() => import("../pages/order/OrderPage2"));
 
 const DashboardEmployee = lazy(() => import("../pages/staff/home/Dashboard"));
 
-const UnitPage = lazy(() => import("../pages/unit/UnitPage"));
-
-const CustomerPage = lazy(() => import("../pages/customer/CustomerPage"));  
+const CustomerPage = lazy(() => import("../pages/manager/customer/CustomerPage"));
 
 const PrintImportInvoice = lazy(
-  () => import("../pages/print/PrintImportInvoice")
+  () => import("../pages/manager/print/PrintImportInvoice")
 );
 
 const PageRouter = () => {
@@ -136,7 +146,10 @@ const PageRouter = () => {
                 element={<OrderTabs />}
               />
               <Route path="/staff/products" element={<ProductPage />} />
-              <Route path="/staff/inventory/shipment" element={<ShipmentPage />} />
+              <Route
+                path="/staff/inventory/shipment"
+                element={<ShipmentPage />}
+              />
             </Route>
           </Route>
           {/* route for manager */}
@@ -168,7 +181,6 @@ const PageRouter = () => {
               <Route path="/products/units" element={<UnitManagement />} />
               <Route path="/update-employee/:id" element={<UpdateEmployee />} />
 
-              <Route path="/units" element={<UnitPage />} />
               <Route path="/customers" element={<CustomerPage />} />
 
               {/* Static pages */}
@@ -203,10 +215,7 @@ const PageRouter = () => {
                 element={<PrintImportInvoice />}
               />
 
-<Route
-                path="/print/order-invoice"
-                element={<PrintOrder />}
-              />
+              <Route path="/print/order-invoice" element={<PrintOrder />} />
               <Route path="/inventory/shipment" element={<ShipmentPage />} />
               <Route
                 path="/promotions/create-promotion"
