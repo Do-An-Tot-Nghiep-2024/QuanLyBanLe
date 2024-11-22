@@ -255,12 +255,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public PageResponse<OrderResponse> getOrdersByEmployee(
             HttpServletRequest request, Integer pageNumber, Integer pageSize,
-            String fromDate, String toDate) throws ParseException {
+            String fromDate, String toDate,String status,String phone,String paymentType) throws ParseException {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         String email = jwtParse.decodeTokenWithRequest(request);
+//        log.info("email is {}",email);
         DateRequest dateRequest = dateConvert.convertDateRequest(fromDate, toDate);
         var ordersByCustomer = orderRepository.getOrdersByEmployee(email, pageable,
-                dateRequest.fromDate(), dateRequest.toDate());
+                dateRequest.fromDate(), dateRequest.toDate(),status,phone,paymentType);
         List<Object[]> orderList = ordersByCustomer.getContent();
         List<OrderResponse> orderResponseList = orderList.stream().map(orderMapper::mapObjectToResponse).toList();
         return new PageResponse<>(orderResponseList, pageNumber, ordersByCustomer.getTotalPages(), ordersByCustomer.getTotalElements(), ordersByCustomer.isLast());

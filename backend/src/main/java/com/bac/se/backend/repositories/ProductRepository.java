@@ -35,7 +35,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "                           WHERE sub_pp.product_id = p.product_id  " +
             "                       )  " +
             "WHERE   " +
-            "    p.is_active = 1 AND p.name LIKE CONCAT(:name, '%') AND c.name LIKE CONCAT(:category, '%')" +
+            "    p.is_active = 1 AND LOWER(p.name) LIKE CONCAT('%',LOWER(:name), '%') AND c.name LIKE CONCAT(:category, '%')" +
             " ORDER BY p.product_id DESC",nativeQuery = true)
     Page<Object[]> getProducts(
             @Param("name") String name,

@@ -12,6 +12,7 @@ import com.bac.se.backend.payload.response.order.OrderResponse;
 import com.bac.se.backend.services.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
@@ -106,11 +108,15 @@ public class OrderController {
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String fromDate,
-            @RequestParam(required = false) String toDate
+            @RequestParam(required = false) String toDate,
+            @RequestParam(defaultValue = "") String status,
+            @RequestParam(defaultValue = "") String customerPhone,
+            @RequestParam(defaultValue = "") String paymentType
     ) {
         try {
+            log.info("request is {}",request);
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrdersByEmployee(request,
-                    pageNumber, pageSize, fromDate, toDate)));
+                    pageNumber, pageSize, fromDate, toDate,status,customerPhone,paymentType)));
         } catch (ParseException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse<>("Invalid date format. Please use 'yyyy-MM-dd'.", null));

@@ -19,9 +19,9 @@ public class Customer {
     @Column(name = "customer_id")
     private Long id;
     private String name;
-    @Column(length = 100)
+    @Column(length = 100,unique = true)
     private String email;
-    @Column(length = 10)
+    @Column(length = 10,unique = true)
     private String phone;
 
     @OneToOne

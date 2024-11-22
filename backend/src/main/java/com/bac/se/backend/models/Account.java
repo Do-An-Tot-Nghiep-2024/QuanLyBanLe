@@ -22,6 +22,7 @@ public class Account implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "account_id")
     private Long id;
+    @Column(unique = true)
     private String username;
     private String password;
     @Enumerated(EnumType.STRING)
