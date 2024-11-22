@@ -21,12 +21,35 @@ const createOrderService = async (order) => {
     
     
     if (response.status === 201) {
+        console.log("JSON" + response.json);
+        
        showToastWithGravityAndOffset("Đặt hàng thành công");
-       return;
+       return true;
     } else {
         showToastWithGravityAndOffset("Có lỗi xảy ra, vui lòng thử lại");
-      
+        return false;
     }
 }
 
-export {createOrderService}
+const getAllOrdersService = async () => {
+    const accessToken = await getItem("accessToken")
+    
+    let cleanedToken = accessToken.replace(/"/g, "");       
+    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/orders`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${cleanedToken}`
+        },
+    });
+
+    const data = await response.json();
+    if (response.status === 200) {
+       return data?.responseList;
+    }
+    else {
+        return null;
+    }
+}
+
+export {createOrderService, getAllOrdersService}

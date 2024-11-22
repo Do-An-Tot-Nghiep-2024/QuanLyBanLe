@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '@/app/style';
 import { Divider } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getCart } from '@/app/AsyncStorage';  // Assuming getCart is a function you have to fetch the cart data
+import { getCart, removeCart } from '@/app/AsyncStorage';  // Assuming getCart is a function you have to fetch the cart data
 import { getInformationDetailService } from '@/app/services/auth.service';
 import { createOrderService } from '@/app/services/order.service';
 import { getLatestPromotionService } from '@/app/services/promotion.service';
@@ -88,7 +88,6 @@ const PaymentDetail = ({ navigation }) => {
 
     const order = {
       orderItems: orderItems,
-      customerPhone: phone,
       customerPayment: totalPrice,
       isLive: false,
       paymentType: 'CASH',
@@ -106,8 +105,9 @@ const PaymentDetail = ({ navigation }) => {
     const response = await createOrderService(order);
     console.log("RESPONSE PAGE: " + response);
     
-    if (response.status === 201) {
-      navigation.navigate('OrderList');
+    if (response) {
+        await removeCart();
+      navigation.navigate('component/Order/OrderList');
     }
   };
 

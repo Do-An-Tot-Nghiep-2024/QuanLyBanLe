@@ -105,5 +105,9 @@ const setItem = async (key, value) => {
     }
 
   }
+  const removeCart = async () => {
+    const cart = JSON.parse(await AsyncStorage.getItem('cart')) || [];
+    await AsyncStorage.setItem('cart', JSON.stringify([]));
+  }
 
-  export {getItem, removeItem, setItem, addToCart, getCart, removeFromCart, updatedCart, descreaseQuantity}
+  export {getItem, removeItem, setItem, addToCart, getCart, removeFromCart, updatedCart, descreaseQuantity, removeCart}

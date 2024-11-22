@@ -131,15 +131,13 @@ export default function Cart({ navigation }) {
     return (
         <View style={styles.container}>
             {cartItems.length > 0 ? (
-                <FlatList
+                <View>
+                    <FlatList
                     data={cartItems} 
                     keyExtractor={item => item?.id?.toString()}
                     renderItem={renderItem}
                 />
-            ) : (
-                <Text style={styles.noCartText}>Chưa có sản phẩm nào</Text>
-            )}
-            <TouchableHighlight underlayColor={"grey"} style={styles.checkoutButton} onPress={() => { navigation.navigate('component/Cart/DetailPayment') }}>
+                <TouchableHighlight underlayColor={"grey"} style={styles.checkoutButton} onPress={() => { navigation.navigate('component/Cart/DetailPayment') }}>
                 <View style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -150,6 +148,12 @@ export default function Cart({ navigation }) {
                     <Text style={styles.checkoutText}>Thanh toán</Text>
                 </View>
             </TouchableHighlight>
+            </View>
+                
+            ) : (
+                <Text style={styles.noCartText}>Chưa có sản phẩm nào</Text>
+            )}
+           
         </View>
     );
 }
