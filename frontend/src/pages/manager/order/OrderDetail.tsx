@@ -86,7 +86,7 @@ export default function OrderDetailPage() {
   const columns = ["Tên sản phẩm", "Số lượng", "Đơn giá", "Thành tiền"];
 
   return (
-    <Container sx={{ pt: 5 }}>
+    <Container sx={{ pt: 5, mt: 2 }}>
       <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
         Chi tiết đơn hàng #{data?.orderId}
       </Typography>
