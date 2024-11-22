@@ -153,7 +153,7 @@ const updateOrderStatusService = async (orderId: number, action: 'cancel' | 'com
   try {
 
     // Sending the request
-    const response: ApiResponse = await api.put(`/orders/${action}/${orderId}`);
+    const response: any = await api.put(`/orders/${action}/${orderId}`);
 
     if (response.message !== "success") {
       return {
