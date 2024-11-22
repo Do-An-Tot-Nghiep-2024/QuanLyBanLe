@@ -66,7 +66,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "left join t_employee e on e.employee_id = o.employee_id " +
             "left join t_customer c on c.customer_id = o.customer_id " +
             "where o.created_at between :fromDate and :toDate " +
-            "AND o.order_status LIKE CONCAT(:status,'%') " +
+            "AND o.order_status LIKE CONCAT(:status,'%') AND o.payment_type LIKE CONCAT(:paymentType,'%') " +
             "AND (:phone = '' OR (c.phone IS NOT NULL AND c.phone LIKE CONCAT(:phone, '%'))) " +
             "group by oi.order_id", nativeQuery = true)
     Page<Object[]> getOrders(
@@ -74,6 +74,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("fromDate") Date fromDate,
             @Param("toDate") Date toDate,
             @Param("status") String status,
+            @Param("paymentType") String paymentType,
             @Param("phone") String phone);
 
     @Query(value = "select o.order_id as orderId, e.name as emp,o.order_status,o.payment_type as paymentType," +

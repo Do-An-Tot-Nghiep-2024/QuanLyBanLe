@@ -17,7 +17,7 @@ public interface OrderService {
 
     PageResponse<OrderResponse> getOrders(Integer pageNumber, Integer pageSize,
                                           String fromDate, String toDate,
-                                          String orderBy, String order, String status, String customerPhone) throws ParseException;
+                                          String orderBy, String order, String status,String paymentType,String customerPhone) throws ParseException;
 
     PageResponse<OrderResponse> getOrdersByCustomer(HttpServletRequest request, Integer pageNumber, Integer pageSize);
 
