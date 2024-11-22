@@ -14,6 +14,8 @@ import source from "../../../assets/fonts/Roboto-Regular.ttf";
 import { formatMoney } from "../../../utils/formatMoney";
 import logo from "../../../assets/images/logo.png";
 import { Box, Button } from "@mui/material";
+import { formatDateTime } from "../../../utils/dateUtil";
+import { useAppSelector } from "../../../redux/hook";
 // Register the custom font
 Font.register({
   family: "Roboto",
@@ -118,7 +120,7 @@ const InvoiceDoc = ({
   customerPayment: number;
   change: number;
   orderId: number;
-  createdAt: string;
+  createdAt: Date;
   employee: string;
   title: string;
   discount: number;
@@ -138,9 +140,9 @@ const InvoiceDoc = ({
             <Text>{employee}</Text>
           </View>
 
-          <View style={[styles.info, { marginBottom:20 }]}>
+          <View style={[styles.info, { marginBottom: 20 }]}>
             <Text style={styles.textTitle}>Ngày tạo: </Text>
-            <Text>{createdAt}</Text>
+            <Text>{formatDateTime(createdAt)}</Text>
           </View>
         </View>
       </View>
@@ -198,7 +200,7 @@ const InvoiceDoc = ({
 export default function PrintOrder() {
   const location = useLocation();
   console.log(location.state);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const {
     total,
     customerPayment,
@@ -207,29 +209,38 @@ const navigate = useNavigate();
     employee,
     totalDiscount,
   } = location.state || {}; // Get data from location state
-
+  const auth = useAppSelector((state) => state.auth);
   // Calculate the total from order items
   const title = "HÓA ĐƠN THANH TOÁN";
   const change = customerPayment - total - totalDiscount;
   const productsItems = location.state?.orderItemResponses as any[];
   // increment quantity and price if product duplicate name
   const items = Object.values(
-    productsItems.reduce((acc, item) => {
-      if (!acc[item.name]) {
-        acc[item.name] = { ...item }; // Initialize the grouped item
-      } else {
-        // Increment the quantity, price, and amount
-        acc[item.name].quantity += item.quantity;
-        // acc[item.name].price += item.price;
-        acc[item.name].amount += item.amount;
-      }
-      return acc;
-    }, {} as Record<string, any>)
+    productsItems.reduce(
+      (acc, item) => {
+        if (!acc[item.name]) {
+          acc[item.name] = { ...item }; // Initialize the grouped item
+        } else {
+          // Increment the quantity, price, and amount
+          acc[item.name].quantity += item.quantity;
+          // acc[item.name].price += item.price;
+          acc[item.name].amount += item.amount;
+        }
+        return acc;
+      },
+      {} as Record<string, any>
+    )
   );
   return (
     <Box width={"90%"}>
       <Button
-        onClick={() => navigate("/orders/create-order")}
+        onClick={() => {
+          if(auth.role === "EMPLOYEE"){
+            navigate("/staff/orders/create-order");
+          }else{
+            navigate("/orders/create-order");
+          }
+        }}
         sx={{
           my: 3,
         }}

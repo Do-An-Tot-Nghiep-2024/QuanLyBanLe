@@ -42,6 +42,7 @@ export default function InventoryPage() {
   const { isLoading, isError, error, data, isFetching } = useQuery({
     queryKey: ["inventory/stock", pageNumber, pageSize],
     queryFn: () => getImportInvoices(pageNumber, pageSize),
+    refetchOnWindowFocus:false
   });
 
   if (isFetching || isLoading) {

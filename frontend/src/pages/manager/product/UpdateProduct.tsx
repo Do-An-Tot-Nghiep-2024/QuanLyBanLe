@@ -190,7 +190,7 @@ export default function UpdateProduct() {
   };
 
   return (
-    <Container>
+    <Container sx={{mt:3}}>
       <Typography variant="h4" align="center" padding={"5px"} sx={{ mb: 3, fontWeight: "bold" }}>
         Cập Nhật Sản Phẩm
       </Typography>

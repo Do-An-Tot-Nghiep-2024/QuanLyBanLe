@@ -1,8 +1,8 @@
 interface PaginationResponse<T> {
-  pageNumber: number;
-  pageSize: number;
-  totalElements: number;
-  totalPages: number;
   responseList: T[];
+  pageNumber:number;
+  totalPages: number;
+  totalElements: number;
+  lastPage: boolean;
 }
 export default PaginationResponse;

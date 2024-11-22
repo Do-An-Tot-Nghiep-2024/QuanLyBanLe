@@ -1,5 +1,5 @@
-interface ApiResponse {
+interface ApiResponse<T> {
   message: string;
-  data: object;
+  data: T;
 }
 export default ApiResponse;

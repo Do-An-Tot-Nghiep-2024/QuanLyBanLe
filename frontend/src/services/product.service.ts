@@ -1,19 +1,21 @@
 import api from "../config/axios";
 import { GetProductSchema } from "../types/getProductSchema";
 import { ProductSchema } from "../types/productSchema";
-import ApiResponse from "../types/apiResponse";
+import ApiResponse from "../types/common/apiResponse";
 import { UpdateProductSchema } from "../types/updateProductSchema";
+import PaginationResponse from "../types/common/paginationResponse";
+import ProductResponse from "../types/product/productResponse";
 
-interface GetProductResponse {
-  message: string;
-  data: {
-    lastPage: boolean;
-    pageNumber: number;
-    responseList: GetProductSchema[];
-    totalElements: number;
-    totalPages: number;
-  } | null;
-}
+// interface GetProductResponse {
+//   message: string;
+//   data: {
+//     lastPage: boolean;
+//     pageNumber: number;
+//     responseList: GetProductSchema[];
+//     totalElements: number;
+//     totalPages: number;
+//   } | null;
+// }
 
 const createProductService = async (
   productRequest: ProductSchema,
@@ -31,7 +33,7 @@ const createProductService = async (
     );
     formData.append("file", imageFile);
     console.log(formData);
-    const response: ApiResponse = await api.post("/products", formData, {
+    const response: any = await api.post("/products", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -76,7 +78,7 @@ const updateProductService = async (
     );
     formData.append("file", imageFile);
     console.log(formData);
-    const response: ApiResponse = await api.put(`/products/${id}`, formData, {
+    const response: any = await api.put(`/products/${id}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -102,35 +104,35 @@ const updateProductService = async (
   }
 };
 
-const getProductsService = async (page: number, limit: number) => {
-  try {
-    const response: ApiResponse = await api.get(
-      `/products?pageNumber=${page}&pageSize=${limit}`
-    );
-    const { message, data } = response;
+// const getProductsService = async (page: number, limit: number) => {
+//   try {
+//     const response: any = await api.get(
+//       `/products?pageNumber=${page}&pageSize=${limit}`
+//     );
+//     const { message, data } = response;
 
-    if (message !== "success") {
-      return {
-        message: message,
-        data: [],
-      };
-    }
+//     if (message !== "success") {
+//       return {
+//         message: message,
+//         data: [],
+//       };
+//     }
 
-    return {
-      message: message,
-      data: data,
-    };
-  } catch (error: any) {
-    return {
-      message: error.response?.data?.message || "An error occurred",
-      data: [],
-    };
-  }
-};
+//     return {
+//       message: message,
+//       data: data,
+//     };
+//   } catch (error: any) {
+//     return {
+//       message: error.response?.data?.message || "An error occurred",
+//       data: [],
+//     };
+//   }
+// };
 
 const getProductByIdService = async (id: number) => {
   try {
-    const response: ApiResponse = await api.get(`/products/${id}`);
+    const response: any = await api.get(`/products/${id}`);
     const { message, data } = response;
 
     if (message !== "success") {
@@ -152,20 +154,23 @@ const getProductByIdService = async (id: number) => {
   }
 };
 
-const getAllProductsService = async (): Promise<GetProductResponse> => {
+const getAllProductsService = async (
+  name: string,
+  category: string,
+  pageNumber: number
+) => {
   try {
-    const response: GetProductResponse = await api.get(`/products`);
+    const response: ApiResponse<PaginationResponse<ProductResponse>> =
+      await api.get(
+        `/products?&name=${name}&category=${category}&pageNumber=${pageNumber}&pageSize=6`
+      );
     const { message, data } = response;
-
-    console.log(data);
-
     return {
       message,
       data: message === "success" ? data : null,
     };
   } catch (error) {
     console.error("Error fetching products:", error);
-
     return {
       message: String(error),
       data: null,
@@ -212,13 +217,11 @@ const getAllProductsByNameService = async (
 
 const getProductsBySupplierService = async (supplierId: number) => {
   try {
-    const response: ApiResponse = await api.get(
-      `/products/supplier/${supplierId}`
-    );
-    const { message, data } = response;
+    const response: any = await api.get(`/products/supplier/${supplierId}`);
+    const message = response?.message;
+    const data = response?.data;
 
     console.log(data);
-
     return {
       message,
       data: message === "success" ? data : null,
@@ -251,7 +254,7 @@ const getProductsBySupplierService = async (supplierId: number) => {
 
 const deleteProductService = async (id: number) => {
   try {
-    const response: ApiResponse = await api.delete(`/products/${id}`);
+    const response: ApiResponse<string> = await api.delete(`/products/${id}`);
 
     console.log(response);
 
@@ -271,7 +274,7 @@ const updateProductPriceService = async (productId: number, price: number) => {
   console.log(price);
 
   try {
-    const response: ApiResponse = await api.put(
+    const response: ApiResponse<ProductResponse> = await api.put(
       `/products/${productId}/price`,
       {
         price: price,
@@ -299,7 +302,7 @@ export {
   getAllProductsService,
   createProductService,
   getProductByIdService,
-  getProductsService,
+  // getProductsService,
   updateProductService,
   deleteProductService,
   getProductsBySupplierService,

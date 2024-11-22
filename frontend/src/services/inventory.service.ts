@@ -1,13 +1,12 @@
 import api from "../config/axios";
 
-import ApiResponse from "../types/apiResponse";
 
 const createInventoryOrderService = async (
   itemList: any[],
   supplierId: number
 ) => {
   try {
-    const response: ApiResponse = await api.post(`/inventory/import`, {
+    const response: any = await api.post(`/inventory/import`, {
       supplierId: supplierId,
       productItems: itemList,
     });
@@ -86,9 +85,7 @@ const getItemImportInvoiceService = async (shipmentId: number) => {
 
 const getShipmentsService = async () => {
   try {
-    const response: any = await api.get(
-      `/inventory/shipments`
-    );
+    const response: any = await api.get(`/inventory/shipments`);
     const { message, data } = response;
     if (message !== "success") {
       return {

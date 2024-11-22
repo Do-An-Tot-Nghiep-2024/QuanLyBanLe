@@ -1,8 +1,6 @@
 import api from "../config/axios";
-import ApiResponse from "../types/apiResponse";
 // import { GetPromotion } from "../types/getPromotion";
 import { PromotionSchema } from "../types/promotionSchema";
-
 
 interface PromotionResponse {
   message: string;
@@ -16,9 +14,10 @@ interface PromotionResponse {
 }
 const createPromotionService = async (promotionRequest: any) => {
   try {
-
-
-    const response: ApiResponse = await api.post("/promotions",promotionRequest);
+    const response: any = await api.post(
+      "/promotions",
+      promotionRequest
+    );
     const { message, data } = response;
     if (message !== "success") {
       return {
@@ -36,19 +35,21 @@ const createPromotionService = async (promotionRequest: any) => {
       data: {},
     };
   }
-}
+};
 
 const createQuantityPromotion = async (promotionData: any) => {
   try {
     console.log(promotionData);
 
-
-    const response: ApiResponse = await api.post(`/promotions/create-quantity-product-promotion`, {
-      promotionRequest: promotionData.promotionRequest,
-      buyQuantity: promotionData.buyQuantity,
-      freeQuantity: promotionData.freeQuantity,
-      productId: promotionData.productId
-    });
+    const response: any = await api.post(
+      `/promotions/create-quantity-product-promotion`,
+      {
+        promotionRequest: promotionData.promotionRequest,
+        buyQuantity: promotionData.buyQuantity,
+        freeQuantity: promotionData.freeQuantity,
+        productId: promotionData.productId,
+      }
+    );
 
     const { message, data } = response;
     if (message !== "success") {
@@ -68,21 +69,23 @@ const createQuantityPromotion = async (promotionData: any) => {
       data: {},
     };
   }
-}
+};
 
 const createGiftProductPromotion = async (promotionData: any) => {
   try {
     console.log(promotionData);
 
-
-    const response: ApiResponse = await api.post(`/promotions/create-gift-product-promotion`, {
-      promotionRequest: promotionData.promotionRequest,
-      buyQuantity: promotionData.buyQuantity,
-      giftQuantity: promotionData.giftQuantity,
-      giftProductId: promotionData.giftProductId,
-      giftShipmentId: promotionData.giftShipmentId,
-      productId: promotionData.productId
-    });
+    const response: any = await api.post(
+      `/promotions/create-gift-product-promotion`,
+      {
+        promotionRequest: promotionData.promotionRequest,
+        buyQuantity: promotionData.buyQuantity,
+        giftQuantity: promotionData.giftQuantity,
+        giftProductId: promotionData.giftProductId,
+        giftShipmentId: promotionData.giftShipmentId,
+        productId: promotionData.productId,
+      }
+    );
 
     const { message, data } = response;
     if (message !== "success") {
@@ -102,18 +105,20 @@ const createGiftProductPromotion = async (promotionData: any) => {
       data: {},
     };
   }
-}
+};
 
 const createDiscountProductPromotion = async (promotionData: any) => {
   try {
     console.log(promotionData);
 
-
-    const response: ApiResponse = await api.post(`/promotions/create-discount-product`, {
-      promotionRequest: promotionData.promotionRequest,
-      productId: promotionData.productId,
-      discount: promotionData.discount
-    });
+    const response: any = await api.post(
+      `/promotions/create-discount-product`,
+      {
+        promotionRequest: promotionData.promotionRequest,
+        productId: promotionData.productId,
+        discount: promotionData.discount,
+      }
+    );
 
     const { message, data } = response;
     if (message !== "success") {
@@ -133,7 +138,7 @@ const createDiscountProductPromotion = async (promotionData: any) => {
       data: {},
     };
   }
-}
+};
 // const getAllProductsService = async (): Promise<GetProductResponse> => {
 //   try {
 //     const response: GetProductResponse = await api.get(`/products`);
@@ -175,23 +180,30 @@ const getAllPromotionService = async (): Promise<PromotionResponse> => {
       data: null,
     };
   }
-}
+};
 
 const getLatestPromotionService = async () => {
   try {
-    const response: ApiResponse = await api.get(`/promotions/latest`);
+    const response: any = await api.get(`/promotions/latest`);
 
     const { message, data } = response;
     return {
       message,
       data: message === "success" ? data : {},
     };
-  } catch (error:any) {
+  } catch (error: any) {
     return {
       message: error.response.data.message,
       data: null,
     };
   }
-}
+};
 
-export { createPromotionService, createQuantityPromotion, createGiftProductPromotion, createDiscountProductPromotion, getAllPromotionService, getLatestPromotionService }
+export {
+  createPromotionService,
+  createQuantityPromotion,
+  createGiftProductPromotion,
+  createDiscountProductPromotion,
+  getAllPromotionService,
+  getLatestPromotionService,
+};

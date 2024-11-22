@@ -109,7 +109,6 @@ const PromotionPage: React.FC = () => {
       >
         <Button
           variant="contained"
-          color="success"
           onClick={() => navigate("/promotions/create-promotion")}
         >
           Tạo Khuyến Mãi
@@ -123,7 +122,7 @@ const PromotionPage: React.FC = () => {
         {isLoading ? (
           <CircularProgress />
         ) : (
-          <Table>
+          <Table size="small">
             <TableHead sx={{ backgroundColor: colors.secondaryColor }}>
               <TableRow>
                 {[
