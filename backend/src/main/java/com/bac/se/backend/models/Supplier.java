@@ -19,7 +19,9 @@ public class Supplier {
     @Column(name = "supplier_id")
     private Long id;
     private String name;
+    @Column(unique = true)
     private String phone;
+    @Column(unique = true)
     private String email;
     private String address;
     @ColumnDefault(value = "true")
