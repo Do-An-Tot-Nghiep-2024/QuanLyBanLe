@@ -122,6 +122,28 @@ const getOrderDetailService = async (orderId: number) => {
   }
 };
 
+const updateOrderStatusService = async (orderId: number, action: 'cancel' | 'complete') => {
+  try {
+
+    // Sending the request
+    const response: ApiResponse = await api.put(`/orders/${action}/${orderId}`);
+
+    if (response.message !== "success") {
+      return {
+        message: response.message,
+        data: {},
+      };
+    }
+
+    return response;
+  } catch (error: any) {
+    return {
+      message: error.response?.data?.message || error.message,
+      data: {},
+    };
+  }
+};
 
 
-export { createOrderService, getAllOrdersService, getOrderDetailService  }
+
+export { createOrderService, getAllOrdersService, getOrderDetailService, updateOrderStatusService  }
