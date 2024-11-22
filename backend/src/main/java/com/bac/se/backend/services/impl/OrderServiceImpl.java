@@ -215,6 +215,7 @@ public class OrderServiceImpl implements OrderService {
                                                  String fromDate, String toDate,
                                                  String orderBy, String order,
                                                  String status,
+                                                 String paymentType,
                                                  String customerPhone
     ) throws ParseException {
         Map<String, String> map = new HashMap<>();
@@ -233,7 +234,7 @@ public class OrderServiceImpl implements OrderService {
         Sort sort = Sort.by(Sort.Direction.fromString(order), column);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         var orders = orderRepository.getOrders(pageable, dateRequest.fromDate(),
-                dateRequest.toDate(), status, customerPhone);
+                dateRequest.toDate(), status,paymentType,customerPhone);
         List<Object[]> orderList = orders.getContent();
         List<OrderResponse> orderResponseList = orderList.stream().map(orderMapper::mapObjectToResponse).toList();
         return new PageResponse<>(orderResponseList, pageNumber, orders.getTotalPages(), orders.getTotalElements(), orders.isLast());
