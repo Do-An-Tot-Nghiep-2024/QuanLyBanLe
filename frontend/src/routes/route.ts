@@ -77,9 +77,9 @@ const CustomerPage = lazy(
   () => import("../pages/manager/customer/CustomerPage")
 );
 
-const PrintImportInvoice = lazy(
-  () => import("../pages/manager/print/PrintImportInvoice")
-);
+// const PrintImportInvoice = lazy(
+//   () => import("../pages/manager/print/PrintImportInvoice")
+// );
 
 const OrderEmployeePage = lazy(
   () => import("../pages/staff/order/OrderEmployeePage")
@@ -116,7 +116,7 @@ const managerRoutes: RouteConfig[] = [
   { path: "/inventory/:id", component: InventoryDetailPage },
   { path: "/inventory/shipment", component: ShipmentPage },
   { path: "/inventory/create-inventory", component: CreateInventoryOrder },
-  { path: "/print/import-invoice", component: PrintImportInvoice },
+  // { path: "/print/import-invoice", component: PrintImportInvoice },
   // product
   { path: "/products", component: ProductPage },
   { path: "/create-product", component: CreateProduct },
