@@ -17,9 +17,14 @@ import {
   Receipt as ReceiptIcon,
   ViewColumn as ViewColumnIcon,
   Warehouse as WarehouseIcon,
+  Gite as GiteIcon,
   NoteAddOutlined,
+  AddShoppingCart as  AddShoppingCartIcon,
+  AppRegistration as AppRegistrationIcon,
+  MapsUgc as MapsUgcIcon,
   Logout,
 } from "@mui/icons-material";
+import RedeemIcon from '@mui/icons-material/Redeem';
 import { AppProvider, DashboardLayout } from "@toolpad/core";
 import type { Router, Navigation, Session } from "@toolpad/core";
 import Cookies from "js-cookie";
@@ -44,7 +49,7 @@ const NAVIGATION: Navigation = [
       {
         segment: "create-order",
         title: "Tạo đơn hàng mới",
-        icon: <WarehouseIcon />,
+        icon: <AddShoppingCartIcon />,
       },
       {
         segment: "",
@@ -78,7 +83,7 @@ const NAVIGATION: Navigation = [
       {
         segment: "/",
         title: "Quản lí sản phẩm",
-        icon: <WarehouseIcon />,
+        icon: <GiteIcon />,
       },
       {
         segment: "categories",
@@ -95,17 +100,17 @@ const NAVIGATION: Navigation = [
   {
     segment: "promotions",
     title: "Khuyễn mãi",
-    icon: <NoteAddOutlined />,
+    icon: <RedeemIcon />,
     children: [
       {
         segment: "/",
         title: "Quản lí khuyến mãi",
-        icon: <WarehouseIcon />,
+        icon: <AppRegistrationIcon />,
       },
       {
         segment: "create-promotion",
         title: "Tạo khuyến mãi",
-        icon: <AddBusinessIcon />,
+        icon: <MapsUgcIcon />,
       },
     ],
   },

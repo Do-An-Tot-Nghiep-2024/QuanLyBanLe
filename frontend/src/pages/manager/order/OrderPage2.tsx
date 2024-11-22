@@ -169,7 +169,7 @@ const OrderPage: React.FC = () => {
         setOrderItems([]);
         setCustomerChange(0);
         setCustomerPayment(0);
-        localStorage.removeItem("queueOrderItems");
+        localStorage.removeItem("queueOrderItems  ");
       } else {
         alert(response.message);
         return;

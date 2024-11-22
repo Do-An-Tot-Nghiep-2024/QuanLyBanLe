@@ -119,7 +119,7 @@ export default function LoginEmployeePage() {
           {/* Password field */}
           <FormControl variant="outlined" fullWidth>
             <InputLabel htmlFor="outlined-adornment-password" color={errors.password ? "error" : "primary"}>
-              Password
+              Mật khẩu  
             </InputLabel>
             <OutlinedInput
               {...register("password")}

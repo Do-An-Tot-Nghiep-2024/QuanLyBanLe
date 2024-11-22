@@ -18,7 +18,7 @@ import {
 
 import ShipmentItem from "../../../types/inventory/itemImportInvoice";
 import { formatMoney } from "../../../utils/formatMoney";
-import { formatDate, formatDateTime } from "../../../utils/convertDate";
+import { formatDate, formatDateTime } from "../../../utils/dateUtil";
 // import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
 export default function InventoryDetailPage() {
@@ -59,7 +59,7 @@ export default function InventoryDetailPage() {
     "Thành tiền",
   ];
   return (
-    <Container>
+    <Container sx={{ mt: 2 }}>
       <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
         Chi tiết hóa đơn nhập hàng
       </Typography>

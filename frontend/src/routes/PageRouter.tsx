@@ -8,82 +8,15 @@ import { useAppDispatch, useAppSelector } from "../redux/hook";
 import { getAccount } from "../redux/auth/authSlice";
 import { useEffect, Suspense, lazy } from "react";
 import Cookies from "js-cookie";
-// import OrderPage from "../pages/order/OrderPage";
+import { employeeRoutes, managerRoutes } from "./route";
 const LoginEmployee = lazy(() => import("../pages/login/LoginEmployeePage"));
 const LoginManager = lazy(() => import("../pages/login/LoginManagerPage"));
 const EmployeeMain = lazy(() => import("../pages/staff/home/EmployeeMainPage"));
-const Dashboard = lazy(() => import("../pages/manager/Dashboard"));
 const ProtectedRoute = lazy(() => import("./ProtectRoute"));
-const EmployeePage = lazy(() => import("../pages/manager/employee/EmployeePage"));
 const NotFoundPage = lazy(() => import("../pages/error/NotFoundPage"));
 const Loading = lazy(() => import("../components/Loading"));
-const CreateEmployee = lazy(() => import("../pages/manager/employee/CreateEmployee"));
-const UpdateEmployee = lazy(() => import("../pages/manager/employee/UpdateEmployee"));
-const SupplierPage = lazy(
-  () => import("../pages/manager/supplier/SupplierPage")
-);
-const CreateSupplier = lazy(
-  () => import("../pages/manager/supplier/CreateSupplier")
-);
-const UpdateSupplier = lazy(
-  () => import("../pages/manager/supplier/UpdateSupplier")
-);
+
 const Sidebar = lazy(() => import("../layout/Sidebar"));
-const CategoryPage = lazy(() => import("../pages/manager/product/CategoryPage"));
-const ProductPage = lazy(() => import("../pages/manager/product/ProductPage"));
-const UpdateProduct = lazy(() => import("../pages/manager/product/UpdateProduct"));
-const CreatePromotion = lazy(
-  () => import("../pages/manager/promotion/CreatePromotion")
-);
-const PromotionPage = lazy(
-  () => import("../pages/manager/promotion/PromotionPage")
-);
-const UnitManagement = lazy(() => import("../pages/manager/product/UnitPage"));
-const OrderList = lazy(() => import("../pages/manager/order/OrderList"));
-
-const ShipmentPage = lazy(
-  () => import("../pages/manager/inventory/ShipmentPage")
-);
-const OrderDetail = lazy(() => import("../pages/manager/order/OrderDetail"));
-const PrintOrder = lazy(() => import("../pages/manager/print/PrintOrder"));
-// statistic
-const StatisticsProduct = lazy(
-  () => import("../pages/manager/report/SalesStatisticsProduct")
-);
-const StatisticsEmployee = lazy(
-  () => import("../pages/manager/report/SalesStatisticsEmployee")
-);
-
-const StatisticsProductPrice = lazy(
-  () => import("../pages/manager/report/StatisticsProductPrice")
-);
-
-// inventory
-const Logout = lazy(() => import("../pages/login/Logout"));
-const CreateProduct = lazy(() => import("../pages/manager/product/CreateProduct"));
-const OrderTabs = lazy(() => import("../pages/manager/order/OrderTabs"));
-// const OrderPage = lazy(() => import("../pages/order/OrderPage1"));
-const CreateInventoryOrder = lazy(
-  () => import("../pages/manager/inventory/CreateInvenoryOrder")
-);
-
-const InventoryPage = lazy(
-  () => import("../pages/manager/inventory/InventoryPage")
-);
-
-const InventoryDetailPage = lazy(
-  () => import("../pages/manager/inventory/InventoryDetailPage")
-);
-// const OrderPage1 = lazy(() => import("../pages/order/OrderPage1"));
-// const OrderPage2 = lazy(() => import("../pages/order/OrderPage2"));
-
-const DashboardEmployee = lazy(() => import("../pages/staff/home/Dashboard"));
-
-const CustomerPage = lazy(() => import("../pages/manager/customer/CustomerPage"));
-
-const PrintImportInvoice = lazy(
-  () => import("../pages/manager/print/PrintImportInvoice")
-);
 
 const PageRouter = () => {
   const auth = useAppSelector((state) => state.auth);
@@ -97,6 +30,39 @@ const PageRouter = () => {
   }, [token, dispatch]);
   const isLoggedIn = auth.isLogin;
   const userRole = auth.role;
+  type RedirectElementProps = {
+    isLoggedIn: boolean;
+    userRole: string;
+    employeePath: string;
+    managerPath: string;
+    fallback: JSX.Element;
+  };
+
+  const getRedirectElement = ({
+    isLoggedIn,
+    userRole,
+    employeePath,
+    managerPath,
+    fallback,
+  }: RedirectElementProps): JSX.Element => {
+    if (isLoggedIn) {
+      return userRole === "EMPLOYEE" ? (
+        <Navigate to={employeePath} />
+      ) : (
+        <Navigate to={managerPath} />
+      );
+    }
+    return fallback;
+  };
+
+  interface RouteConfig {
+    path: string;
+    component: React.LazyExoticComponent<React.FC>;
+  }
+  const renderRoutes = (routes: RouteConfig[]) =>
+    routes.map(({ path, component: Component }) => (
+      <Route key={path} path={path} element={<Component />} />
+    ));
 
   return (
     <Router>
@@ -105,30 +71,25 @@ const PageRouter = () => {
           {/* routes for manager */}
           <Route
             path="/login"
-            element={
-              isLoggedIn && userRole === "EMPLOYEE" ? (
-                <Navigate to={"/"} />
-              ) : isLoggedIn && userRole === "MANAGER" ? (
-                <Navigate to={"/dashboard"} />
-              ) : (
-                <LoginEmployee />
-              )
-            }
+            element={getRedirectElement({
+              isLoggedIn,
+              userRole,
+              employeePath: "/",
+              managerPath: "/dashboard",
+              fallback: <LoginEmployee />,
+            })}
           />
-          {/* login page for manager */}
           <Route
             path="/admin"
-            element={
-              isLoggedIn && userRole === "MANAGER" ? (
-                <Navigate to={"/dashboard"} />
-              ) : isLoggedIn && userRole === "EMPLOYEE" ? (
-                <Navigate to={"/"} />
-              ) : (
-                <LoginManager />
-              )
-            }
+            element={getRedirectElement({
+              isLoggedIn,
+              userRole,
+              employeePath: "/",
+              managerPath: "/dashboard",
+              fallback: <LoginManager />,
+            })}
           />
-          {/* routes for employee */}
+          {/* Route for EMPLOYEE AND MANAGER */}
           <Route
             element={
               <ProtectedRoute
@@ -140,18 +101,20 @@ const PageRouter = () => {
             }
           >
             <Route element={<EmployeeMain />}>
-              <Route path="/" element={<DashboardEmployee />} />
+              {/* <Route path="/" element={<DashboardEmployee />} /> */}
+              {/* <Route path="/staff/orders" element={<OrderEmployeePage />} /> */}
+              {/* <Route path="/" element={<DashboardEmployee />} />
               <Route
                 path="/staff/orders/create-order"
                 element={<OrderTabs />}
               />
-              <Route path="/staff/products" element={<ProductPage />} />
-              <Route
-                path="/staff/inventory/shipment"
-                element={<ShipmentPage />}
-              />
+              <Route path="/products" element={<ProductPage />} />
+              <Route path="/inventory/shipment" element={<ShipmentPage />} />
+              <Route path="/staff/orders/:orderId" element={<OrderDetail />} /> */}
+              {renderRoutes(employeeRoutes)}
             </Route>
           </Route>
+
           {/* route for manager */}
           <Route
             element={
@@ -163,28 +126,29 @@ const PageRouter = () => {
               />
             }
           >
-            {/* viết giao diện các chức năng của quản lý dưới sidebar */}
             <Route element={<Sidebar />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/employees" element={<EmployeePage />} />
-              <Route path="/create-employee" element={<CreateEmployee />} />
+              {/* <Route path="/dashboard" element={<Dashboard />} />
+              
               <Route path="/suppliers" element={<SupplierPage />} />
               <Route path="/create-supplier" element={<CreateSupplier />} />
-              <Route path="/update-product/:id" element={<UpdateProduct />} />
               <Route path="/update-supplier/:id" element={<UpdateSupplier />} />
 
-              <Route path="/create-product" element={<CreateProduct />} />
 
               <Route path="/products" element={<ProductPage />} />
-
+              <Route path="/create-product" element={<CreateProduct />} />
+              <Route path="/update-product/:id" element={<UpdateProduct />} />
               <Route path="/products/categories" element={<CategoryPage />} />
               <Route path="/products/units" element={<UnitManagement />} />
+
+              <Route path="/employees" element={<EmployeePage />} />
+              <Route path="/create-employee" element={<CreateEmployee />} />
               <Route path="/update-employee/:id" element={<UpdateEmployee />} />
 
-              <Route path="/customers" element={<CustomerPage />} />
+
+              <Route path="/customers" element={<CustomerPage />} /> */}
 
               {/* Static pages */}
-              <Route path="/reports/product" element={<StatisticsProduct />} />
+              {/* <Route path="/reports/product" element={<StatisticsProduct />} />
               <Route
                 path="/reports/employee"
                 element={<StatisticsEmployee />}
@@ -192,36 +156,41 @@ const PageRouter = () => {
               <Route
                 path="/reports/product-price/:productId"
                 element={<StatisticsProductPrice />}
-              />
+              /> */}
               {/* inventory */}
-              <Route
+              {/* <Route path="/orders/create-order" element={<OrderPage1 />} />
+              <Route path="/order2" element={<OrderPage2 />} /> */}
+
+              {/* <Route path="/orders/create-order" element={<OrderTabs />} />
+              <Route path="/orders" element={<OrderList />} />
+              <Route path="/orders/:orderId" element={<OrderDetail />} /> */}
+
+                {/* inventory */}
+              {/* <Route
                 path="/inventory/import-invoices"
                 element={<InventoryPage />}
               />
               <Route path="/inventory/:id" element={<InventoryDetailPage />} />
-              <Route path="/logout" element={<Logout />} />
-              <Route path="/orders/create-order" element={<OrderTabs />} />
-              {/* <Route path="/orders/create-order" element={<OrderPage1 />} />
-              <Route path="/order2" element={<OrderPage2 />} /> */}
-              <Route path="/orders" element={<OrderList />} />
-              <Route path="/orders/:orderId" element={<OrderDetail />} />
-
-              <Route
-                path="/inventory/create-inventory"
-                element={<CreateInventoryOrder />}
-              />
+              <Route path="/inventory/shipment" element={<ShipmentPage />} />
               <Route
                 path="/print/import-invoice"
                 element={<PrintImportInvoice />}
               />
 
-              <Route path="/print/order-invoice" element={<PrintOrder />} />
-              <Route path="/inventory/shipment" element={<ShipmentPage />} />
               <Route
+                path="/inventory/create-inventory"
+                element={<CreateInventoryOrder />}
+              />
+              <Route path="/print/order-invoice" element={<PrintOrder />} /> */}
+                {/*promotion  */}
+              {/* <Route
                 path="/promotions/create-promotion"
                 element={<CreatePromotion />}
               />
               <Route path="/promotions" element={<PromotionPage />} />
+
+              <Route path="/logout" element={<Logout />} /> */}
+              {renderRoutes(managerRoutes)}
             </Route>
           </Route>
           {/* Not found page */}

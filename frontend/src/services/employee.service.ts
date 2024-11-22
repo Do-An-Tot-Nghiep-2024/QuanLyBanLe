@@ -1,5 +1,5 @@
 import api from "../config/axios";
-import ApiResponse from "../types/apiResponse";
+// import any from "../types/common/any";
 import { EmployeeSchema } from "../types/employeeSchema";
 
 const getEmployeesService = async (page: number, limit: number) => {
@@ -32,7 +32,7 @@ const getEmployeesService = async (page: number, limit: number) => {
 
 const getEmployeeByIdService = async (id: number) => {
   try {
-    const response: ApiResponse = await api.get(`/employees/${id}`);
+    const response: any = await api.get(`/employees/${id}`);
     if (response.message !== "success") {
       return {
         message: response.message,
@@ -44,13 +44,13 @@ const getEmployeeByIdService = async (id: number) => {
     return {
       message: error.response.data.message,
       data: {},
-    } as ApiResponse;
+    } as any;
   }
 };
 
 const createEmployeeService = async (employee: EmployeeSchema) => {
   try {
-    const response: ApiResponse = await api.post("/employees", employee);
+    const response: any = await api.post("/employees", employee);
     console.log(response);
     const { message, data } = response;
     if (message !== "success") {
@@ -74,7 +74,7 @@ const createEmployeeService = async (employee: EmployeeSchema) => {
 
 const deleteEmployeeService = async (id: number) => {
   try {
-    const response: ApiResponse = await api.delete(`/employees/${id}`);
+    const response: any = await api.delete(`/employees/${id}`);
     if (response.message !== "success") {
       return {
         message: response.message,
@@ -94,7 +94,7 @@ const deleteEmployeeService = async (id: number) => {
 };
 const updateEmployeeService = async (id: number, employee: EmployeeSchema) => {
   try {
-    const response: ApiResponse = await api.put(`/employees/${id}`, employee);
+    const response: any = await api.put(`/employees/${id}`, employee);
     if (response.message !== "success") {
       return {
         message: response.message,
@@ -115,7 +115,7 @@ const updateEmployeeService = async (id: number, employee: EmployeeSchema) => {
 
 const exportEmployeeService = async () => {
   try {
-    const response: ApiResponse = await api.get("/employees/export");
+    const response: any = await api.get("/employees/export");
     if (response.message !== "success") {
       return {
         message: response.message,
@@ -140,5 +140,5 @@ export {
   deleteEmployeeService,
   updateEmployeeService,
   getEmployeeByIdService,
-  exportEmployeeService
+  exportEmployeeService,
 };

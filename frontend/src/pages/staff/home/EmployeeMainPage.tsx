@@ -11,6 +11,7 @@ import {
   ShoppingBag as ShoppingBagIcon,
   Inventory as InventoryIcon,
   Settings as SettingsIcon,
+  Receipt as  ReceiptIcon,
   Logout,
 } from "@mui/icons-material";
 import { AppProvider, DashboardLayout} from "@toolpad/core";
@@ -40,10 +41,15 @@ const NAVIGATION: Navigation = [
         title: "Tạo đơn hàng mới",
         icon: <WarehouseIcon />,
       },
+      {
+        segment: "",
+        title: "Quản lí đơn hàng",
+        icon: <ReceiptIcon />,
+      },
     ],
   },
   {
-    segment: "staff/inventory",
+    segment: "inventory",
     title: "Kho hàng",
     icon: <InventoryIcon />,
     children: [
@@ -58,13 +64,6 @@ const NAVIGATION: Navigation = [
     segment: "staff/products",
     title: "Sản phẩm",
     icon: <StoreIcon />,
-    // children: [
-    //   {
-    //     segment: "",
-    //     title: "Danh sách sản phẩm",
-    //     icon: <WarehouseIcon />,
-    //   },
-    // ],
   },
   {
     segment: "reports",

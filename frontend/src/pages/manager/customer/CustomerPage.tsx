@@ -16,7 +16,7 @@ import colors from "../../../constants/color";
 import { useState } from "react";
 import getCustomersService from "../../../services/customer.service";
 import Customer from "../../../types/customer/customerResponse";
-export default function UnitPage() {
+export default function CustomerPage() {
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(10);
   const getCustomers = async (page: number, limit: number) => {

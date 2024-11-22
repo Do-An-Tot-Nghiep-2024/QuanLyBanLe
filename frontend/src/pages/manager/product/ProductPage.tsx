@@ -15,7 +15,6 @@ import {
   CircularProgress,
   Tabs,
   Tab,
-  TablePagination,
   Pagination,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
@@ -30,11 +29,15 @@ import {
   updateProductPriceService,
 } from "../../../services/product.service";
 import { useQuery } from "@tanstack/react-query";
-import { GetProductSchema } from "../../../types/getProductSchema";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { useAppSelector } from "../../../redux/hook";
 import TextSearch from "../../../components/TextSeatch";
 import colors from "../../../constants/color";
+import { formatMoney, formatMoneyThousand } from "../../../utils/formatMoney";
+import { getCategoriesService } from "../../../services/category.service";
+import CategoryResponse from "../../../types/category/categoryResponse";
+import ProductResponse from "../../../types/product/productResponse";
+import useDebounce from "../../../hooks/useDebounce";
 
 export default function ProductPage() {
   const navigate = useNavigate();
@@ -42,34 +45,82 @@ export default function ProductPage() {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
-
-  const [productToDelete, setProductToDelete] = useState<GetProductSchema>();
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchName, setSearchName] = useState("");
+  const [category, setCategory] = useState("");
+  const [selectProduct, setSelectProduct] = useState<ProductResponse>();
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(10);
-  const [searchTerm, setSearchTerm] = useState("");
+  // const [limit, setLimit] = useState(10);
+  // const [searchTerm, setSearchTerm] = useState("");
   const [openPriceModal, setOpenPriceModal] = useState(false);
-  const [productToUpdate, setProductToUpdate] =
-    useState<GetProductSchema | null>(null);
-  const [newPrice, setNewPrice] = useState<number | string>("");
+  // const [productToUpdate, setProductToUpdate] =
+  //   useState<GetProductSchema | null>(null);
+  const [newPrice, setNewPrice] = useState("");
+  
+  const search = useDebounce(searchName, 500);
 
-  const fetchProducts = async () => {
-    const response = await getAllProductsService();
-    if (!response) {
-      throw new Error("Error fetching products");
-    }
-    return response.data;
+  const handleError = (message: string) => {
+    setAlertMessage(message);
+    setAlertOpen(true);
+    return;
   };
 
+  const fetchProducts = async (
+    name: string,
+    category: string,
+    page: number
+  ) => {
+    try {
+      const response = await getAllProductsService(name, category, page);
+      if (response.message !== "success") {
+        handleError(response.message);
+      }
+      return response.data;
+    } catch (error: any) {  
+      handleError(error.message as string);
+    }
+  };
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ["products", page, limit],
-    queryFn: fetchProducts,
+    queryKey: ["products", page, category, search],
+    queryFn: () => fetchProducts(search, category, page),
+    refetchOnWindowFocus: false,
+    // queryFn: fetchProducts({name:searchName,category,page}),
   });
 
-  const handleDeleteProduct = async () => {
-    if (!productToDelete) return;
+  const getCategories = async () => {
     try {
-      await deleteProductService(Number(productToDelete.id));
+      const response = await getCategoriesService();
+      if (response.message !== "success") {
+        handleError(response.message);
+      }
+      return response.data as CategoryResponse[];
+    } catch (error: any) {
+      handleError(error.message as string);
+    }
+  };
+
+  const {
+    data: categoriesResponse,
+    isLoading: isLoadingCategories,
+    isError: isErrorCategories,
+    error: errorCategories,
+  } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+    refetchOnWindowFocus: false,
+  });
+
+  if (isLoadingCategories || isLoading) {
+    return <div>Loading...</div>;
+  }
+  if (isErrorCategories) {
+    return <div>Error: {errorCategories.message}</div>;
+  }
+
+  const handleDeleteProduct = async () => {
+    if (!selectProduct) return;
+    try {
+      await deleteProductService(Number(selectProduct.id));
       setAlertMessage("Xóa sản phẩm thành công");
       setAlertOpen(true);
       refetch();
@@ -83,34 +134,36 @@ export default function ProductPage() {
   };
 
   const handleChangePage = (_event: any, newPage: SetStateAction<number>) => {
-    setPage(newPage);
+    setPage(Number(newPage) - 1);
   };
 
-  const handleChangeRowsPerPage = (event: { target: { value: string } }) => {
-    setLimit(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+  // const handleChangeRowsPerPage = (event: { target: { value: string } }) => {
+  //   setLimit(parseInt(event.target.value, 10));
+  //   setPage(0);
+  // };
 
-  const handleOpenPriceModal = (product: GetProductSchema) => {
-    setProductToUpdate(product);
-    setNewPrice(Number(product.price));
+  const handleOpenPriceModal = (product: ProductResponse) => {
+    // console.log(product);
+
+    // setProductToUpdate(product);
+    setNewPrice(product.price.toString());
     setOpenPriceModal(true);
   };
 
   const handleClosePriceModal = () => {
     setOpenPriceModal(false);
     setNewPrice("");
-    setProductToUpdate(null);
+    // setProductToUpdate(null);
   };
 
   const handleUpdatePrice = async () => {
-    if (!productToUpdate || !newPrice) return;
+    if (!selectProduct || !newPrice) return;
     try {
       const response = await updateProductPriceService(
-        Number(productToUpdate.id),
+        Number(selectProduct.id),
         Number(newPrice)
       );
-      console.log(response);
+      // console.log(response);
       if (response.message === "success") {
         setAlertMessage("Cập nhật giá thành công");
         setAlertOpen(true);
@@ -131,39 +184,20 @@ export default function ProductPage() {
     }
   };
 
-  const categories = Array.from(
-    new Set(data?.responseList.map((product) => product.category))
-  ).concat("All");
-
-  const normalizeString = (str: string) => {
-    return str
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-  };
-
-  const filteredProducts = Array.isArray(data?.responseList)
-    ? data?.responseList.filter((product) => {
-        const matchesSearchTerm = normalizeString(
-          String(product.name)
-        ).includes(normalizeString(searchTerm));
-        if (selectedCategory === "All") {
-          return searchTerm ? matchesSearchTerm : true;
-        } else {
-          return (
-            product.category === selectedCategory &&
-            (!searchTerm || matchesSearchTerm)
-          );
-        }
-      })
-    : [];
-
   const handleChangeSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
+    setSearchName(event.target.value);
   };
+
+  const handleChangeNewPrice = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const rawInput = event.target.value.replace(/[^\d]/g, ""); // Remove non-numeric characters
+    // const input = Number(rawInput);
+    setNewPrice(rawInput);
+  };
+
+  // console.log(page);
   return (
     <>
-      <Box sx={{ width: "80%", height: "100vh", margin: "0 auto", pt: 4 }}>
+      <Box sx={{ width: "90%", height: "100vh", margin: "0 auto", pt: 4 }}>
         <Typography
           variant="h5"
           align="center"
@@ -178,18 +212,10 @@ export default function ProductPage() {
           alignItems={"center"}
           paddingBottom={5}
         >
-          {/* <TextField
-            id="search"
-            label="Tìm kiếm sản phẩm"
-            variant="filled"
-            size="small"
-            sx={{ width: "100%", mt: 2 }}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          /> */}
           <TextSearch
             props={{
               placeholder: "Nhập tên sản phẩm cần tìm",
-              state: searchTerm,
+              state: searchName,
               setState: handleChangeSearch,
             }}
           />
@@ -208,16 +234,34 @@ export default function ProductPage() {
         </Stack>
 
         <Tabs
+          // selectionFollowsFocus
           value={selectedCategory}
-          onChange={(_event, newValue) => setSelectedCategory(newValue)}
+          // onChange={(_event, newValue) => setSelectedCategory(newValue)}
           sx={{ mb: 2 }}
         >
-          {categories.map((category) => (
-            <Tab key={String(category)} label={category} value={category} />
-          ))}
+          <Tab
+            label={"Tất cả"}
+            value=""
+            onClick={() => {
+              setCategory("");
+              setSelectedCategory("");
+            }}
+          />
+          {categoriesResponse !== undefined &&
+            categoriesResponse.map((category) => (
+              <Tab
+                onClick={() => {
+                  setCategory(category.name);
+                  setSelectedCategory(category.name);
+                }}
+                key={category.id}
+                label={category.name}
+                value={category.name}
+              />
+            ))}
         </Tabs>
 
-        <Grid container spacing={1}>
+        <Grid container spacing={2}>
           {isLoading ? (
             <Grid size="auto" display="flex" justifyContent="center">
               <CircularProgress />
@@ -226,13 +270,13 @@ export default function ProductPage() {
             <Grid size="auto" display="flex" justifyContent="center">
               <Typography variant="h6">Error: {error.message}</Typography>
             </Grid>
-          ) : filteredProducts?.length ? (
-            filteredProducts.map((product) => (
-              <Grid size="auto" key={Number(product.id)}>
+          ) : data !== undefined && data?.responseList?.length ? (
+            data?.responseList?.map((product) => (
+              <Grid size={{ sm: 12, md: 6, lg: 4 }} key={Number(product.id)}>
                 <Card
                   sx={{
-                    width: 200,
-                    height: 300,
+                    // width: 300,
+                    // height: 200,
                     display: "flex",
                     flexDirection: "column",
                     backgroundColor: "white",
@@ -250,16 +294,21 @@ export default function ProductPage() {
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography>{product.name}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {product.category}
+                      Danh mục: {product.category}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body1" color="text.secondary">
                       Đơn vị tính: {product.unit}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(Number(product.price))}
+                      Giá gốc: {product.originalPrice}
+                    </Typography>
+                    <Typography
+                      fontFamily="sans-serif"
+                      fontSize={20}
+                      align="center"
+                      color="#000"
+                    >
+                      {formatMoney(Number(product.price))}
                     </Typography>
                   </CardContent>
                   {auth.role === "MANAGER" ? (
@@ -267,7 +316,7 @@ export default function ProductPage() {
                       <IconButton
                         color="error"
                         onClick={() => {
-                          setProductToDelete(product);
+                          setSelectProduct(product);
                           setConfirmOpen(true);
                         }}
                       >
@@ -283,7 +332,10 @@ export default function ProductPage() {
                       </IconButton>
                       <IconButton
                         color="success"
-                        onClick={() => handleOpenPriceModal(product)}
+                        onClick={() => {
+                          setSelectProduct(product);
+                          handleOpenPriceModal(product);
+                        }}
                       >
                         <TrendingUpIcon />
                       </IconButton>
@@ -299,16 +351,18 @@ export default function ProductPage() {
           )}
         </Grid>
 
-        {/* Pagination Component */}
-        <TablePagination
-          component={Pagination}
-          rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+        <Pagination
+          sx={{
+            alignItems: "center",
+            justifyContent: "center",
+            display: "flex",
+            mt: 3,
+          }}
           count={data ? data.totalPages : 0}
-          rowsPerPage={limit}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          sx={{ marginTop: 2 }}
+          page={page + 1}
+          onChange={handleChangePage}
+          variant="outlined"
+          shape="rounded"
         />
       </Box>
 
@@ -318,7 +372,7 @@ export default function ProductPage() {
           <Typography variant="h6">Xác nhận xóa sản phẩm</Typography>
           <Typography>
             Bạn có chắc chắn muốn xóa sản phẩm{" "}
-            <strong>{productToDelete?.name}</strong> không?
+            <strong>{selectProduct?.name}</strong> không?
           </Typography>
           <Stack
             direction="row"
@@ -344,29 +398,16 @@ export default function ProductPage() {
         <Box sx={styles.modalContent}>
           <Typography variant="h6">Cập nhật giá sản phẩm</Typography>
           <Typography>
-            Giá nhập: {Number(productToUpdate?.originalPrice)} VND
+            Giá nhập: {Number(selectProduct?.originalPrice)} VND
           </Typography>
 
-          <Typography>Giá cũ: {Number(productToUpdate?.price)} VND</Typography>
+          <Typography>Giá cũ: {Number(selectProduct?.price)} VND</Typography>
           <TextField
             label="Nhập giá mới"
             variant="outlined"
             type="text" // Use type="text" for better handling of raw input
-            value={
-              newPrice === ""
-                ? ""
-                : new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(Number(newPrice))
-            } // Show formatted value when newPrice is not empty
-            onChange={(e) => {
-              // Remove any non-numeric characters except for an empty string
-              const newValue = e.target.value.replace(/[^\d]/g, "");
-
-              // Update the raw numeric value or set it to empty string
-              setNewPrice(newValue ? parseFloat(newValue) : ""); // set to empty string if invalid input
-            }}
+            value={newPrice ? formatMoneyThousand(Number(newPrice)) : ""}
+            onChange={handleChangeNewPrice}
             fullWidth
             sx={{ mb: 2 }}
           />
@@ -396,7 +437,7 @@ export default function ProductPage() {
       >
         <Alert
           onClose={() => setAlertOpen(false)}
-          severity="info"
+          severity="success"
           sx={{ width: "100%" }}
         >
           {alertMessage}

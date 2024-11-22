@@ -1,14 +1,14 @@
 import { LoginSchema } from "../types/loginSchema";
 import api from "../config/axios";
-import ApiResponse from "../types/apiResponse";
+import ApiResponse from "../types/common/apiResponse";
 import LoginResponse from "../types/loginResponse";
 
 const loginService = async (login: LoginSchema) => {
   try {
-    const response: ApiResponse = await api.post("/auth/login", login);
+    const response: ApiResponse<LoginResponse> = await api.post("/auth/login", login);
     console.log(response);
 
-    if (response?.message !== "success") {
+    if (response.message !== "success") {
       return {
         message: response.message,
         data: {},

@@ -12,7 +12,7 @@ import { visuallyHidden } from "@mui/utils";
 import { Paper, Stack, Typography } from "@mui/material";
 import { getShipmentsService } from "../../../services/inventory.service";
 import { useQuery } from "@tanstack/react-query";
-import { convertDate } from "../../../utils/convertDate";
+import { convertDate } from "../../../utils/dateUtil";
 import colors from "../../../constants/color";
 import TextSearch from "../../../components/TextSeatch";
 import ProductShipment from "../../../types/inventory/productShipment";
@@ -170,6 +170,7 @@ export default function EnhancedTable() {
   const { isLoading, isError, error, data, isFetching } = useQuery({
     queryKey: ["inventory/shipments"],
     queryFn: () => getShipments(),
+    refetchOnWindowFocus: false,
   });
 
   if (isLoading || isFetching) {
@@ -290,6 +291,7 @@ export default function EnhancedTable() {
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
+                    key={row.shipmentId + row.product + row.exp}
                     // key={row.shipmentId}
                     selected={isItemSelected}
                     sx={{ cursor: "pointer" }}
