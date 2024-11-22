@@ -96,8 +96,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("paymentType") String paymentType);
 
 
-    @Query(value = "select e.name,e.phone from t_order o " +
-            "join t_employee e on e.employee_id = o.employee_id " +
+    @Query(value = "select COALESCE(e.name,''),COALESCE(e.phone,'') from t_order o " +
+            "left join t_employee e on e.employee_id = o.employee_id " +
             "where o.order_id = :orderId;", nativeQuery = true)
     List<Object[]> getEmployeeByOrderId(Long orderId);
 
