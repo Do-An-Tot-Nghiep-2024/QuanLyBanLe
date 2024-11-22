@@ -1,11 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import orders from '@/app/component/data/orders'; // Adjust the path based on your file structure
+import { getAllOrdersService } from '@/app/services/order.service';
 
 const OrderList = ({ navigation }) => {
-    const sortedOrders = orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+    const [orders, setOrders] = useState([]);
 
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const response = await getAllOrdersService();
+                if(!response){
+                    return;
+                }
+                console.log(response);
+                
+                setOrders(response);
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            }
+        };
+
+        fetchOrders();
+    }, []);
     const renderItem = ({ item }) => (
         <Pressable style={styles.orderItem} onPress={() => navigation.navigate('component/Order/DetailOrder', { orderId: item.id })}>
             <Text style={styles.orderId}>Đơn hàng ID: {item.id}</Text>
@@ -25,12 +42,17 @@ const OrderList = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <FlatList
-                data={sortedOrders}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderItem}
-                contentContainerStyle={styles.listContainer}
-            />
+            {orders.length > 0 ? (
+                <FlatList
+                    data={orders}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={renderItem}
+                    contentContainerStyle={styles.listContainer}
+                />
+            ) : (
+                <Text style={styles.noOrderText}>Chưa có đơn hàng nào</Text>
+            )}
+           
         </View>
     );
 };
@@ -113,6 +135,11 @@ const styles = StyleSheet.create({
     completeIcon: {
         marginLeft: 5,
     },
+    noOrderText: {
+        textAlign: 'center',
+        fontSize: 18,
+        fontWeight: 'bold',
+    }
 });
 
 export default OrderList;
