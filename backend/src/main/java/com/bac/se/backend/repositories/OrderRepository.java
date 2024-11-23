@@ -14,19 +14,19 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(value = "SELECT  " +
             "    o.order_id, " +
-            "    e.name, " +
+            "    COALESCE(e.name,'') as emp, " +
             "    o.order_status, " +
             "    o.payment_type, " +
             "    SUM(oi.amount) as total, " +
             "    o.total_discount, " +
             "    o.customer_payment, " +
             "    o.created_at, " +
-            "    c.phone " +
+            "    COALESCE(c.phone,'') " +
             "FROM " +
             "    t_order o " +
             "        INNER JOIN " +
             "    t_order_item oi ON o.order_id = oi.order_id " +
-            "        INNER JOIN " +
+            "        LEFT JOIN " +
             "    t_employee e ON e.employee_id = o.employee_id " +
             "        LEFT JOIN  " +
             "    t_customer c ON c.customer_id = o.customer_id " +
