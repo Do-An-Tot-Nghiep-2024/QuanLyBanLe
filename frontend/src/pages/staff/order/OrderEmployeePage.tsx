@@ -62,7 +62,6 @@ export default function OrderEmployeePage() {
     toDate: genDate.toDate,
     paymentType: "",
   });
-  const debounce = useDebounce(request.customerPhone, 1000);
 
   const getOrdersByEmployee = async () => {
     try {
@@ -76,6 +75,8 @@ export default function OrderEmployeePage() {
       return;
     }
   };
+  const debounce = useDebounce(request.customerPhone, 1000);
+
   const { data, isLoading, error, isFetching, isError } = useQuery({
     queryKey: ["orders", request,debounce],
     queryFn: () => getOrdersByEmployee(),
@@ -369,7 +370,7 @@ export default function OrderEmployeePage() {
                 <MenuItem value="" selected>
                   <em>Tất cả</em>
                 </MenuItem>
-                <MenuItem value={"PENING"}>Đang đợi</MenuItem>
+                <MenuItem value={"PENDING"}>Đang đợi</MenuItem>
                 <MenuItem value={"COMPLETED"}>Hoàn thành</MenuItem>
                 <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
               </Select>
