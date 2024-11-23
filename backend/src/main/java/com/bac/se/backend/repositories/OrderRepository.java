@@ -109,6 +109,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "WHERE o.order_status = 'COMPLETED' AND DATE(o.created_at) = CURDATE()", nativeQuery = true)
     long getCurrentTotalOrders();
 
+
     @Query(value = "SELECT  " +
             "   SUM(oi.amount - (oi.quantity * pp.original_price) - o.total_discount) AS total_profit " +
             "FROM  " +
@@ -121,11 +122,21 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "   o.order_status = 'COMPLETED' AND DATE(o.created_at) = CURDATE()", nativeQuery = true)
     List<Object[]> getNetTotalProfitCurrent(Pageable pageable);
 
-    // Get total sales by employee
-    @Query(value = "SELECT SUM(oi.amount) FROM t_order o   " +
+    // Get total sales by employee by date
+    @Query(value = "SELECT o.created_at,SUM(oi.amount) FROM t_order o   " +
             "INNER JOIN t_order_item oi ON o.order_id = oi.order_id  " +
             "INNER JOIN t_employee e ON e.employee_id = o.employee_id  " +
-            "WHERE e.email = :email AND DATE(o.created_at) = CURDATE()", nativeQuery = true)
-    List<Object[]> getTotalCurrentSalesByEmployee(String email, Pageable pageable);
+            "WHERE e.email = :email AND o.order_status = 'COMPLETED' AND (o.created_at BETWEEN :fromDate AND :toDate) " +
+            "GROUP BY o.created_at", nativeQuery = true)
+    List<Object[]> getTotalSalesByEmployee(String email,
+                                           Date fromDate, Date toDate);
+
+    // Get total orders by employee by date
+    @Query(value = "SELECT o.created_at,COUNT(o.order_id) FROM t_order o   " +
+            "INNER JOIN t_employee e ON e.employee_id = o.employee_id  " +
+            "WHERE e.email = :email AND o.order_status = 'COMPLETED' AND (o.created_at BETWEEN :fromDate AND :toDate)" +
+            "GROUP BY o.created_at", nativeQuery = true)
+    List<Object[]> getTotalOrdersByEmployee(String email,
+                                            Date fromDate, Date toDate);
 
 }

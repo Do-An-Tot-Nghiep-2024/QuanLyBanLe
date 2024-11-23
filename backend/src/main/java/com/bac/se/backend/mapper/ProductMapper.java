@@ -1,7 +1,11 @@
 package com.bac.se.backend.mapper;
 
 import com.bac.se.backend.payload.response.order.ProductOrderItemResponse;
-import com.bac.se.backend.payload.response.product.*;
+import com.bac.se.backend.payload.response.product.ProductCategoryResponse;
+import com.bac.se.backend.payload.response.product.ProductImportInvoiceResponse;
+import com.bac.se.backend.payload.response.product.ProductMobileResponse;
+import com.bac.se.backend.payload.response.product.ProductResponse;
+import com.bac.se.backend.payload.response.statistic.product.BestSellingProductResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
