@@ -150,7 +150,7 @@ const OrderOnlineList: React.FC = () => {
         return diffInDays > 1;
     };
 
-    const handleOrderAction = async (action: 'cancel' | 'complete', orderId: number) => {
+    const handleOrderAction = async (action: 'cancel' | 'status', orderId: number) => {
 
         const response = await updateOrderStatusService(orderId, action);
         if (response?.data) {
@@ -372,7 +372,7 @@ const OrderOnlineList: React.FC = () => {
                                 sx={{ marginRight: 1 }}
                                 onClick={(event) => {
                                     event.stopPropagation();  // Prevent row click
-                                    handleOrderAction('complete', order.orderId); // Directly call handleOrderAction
+                                    handleOrderAction('status', order.orderId); // Directly call handleOrderAction
                                 }}
                             >
                                 Hoàn Thành

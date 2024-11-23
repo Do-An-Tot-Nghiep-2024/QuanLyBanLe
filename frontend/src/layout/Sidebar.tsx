@@ -99,7 +99,7 @@ const NAVIGATION: Navigation = [
   },
   {
     segment: "promotions",
-    title: "Khuyễn mãi",
+    title: "Khuyến mãi",
     icon: <RedeemIcon />,
     children: [
       {
