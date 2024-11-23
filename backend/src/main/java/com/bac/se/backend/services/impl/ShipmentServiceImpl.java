@@ -36,7 +36,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final StockRepository stockRepository;
     private final ShipmentRepository shipmentRepository;
     private final ShipmentItemRepository shipmentItemRepository;
-    static final double DEFAULT_PROFIT = 0.05; // 5% profit
+    static final double DEFAULT_PROFIT = 0.25; // 5% profit
     private final ProductRepository productRepository;
     private final InvoiceMapper invoiceMapper;
     private final SupplierRepository supplierRepository;
