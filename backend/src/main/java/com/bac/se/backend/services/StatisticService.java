@@ -1,8 +1,11 @@
 package com.bac.se.backend.services;
 
-import com.bac.se.backend.payload.response.product.BestSellingProductResponse;
+import com.bac.se.backend.payload.response.common.OrderDateResponse;
 import com.bac.se.backend.payload.response.product.StatisticPriceProductResponse;
+import com.bac.se.backend.payload.response.statistic.SaleAndProfitResponse;
 import com.bac.se.backend.payload.response.statistic.StatisticResponse;
+import com.bac.se.backend.payload.response.statistic.product.BestSellingProductResponse;
+import com.bac.se.backend.payload.response.statistic.product.TopFiveHighestGrossingProductResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.math.BigDecimal;
@@ -16,20 +19,32 @@ public interface StatisticService {
 
     List<StatisticPriceProductResponse> statisticsProductPriceByTime(Long productId);
 
-    List<BestSellingProductResponse> statisticsBestSellingProduct(String fromDate, String toDate) throws ParseException;
+    // for employee
+    List<OrderDateResponse<BigDecimal>> getTotalSalesByEmp(HttpServletRequest request,
+                                                           String fromDate, String toDate) throws ParseException;
 
-
-    BigDecimal getSalesCurrentOfEmployee(HttpServletRequest request);
-
+    List<OrderDateResponse<Integer>> getCurrentTotalOrdersOfEmployee(HttpServletRequest request,
+                                                                     String fromDate, String toDate) throws ParseException;
     // for manager
+
     BigDecimal getCurrentTotalSales();
 
     Long getCurrentTotalOrders();
 
     BigDecimal getCurrentNetTotalProfit();
 
+    // statistics by date
+    // sale and profit
+    List<SaleAndProfitResponse> getSalesAndProfitByDate(String fromDate, String toDate) throws ParseException;
 
+    // best selling product
+    List<BestSellingProductResponse> statisticsBestSellingProduct(String fromDate, String toDate) throws ParseException;
 
+    // top five highest grossing product
+    List<TopFiveHighestGrossingProductResponse> statisticsTopFiveHighestGrossingProduct(String fromDate, String toDate) throws ParseException;
+
+    // statistics by supplier
+    List<StatisticResponse> statisticsBySupplier();
 
 
 }
