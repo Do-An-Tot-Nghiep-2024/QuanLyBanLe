@@ -6,6 +6,7 @@ import {
     ScrollView,
     Pressable,
     ToastAndroid,
+    ActivityIndicator,  // Import ActivityIndicator
 } from "react-native";
 import {
     TextInput,
@@ -31,6 +32,7 @@ const Login = () => {
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [showNewPassword, setShowNewPassword] = useState(false);
+    const [loading, setLoading] = useState(false);  // Loading state
 
     const toggleNewPasswordVisibility = () => {
         setShowNewPassword((prevState) => !prevState);
@@ -63,6 +65,7 @@ const Login = () => {
     const onLogin = async () => {
         setEmailError("");
         setPasswordError("");
+        setLoading(true);  // Start loading when the login button is clicked
 
         if (!email) {
             setEmailError("*Email không được rỗng");
@@ -74,6 +77,8 @@ const Login = () => {
         if (email && password) {
             await LoginService(email, password, navigation);
         }
+
+        setLoading(false);  // Stop loading after login process
     };
 
     const handleEmailChange = (text) => {
@@ -131,8 +136,12 @@ const Login = () => {
             </View>
 
             <View style={styles.btnContainer}>
-                <Button mode="contained" style={stylessheet.button} onPress={onLogin}>
-                    Đăng nhập
+                <Button mode="contained" style={stylessheet.button} onPress={onLogin} disabled={loading}>
+                    {loading ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                        "Đăng nhập"
+                    )}
                 </Button>
             </View>
         </ScrollView>

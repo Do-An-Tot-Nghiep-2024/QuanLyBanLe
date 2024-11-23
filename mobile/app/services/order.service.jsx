@@ -35,7 +35,7 @@ const getAllOrdersService = async () => {
     const accessToken = await getItem("accessToken")
     
     let cleanedToken = accessToken.replace(/"/g, "");       
-    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/orders`, {
+    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/orders/customer`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -43,13 +43,42 @@ const getAllOrdersService = async () => {
         },
     });
 
-    const data = await response.json();
+    const data = await response.json();    
+
     if (response.status === 200) {
-       return data?.responseList;
+        
+       return data?.data?.responseList;
     }
     else {
         return null;
+
     }
+  
+}
+
+const getOrderDetailService = async (orderId) => {
+    const accessToken = await getItem("accessToken")
+    
+    let cleanedToken = accessToken.replace(/"/g, "");       
+    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/orders/customer-detail/${orderId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${cleanedToken}`
+        },
+    });
+
+    const data = await response.json();    
+
+    if (response.status === 200) {
+        
+       return data?.data;
+    }
+    else {
+        return null;
+
+    }
+  
 }
 
 export {createOrderService, getAllOrdersService}

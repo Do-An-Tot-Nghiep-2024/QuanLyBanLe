@@ -149,7 +149,7 @@ const getOrdersByEmployeeService = async (request: OrderRequestProp) => {
   }
 };
 
-const updateOrderStatusService = async (orderId: number, action: 'cancel' | 'complete') => {
+const updateOrderStatusService = async (orderId: number, action: 'cancel' | 'status') => {
   try {
 
     // Sending the request

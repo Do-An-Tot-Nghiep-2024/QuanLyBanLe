@@ -23,20 +23,40 @@ const OrderList = ({ navigation }) => {
 
         fetchOrders();
     }, []);
+    const translateStatus = (status) => {
+        const statusMapping = {
+            PENDING: "Đang chờ nhận hàng",   
+            CANCELLED: "Đã hủy",    
+            COMPLETED: "Hoàn thành", 
+        };
+        
+        return statusMapping[status] || "Không xác định"; 
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);  
+    
+        const day = String(date.getDate()).padStart(2, "0"); 
+        const month = String(date.getMonth() + 1).padStart(2, "0"); 
+        const year = date.getFullYear(); 
+    
+        return `${day}/${month}/${year}`; 
+    };
+    
     const renderItem = ({ item }) => (
-        <Pressable style={styles.orderItem} onPress={() => navigation.navigate('component/Order/DetailOrder', { orderId: item.id })}>
-            <Text style={styles.orderId}>Đơn hàng ID: {item.id}</Text>
-            <Text style={styles.customerName}>Khách hàng: {item.customerName}</Text>
-            <Text style={styles.phone}>Số điện thoại: {item.phone}</Text>
-            <Text style={styles.total}>Tổng tiền: {item.totalPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Text>
-            <Text style={styles.paymentMethod}>Phương thức thanh toán: {item.paymentMethod}</Text>
-            <Text style={styles.pickupDate}>Ngày nhận hàng: {item.pickupDate}</Text>
+        <Pressable style={styles.orderItem} onPress={() => navigation.navigate('component/Order/DetailOrder', { orderId: item.orderId })}>
+        {/* <Pressable style={styles.orderItem}> */}
+
+            <Text style={styles.orderId}>Đơn hàng ID: {item.orderIdid}</Text>
+            <Text style={styles.customerName}>Khách hàng: {item.customerPhone}</Text>
+            <Text style={styles.total}>Tổng tiền: {item.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Text>
+            <Text style={styles.paymentMethod}>Phương thức thanh toán: {item.paymentType}</Text>
+            <Text style={styles.pickupDate}>Ngày đặt hàng: {formatDate(item.createdAt)}</Text>
             <View style={styles.statusContainer}>
-                <Text style={styles.status}>Trạng thái: {item.status}</Text>
-                {item.status === "Hoàn tất" && (
-                    <MaterialCommunityIcons name="check-circle" size={20} color="green" style={styles.completeIcon} />
-                )}
-            </View>
+            <Text style={styles.status}>
+                Trạng thái: {translateStatus(item.orderStatus)}
+            </Text>
+            </View> 
         </Pressable>
     );
 
@@ -45,7 +65,7 @@ const OrderList = ({ navigation }) => {
             {orders.length > 0 ? (
                 <FlatList
                     data={orders}
-                    keyExtractor={(item) => item.id.toString()}
+                    keyExtractor={(item) => item.orderId.toString()}
                     renderItem={renderItem}
                     contentContainerStyle={styles.listContainer}
                 />
