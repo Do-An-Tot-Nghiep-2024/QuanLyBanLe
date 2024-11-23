@@ -97,7 +97,7 @@ const OrderPage: React.FC = () => {
     setOrderItems((prev) =>
       prev.map((item) =>
         item.product.id === product.product.id &&
-        item.selectedShipment === product.selectedShipment
+          item.selectedShipment === product.selectedShipment
           ? { ...item, quantity }
           : item
       )
@@ -210,10 +210,10 @@ const OrderPage: React.FC = () => {
         prev.map((orderItem, index) =>
           index === existingItemIndex
             ? {
-                ...orderItem,
-                quantity: orderItem.quantity + 1,
-                selectedShipment,
-              }
+              ...orderItem,
+              quantity: orderItem.quantity + 1,
+              selectedShipment,
+            }
             : { ...orderItem }
         )
       );
@@ -276,12 +276,12 @@ const OrderPage: React.FC = () => {
     const response = await getLatestPromotionService();
     console.log("latest promotion", response);
 
-    if (response.message !== "success") {
-      alert(response.message);
+    if (response.message === "success") {
+      setLatestPromotion(response.data as GetPromotion);
+      return;
     }
 
-    setLatestPromotion(response.data as GetPromotion);
-  };
+  }
 
   const totalPayment = orderItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -350,7 +350,7 @@ const OrderPage: React.FC = () => {
                 boxShadow: 4,
                 borderColor: "#FBFBFB",
                 height: 80,
-                mx:3
+                mx: 3
               }}
             >
               <Avatar src={String(product.image)} style={{ marginRight: 16 }} />
@@ -489,40 +489,52 @@ const OrderPage: React.FC = () => {
               {formatCurrency(
                 orderItems.length > 0
                   ? orderItems.reduce(
-                      (sum, item) =>
-                        sum +
-                        (item.price && item.quantity
-                          ? item.price * item.quantity
-                          : 0),
-                      0
-                    )
+                    (sum, item) =>
+                      sum +
+                      (item.price && item.quantity
+                        ? item.price * item.quantity
+                        : 0),
+                    0
+                  )
                   : 0
               )}
             </Typography>
 
             <Box>
-              {latestPromotion != null &&
-              latestPromotion != undefined &&
-              totalPayment >= latestPromotion?.minOrderValue ? (
+              {/* Case when no promotion is available */}
+              {latestPromotion == null && (
                 <Typography
                   variant="body1"
-                  sx={{ color: "green", fontWeight: "bold", mb: 2 }}
+                  sx={{ color: "green", fontWeight: "bold", textAlign: 'right', mb: 2 }}
                 >
-                  Chúc mừng! Bạn đã đủ điều kiện nhận ưu đãi{" "}
-                  {latestPromotion.percentage}% cho đơn hàng từ{" "}
-                  {formatCurrency(latestPromotion.minOrderValue)}
-                </Typography>
-              ) : (
-                <Typography
-                  variant="body1"
-                  sx={{ color: "green", fontWeight: "bold", mb: 2 }}
-                >
-                  Bạn chưa đủ điều kiện nhận ưu đãi{" "}
-                  {latestPromotion?.percentage}% cho đơn hàng từ{" "}
-                  {formatCurrency(Number(latestPromotion?.minOrderValue))}.
+                  Chưa có ưu đãi nào
                 </Typography>
               )}
+
+              {/* Case when promotion is available */}
+              {latestPromotion && latestPromotion !== undefined && (
+                totalPayment >= latestPromotion?.minOrderValue ? (
+                  <Typography
+                    variant="body1"
+                    sx={{ color: "green", fontWeight: "bold", mb: 2 }}
+                  >
+                    Chúc mừng! Bạn đã đủ điều kiện nhận ưu đãi{" "}
+                    {latestPromotion.percentage}% cho đơn hàng từ{" "}
+                    {formatCurrency(latestPromotion.minOrderValue)}
+                  </Typography>
+                ) : (
+                  <Typography
+                    variant="body1"
+                    sx={{ color: "green", fontWeight: "bold", mb: 2 }}
+                  >
+                    Bạn chưa đủ điều kiện nhận ưu đãi{" "}
+                    {latestPromotion?.percentage}% cho đơn hàng từ{" "}
+                    {formatCurrency(Number(latestPromotion?.minOrderValue))}.
+                  </Typography>
+                )
+              )}
             </Box>
+
             {/* <TextField
               fullWidth
               variant="outlined"
@@ -546,8 +558,8 @@ const OrderPage: React.FC = () => {
             />
 
             {latestPromotion != null &&
-            latestPromotion != undefined &&
-            totalPayment >= latestPromotion?.minOrderValue ? (
+              latestPromotion != undefined &&
+              totalPayment >= latestPromotion?.minOrderValue ? (
               <Typography
                 sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}
               >

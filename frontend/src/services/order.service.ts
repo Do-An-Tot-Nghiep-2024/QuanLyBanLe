@@ -41,56 +41,25 @@ const createOrderService = async (
   }
 };
 
-// <<<<<<< dev
-//   const getAllOrdersService = async (page: number, limit: number, _sortField: string = 'orderId', // Default to 'orderId'
-//     _sortOrder: string = 'asc'): Promise<ResponsePagination<OrderSchema>> => {
-//     const response = await api.get(`/orders?pageNumber=${page}&limit=${limit}`);
-//     if (response) {
-//         return response.data;
-//     }
-// =======
-//     return {
-//       message: message,
-//       data: data,
-//     };
-//   } catch (error: any) {
-//     return {
-//       message: error.response?.data?.message || "An error occurred",
-//       data: {},
-//     };
-//   }
-// };
-
-// //   const getAllOrdersService = async (page: number, limit: number, sortField: string = 'orderId', // Default to 'orderId'
-// //     sortOrder: string = 'asc'): Promise<ResponsePagination<OrderSchema>> => {
-// //     const response = await api.get(`/orders?pageNumber=${page}&limit=${limit}`);
-// //     if (response) {
-// //         return response.data;
-// //     }
-
-// //     return null as unknown as ResponsePagination<OrderSchema>;
-// // };
-
-// >>>>>>> main
-
 const getAllOrdersService = async (
   page: number,
   limit: number,
   sortField: string = "orderId",
   sortOrder: string = "asc",
-  fromDate?: string, // Optional start date for filtering
-  toDate?: string, // Optional end date for filtering
-  status?: string, // Optional status filter
-  paymentType?: string, // Optional payment type filter
-  customerPhone?: string // Optional customer phone search filter
+  fromDate?: string,
+  toDate?: string,
+  status?: string,
+  paymentType?: string,
+  customerPhone?: string
 ): Promise<ResponsePagination<OrderSchema>> => {
-  // Construct query parameters based on the provided arguments
   let queryParams = `?pageNumber=${page}&pageSize=${limit}&orderBy=${sortField}&order=${sortOrder}`;
-
-  // Add optional filters if they exist
   if (fromDate) queryParams += `&fromDate=${fromDate}`;
-  if (toDate) queryParams += `&toDate=${toDate}`;
-  if (status) queryParams += `&status=${status}`;
+  if (toDate) {
+    const newToDate = new Date(toDate);
+    newToDate.setDate(newToDate.getDate() + 1);
+    const updatedToDate = newToDate.toISOString().split('T')[0];
+    queryParams += `&toDate=${updatedToDate}`;
+  } if (status) queryParams += `&status=${status}`;
   if (paymentType) queryParams += `&paymentType=${paymentType}`;
   if (customerPhone) queryParams += `&customerPhone=${customerPhone}`;
 
