@@ -13,13 +13,11 @@ import {
   Box,
   TextField,
   TablePagination,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControlLabel,
-  Checkbox,
+  MenuItem,
+  FormControl,
+  Select,
+  InputLabel,
+  SelectChangeEvent,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { getAllOrdersService } from "../../../services/order.service"; // Import service function
@@ -27,19 +25,17 @@ import ResponsePagination from "../../../types/responsePagination";
 import { OrderSchema } from "../../../types/orderSchema";
 import colors from "../../../constants/color";
 import { useNavigate } from "react-router-dom";
-
 const OrderList: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string>();
+  const [selectedPayments, setSelectedPayments] = useState<string>();
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [orderBy, setOrderBy] = useState<string>("orderId");
   const [order, setOrder] = useState<"asc" | "desc">("desc");
-  const [filterModalOpen, setFilterModalOpen] = useState<boolean>(false);
 
   const columns: Array<{
     label: string;
@@ -48,14 +44,14 @@ const OrderList: React.FC = () => {
     maxWidth?: string;
     minWidth?: string;
   }> = [
-    { label: "Mã Đơn Hàng", field: "orderId", width: "10%" },
-    { label: "Nhân Viên", field: "employee", width: "25%" },
-    { label: "Trạng Thái", field: "orderStatus", width: "15%" },
-    { label: "Ngày Tạo", field: "createdAt", width: "15%" },
-    { label: "Phương Thức Thanh Toán", field: "paymentType", width: "15%" },
-    { label: "Tổng Cộng", field: "total", width: "20%" },
-    { label: "Số Điện Thoại Khách Hàng", field: "customerPhone", width: "10%" },
-  ];
+      { label: "Mã Đơn Hàng", field: "orderId", width: "10%" },
+      { label: "Nhân Viên", field: "employee", width: "25%" },
+      { label: "Trạng Thái", field: "orderStatus", width: "15%" },
+      { label: "Ngày Tạo", field: "createdAt", width: "15%" },
+      { label: "Phương Thức Thanh Toán", field: "paymentType", width: "15%" },
+      { label: "Tổng Cộng", field: "total", width: "20%" },
+      { label: "Số Điện Thoại Khách Hàng", field: "customerPhone", width: "10%" },
+    ];
 
   const tableCellStyles = {
     padding: "8px",
@@ -67,42 +63,56 @@ const OrderList: React.FC = () => {
     const currentDate = new Date();
 
     if (startDate && new Date(startDate) > currentDate) {
-      alert("Không thể chọn ngày bắt đầu ở tương lai.");
-      return false;
+        alert('Không thể chọn ngày bắt đầu ở tương lai.');
+        setStartDate('')
+        return;
     }
 
     if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
-      alert("Ngày kết thúc phải sau ngày bắt đầu.");
-      return false;
+        alert('Ngày kết thúc phải sau ngày bắt đầu.');
+        setEndDate('')
+        return;
     }
 
     if (endDate && new Date(endDate) > currentDate) {
-      alert("Không thể chọn ngày kết thúc ở tương lai.");
-      return false;
+        alert('Không thể chọn ngày kết thúc ở tương lai.');
+        setEndDate('')
+        return;
     }
 
     return true;
-  };
+};
 
-  const fetchOrders = async () => {
-    if (endDate && startDate) {
-      if (!validateDates()) {
-        return;
-      }
+const fetchOrders = async () => {
+    if ((startDate && !endDate) || (!startDate && endDate)) {
+      alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc");
+      return; 
     }
-    const response = await getAllOrdersService(
-      page,
-      rowsPerPage,
-      orderBy,
-      order,
-      startDate,
-      endDate,
-      selectedStatuses.join(","),
-      selectedPayments.join(","),
-      searchTerm
-    );
-
-    return response as ResponsePagination<OrderSchema>;
+  
+    if (startDate && endDate && !validateDates()) {
+      return; 
+    }
+  
+    console.log("Fetching orders with dates:", startDate, endDate);
+  
+    try {
+      const response = await getAllOrdersService(
+        page,
+        rowsPerPage,
+        orderBy,
+        order,
+        startDate,
+        endDate,
+        selectedStatuses,
+        selectedPayments,
+        searchTerm,
+      );
+  
+      return response as ResponsePagination<OrderSchema>;
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      alert("Lỗi khi lấy dữ liệu đơn hàng. Vui lòng thử lại.");
+    }
   };
 
   const { data, isLoading, error } = useQuery({
@@ -145,30 +155,37 @@ const OrderList: React.FC = () => {
     }
   };
 
-  // Handle status checkbox change
-  const handleStatusChange = (status: string) => {
-    setSelectedStatuses((prev) =>
-      prev.includes(status)
-        ? prev.filter((s) => s !== status)
-        : [...prev, status]
-    );
+  const handleChange = (
+    e: React.ChangeEvent<{ name?: string; value: string }> | SelectChangeEvent
+  ) => {
+    const { name, value } = e.target;
+    if (name === "status") {
+      setSelectedStatuses(value);
+    }
+    if (name === "paymentType") {
+      setSelectedPayments(value);
+    }
   };
-
-  // Handle payment type checkbox change
-  const handlePaymentChange = (payment: string) => {
-    setSelectedPayments((prev) =>
-      prev.includes(payment)
-        ? prev.filter((p) => p !== payment)
-        : [...prev, payment]
-    );
+  const translateStatus = (status: string) => {
+    const statusMapping: { [key: string]: string } = {
+      PENDING: "Đang chờ nhận hàng",  
+      CANCELLED: "Đã hủy",    
+      COMPLETED: "Hoàn thành", 
+      // Add more statuses if necessary
+    };
+    
+    return statusMapping[status] || "Không xác định"; // Default if the status doesn't match
   };
-
-  // Open filter modal
-  const handleFilterOpen = () => setFilterModalOpen(true);
-
-  // Close filter modal
-  const handleFilterClose = () => setFilterModalOpen(false);
-
+  
+  const translatePaymentType = (paymentType: string) => {
+    const paymentMapping: { [key: string]: string } = {
+      CASH: "Tiền mặt",  
+      E_WALLET: "Chuyển khoản", 
+      // Add more payment methods if necessary
+    };
+    
+    return paymentMapping[paymentType] || "Không xác định"; // Default if the payment type doesn't match
+  };
   return (
     <Box width={"90%"}>
       <Typography
@@ -228,7 +245,6 @@ const OrderList: React.FC = () => {
             sx={{ width: 350 }}
           />
 
-          {/* Filter Button (Aligned Right) */}
           <Box
             sx={{
               gap: 1,
@@ -239,102 +255,47 @@ const OrderList: React.FC = () => {
             }}
           >
             {/* Status Display */}
-            <Box
-              sx={{
-                borderRadius: 10,
-                padding: 1.5,
-                marginRight: 2,
-                backgroundColor: colors.primaryColor,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <Typography color="white" variant="body2">
-                Trạng Thái:{" "}
-                {selectedStatuses.length > 0
-                  ? selectedStatuses.join(", ")
-                  : "Tất cả"}
-              </Typography>
-            </Box>
-
-            {/* Payment Method Display */}
-            <Box
-              sx={{
-                borderRadius: 10,
-                padding: 1.5,
-                backgroundColor: colors.primaryColor,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <Typography variant="body2" color="white">
-                Phương Thức Thanh Toán:{" "}
-                {selectedPayments.length > 0
-                  ? selectedPayments.join(", ")
-                  : "Tất cả"}
-              </Typography>
-            </Box>
-
-            <Button
-              sx={{
-                textDecoration: "underline",
-                color: "primary.main",
-                "&:hover": {
-                  backgroundColor: "transparent",
-                },
-                border: 1,
-              }}
-              onClick={handleFilterOpen}
-            >
-              Bộ Lọc
-            </Button>
+            <FormControl sx={{ minWidth: 200 }} fullWidth>
+              <InputLabel id="demo-simple-select-status">Trạng thái</InputLabel>
+              <Select
+                labelId="demo-simple-select-status"
+                id="demo-simple-select"
+                name="status"
+                label="Trạng thái"
+                value={selectedStatuses}
+                onChange={handleChange}
+              >
+                <MenuItem value="" selected>
+                  <em>Tất cả</em>
+                </MenuItem>
+                <MenuItem value={"PENDING"}>Đang đợi</MenuItem>
+                <MenuItem value={"COMPLETED"}>Hoàn thành</MenuItem>
+                <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl sx={{ minWidth: 150 }} fullWidth>
+              <InputLabel id="demo-simple-select-payment">
+                Thanh toán
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-payment"
+                id="demo-simple-select"
+                label="Thanh toán"
+                name="paymentType"
+                value={selectedPayments}
+                onChange={handleChange}
+              >
+                <MenuItem value="" selected>
+                  <em>Tất cả</em>
+                </MenuItem>
+                <MenuItem value={"CASH"}>Tiền mặt</MenuItem>
+                <MenuItem value={"E_WALLET"}>Chuyển khoản</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
+
         </Box>
       </Stack>
-
-      {/* Filter Modal */}
-      <Dialog open={filterModalOpen} onClose={handleFilterClose}>
-        <DialogTitle textAlign={"center"} fontWeight={"bold"}>
-          Bộ Lọc Đơn Hàng
-        </DialogTitle>
-        <DialogContent sx={{ backgroundColor: "white" }}>
-          {/* Status filter */}
-          <Typography variant="subtitle1" fontWeight={"bold"}>
-            Trạng Thái:
-          </Typography>
-          {["PENDING", "COMPLETED", "CANCELLED"].map((status) => (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={selectedStatuses.includes(status)}
-                  onChange={() => handleStatusChange(status)}
-                />
-              }
-              label={status}
-              key={status}
-            />
-          ))}
-          {/* Payment filter */}
-          <Typography variant="subtitle1" fontWeight={"bold"} mt={2}>
-            Phương Thức Thanh Toán:
-          </Typography>
-          {["CASH", "VNPAY", "MOMO"].map((payment) => (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={selectedPayments.includes(payment)}
-                  onChange={() => handlePaymentChange(payment)}
-                />
-              }
-              label={payment}
-              key={payment}
-            />
-          ))}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleFilterClose}>Đóng</Button>
-        </DialogActions>
-      </Dialog>
 
       {/* Orders Table */}
       <TableContainer
@@ -394,21 +355,19 @@ const OrderList: React.FC = () => {
                     onClick={() => handleRowClick(order)}
                   >
                     {columns.map((column, index) => (
-                      <TableCell
-                        key={index}
-                        align="center"
-                        sx={tableCellStyles}
-                      >
+                      <TableCell key={index} align="center" sx={tableCellStyles}>
                         {column.field
                           ? column.field === "total"
                             ? `${order.total.toLocaleString()} VND`
                             : column.field === "createdAt"
-                              ? new Date(order.createdAt).toLocaleDateString(
-                                  "vi-VN"
-                                )
+                              ? new Date(order.createdAt).toLocaleDateString("vi-VN")
                               : column.field === "customerPhone"
                                 ? order.customerPhone
-                                : order[column.field]
+                                : column.field === "orderStatus"
+                                  ? translateStatus(order[column.field] as string)  // Use the translateStatus function
+                                  : column.field === "paymentType"
+                                    ? translatePaymentType(order[column.field] as string) // Use the translatePaymentType function
+                                    : order[column.field]
                           : null}
                       </TableCell>
                     ))}

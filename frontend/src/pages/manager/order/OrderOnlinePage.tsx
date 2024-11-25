@@ -13,13 +13,7 @@ import {
     Box,
     TextField,
     TablePagination,
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    FormControlLabel,
-    Checkbox,
+    Button
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { getAllOrdersService, updateOrderStatusService } from "../../../services/order.service";
@@ -35,12 +29,10 @@ const OrderOnlineList: React.FC = () => {
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [selectedStatuses] = useState<string[]>(['PENDING']);
-    const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
     const [page, setPage] = useState<number>(0);
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [orderBy, setOrderBy] = useState<string>('total');
     const [order, setOrder] = useState<"asc" | "desc">('desc');
-    const [filterModalOpen, setFilterModalOpen] = useState<boolean>(false);
 
     const columns: Array<{ label: string; field?: keyof OrderSchema; width?: string; maxWidth?: string; minWidth?: string }> = [
         { label: "Mã Đơn Hàng", field: "orderId", width: "10%" },
@@ -63,29 +55,39 @@ const OrderOnlineList: React.FC = () => {
 
         if (startDate && new Date(startDate) > currentDate) {
             alert('Không thể chọn ngày bắt đầu ở tương lai.');
-            return false;
+            setStartDate('')
+            return;
         }
 
         if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
             alert('Ngày kết thúc phải sau ngày bắt đầu.');
-            return false;
+            setEndDate('')
+            return;
         }
 
         if (endDate && new Date(endDate) > currentDate) {
             alert('Không thể chọn ngày kết thúc ở tương lai.');
-            return false;
+            setEndDate('')
+            return;
         }
 
         return true;
     };
 
     const fetchOrders = async () => {
-        if (endDate && startDate) {
-            if (!validateDates()) {
-                return;
-            }
+        if ((startDate && !endDate) || (!startDate && endDate)) {
+          alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc");
+          return; 
         }
-        const response = await getAllOrdersService(
+      
+        if (startDate && endDate && !validateDates()) {
+          return; 
+        }
+      
+        console.log("Fetching orders with dates:", startDate, endDate);
+      
+        try {
+          const response = await getAllOrdersService(
             page,
             rowsPerPage,
             orderBy,
@@ -95,13 +97,18 @@ const OrderOnlineList: React.FC = () => {
             selectedStatuses[0],
             selectedPayments[0],
             searchTerm
-        );
-
-        return response as ResponsePagination<OrderSchema>;
-    };
+          );
+      
+          return response as ResponsePagination<OrderSchema>;
+        } catch (error) {
+          console.error("Error fetching orders:", error);
+          alert("Lỗi khi lấy dữ liệu đơn hàng. Vui lòng thử lại.");
+        }
+      };
+      
 
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ["orders", page, rowsPerPage, startDate, endDate, selectedStatuses, selectedPayments, searchTerm, orderBy, order],
+        queryKey: ["orders", page, rowsPerPage, startDate, endDate, selectedStatuses, searchTerm, orderBy, order],
         queryFn: fetchOrders,
     });
 
@@ -127,20 +134,6 @@ const OrderOnlineList: React.FC = () => {
         }
     };
 
-
-    // Handle payment type checkbox change
-    const handlePaymentChange = (payment: string) => {
-        setSelectedPayments(prev =>
-            prev.includes(payment) ? prev.filter(p => p !== payment) : [...prev, payment]
-        );
-    };
-
-    // Open filter modal
-    const handleFilterOpen = () => setFilterModalOpen(true);
-
-    // Close filter modal
-    const handleFilterClose = () => setFilterModalOpen(false);
-
     // Utility function to check if an order is older than 1 day
     const isOlderThanOneDay = (createdAt: string): boolean => {
         const currentDate = new Date();
@@ -150,7 +143,7 @@ const OrderOnlineList: React.FC = () => {
         return diffInDays > 1;
     };
 
-    const handleOrderAction = async (action: 'cancel' | 'complete', orderId: number) => {
+    const handleOrderAction = async (action: 'cancel' | 'status', orderId: number) => {
 
         const response = await updateOrderStatusService(orderId, action);
         if (response?.data) {
@@ -162,8 +155,29 @@ const OrderOnlineList: React.FC = () => {
 
 
     };
+
+    const translateStatus = (status: string) => {
+        const statusMapping: { [key: string]: string } = {
+            PENDING: "Đang chờ nhận hàng",
+            CANCELLED: "Đã hủy",
+            COMPLETED: "Hoàn thành",
+            // Add more statuses if necessary
+        };
+
+        return statusMapping[status] || "Không xác định"; // Default if the status doesn't match
+    };
+
+    const translatePaymentType = (paymentType: string) => {
+        const paymentMapping: { [key: string]: string } = {
+            CASH: "Tiền mặt",
+            E_WALLET: "Chuyển khoản",
+            // Add more payment methods if necessary
+        };
+
+        return paymentMapping[paymentType] || "Không xác định"; // Default if the payment type doesn't match
+    };
     return (
-        <Box width={"90%"}>
+        <Box width={"100%"}>
             <Typography variant="h5" component="h2" style={{ margin: '16px', textAlign: 'center' }}>
                 Danh sách đơn hàng
             </Typography>
@@ -175,22 +189,20 @@ const OrderOnlineList: React.FC = () => {
                 sx={{ marginBottom: '16px' }}
             >
                 <Box display="flex" justifyContent="flex-end" gap={2}>
-                    {/* Start Date */}
                     <TextField
                         type="date"
                         label="Ngày bắt đầu"
                         variant="outlined"
-                        value={startDate}
+                        value={startDate} // Format the date for display in 'yyyy-mm-dd'
                         onChange={(e) => setStartDate(e.target.value)}
                         InputLabelProps={{ shrink: true }}
                         sx={{ width: 150 }}
                     />
-                    {/* End Date */}
                     <TextField
                         type="date"
                         label="Ngày kết thúc"
                         variant="outlined"
-                        value={endDate}
+                        value={endDate} // Format the date for display in 'yyyy-mm-dd'
                         onChange={(e) => setEndDate(e.target.value)}
                         InputLabelProps={{ shrink: true }}
                         sx={{ width: 150 }}
@@ -253,44 +265,12 @@ const OrderOnlineList: React.FC = () => {
                             }}
                         >
                             <Typography variant="body2" color="white">
-                                Phương Thức Thanh Toán: {selectedPayments.length > 0 ? selectedPayments.join(', ') : 'Tất cả'}
+                                Phương Thức Thanh Toán: Tất cả
                             </Typography>
                         </Box>
-                        <Button
-                            sx={{
-                                textDecoration: 'underline',
-                                color: 'primary.main',
-                                '&:hover': {
-                                    backgroundColor: 'transparent',
-                                },
-                                border: 1,
-                            }}
-                            onClick={handleFilterOpen}
-                        >
-                            Bộ Lọc
-                        </Button>
                     </Box>
                 </Box>
             </Stack>
-
-            {/* Filter Modal */}
-            <Dialog open={filterModalOpen} onClose={handleFilterClose}>
-                <DialogTitle textAlign={'center'} fontWeight={'bold'}>Bộ Lọc Đơn Hàng</DialogTitle>
-                <DialogContent sx={{ backgroundColor: 'white' }}>
-                    {/* Payment filter */}
-                    <Typography variant="subtitle1" fontWeight={'bold'} mt={2}>Phương Thức Thanh Toán:</Typography>
-                    {['CASH'].map(payment => (
-                        <FormControlLabel
-                            control={<Checkbox checked={selectedPayments.includes(payment)} onChange={() => handlePaymentChange(payment)} />}
-                            label={payment}
-                            key={payment}
-                        />
-                    ))}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleFilterClose}>Đóng</Button>
-                </DialogActions>
-            </Dialog>
 
             {/* Orders Table */}
             <TableContainer component={Paper} sx={{ width: "100%", margin: "auto", backgroundColor: 'white', maxHeight: "700px", overflowY: "auto" }}>
@@ -332,71 +312,74 @@ const OrderOnlineList: React.FC = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-    {data?.responseList?.map((order) => (
-        <TableRow 
-            key={order.orderId} 
-            hover 
-            onClick={() => handleRowClick(order)} 
-        >
-            {columns.map((column, index) => (
-                <TableCell
-                    key={index}
-                    align="center"
-                    sx={{
-                        ...tableCellStyles,
-                        whiteSpace: 'nowrap', // Prevent text from wrapping
-                        overflow: 'hidden',  // Ensure overflow is hidden
-                        textOverflow: 'ellipsis', // Show ellipsis when content overflows
-                    }}
-                >
-                    {column.field ? (
-                        column.field === 'total' ? (
-                            `${order.total.toLocaleString()} VND`
-                        ) : column.field === 'createdAt' ? (
-                            new Date(order.createdAt).toLocaleDateString('vi-VN')
-                        ) : column.field === 'customerPhone' ? (
-                            order.customerPhone
-                        ) : column.field === 'orderStatus' ? (
-                            order.orderStatus
-                        ) : (
-                            order[column.field]
-                        )
-                    ) : null}
+                                {data?.responseList?.map((order) => (
+                                    <TableRow
+                                        key={order.orderId}
+                                        hover
+                                        onClick={() => handleRowClick(order)}
+                                    >
+                                        {columns.map((column, index) => (
+                                            <TableCell
+                                                key={index}
+                                                align="center"
+                                                sx={{
+                                                    ...tableCellStyles,
+                                                    whiteSpace: 'nowrap', // Prevent text from wrapping
+                                                    overflow: 'hidden',  // Ensure overflow is hidden
+                                                    textOverflow: 'ellipsis', // Show ellipsis when content overflows
+                                                }}
+                                            >
+                                                {column.field ? (
+                                                    column.field === 'total' ? (
+                                                        `${order.total.toLocaleString()} VND`
+                                                    ) : column.field === 'createdAt' ? (
+                                                        new Date(order.createdAt).toLocaleDateString('vi-VN')
+                                                    ) : column.field === 'customerPhone' ? (
+                                                        order.customerPhone
+                                                    )
+                                                        : column.field === "orderStatus"
+                                                            ? translateStatus(order[column.field] as string)  // Use the translateStatus function
+                                                            : column.field === "paymentType"
+                                                                ? translatePaymentType(order[column.field] as string)
+                                                                : (
+                                                                    order[column.field]
+                                                                )
+                                                ) : null}
 
-                    {/* Action Buttons - Only render in the last column (Action column) */}
-                    {index === columns.length - 1 && order.orderStatus === 'PENDING' && (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, flexDirection: 'column' }}>
-                            <Button
-                                variant="contained"
-                                color="success"
-                                sx={{ marginRight: 1 }}
-                                onClick={(event) => {
-                                    event.stopPropagation();  // Prevent row click
-                                    handleOrderAction('complete', order.orderId); // Directly call handleOrderAction
-                                }}
-                            >
-                                Hoàn Thành
-                            </Button>
-                            {isOlderThanOneDay(order.createdAt) && (
-                                <Button
-                                    variant="contained"
-                                    color="error"
-                                    sx={{ marginRight: 1 }}
-                                    onClick={(event) => {
-                                        event.stopPropagation();  // Prevent row click
-                                        handleOrderAction('cancel', order.orderId); // Directly call handleOrderAction
-                                    }}
-                                >
-                                    Hủy Đơn
-                                </Button>
-                            )}
-                        </Box>
-                    )}
-                </TableCell>
-            ))}
-        </TableRow>
-    ))}
-</TableBody>
+                                                {/* Action Buttons - Only render in the last column (Action column) */}
+                                                {index === columns.length - 1 && order.orderStatus === 'PENDING' && (
+                                                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, flexDirection: 'column' }}>
+                                                        <Button
+                                                            variant="contained"
+                                                            color="success"
+                                                            sx={{ marginRight: 1 }}
+                                                            onClick={(event) => {
+                                                                event.stopPropagation();  // Prevent row click
+                                                                handleOrderAction('status', order.orderId); // Directly call handleOrderAction
+                                                            }}
+                                                        >
+                                                            Hoàn Thành
+                                                        </Button>
+                                                        {isOlderThanOneDay(order.createdAt) && (
+                                                            <Button
+                                                                variant="contained"
+                                                                color="error"
+                                                                sx={{ marginRight: 1 }}
+                                                                onClick={(event) => {
+                                                                    event.stopPropagation();  // Prevent row click
+                                                                    handleOrderAction('cancel', order.orderId); // Directly call handleOrderAction
+                                                                }}
+                                                            >
+                                                                Hủy Đơn
+                                                            </Button>
+                                                        )}
+                                                    </Box>
+                                                )}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
 
                         </Table>
 
