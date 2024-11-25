@@ -89,6 +89,13 @@ const ShipmentPage = lazy(
 );
 
 const ProductPage = lazy(() => import("../pages/manager/product/ProductPage"));
+
+const ProductReport = lazy(
+  () => import("../pages/manager/report/ProductReport")
+);
+
+const ProfitReport = lazy(() => import("../pages/manager/report/ProfitReport"));
+
 interface RouteConfig {
   path: string;
   component: React.LazyExoticComponent<React.FC>;
@@ -98,8 +105,8 @@ const employeeRoutes: RouteConfig[] = [
   { path: "/staff/orders/create-order", component: OrderTabs },
   { path: "/staff/orders", component: OrderEmployeePage },
   { path: "/staff/orders/:orderId", component: OrderDetail },
-  { path: "/print/order-invoice", component: PrintOrder },
-  { path: "/staff/inventory/shipment", component: ShipmentPage },
+  { path: "/staff/print/order-invoice", component: PrintOrder },
+  { path: "/staff/inventory", component: ShipmentPage },
   { path: "/staff/products", component: ProductPage },
   { path: "/logout", component: Logout },
 ];
@@ -114,7 +121,7 @@ const managerRoutes: RouteConfig[] = [
   // inventory
   { path: "/inventory/import-invoices", component: InventoryPage },
   { path: "/inventory/:id", component: InventoryDetailPage },
-  { path: "/inventory/shipment", component: ShipmentPage },
+  { path: "/inventory", component: ShipmentPage },
   { path: "/inventory/create-inventory", component: CreateInventoryOrder },
   // { path: "/print/import-invoice", component: PrintImportInvoice },
   // product
@@ -144,6 +151,9 @@ const managerRoutes: RouteConfig[] = [
   { path: "/promotions", component: PromotionPage },
   { path: "/promotions/create-promotion", component: CreatePromotion },
   { path: "/logout", component: Logout },
+  // report
+  { path: "/reports/product", component: ProductReport },
+  { path: "/reports/profit", component: ProfitReport },
 ];
 
 export { employeeRoutes, managerRoutes };

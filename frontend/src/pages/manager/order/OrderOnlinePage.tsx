@@ -92,8 +92,8 @@ const OrderOnlineList: React.FC = () => {
             order,
             startDate,
             endDate,
-            selectedStatuses.join(','),
-            selectedPayments.join(','),
+            selectedStatuses[0],
+            selectedPayments[0],
             searchTerm
         );
 

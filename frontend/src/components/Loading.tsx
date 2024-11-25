@@ -1,37 +1,7 @@
-import * as React from "react";
-import LinearProgress from "@mui/material/LinearProgress";
-import { Stack, Typography } from "@mui/material";
-
+import { Box, CircularProgress, Stack } from "@mui/material";
+import Logo from "../assets/images/logo.png";
 export default function LinearBuffer() {
-  const [progress, setProgress] = React.useState(0);
-  const [buffer, setBuffer] = React.useState(10);
-
-  const progressRef = React.useRef(() => {});
-  React.useEffect(() => {
-    progressRef.current = () => {
-      if (progress === 100) {
-        setProgress(0);
-        setBuffer(10);
-      } else {
-        setProgress(progress + 1);
-        if (buffer < 100 && progress % 5 === 0) {
-          const newBuffer = buffer + 1 + Math.random() * 10;
-          setBuffer(newBuffer > 100 ? 100 : newBuffer);
-        }
-      }
-    };
-  });
-
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      progressRef.current();
-    }, 100);
-
-    return () => {
-      clearInterval(timer);
-    };
-  }, []);
-
+  
   return (
     <Stack
       sx={{
@@ -43,13 +13,15 @@ export default function LinearBuffer() {
       alignItems="center"
       justifyContent="center"
     >
-      <LinearProgress
-        variant="buffer"
-        sx={{ width: "80%" }}
-        value={progress}
-        valueBuffer={buffer}
+      <Box
+        component="img"
+        src={Logo}
+        alt="logo"
+        width={100}
+        height={100}
+        sx={{ borderRadius: "50%" }}
       />
-      <Typography>Loading...</Typography>
+      <CircularProgress size="3rem" />
     </Stack>
   );
 }

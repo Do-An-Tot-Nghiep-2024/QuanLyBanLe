@@ -28,8 +28,10 @@ const PageRouter = () => {
       dispatch(getAccount());
     }
   }, [token, dispatch]);
+
   const isLoggedIn = auth.isLogin;
-  const userRole = auth.role;
+  const userRole = auth.role; 
+
   type RedirectElementProps = {
     isLoggedIn: boolean;
     userRole: string;
@@ -165,7 +167,7 @@ const PageRouter = () => {
               <Route path="/orders" element={<OrderList />} />
               <Route path="/orders/:orderId" element={<OrderDetail />} /> */}
 
-                {/* inventory */}
+              {/* inventory */}
               {/* <Route
                 path="/inventory/import-invoices"
                 element={<InventoryPage />}
@@ -182,7 +184,7 @@ const PageRouter = () => {
                 element={<CreateInventoryOrder />}
               />
               <Route path="/print/order-invoice" element={<PrintOrder />} /> */}
-                {/*promotion  */}
+              {/*promotion  */}
               {/* <Route
                 path="/promotions/create-promotion"
                 element={<CreatePromotion />}

@@ -9,7 +9,7 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import { visuallyHidden } from "@mui/utils";
-import { Paper, Stack, Typography } from "@mui/material";
+import { Paper, Skeleton, Stack, Typography } from "@mui/material";
 import { getShipmentsService } from "../../../services/inventory.service";
 import { useQuery } from "@tanstack/react-query";
 import { convertDate } from "../../../utils/dateUtil";
@@ -269,6 +269,10 @@ export default function EnhancedTable() {
       </Stack>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <TableContainer>
+          {isLoading ||
+            (isFetching && (
+              <Skeleton variant="rectangular" width="100%" height={400} />
+            ))}
           <Table
             sx={{ minWidth: 750 }}
             aria-labelledby="tableTitle"

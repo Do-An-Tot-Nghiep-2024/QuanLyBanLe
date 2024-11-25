@@ -37,7 +37,7 @@ const OrderList: React.FC = () => {
   const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
-  const [orderBy, setOrderBy] = useState<string>("total");
+  const [orderBy, setOrderBy] = useState<string>("orderId");
   const [order, setOrder] = useState<"asc" | "desc">("desc");
   const [filterModalOpen, setFilterModalOpen] = useState<boolean>(false);
 

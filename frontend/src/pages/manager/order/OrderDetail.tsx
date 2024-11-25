@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { formatMoney } from "../../../utils/formatMoney"; // Assuming you have this utility for formatting money
+import { useAppSelector } from "../../../redux/hook";
 
 // Define the type for order items
 interface OrderItem {
@@ -42,6 +43,7 @@ interface OrderDetailResponse {
 export default function OrderDetailPage() {
   const { orderId } = useParams();
 
+  const auth = useAppSelector(state => state.auth);
   const navigate = useNavigate();
   const orderNumber = Number(orderId);
 
@@ -173,9 +175,17 @@ export default function OrderDetailPage() {
       {/* Button to print the invoice or order details */}
       <Button
         onClick={() => {
-          navigate("/print/order-invoice", {
-            state: data, // Pass the order data to the print page
-          });
+          const state = data;
+          if(auth.role === "EMPLOYEE"){
+            navigate("/staff/print/order-invoice", {
+              state: state, // Pass the order data to the print page
+            });
+          }else{
+            navigate("/print/order-invoice", {
+              state: state, // Pass the order data to the print page
+            });
+          }
+        
         }}
         variant="contained"
         startIcon={<PictureAsPdfIcon />}

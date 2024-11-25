@@ -46,7 +46,7 @@ const OrderPage: React.FC = () => {
     // Load saved order items from localStorage during initialization
     const savedOrderItems = localStorage.getItem("orderItems");
     return savedOrderItems ? JSON.parse(savedOrderItems) : [];
-  })
+  });
   const [customerPayment, setCustomerPayment] = useState(0);
   const [customerChange, setCustomerChange] = useState(0);
   const [latestPromotion, setLatestPromotion] = useState<GetPromotion>();
@@ -245,7 +245,6 @@ const OrderPage: React.FC = () => {
   };
 
   const updateCustomerPayment = (customerPayment: number) => {
-
     if (customerPayment === 0) {
       setCustomerPayment(0);
       setCustomerChange(0);
@@ -277,9 +276,8 @@ const OrderPage: React.FC = () => {
     console.log("latest promotion", response);
 
     if (response.message !== "success") {
-      alert(response.message);
+      setLatestPromotion(undefined);
     }
-
     setLatestPromotion(response.data as GetPromotion);
   };
 
@@ -350,7 +348,7 @@ const OrderPage: React.FC = () => {
                 boxShadow: 4,
                 borderColor: "#FBFBFB",
                 height: 80,
-                mx:3
+                mx: 3,
               }}
             >
               <Avatar src={String(product.image)} style={{ marginRight: 16 }} />
@@ -466,12 +464,16 @@ const OrderPage: React.FC = () => {
                           : 0
                       )}
                     </TableCell>
-                    <Button
-                      onClick={() => handleOpenDelete(Number(item.product.id))}
-                      sx={{ mt: 3, color: "red" }}
-                    >
-                      Xóa
-                    </Button>
+                    <TableCell>
+                      <Button
+                        onClick={() =>
+                          handleOpenDelete(Number(item.product.id))
+                        }
+                        sx={{ mt: 3, color: "red" }}
+                      >
+                        Xóa
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -501,27 +503,27 @@ const OrderPage: React.FC = () => {
             </Typography>
 
             <Box>
-              {latestPromotion != null &&
-              latestPromotion != undefined &&
-              totalPayment >= latestPromotion?.minOrderValue ? (
-                <Typography
-                  variant="body1"
-                  sx={{ color: "green", fontWeight: "bold", mb: 2 }}
-                >
-                  Chúc mừng! Bạn đã đủ điều kiện nhận ưu đãi{" "}
-                  {latestPromotion.percentage}% cho đơn hàng từ{" "}
-                  {formatCurrency(latestPromotion.minOrderValue)}
-                </Typography>
-              ) : (
-                <Typography
-                  variant="body1"
-                  sx={{ color: "green", fontWeight: "bold", mb: 2 }}
-                >
-                  Bạn chưa đủ điều kiện nhận ưu đãi{" "}
-                  {latestPromotion?.percentage}% cho đơn hàng từ{" "}
-                  {formatCurrency(Number(latestPromotion?.minOrderValue))}.
-                </Typography>
-              )}
+              {latestPromotion !== null && latestPromotion !== undefined ? (
+                totalPayment >= latestPromotion?.minOrderValue ? (
+                  <Typography
+                    variant="body1"
+                    sx={{ color: "green", fontWeight: "bold", mb: 2 }}
+                  >
+                    Chúc mừng! Bạn đã đủ điều kiện nhận ưu đãi{" "}
+                    {latestPromotion.percentage}% cho đơn hàng từ{" "}
+                    {formatCurrency(latestPromotion.minOrderValue)}
+                  </Typography>
+                ) : (
+                  <Typography
+                    variant="body1"
+                    sx={{ color: "green", fontWeight: "bold", mb: 2 }}
+                  >
+                    Bạn chưa đủ điều kiện nhận ưu đãi{" "}
+                    {latestPromotion?.percentage}% cho đơn hàng từ{" "}
+                    {formatCurrency(Number(latestPromotion?.minOrderValue))}.
+                  </Typography>
+                )
+              ) : null}
             </Box>
             {/* <TextField
               fullWidth
@@ -545,8 +547,8 @@ const OrderPage: React.FC = () => {
               sx={{ mb: 2, width: "30%" }}
             />
 
-            {latestPromotion != null &&
-            latestPromotion != undefined &&
+            {latestPromotion !== null &&
+            latestPromotion !== undefined &&
             totalPayment >= latestPromotion?.minOrderValue ? (
               <Typography
                 sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}

@@ -95,11 +95,20 @@ const styles = StyleSheet.create({
     borderRadius: "50%",
     marginTop: 25,
   },
-  checkout: {
-    display: "flex",
+  payment: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between", // Distributes space evenly with alignment
+    alignItems: "center", // Ensures vertical alignment
+    padding: 10,
     fontSize: 20,
+  },
+  textLeft: {
+    flex: 1,
+    textAlign: "right",
+  },
+  textRight: {
+    flex: 1,
+    textAlign: "center",
   },
 });
 
@@ -154,31 +163,19 @@ const InvoiceDoc = ({
         {discount > 0 && (
           <Text style={styles.total}>Khuyến mãi: {formatMoney(discount)}</Text>
         )}
-        <View style={styles.checkout}>
-          <Text>Tổng tiền:</Text>
-          <Text> {formatMoney(total)}</Text>
+        <View style={styles.payment}>
+          <Text style={styles.textLeft}>Tổng tiền:</Text>
+          <Text style={styles.textRight}> {formatMoney(total)}</Text>
         </View>
 
-        <View
-          style={[
-            styles.checkout,
-            { fontSize: 16, marginTop: 10, paddingBottom: 10 },
-          ]}
-        >
-          <Text>Tiền khách thanh toán:</Text>
-          <Text style={{ paddingRight: "30px" }}>
-            {" "}
-            {formatMoney(customerPayment)}
-          </Text>
+        <View style={[styles.payment, { fontSize: 15 }]}>
+          <Text style={styles.textLeft}>Tiền khách thanh toán:</Text>
+          <Text style={styles.textRight}>{formatMoney(customerPayment)}</Text>
         </View>
-        <View
-          style={[
-            styles.checkout,
-            { fontSize: 16, marginTop: 10, paddingBottom: 10 },
-          ]}
-        >
-          <Text>Tiền thối lại:</Text>
-          <Text> {formatMoney(change)}</Text>
+
+        <View style={[styles.payment, { fontSize: 15 }]}>
+          <Text style={styles.textLeft}>Tiền thối lại:</Text>
+          <Text style={styles.textRight}>{formatMoney(change)}</Text>
         </View>
 
         <Text
@@ -199,7 +196,7 @@ const InvoiceDoc = ({
 // Main print invoice component
 export default function PrintOrder() {
   const location = useLocation();
-  console.log(location.state);
+  // console.log(location.state);
   const navigate = useNavigate();
   const {
     total,
@@ -210,11 +207,11 @@ export default function PrintOrder() {
     totalDiscount,
   } = location.state || {}; // Get data from location state
   const auth = useAppSelector((state) => state.auth);
-  // Calculate the total from order items
+  // // Calculate the total from order items
   const title = "HÓA ĐƠN THANH TOÁN";
   const change = customerPayment - total - totalDiscount;
   const productsItems = location.state?.orderItemResponses as any[];
-  // increment quantity and price if product duplicate name
+  // // increment quantity and price if product duplicate name
   const items = Object.values(
     productsItems.reduce(
       (acc, item) => {
@@ -231,13 +228,37 @@ export default function PrintOrder() {
       {} as Record<string, any>
     )
   );
+  // const fetchData = {
+  //   total: 2000,
+  //   customerPayment: 2000,
+  //   orderId: 1,
+  //   createdAt: new Date(),
+  //   employee: "Nguyen",
+  //   totalDiscount: 0,
+  //   change: 0,
+  //   items: [
+  //     {
+  //       name: "Banh bao",
+  //       quantity: 2,
+  //       price: 24000,
+  //       amount: 48000,
+  //     },
+  //     {
+  //       name: "Banh mi",
+  //       quantity: 1,
+  //       price: 24000,
+  //       amount: 24000,
+  //     },
+  //   ],
+  // };
+
   return (
     <Box width={"90%"}>
       <Button
         onClick={() => {
-          if(auth.role === "EMPLOYEE"){
+          if (auth.role === "EMPLOYEE") {
             navigate("/staff/orders/create-order");
-          }else{
+          } else {
             navigate("/orders/create-order");
           }
         }}
@@ -248,6 +269,7 @@ export default function PrintOrder() {
       >
         HOÀN THÀNH
       </Button>
+
       <PDFViewer style={{ width: "100%", height: "100vh" }}>
         <InvoiceDoc
           data={items}
