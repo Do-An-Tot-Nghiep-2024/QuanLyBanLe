@@ -10,7 +10,6 @@ import {
   RecentActors as RecentActorsIcon,
   ShoppingBag as ShoppingBagIcon,
   Inventory as InventoryIcon,
-  Settings as SettingsIcon,
   Receipt as  ReceiptIcon,
   Logout,
 } from "@mui/icons-material";
@@ -49,12 +48,12 @@ const NAVIGATION: Navigation = [
     ],
   },
   {
-    segment: "inventory",
+    segment: "staff/inventory",
     title: "Kho hàng",
     icon: <InventoryIcon />,
     children: [
       {
-        segment: "shipment",
+        segment: "",
         title: "Quản lí lô hàng",
         icon: <WarehouseIcon />,
       },
@@ -86,11 +85,6 @@ const NAVIGATION: Navigation = [
         icon: <DateRangeIcon />,
       },
     ],
-  },
-  {
-    segment: "settings",
-    title: "Cài đặt",
-    icon: <SettingsIcon />,
   },
   {
     segment: "logout",

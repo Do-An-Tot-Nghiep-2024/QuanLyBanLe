@@ -46,7 +46,7 @@ const OrderPage: React.FC = () => {
     // Load saved order items from localStorage during initialization
     const savedOrderItems = localStorage.getItem("orderItems");
     return savedOrderItems ? JSON.parse(savedOrderItems) : [];
-  })
+  });
   const [customerPayment, setCustomerPayment] = useState(0);
   const [customerChange, setCustomerChange] = useState(0);
   const [latestPromotion, setLatestPromotion] = useState<GetPromotion>();
@@ -245,7 +245,6 @@ const OrderPage: React.FC = () => {
   };
 
   const updateCustomerPayment = (customerPayment: number) => {
-
     if (customerPayment === 0) {
       setCustomerPayment(0);
       setCustomerChange(0);
@@ -276,10 +275,15 @@ const OrderPage: React.FC = () => {
     const response = await getLatestPromotionService();
     console.log("latest promotion", response);
 
-    if (response.message === "success") {
+    if (response.message !== "success") {
+      setLatestPromotion(undefined);
+    }
+    setLatestPromotion(response.data as GetPromotion);
+  };
+<!--     if (response.message === "success") {
       setLatestPromotion(response.data as GetPromotion);
       return;
-    }
+    } -->
 
   }
 
@@ -350,7 +354,7 @@ const OrderPage: React.FC = () => {
                 boxShadow: 4,
                 borderColor: "#FBFBFB",
                 height: 80,
-                mx: 3
+                mx: 3,
               }}
             >
               <Avatar src={String(product.image)} style={{ marginRight: 16 }} />
@@ -466,12 +470,16 @@ const OrderPage: React.FC = () => {
                           : 0
                       )}
                     </TableCell>
-                    <Button
-                      onClick={() => handleOpenDelete(Number(item.product.id))}
-                      sx={{ mt: 3, color: "red" }}
-                    >
-                      Xóa
-                    </Button>
+                    <TableCell>
+                      <Button
+                        onClick={() =>
+                          handleOpenDelete(Number(item.product.id))
+                        }
+                        sx={{ mt: 3, color: "red" }}
+                      >
+                        Xóa
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -501,6 +509,7 @@ const OrderPage: React.FC = () => {
             </Typography>
 
             <Box>
+              {latestPromotion !== null && latestPromotion !== undefined ? (
               {/* Case when no promotion is available */}
               {latestPromotion == null && (
                 <Typography
@@ -532,6 +541,7 @@ const OrderPage: React.FC = () => {
                     {formatCurrency(Number(latestPromotion?.minOrderValue))}.
                   </Typography>
                 )
+              ) : null}
               )}
             </Box>
 
@@ -557,6 +567,9 @@ const OrderPage: React.FC = () => {
               sx={{ mb: 2, width: "30%" }}
             />
 
+            {latestPromotion !== null &&
+            latestPromotion !== undefined &&
+            totalPayment >= latestPromotion?.minOrderValue ? (
             {latestPromotion != null &&
               latestPromotion != undefined &&
               totalPayment >= latestPromotion?.minOrderValue ? (

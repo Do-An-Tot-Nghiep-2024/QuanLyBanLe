@@ -13,8 +13,26 @@ const getDashboardService = async () => {
       message: message,
       data: data,
     };
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    return {
+      messsage: error.response.data.message,
+      data: {},
+    };
   }
 };
-export { getDashboardService };
+const getDashboardEmployeeService = async () => {
+  try {
+    const response: any = await api.get("/dashboard/employee");
+    const { message, data } = response;
+    return {
+      message: message,
+      data: message === "success" ? data : {},
+    };
+  } catch (error: any) {
+    return {
+      message: error.response.data.message,
+      data: {},
+    };
+  }
+};
+export { getDashboardService, getDashboardEmployeeService };

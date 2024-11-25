@@ -31,7 +31,8 @@ const generateDate = () => {
   const date = new Date();
 
   // Helper function to get the last day of a month
-  const getLastDayOfMonth = (year:number, month:number) => new Date(year, month + 1, 0).getDate();
+  const getLastDayOfMonth = (year: number, month: number) =>
+    new Date(year, month + 1, 0).getDate();
 
   const year = date.getFullYear();
   const month = date.getMonth();
@@ -55,6 +56,34 @@ const generateDate = () => {
     toDate,
   };
 };
+const generateDateDuringWeek = () => {
+  const today = new Date();
 
+  // Calculate `fromDate` (current date minus 7 days)
+  const fromDate = new Date(today);
+  fromDate.setDate(today.getDate() - 7);
 
-export { convertDate, formatDate, formatDateTime, generateDate };
+  // Calculate `toDate` (current date plus 1 day)
+  const toDate = new Date(today);
+  toDate.setDate(today.getDate() + 1);
+
+  // Return the calculated dates
+  return {
+    fromDate: formatDateResponse(fromDate),
+    toDate: formatDateResponse(toDate),
+  };
+};
+const formatDateResponse = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+export {
+  convertDate,
+  formatDate,
+  formatDateTime,
+  generateDate,
+  generateDateDuringWeek,
+};

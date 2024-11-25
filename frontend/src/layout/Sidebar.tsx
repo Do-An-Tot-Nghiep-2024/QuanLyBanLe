@@ -7,24 +7,23 @@ import {
   BarChart as BarChartIcon,
   BadgeOutlined as BadgeOutlinedIcon,
   PeopleAltOutlined as PeopleAltOutlinedIcon,
-  DateRange as DateRangeIcon,
   Store as StoreIcon,
-  RecentActors as RecentActorsIcon,
   ShoppingBag as ShoppingBagIcon,
   Inventory as InventoryIcon,
-  Settings as SettingsIcon,
+  // Settings as SettingsIcon,
   AddBusiness as AddBusinessIcon,
   Receipt as ReceiptIcon,
   ViewColumn as ViewColumnIcon,
   Warehouse as WarehouseIcon,
   Gite as GiteIcon,
   NoteAddOutlined,
-  AddShoppingCart as  AddShoppingCartIcon,
+  AddShoppingCart as AddShoppingCartIcon,
   AppRegistration as AppRegistrationIcon,
   MapsUgc as MapsUgcIcon,
+  AttachMoney as AttachMoneyIcon,
   Logout,
 } from "@mui/icons-material";
-import RedeemIcon from '@mui/icons-material/Redeem';
+import RedeemIcon from "@mui/icons-material/Redeem";
 import { AppProvider, DashboardLayout } from "@toolpad/core";
 import type { Router, Navigation, Session } from "@toolpad/core";
 import Cookies from "js-cookie";
@@ -69,7 +68,7 @@ const NAVIGATION: Navigation = [
         icon: <ReceiptIcon />,
       },
       {
-        segment: "shipment",
+        segment: "",
         title: "Quản lí lô hàng",
         icon: <WarehouseIcon />,
       },
@@ -94,6 +93,7 @@ const NAVIGATION: Navigation = [
         segment: "units",
         title: "Quản lí đơn vị tính",
         icon: <ViewColumnIcon />,
+        kind: "page",
       },
     ],
   },
@@ -140,22 +140,17 @@ const NAVIGATION: Navigation = [
         icon: <ShoppingBagIcon />,
       },
       {
-        segment: "employee",
-        title: "Theo nhân viên",
-        icon: <RecentActorsIcon />,
-      },
-      {
-        segment: "date",
-        title: "Theo thời gian",
-        icon: <DateRangeIcon />,
+        segment: "profit",
+        title: "Theo doanh thu",
+        icon: <AttachMoneyIcon />,
       },
     ],
   },
-  {
-    segment: "settings",
-    title: "Cài đặt",
-    icon: <SettingsIcon />,
-  },
+  // {
+  //   segment: "settings",
+  //   title: "Cài đặt",
+  //   icon: <SettingsIcon />,
+  // },
   {
     segment: "logout",
     title: "Đăng xuất",
@@ -167,6 +162,7 @@ const demoTheme = createTheme({
   cssVariables: {
     colorSchemeSelector: "data-toolpad-color-scheme",
   },
+
   colorSchemes: {
     light: {
       palette: {
@@ -176,6 +172,7 @@ const demoTheme = createTheme({
         },
       },
     },
+
     // dark: {
     //   palette: {
     //     background: {
@@ -194,6 +191,7 @@ const demoTheme = createTheme({
       xl: 1536,
     },
   },
+
   components: {
     MuiTableCell: {
       styleOverrides: {

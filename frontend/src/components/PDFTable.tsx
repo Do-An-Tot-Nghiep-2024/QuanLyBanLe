@@ -1,4 +1,4 @@
-import { Text, View, Document, StyleSheet } from "@react-pdf/renderer";
+import { Text, View, StyleSheet } from "@react-pdf/renderer";
 import OrderItemResponse from "../types/order/orderItemResponse";
 
 // Create styles
@@ -8,7 +8,8 @@ const styles = StyleSheet.create({
     flexDirection: "column", // Column-wise arrangement
     justifyContent: "center",
     alignItems: "center",
-    marginBottom:"10px"
+    marginBottom: "10px",
+    marginHorizontal: "40px",
   },
 
   // Header row style to center the header content
@@ -24,17 +25,16 @@ const styles = StyleSheet.create({
   tableRow: {
     flexDirection: "row", // Row-wise arrangement
     width: "100%", // Full width of the table
-    textAlign: "left", // Left-align the content
   },
 
   // Column definition: flexBasis ensures consistent width for all columns
   tableCol: {
-    flexBasis: "33.33%", // Make all columns take up 1/3 of the row width
-    borderStyle: "solid",
+    width: "100%",
     borderBottomWidth: 1,
-    borderColor: "#007AFF",
+    borderColor: "#000",
+    borderBottomStyle: "dashed",
     padding: 5,
-    fontSize: 13,
+    fontSize: 14,
   },
 
   // Table cell font size
@@ -46,50 +46,50 @@ const styles = StyleSheet.create({
 
 // Create Document Component
 const PDFTable = ({ data }: { data: OrderItemResponse[] }) => (
-  <Document >
-    <View style={styles.tableContainer}>
-      {/* Table Header */}
-      <View style={styles.tableRow}>
-        <View style={styles.tableCol}>
-          <Text style={styles.tableCell}>STT</Text>
+  // <Document>
+  <View style={styles.tableContainer}>
+    {/* Table Header */}
+    <View style={styles.tableRow}>
+      <View style={[styles.tableCol, { width: "50%" }]}>
+        <Text style={styles.tableCell}>STT</Text>
+      </View>
+      <View style={[styles.tableCol, { textAlign: "left" }]}>
+        <Text style={styles.tableCell}>Tên sản phẩm</Text>
+      </View>
+      <View style={[styles.tableCol, { textAlign: "center" }]}>
+        <Text style={styles.tableCell}>Số lượng</Text>
+      </View>
+      <View style={styles.tableCol}>
+        <Text style={styles.tableCell}>Đơn giá</Text>
+      </View>
+      <View style={styles.tableCol}>
+        <Text style={styles.tableCell}>Thành tiền</Text>
+      </View>
+    </View>
+
+    {/* Table Rows */}
+    {data?.map((item, index) => (
+      <View key={index} style={styles.tableRow}>
+        <View style={[styles.tableCol, { width: "50%" }]}>
+          <Text>{index + 1}</Text>
         </View>
         <View style={styles.tableCol}>
-          <Text style={styles.tableCell}>Tên sản phẩm</Text>
+          <Text>{item?.name}</Text>
         </View>
         <View style={styles.tableCol}>
-          <Text style={styles.tableCell}>Số lượng</Text>
+          <Text style={{ textAlign: "center" }}>{item?.quantity}</Text>
+        </View>
+
+        <View style={styles.tableCol}>
+          <Text>{Number(item.price).toLocaleString("de-DE")}</Text>
         </View>
         <View style={styles.tableCol}>
-          <Text style={styles.tableCell}>Đơn giá</Text>
-        </View>
-        <View style={styles.tableCol}>
-          <Text style={styles.tableCell}>Thành tiền</Text>
+          <Text>{Number(item.amount).toLocaleString("de-DE")}</Text>
         </View>
       </View>
-
-      {/* Table Rows */}
-      {data?.map((item, index) => (
-        <View key={index} style={styles.tableRow}>
-          <View style={styles.tableCol}>
-            <Text>{index + 1}</Text>
-          </View>
-          <View style={styles.tableCol}>
-            <Text>{item?.name}</Text>
-          </View>
-          <View style={styles.tableCol}>
-            <Text>{item?.quantity}</Text>
-          </View>
-
-          <View style={styles.tableCol}>
-            <Text>{Number(item.price).toLocaleString("de-DE")}</Text>
-          </View>
-          <View style={styles.tableCol}>
-            <Text>{Number(item.amount).toLocaleString("de-DE")}</Text>
-          </View>
-        </View>
-      ))}
-    </View>
-  </Document>
+    ))}
+  </View>
+  // </Document>
 );
 
 export default PDFTable;
