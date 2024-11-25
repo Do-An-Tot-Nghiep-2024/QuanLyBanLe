@@ -2,6 +2,7 @@ package com.bac.se.backend.utils;
 
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.EagerTransformation;
 import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.Objects;
 
 @Slf4j
@@ -24,9 +26,14 @@ public class UploadImage {
 
     public String uploadFile(MultipartFile gif) {
         try {
+            var options = ObjectUtils.asMap(
+                    "eager", Collections.singletonList(
+                            new EagerTransformation().crop("scale")),
+                    "eager_async", true
+            );
             File uploadedFile = convertMultiPartToFile(gif);
             var uploadResult = cloudinaryConfig
-                    .uploader().upload(uploadedFile, ObjectUtils.emptyMap());
+                    .uploader().upload(uploadedFile, options);
             // delete the temporary file optimized for memory
             Files.delete(uploadedFile.toPath());
             return uploadResult.get("secure_url").toString();

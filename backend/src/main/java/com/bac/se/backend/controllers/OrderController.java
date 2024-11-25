@@ -31,7 +31,7 @@ public class OrderController {
 
 
     @GetMapping
-    @PreAuthorize("hasAuthority('MANAGER')")
+    @PreAuthorize("hasAnyAuthority('MANAGER','EMPLOYEE')")
     public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrders(
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize,

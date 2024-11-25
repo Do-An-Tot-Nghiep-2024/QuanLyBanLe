@@ -152,7 +152,7 @@ public class StatisticServiceImpl implements StatisticService {
 
     @Override
     public List<SaleAndProfitResponse> getSalesAndProfitByDate(String fromDate, String toDate) throws ParseException {
-        DateRequest dateRequest = dateConvert.convertMothRequest(fromDate, toDate);
+        DateRequest dateRequest = dateConvert.convertCurrentDateRequest(fromDate, toDate);
         var salesAndProfit = orderItemRepository.getSalesAndProfitByDate(dateRequest.fromDate(),dateRequest.toDate());
         return salesAndProfit.stream().map(statisticMapper::mapObjectToSaleAndProfitResponse).toList();
     }

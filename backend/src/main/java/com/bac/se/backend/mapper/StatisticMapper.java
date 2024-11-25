@@ -14,7 +14,7 @@ public class StatisticMapper {
 
     public SaleAndProfitResponse mapObjectToSaleAndProfitResponse(Object[] object) {
         return new SaleAndProfitResponse(
-                (Date) object[0],
+                object[0].toString(),
                 BigDecimal.valueOf(Double.parseDouble(object[1].toString())),
                 BigDecimal.valueOf(Double.parseDouble(object[2].toString()))
         );

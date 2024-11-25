@@ -33,7 +33,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
 
     // Thống kê doanh số và lợi nhuận theo thời gian cho quản lí
     @Query(value = "SELECT  " +
-            "    o.created_at AS created_day, " +
+            "     DATE_FORMAT(o.created_at,'%d-%m-%Y') AS createdAt, " +
             "    ROUND(SUM(oi.amount),3) AS total, " +
             "    ROUND(SUM(oi.amount - (oi.quantity * pp.original_price) - o.total_discount),3) AS total_profit " +
             "FROM " +
@@ -45,7 +45,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
             "WHERE " +
             "    o.created_at BETWEEN :fromDate AND :toDate " +
             "AND o.order_status = 'COMPLETED' " +
-            "GROUP BY o.created_at",nativeQuery = true)
+            "GROUP BY createdAt",nativeQuery = true)
     List<Object[]> getSalesAndProfitByDate(Date fromDate, Date toDate);
 
     // Top five highest grossing product

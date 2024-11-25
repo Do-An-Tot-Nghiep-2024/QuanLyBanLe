@@ -15,6 +15,7 @@ import com.bac.se.backend.repositories.*;
 import com.bac.se.backend.services.ProductPriceService;
 import com.bac.se.backend.services.ProductService;
 import com.bac.se.backend.utils.UploadImage;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -101,6 +102,7 @@ public class ProductServiceImpl implements ProductService {
 
     // create product
     @Override
+    @Transactional
     public CreateProductResponse createProduct(
             CreateProductRequest productUpdateRequest,
             MultipartFile image
