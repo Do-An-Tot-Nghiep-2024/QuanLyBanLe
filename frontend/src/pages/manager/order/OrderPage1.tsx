@@ -97,7 +97,7 @@ const OrderPage: React.FC = () => {
     setOrderItems((prev) =>
       prev.map((item) =>
         item.product.id === product.product.id &&
-          item.selectedShipment === product.selectedShipment
+        item.selectedShipment === product.selectedShipment
           ? { ...item, quantity }
           : item
       )
@@ -210,10 +210,10 @@ const OrderPage: React.FC = () => {
         prev.map((orderItem, index) =>
           index === existingItemIndex
             ? {
-              ...orderItem,
-              quantity: orderItem.quantity + 1,
-              selectedShipment,
-            }
+                ...orderItem,
+                quantity: orderItem.quantity + 1,
+                selectedShipment,
+              }
             : { ...orderItem }
         )
       );
@@ -280,12 +280,6 @@ const OrderPage: React.FC = () => {
     }
     setLatestPromotion(response.data as GetPromotion);
   };
-<!--     if (response.message === "success") {
-      setLatestPromotion(response.data as GetPromotion);
-      return;
-    } -->
-
-  }
 
   const totalPayment = orderItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -497,31 +491,19 @@ const OrderPage: React.FC = () => {
               {formatCurrency(
                 orderItems.length > 0
                   ? orderItems.reduce(
-                    (sum, item) =>
-                      sum +
-                      (item.price && item.quantity
-                        ? item.price * item.quantity
-                        : 0),
-                    0
-                  )
+                      (sum, item) =>
+                        sum +
+                        (item.price && item.quantity
+                          ? item.price * item.quantity
+                          : 0),
+                      0
+                    )
                   : 0
               )}
             </Typography>
 
             <Box>
-              {latestPromotion !== null && latestPromotion !== undefined ? (
-              {/* Case when no promotion is available */}
-              {latestPromotion == null && (
-                <Typography
-                  variant="body1"
-                  sx={{ color: "green", fontWeight: "bold", textAlign: 'right', mb: 2 }}
-                >
-                  Chưa có ưu đãi nào
-                </Typography>
-              )}
-
-              {/* Case when promotion is available */}
-              {latestPromotion && latestPromotion !== undefined && (
+              {latestPromotion && latestPromotion !== undefined ? (
                 totalPayment >= latestPromotion?.minOrderValue ? (
                   <Typography
                     variant="body1"
@@ -542,7 +524,6 @@ const OrderPage: React.FC = () => {
                   </Typography>
                 )
               ) : null}
-              )}
             </Box>
 
             {/* <TextField
@@ -567,27 +548,24 @@ const OrderPage: React.FC = () => {
               sx={{ mb: 2, width: "30%" }}
             />
 
-            {latestPromotion !== null &&
-            latestPromotion !== undefined &&
-            totalPayment >= latestPromotion?.minOrderValue ? (
-            {latestPromotion != null &&
-              latestPromotion != undefined &&
+            {latestPromotion && latestPromotion !== undefined ? (
               totalPayment >= latestPromotion?.minOrderValue ? (
-              <Typography
-                sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}
-              >
-                Tổng tiền giảm giá khuyến mãi:{" "}
-                {formatCurrency(
-                  Number(totalPayment * latestPromotion?.percentage)
-                )}
-              </Typography>
-            ) : (
-              <Typography
-                sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}
-              >
-                Tổng tiền giảm giá khuyến mãi: 0
-              </Typography>
-            )}
+                <Typography
+                  sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}
+                >
+                  Tổng tiền giảm giá khuyến mãi:{" "}
+                  {formatCurrency(
+                    Number(totalPayment * latestPromotion?.percentage)
+                  )}
+                </Typography>
+              ) : (
+                <Typography
+                  sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}
+                >
+                  Tổng tiền giảm giá khuyến mãi: 0
+                </Typography>
+              )
+            ) : null}
 
             <Typography sx={{ mb: 2, fontStyle: "italic" }}>
               Tiền thừa: {formatCurrency(customerChange)}
