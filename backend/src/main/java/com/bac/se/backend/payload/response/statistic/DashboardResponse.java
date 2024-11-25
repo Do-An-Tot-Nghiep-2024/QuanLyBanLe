@@ -1,4 +1,4 @@
-package com.bac.se.backend.payload.response;
+package com.bac.se.backend.payload.response.statistic;
 
 import java.math.BigDecimal;
 
