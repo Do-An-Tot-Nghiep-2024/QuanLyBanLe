@@ -29,6 +29,7 @@ const OrderOnlineList: React.FC = () => {
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [selectedStatuses] = useState<string[]>(['PENDING']);
+    const[selectedPayments] = useState<string[]>(['CASH']);
     const [page, setPage] = useState<number>(0);
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [orderBy, setOrderBy] = useState<string>('total');
