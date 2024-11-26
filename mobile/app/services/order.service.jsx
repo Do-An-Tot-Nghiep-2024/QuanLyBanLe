@@ -81,4 +81,4 @@ const getOrderDetailService = async (orderId) => {
   
 }
 
-export {createOrderService, getAllOrdersService}
+export {createOrderService, getAllOrdersService, getOrderDetailService}

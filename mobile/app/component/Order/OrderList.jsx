@@ -13,7 +13,6 @@ const OrderList = ({ navigation }) => {
                 if(!response){
                     return;
                 }
-                console.log(response);
                 
                 setOrders(response);
             } catch (error) {

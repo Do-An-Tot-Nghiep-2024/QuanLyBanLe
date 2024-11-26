@@ -1,4 +1,5 @@
-import React from "react";
+import { getOrderDetailService } from "@/app/services/order.service";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 
 // Helper function to calculate time difference in hours
@@ -9,7 +10,27 @@ const getTimeDifferenceInHours = (createdAt) => {
     return timeDifference / (1000 * 60 * 60); // Convert milliseconds to hours
 };
 
-const OrderDetail = ({ data }) => {
+const OrderDetail = ({ route, navigation }) => {
+    const orderId = route.params?.orderId;
+    const [detailOrder, setDetailOrder] = useState({});
+
+    useEffect(() => {   
+        const fetchOrderItems = async () => {
+            try {
+                const response = await getOrderDetailService(orderId);
+                if (!response) {
+                    return;
+                }
+                console.log(response);
+                
+                setDetailOrder(response);
+            } catch (error) {
+                console.error('Error fetching order items:', error);
+            }
+        };
+
+        fetchOrderItems();
+    },[])
     // Get the time difference in hours from 'createdAt'
     // const timeDifferenceInHours = getTimeDifferenceInHours(data.createdAt);
 
@@ -18,16 +39,18 @@ const OrderDetail = ({ data }) => {
         <View style={styles.tableRow}>
             <Text style={styles.tableCell}>{item.name}</Text>
             <Text style={styles.tableCell}>{item.quantity}</Text>
-            <Text style={styles.tableCell}>{item.amount.toLocaleString()} VND</Text>
+            <Text style={styles.tableCell}>{item.price.toLocaleString()}</Text>
+
+            <Text style={styles.tableCell}>{item.amount.toLocaleString()}</Text>
         </View>
     );
 
     return (
         <View style={styles.container}>
             {/* Display Employee Info */}
-            <Text style={styles.header}>Thông tin nhân viên</Text>
+            {/* <Text style={styles.header}>Thông tin nhân viên</Text>
             <Text style={styles.infoText}>Tên: {data.employeeName}</Text>
-            <Text style={styles.infoText}>Điện thoại: {data.employeePhone}</Text>
+            <Text style={styles.infoText}>Điện thoại: {data.employeePhone}</Text> */}
 
             {/* Display warning if the time difference is greater than 24 hours */}
             {/* {timeDifferenceInHours > 24 && (
@@ -43,12 +66,13 @@ const OrderDetail = ({ data }) => {
             <View style={styles.tableHeader}>
                 <Text style={[styles.tableHeaderCell, styles.tableCell]}>Tên món</Text>
                 <Text style={[styles.tableHeaderCell, styles.tableCell]}>Số lượng</Text>
+                <Text style={[styles.tableHeaderCell, styles.tableCell]}>Giá</Text>
                 <Text style={[styles.tableHeaderCell, styles.tableCell]}>Thành tiền</Text>
             </View>
 
             {/* Display Order Items as Table Rows */}
             <FlatList
-                data={data.orderItems}
+                data={detailOrder.orderItems}
                 renderItem={renderOrderItem}
                 keyExtractor={(item, index) => index.toString()}
             />
@@ -56,7 +80,7 @@ const OrderDetail = ({ data }) => {
             {/* Display Total */}
             <View style={styles.totalContainer}>
                 <Text style={styles.totalText}>
-                    Tổng tiền: {data.total.toLocaleString()} VND
+                    Tổng tiền: {detailOrder?.total?.toLocaleString()} VND
                 </Text>
             </View>
         </View>
@@ -73,6 +97,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginTop: 20,
         marginBottom: 10,
+        textAlign: 'center',
     },
     infoText: {
         fontSize: 16,
@@ -109,6 +134,8 @@ const styles = StyleSheet.create({
     totalText: {
         fontSize: 18,
         fontWeight: "bold",
+        textAlign: 'right'
+
     },
     warningContainer: {
         backgroundColor: "#ffcccb",
