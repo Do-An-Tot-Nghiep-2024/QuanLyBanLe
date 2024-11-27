@@ -1,6 +1,7 @@
 package com.bac.se.backend.services;
 
 import com.bac.se.backend.exceptions.BadRequestUserException;
+import com.bac.se.backend.payload.request.ChangePasswordRequest;
 import com.bac.se.backend.payload.request.EmployeeAccountRequest;
 import com.bac.se.backend.payload.request.LoginRequest;
 import com.bac.se.backend.payload.request.RegisterRequest;
@@ -21,4 +22,6 @@ public interface AccountService {
     LoginResponse loginUser(LoginRequest loginRequest) throws BadRequestUserException;
 
     LoginResponse resetPassword(String email,String newPassword,String confirmPassword) throws BadRequestUserException;
+
+    String changePassword(ChangePasswordRequest changePasswordRequest,HttpServletRequest request) throws BadRequestUserException;
 }

@@ -6,6 +6,7 @@ import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.models.Account;
 import com.bac.se.backend.models.Customer;
+import com.bac.se.backend.payload.request.ChangePasswordRequest;
 import com.bac.se.backend.payload.request.EmployeeAccountRequest;
 import com.bac.se.backend.payload.request.LoginRequest;
 import com.bac.se.backend.payload.request.RegisterRequest;
@@ -154,6 +155,25 @@ public class AccountServiceImpl implements AccountService {
         account.setPassword(passwordEncoder.encode(newPassword));
         accountRepository.save(account);
         return new LoginResponse(jwtService.generateToken(account),jwtService.generateRefreshToken(account));
+    }
+
+    @Override
+    public String changePassword(ChangePasswordRequest changePasswordRequest, HttpServletRequest request) throws BadRequestUserException {
+        String email = jwtParse.decodeTokenWithRequest(request);
+        log.info("Email: {} ",email);
+        var account = accountRepository.findByUsername(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
+        String newPassword = changePasswordRequest.newPassword();
+        String confirmPassword = changePasswordRequest.confirmPassword();
+        if(!newPassword.equals(confirmPassword)){
+            throw new BadRequestUserException("Mật khẩu và xác nhận mật khẩu không trùng khớp");
+        }
+        if(!passwordEncoder.matches(changePasswordRequest.password(),account.getPassword())){
+            throw new BadRequestUserException("Mật khẩu hiện tại không chính xác");
+        }
+        account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+        return "Change password successfully";
     }
 
 }

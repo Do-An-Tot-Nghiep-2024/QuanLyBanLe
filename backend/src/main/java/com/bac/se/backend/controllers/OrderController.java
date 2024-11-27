@@ -57,7 +57,7 @@ public class OrderController {
 
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrderLive(@RequestBody OrderRequest orderRequest, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrder(@RequestBody OrderRequest orderRequest, HttpServletRequest request) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>(REQUEST_SUCCESS, orderService.createOrder(orderRequest, request)));
