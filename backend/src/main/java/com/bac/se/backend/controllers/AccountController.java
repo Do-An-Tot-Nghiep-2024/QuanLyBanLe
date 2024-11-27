@@ -2,6 +2,8 @@ package com.bac.se.backend.controllers;
 
 import com.bac.se.backend.exceptions.AlreadyExistsException;
 import com.bac.se.backend.exceptions.BadRequestUserException;
+import com.bac.se.backend.exceptions.ResourceNotFoundException;
+import com.bac.se.backend.payload.request.ChangePasswordRequest;
 import com.bac.se.backend.payload.request.EmployeeAccountRequest;
 import com.bac.se.backend.payload.request.LoginRequest;
 import com.bac.se.backend.payload.request.RegisterRequest;
@@ -44,7 +46,7 @@ public class AccountController {
     }
 
     @PostMapping("/createAccount")
-    @PreAuthorize("hasAuthority('EMPLOYEE')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<EmployeeAccountResponse>> createAccountEmployee(@RequestBody EmployeeAccountRequest accountRequest) {
         log.info("Request is {}", accountRequest);
         try {
@@ -92,6 +94,22 @@ public class AccountController {
         try {
             LoginResponse login = accountService.resetPassword(email, newPassword, confirmPassword);
             return ResponseEntity.ok().body(new ApiResponse<>(REQUEST_SUCCESS, login));
+        } catch (BadRequestUserException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<ApiResponse<String>> changePassword(
+            @RequestBody ChangePasswordRequest changePasswordRequest,
+            HttpServletRequest request) {
+        try {
+            String result = accountService.changePassword(changePasswordRequest, request);
+            return ResponseEntity.ok().body(new ApiResponse<>(REQUEST_SUCCESS, result));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(e.getMessage(), null));
         } catch (BadRequestUserException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage(), null));
         } catch (Exception e) {
