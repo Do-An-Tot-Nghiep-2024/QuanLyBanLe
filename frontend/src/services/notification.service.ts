@@ -13,11 +13,28 @@ const getSentNotificationsService = async () => {
       message: message,
       data: data,
     };
-  } catch (error : any) {
+  } catch (error: any) {
     return {
       message: error.response.data.message,
       data: [],
     };
   }
 };
-export { getSentNotificationsService };
+
+const readNotificationsService = async (id: number) => {
+  try {
+    const response: any = await api.put(`/notifications/${id}`);
+    const { message, data } = response;
+    return {
+      message: message,
+      data: message === "success" ? data : "",
+    };
+  } catch (error: any) {
+    return {
+      messaage: error.response.data.message,
+      data: "",
+    };
+  }
+};
+
+export { getSentNotificationsService,readNotificationsService };

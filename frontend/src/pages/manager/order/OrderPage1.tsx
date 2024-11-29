@@ -52,6 +52,8 @@ const OrderPage: React.FC = () => {
   const [latestPromotion, setLatestPromotion] = useState<GetPromotion>();
   const [deleteConfirmOpen, setConfirmOpen] = useState(false);
   const [deleteItem, setDeleteItem] = useState(0);
+  // const [totalDiscount, setTotalDiscount] = useState(0);
+  const [total, setTotal] = useState(0);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -60,9 +62,11 @@ const OrderPage: React.FC = () => {
     }).format(amount);
   };
 
-  useEffect(() => {
-    localStorage.setItem("orderItems", JSON.stringify(orderItems));
-  }, [orderItems]);
+  const handleUpdateTotal = (orderItems: OrderItem[]) => {
+    setTotal(
+      orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    );
+  };
 
   const handleAddToOrder = (product: GetProductSchema) => {
     const missingShipment = orderItems.some((item) => !item.selectedShipment);
@@ -83,6 +87,7 @@ const OrderPage: React.FC = () => {
         selectedShipment: "",
       },
     ]);
+    handleUpdateTotal(orderItems);
   };
 
   const handleUpdateQuantity = (product: OrderItem, quantity: number) => {
@@ -102,6 +107,7 @@ const OrderPage: React.FC = () => {
           : item
       )
     );
+    handleUpdateTotal(orderItems);
   };
 
   const isShipmentSelected = () => {
@@ -124,7 +130,7 @@ const OrderPage: React.FC = () => {
 
     if (
       customerPayment === 0 ||
-      customerPayment < totalPayment ||
+      customerPayment < totalPayment - getPromotionCurrent() ||
       !isCustomerPaymentValid(customerPayment)
     ) {
       alert("Vui lòng nhập số tiền hợp lệ");
@@ -162,7 +168,7 @@ const OrderPage: React.FC = () => {
         customerPayment,
         totalDiscount
       );
-      console.log("Order created:", response);
+      // console.log("Order created:", response);
       if (response.message === "success") {
         const data = response.data as { orderId: number };
         navigate(`/orders/${data.orderId}`);
@@ -250,14 +256,13 @@ const OrderPage: React.FC = () => {
       setCustomerChange(0);
       return;
     }
-    const totalPayment = orderItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+
     if (isCustomerPaymentValid(customerPayment)) {
-      console.log(customerPayment);
       setCustomerPayment(customerPayment);
-      setCustomerChange(customerPayment - totalPayment);
+      const totalRequired = total - getPromotionCurrent();
+      console.log(totalRequired);
+
+      setCustomerChange(customerPayment - totalRequired);
     }
   };
 
@@ -273,11 +278,10 @@ const OrderPage: React.FC = () => {
 
   const handleGetLatestPromotion = async () => {
     const response = await getLatestPromotionService();
-    console.log("latest promotion", response);
-
     if (response.message !== "success") {
       setLatestPromotion(undefined);
     }
+
     setLatestPromotion(response.data as GetPromotion);
   };
 
@@ -288,23 +292,49 @@ const OrderPage: React.FC = () => {
 
   useEffect(() => {
     handleGetLatestPromotion();
-  }, []);
+  }, [total]);
 
   const handleDeleteClose = () => {
     setConfirmOpen(false);
+  };
+
+  const getPromotionCurrent = () => {
+    if (latestPromotion !== undefined && latestPromotion !== null) {
+      if (total >= latestPromotion?.minOrderValue) {
+        return total * latestPromotion?.percentage;
+      }
+    }
+    return 0;
   };
 
   const handleDeleteOrderItem = () => {
     setOrderItems((prevOrderItems) =>
       prevOrderItems.filter((item) => item.product.id !== deleteItem)
     );
+    // update in localStorage
+    localStorage.setItem("orderItems", JSON.stringify(orderItems));
+    // localStorage.removeItem("orderItems");
+    console.log("item delete is", deleteItem);
+
+    console.log(orderItems);
+    const total = orderItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+    console.log(total);
+    setCustomerChange(customerChange - total);
     setConfirmOpen(false);
+    handleUpdateTotal(orderItems);
   };
 
   const handleOpenDelete = (id: number) => {
     setConfirmOpen(true);
     setDeleteItem(id);
   };
+  useEffect(() => {
+    localStorage.setItem("orderItems", JSON.stringify(orderItems));
+    handleUpdateTotal(orderItems);
+  }, [orderItems]);
 
   return (
     <Box display="flex" p={1} sx={{ height: "100%", width: "100%" }}>
@@ -469,7 +499,7 @@ const OrderPage: React.FC = () => {
                         onClick={() =>
                           handleOpenDelete(Number(item.product.id))
                         }
-                        sx={{ mt: 3, color: "red" }}
+                        sx={{ color: "red" }}
                       >
                         Xóa
                       </Button>
@@ -486,31 +516,21 @@ const OrderPage: React.FC = () => {
             alignItems="flex-end"
             width="100%"
           >
+            
+
             <Typography sx={{ mb: 2, fontWeight: "bold" }}>
-              Tổng tiền hàng:{" "}
-              {formatCurrency(
-                orderItems.length > 0
-                  ? orderItems.reduce(
-                      (sum, item) =>
-                        sum +
-                        (item.price && item.quantity
-                          ? item.price * item.quantity
-                          : 0),
-                      0
-                    )
-                  : 0
-              )}
+              Tổng tiền hàng: {formatCurrency(total as number)}
             </Typography>
 
             <Box>
-              {latestPromotion && latestPromotion !== undefined ? (
+              {latestPromotion != null && latestPromotion != undefined ? (
                 totalPayment >= latestPromotion?.minOrderValue ? (
                   <Typography
                     variant="body1"
                     sx={{ color: "green", fontWeight: "bold", mb: 2 }}
                   >
                     Chúc mừng! Bạn đã đủ điều kiện nhận ưu đãi{" "}
-                    {latestPromotion.percentage}% cho đơn hàng từ{" "}
+                    {latestPromotion.percentage * 100}% cho đơn hàng từ{" "}
                     {formatCurrency(latestPromotion.minOrderValue)}
                   </Typography>
                 ) : (
@@ -519,23 +539,12 @@ const OrderPage: React.FC = () => {
                     sx={{ color: "green", fontWeight: "bold", mb: 2 }}
                   >
                     Bạn chưa đủ điều kiện nhận ưu đãi{" "}
-                    {latestPromotion?.percentage}% cho đơn hàng từ{" "}
+                    {latestPromotion?.percentage * 100}% cho đơn hàng từ{" "}
                     {formatCurrency(Number(latestPromotion?.minOrderValue))}.
                   </Typography>
                 )
               ) : null}
             </Box>
-
-            {/* <TextField
-              fullWidth
-              variant="outlined"
-              label="Tiền khách hàng đưa"
-              value={customerPayment}
-              onChange={(e) => {
-                updateCustomerPayment(Number(e.target.value));
-              }}
-              sx={{ mb: 2, width: '30%' }}
-            /> */}
 
             <TextField
               label="Tiền khách hàng đưa"
@@ -548,25 +557,29 @@ const OrderPage: React.FC = () => {
               sx={{ mb: 2, width: "30%" }}
             />
 
-            {latestPromotion && latestPromotion !== undefined ? (
-              totalPayment >= latestPromotion?.minOrderValue ? (
-                <Typography
-                  sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}
-                >
-                  Tổng tiền giảm giá khuyến mãi:{" "}
-                  {formatCurrency(
-                    Number(totalPayment * latestPromotion?.percentage)
-                  )}
-                </Typography>
-              ) : (
-                <Typography
-                  sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}
-                >
-                  Tổng tiền giảm giá khuyến mãi: 0
-                </Typography>
-              )
-            ) : null}
+            {latestPromotion != null &&
+            latestPromotion != undefined &&
+            totalPayment >= latestPromotion?.minOrderValue ? (
+              <Typography
+                sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}
+              >
+                Tổng tiền giảm giá khuyến mãi:{" "}
+                {formatCurrency(
+                  Number(totalPayment * latestPromotion?.percentage)
+                )}
+              </Typography>
+            ) : (
+              <Typography
+                sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}
+              >
+                Tổng tiền giảm giá khuyến mãi: 0
+              </Typography>
+            )}
 
+            <Typography sx={{ mb: 2, fontStyle: "italic" }}>
+              Số tiền khách cần trả:{" "}
+              {formatCurrency(total - getPromotionCurrent())}
+            </Typography>
             <Typography sx={{ mb: 2, fontStyle: "italic" }}>
               Tiền thừa: {formatCurrency(customerChange)}
             </Typography>

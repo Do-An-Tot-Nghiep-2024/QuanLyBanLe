@@ -10,21 +10,14 @@ import {
   Container,
   Stack,
 } from "@mui/material";
-import {
-  createPromotionService,
-} from "../../../services/promotion.service";
+import { createPromotionService } from "../../../services/promotion.service";
 import { useNavigate } from "react-router-dom";
-import { SubmitHandler, useForm } from "react-hook-form";
-import {
-  defaultPromotionSchema,
-  PromotionSchema,
-} from "../../../types/promotionSchema";
-import { zodResolver } from "@hookform/resolvers/zod";
 
+import PromotionRequest from "../../../types/promotion/promotionRequest";
 
 const CreatePromotion: React.FC = () => {
   const navigate = useNavigate();
- 
+
   // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -32,45 +25,98 @@ const CreatePromotion: React.FC = () => {
     "success"
   );
 
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<PromotionSchema>({
-    mode: "all",
-    resolver: zodResolver(PromotionSchema),
-    defaultValues: defaultPromotionSchema,
+  const [promotion, setPromotion] = useState({
+    name: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+    orderLimit: 0,
+    minOrderValue: 0,
+    discountPercent: 0,
   });
-  
-  const onSubmit: SubmitHandler<PromotionSchema> = async (data) => {
-    try {
-      const promotion = {
-          name: data.name,
-          description: data.description,
-          startDate: reformatDate(data.startDate),
-          endDate: reformatDate(data.endDate),
-          orderLimit: data.orderLimit,
-          minOrderValue: data.minOrderValue,
-          discountPercent: data.discountPercent
+
+  const handleChangeInput = (e: any) => {
+    setPromotion({ ...promotion, [e.target.name]: e.target.value });
+  };
+
+  const validateForm = (data: PromotionRequest) => {
+    const {
+      name,
+      description,
+      startDate,
+      endDate,
+      orderLimit,
+      minOrderValue,
+      discountPercent,
+    } = data;
+    if (
+      !name ||
+      !description ||
+      !startDate ||
+      !endDate ||
+      !orderLimit ||
+      !minOrderValue ||
+      !discountPercent
+    ) {
+      return {
+        status: false,
+        message: "Vui lòng nhập đầy đủ thông tin",
+      };
+    }
+
+    if (startDate > endDate) {
+      return {
+        status: false,
+        message: "Ngày bắt đầu phải nhỏ hơn ngày kết thúc",
+      };
+    }
+    if(orderLimit < 1 || minOrderValue < 1 || discountPercent < 1){
+      return {
+        status: false,
+        message: "Giá trị số lượng phải lớn hơn 0",
       }
-      console.log(promotion);
-      
-      const response = await createPromotionService(promotion);
+    }
+    return {
+      status: true,
+      message: "",
+    };
+    
+  };
+
+  const onSubmit = async (data: PromotionRequest) => {
+    try {
+      const { status, message } = validateForm(data);
+      if (!status) {
+        setSnackbarMessage(message);
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        return;
+      }
+      const promotionSave = {
+        name: data.name,
+        description: data.description,
+        startDate: reformatDate(data.startDate),
+        endDate: reformatDate(data.endDate),
+        orderLimit: data.orderLimit,
+        minOrderValue: data.minOrderValue,
+        discountPercent: data.discountPercent,
+      };
+
+      const response = await createPromotionService(promotionSave);
       if (response.message == "success") {
         console.log("Create employee success");
-        navigate("/promotions")
+        navigate("/promotions");
       } else {
         setSnackbarMessage(response.message);
         setSnackbarSeverity("error");
         setSnackbarOpen(true);
         return;
       }
-    } catch (error : any) {
-        setSnackbarMessage(error.message);
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
-        return;
+    } catch (error: any) {
+      setSnackbarMessage(error.message);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      return;
     }
   };
 
@@ -78,7 +124,6 @@ const CreatePromotion: React.FC = () => {
     const date = new Date(dateString);
     return date.toISOString().split("T")[0];
   };
-
 
   const handleSnackbarClose = (
     _event: React.SyntheticEvent | Event,
@@ -90,16 +135,8 @@ const CreatePromotion: React.FC = () => {
     setSnackbarOpen(false);
   };
 
-  // const normalizeString = (str: string) => {
-  //   return str
-  //     .normalize("NFD")
-  //     .replace(/[\u0300-\u036f]/g, "")
-  //     .toLowerCase();
-  // };
-
   return (
     <Container
-      component={"form"}
       sx={{
         // backgroundColor: "white",
         boxShadow: 3,
@@ -108,7 +145,6 @@ const CreatePromotion: React.FC = () => {
         p: 3,
         width: "80%",
       }}
-      onSubmit={handleSubmit(onSubmit)}
     >
       <Typography
         variant="h5"
@@ -119,84 +155,82 @@ const CreatePromotion: React.FC = () => {
         TẠO KHUYẾN MÃI
       </Typography>
       <TextField
-        {...register("name")}
         fullWidth
         label="Tên khuyến mãi"
         name="name"
-        error={!!errors.name}
-        helperText={errors.name?.message}
+        value={promotion.name}
+        onChange={handleChangeInput}
         sx={{ mb: 2 }}
       />
 
       <TextField
-        {...register("description")}
         fullWidth
         label="Mô tả khuyến mãi"
         name="description"
-        error={!!errors.description}
-        helperText={errors.description?.message}
+        value={promotion.description}
+        onChange={handleChangeInput}
         sx={{ mb: 2 }}
       />
 
       <Box display="flex" flexDirection="row" gap="15px">
         <TextField
-          {...register("startDate")}
           fullWidth
           type="date"
           label="Ngày bắt đầu"
           name="startDate"
-          error={!!errors.startDate}
-          helperText={errors.startDate?.message}
           sx={{ mb: 2 }}
           InputLabelProps={{ shrink: true }}
+          value={promotion.startDate}
+          onChange={handleChangeInput}
         />
 
         <TextField
-          {...register("endDate")}
           fullWidth
           type="date"
           label="Ngày kết thúc"
           name="endDate"
-          error={!!errors.endDate}
-          helperText={errors.endDate?.message}
           sx={{ mb: 2 }}
           InputLabelProps={{ shrink: true }}
+          value={promotion.endDate}
+          onChange={handleChangeInput}
         />
       </Box>
 
-        <TextField
-          {...register("minOrderValue")}
-          fullWidth
-          type="number"
-          label="Giá trị đơn hàng tối thiểu"
-          name="minOrderValue"
-          error={!!errors.minOrderValue}
-          helperText={errors.minOrderValue?.message}
-          sx={{ mb: 2 }}
-        />
-      <Stack direction="row" spacing={2} mb={2}>
       <TextField
-        {...register("orderLimit")}
         fullWidth
         type="number"
-        error={!!errors.orderLimit}
-        helperText={errors.orderLimit?.message}
-        label="Số lượng đơn hàng được áp dụng khuyến mãi"
+        label="Giá trị đơn hàng tối thiểu"
+        name="minOrderValue"
         sx={{ mb: 2 }}
+        value={promotion.minOrderValue}
+        onChange={handleChangeInput}
       />
+      <Stack direction="row" spacing={2} mb={2}>
         <TextField
-          {...register("discountPercent")}
+          fullWidth
+          type="number"
+          label="Số lượng đơn hàng được áp dụng khuyến mãi"
+          sx={{ mb: 2 }}
+          name="orderLimit"
+          value={promotion.orderLimit}
+          onChange={handleChangeInput}
+        />
+        <TextField
           fullWidth
           type="number"
           label="Phần trăm giảm giá"
-          name="discountPercent"
-          error={!!errors.discountPercent}
-          helperText={errors.discountPercent?.message}
           sx={{ mb: 2 }}
+          name="discountPercent"
+          value={promotion.discountPercent}
+          onChange={handleChangeInput}
         />
       </Stack>
 
-      <Button variant="contained" color="primary" type="submit">
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => onSubmit(promotion as PromotionRequest)}
+      >
         Tạo khuyến mãi
       </Button>
 

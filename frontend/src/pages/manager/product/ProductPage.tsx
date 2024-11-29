@@ -56,7 +56,7 @@ export default function ProductPage() {
   // const [productToUpdate, setProductToUpdate] =
   //   useState<GetProductSchema | null>(null);
   const [newPrice, setNewPrice] = useState("");
-  
+
   const search = useDebounce(searchName, 500);
 
   const handleError = (message: string) => {
@@ -76,7 +76,7 @@ export default function ProductPage() {
         handleError(response.message);
       }
       return response.data;
-    } catch (error: any) {  
+    } catch (error: any) {
       handleError(error.message as string);
     }
   };
@@ -116,6 +116,20 @@ export default function ProductPage() {
   if (isErrorCategories) {
     return <div>Error: {errorCategories.message}</div>;
   }
+
+  const fitImage = (image: string) => {
+    const split = image.split("/");
+    let rs = "";
+    for (let i = 0; i < split.length; i++) {
+      if (i === 5) {
+        rs += split[i] + "/c_fit,h_250,w_250/";
+      } else {
+        rs += split[i] + "/";
+      }
+    }
+    
+    return rs.substring(0, rs.length - 1);
+  };
 
   const handleDeleteProduct = async () => {
     if (!selectProduct) return;
@@ -194,10 +208,11 @@ export default function ProductPage() {
     setNewPrice(rawInput);
   };
 
+  
   // console.log(page);
   return (
-    <>
-      <Box sx={{ width: "90%", height: "100vh", margin: "0 auto", pt: 4 }}>
+    <Box sx={{ width: "90%", height: "100%", py: 4 }}>
+      <Box>
         <Typography
           variant="h5"
           align="center"
@@ -286,13 +301,27 @@ export default function ProductPage() {
                 >
                   <CardMedia
                     component="img"
-                    height="140"
-                    image={product.image as string}
+                    height="200"
+                    image={fitImage(product.image) as string}
                     alt={product.name as string}
                     sx={{ objectFit: "cover", padding: 1 }}
                   />
                   <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography>{product.name}</Typography>
+                    <Typography
+                      noWrap
+                      sx={{
+                        fontSize: "1rem",
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        height: "2em", // Adjust based on desired fixed height
+                        lineHeight: "2em",
+                      }}
+                    >
+                      {product.name}
+                    </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Danh mục: {product.category}
                     </Typography>
@@ -356,7 +385,8 @@ export default function ProductPage() {
             alignItems: "center",
             justifyContent: "center",
             display: "flex",
-            mt: 3,
+            my: 2,
+            // mt: 3,
           }}
           count={data ? data.totalPages : 0}
           page={page + 1}
@@ -443,7 +473,7 @@ export default function ProductPage() {
           {alertMessage}
         </Alert>
       </Snackbar>
-    </>
+    </Box>
   );
 }
 

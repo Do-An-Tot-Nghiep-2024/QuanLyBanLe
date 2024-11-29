@@ -415,7 +415,7 @@ const CreateInventoryOrder: React.FC = () => {
                       onChange={(e) =>
                         handleUpdatePrice(
                           item.product.id,
-                          parseFloat(e.target.value)
+                          Number(e.target.value)
                         )
                       }
                       placeholder="VNĐ"

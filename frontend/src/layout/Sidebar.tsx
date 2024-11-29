@@ -21,6 +21,7 @@ import {
   AppRegistration as AppRegistrationIcon,
   MapsUgc as MapsUgcIcon,
   AttachMoney as AttachMoneyIcon,
+  Refresh as RefreshIcon,
   Logout,
 } from "@mui/icons-material";
 import RedeemIcon from "@mui/icons-material/Redeem";
@@ -33,6 +34,8 @@ import { Outlet, useNavigate } from "react-router-dom";
 import logo from "../assets/images/logo.png";
 import Notification from "../components/Notification";
 import { connectToSocket } from "../config/socket";
+import { getSentNotificationsService } from "../services/notification.service";
+import { IconButton, Stack } from "@mui/material";
 
 const NAVIGATION: Navigation = [
   {
@@ -103,7 +106,7 @@ const NAVIGATION: Navigation = [
     icon: <RedeemIcon />,
     children: [
       {
-        segment: "/",
+        segment: "",
         title: "Quản lí khuyến mãi",
         icon: <AppRegistrationIcon />,
       },
@@ -214,7 +217,8 @@ export default function Sidebar() {
   const auth = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const [messages, setMessages] = useState([]);
+  const [nofitications, setNotifications] = useState([]);
+  const [refresh, setRefresh] = useState(false);
   const [session, setSession] = useState<Session | null>({
     user: {
       name: auth?.usename,
@@ -260,6 +264,18 @@ export default function Sidebar() {
     };
   }, [pathname]);
 
+  const getNotifications = async () => {
+    try {
+      const response = await getSentNotificationsService();
+      if (response.message !== "success") {
+        throw new Error(response.message);
+      }
+      setNotifications(response.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   useEffect(() => {
     // const socket = new SockJS("http://localhost:8080/ws");
     // const client: Client = Stomp.over(socket);
@@ -285,8 +301,9 @@ export default function Sidebar() {
     //     }
     //   );
     // });
-    connectToSocket(setMessages);
-  }, []);
+    getNotifications();
+    connectToSocket(setNotifications);
+  }, [refresh]);
 
   return (
     // preview-start
@@ -303,7 +320,14 @@ export default function Sidebar() {
     >
       <DashboardLayout
         slots={{
-          toolbarActions: () => Notification(messages.length),
+          toolbarActions: () => (
+            <Stack flexDirection={"row"}>
+              <IconButton sx={{mb:1}} onClick={() => setRefresh((prev) => !prev)}>
+                <RefreshIcon />
+              </IconButton>
+              <Notification data={nofitications} />
+            </Stack>
+          ),
         }}
       >
         <Box
