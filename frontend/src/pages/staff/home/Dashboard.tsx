@@ -33,6 +33,8 @@ export default function Dashboard() {
     fontSize: 36,
   };
 
+  console.log(data);
+  
   const map = new Map([
     [
       "currentTotalOrders",

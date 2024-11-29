@@ -6,12 +6,13 @@ import com.bac.se.backend.services.DashboardService;
 import com.bac.se.backend.services.StatisticService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.Collections;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
@@ -34,9 +35,9 @@ public class DashboardServiceImpl implements DashboardService {
     public DashboardEmpResponse getDashboardEmp(HttpServletRequest request, String fromDate, String toDate) throws ParseException {
         var totalOrders = statisticService.getCurrentTotalOrdersOfEmployee(request, fromDate, toDate)
                 .stream()
-                .sorted(Collections.reverseOrder())
+//                .sorted(Collections.reverseOrder())
                 .toList();
-
+        log.info("total orders {}",totalOrders);
         long currentTotalOrders = 0L;
         if (!totalOrders.isEmpty()) {
             currentTotalOrders = totalOrders.get(0).getData();
@@ -44,7 +45,7 @@ public class DashboardServiceImpl implements DashboardService {
 
         var totalSales = statisticService.getTotalSalesByEmp(request, fromDate, toDate)
                 .stream()
-                .sorted(Collections.reverseOrder())
+//                .sorted(Collections.reverseOrder())
                 .toList();
         BigDecimal currTotalSales = BigDecimal.ZERO;
         if (!totalSales.isEmpty()) {

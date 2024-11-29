@@ -5,13 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Data
 public class OrderDateResponse <T>{
-    private Date date;
+    private String date;
     private T data;
 }

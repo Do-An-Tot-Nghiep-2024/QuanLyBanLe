@@ -31,6 +31,7 @@ import { GetPromotion } from "../../../types/getPromotion";
 import { getLatestPromotionService } from "../../../services/promotion.service";
 import colors from "../../../constants/color";
 import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../../redux/hook";
 
 interface OrderItem {
   product: GetProductSchema;
@@ -40,6 +41,7 @@ interface OrderItem {
 }
 
 const OrderPage: React.FC = () => {
+  const auth = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>(() => {
@@ -178,7 +180,12 @@ const OrderPage: React.FC = () => {
       // console.log("Order created:", response);
       if (response.message === "success") {
         const data = response.data as { orderId: number };
-        navigate(`/orders/${data.orderId}`);
+        if(auth.role === "ADMIN"){
+          navigate(`/orders/${data.orderId}`);
+
+        }else{
+          navigate(`/staff/orders/${data.orderId}`);
+        }
         setOrderItems([]);
         setCustomerChange(0);
         setCustomerPayment(0);

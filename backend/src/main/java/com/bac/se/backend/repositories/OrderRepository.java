@@ -123,19 +123,19 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Object[]> getNetTotalProfitCurrent(Pageable pageable);
 
     // Get total sales by employee by date
-    @Query(value = "SELECT o.created_at,SUM(oi.amount) FROM t_order o   " +
+    @Query(value = "SELECT DATE_FORMAT(o.created_at,'%d-%m-%Y') as createdAt,SUM(oi.amount) FROM t_order o   " +
             "INNER JOIN t_order_item oi ON o.order_id = oi.order_id  " +
             "INNER JOIN t_employee e ON e.employee_id = o.employee_id  " +
             "WHERE e.email = :email AND o.order_status = 'COMPLETED' AND (o.created_at BETWEEN :fromDate AND :toDate) " +
-            "GROUP BY o.created_at", nativeQuery = true)
+            "GROUP BY createdAt order by createdAt desc", nativeQuery = true)
     List<Object[]> getTotalSalesByEmployee(String email,
                                            Date fromDate, Date toDate);
 
     // Get total orders by employee by date
-    @Query(value = "SELECT o.created_at,COUNT(o.order_id) FROM t_order o   " +
+    @Query(value = "SELECT DATE_FORMAT(o.created_at,'%d-%m-%Y') as createdAt,COUNT(o.order_id) FROM t_order o   " +
             "INNER JOIN t_employee e ON e.employee_id = o.employee_id  " +
             "WHERE e.email = :email AND o.order_status = 'COMPLETED' AND (o.created_at BETWEEN :fromDate AND :toDate)" +
-            "GROUP BY o.created_at", nativeQuery = true)
+            "GROUP BY createdAt order by createdAt desc", nativeQuery = true)
     List<Object[]> getTotalOrdersByEmployee(String email,
                                             Date fromDate, Date toDate);
 

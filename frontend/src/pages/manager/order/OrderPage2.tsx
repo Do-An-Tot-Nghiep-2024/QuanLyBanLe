@@ -31,6 +31,7 @@ import { GetPromotion } from "../../../types/getPromotion";
 import { getLatestPromotionService } from "../../../services/promotion.service";
 import colors from "../../../constants/color";
 import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../../redux/hook";
 
 interface OrderItem {
   product: GetProductSchema;
@@ -41,6 +42,7 @@ interface OrderItem {
 
 const OrderPage: React.FC = () => {
   const navigate = useNavigate();
+  const auth = useAppSelector((state) => state.auth);
   const [searchTerm, setSearchTerm] = useState("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>(() => {
     // Load saved order items from localStorage during initialization
@@ -170,7 +172,11 @@ const OrderPage: React.FC = () => {
       // console.log("Order created:", response);
       if (response.message === "success") {
         const data = response.data as { orderId: number };
-        navigate(`/orders/${data.orderId}`);
+        if (auth.role === "MANAGER") {
+          navigate(`/orders/${data.orderId}`);
+        } else {
+          navigate(`/staff/orders/${data.orderId}`);
+        }
         setOrderItems([]);
         setCustomerChange(0);
         setCustomerPayment(0);
@@ -309,7 +315,7 @@ const OrderPage: React.FC = () => {
     let total = 0;
     setOrderItems((prevOrderItems) =>
       prevOrderItems.filter((item) => {
-        if(item.product.id !== deleteItem){
+        if (item.product.id !== deleteItem) {
           total += item.price * item.quantity;
           return item;
         }

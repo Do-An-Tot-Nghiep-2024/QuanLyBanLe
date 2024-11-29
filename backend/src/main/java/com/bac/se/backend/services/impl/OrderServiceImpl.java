@@ -82,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
             log.info("quantity is {}", stockResponse.quantity() - stockResponse.soldQuantity());
             throw new BadRequestUserException("Số lượng sản phẩm không đủ");
         }
-        if (stockResponse.quantity() - stockResponse.notifyQuantity() <= stockResponse.notifyQuantity()) {
+        if (stockResponse.quantity() - stockResponse.soldQuantity() <= stockResponse.notifyQuantity()) {
             Notification notification = Notification.builder()
                     .sentAt(new Date())
                     .status(NotificationStatus.SENT)
