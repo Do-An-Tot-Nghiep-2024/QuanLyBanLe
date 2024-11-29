@@ -199,6 +199,32 @@ const getLatestPromotionService = async () => {
   }
 };
 
+
+const updatePromotionService = async (promotionId: number, promotionRequest: any) => {
+  try {
+    const response: any = await api.put(
+      `/promotions/${promotionId}`,
+      promotionRequest
+    );
+    const { message, data } = response;
+    if (message !== "success") {
+      return {
+        message: message,
+        data: {},
+      };
+    }
+    return {
+      message: message,
+      data: data,
+    };
+  } catch (error: any) {
+    return {
+      message: error.response?.data?.message,
+      data: {},
+    };
+  }
+}
+
 export {
   createPromotionService,
   createQuantityPromotion,
@@ -206,4 +232,5 @@ export {
   createDiscountProductPromotion,
   getAllPromotionService,
   getLatestPromotionService,
+  updatePromotionService,
 };

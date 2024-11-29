@@ -38,24 +38,26 @@ export const PromotionSchema = z.object({
     z.number().min(1, { message: "Giá trị đơn hàng tối thiểu phải lớn hơn 0" })
   ),
 
-  discountPercent: z.preprocess(
-    (val) => parseInt(z.string().parse(val)),
+  percentage: z.preprocess(
+    (val) => parseFloat(z.string().parse(val)),
     // value is between 0 and 100
     z
       .number()
-      .min(0, { message: "Phần trăm giảm giá phải trong khoảng 0 đến 100" })
+      .min(1, { message: "Phần trăm giảm giá phải trong khoảng 0 đến 100" })
       .max(100, { message: "Phần trăm giảm giá phải trong khoảng 0 đến 100" })
   ),
+  isActive: z.boolean().optional(),
 });
 export type PromotionSchema = z.infer<typeof PromotionSchema>;
 
 export const defaultPromotionSchema: PromotionSchema = {
-  id: 0,
+  // id: 0,
   name: "",
   description: "",
   startDate: "",
   endDate: "",
   orderLimit: 0,
   minOrderValue: 0,
-  discountPercent: 0,
+  percentage: 0,
+  // isActive:true
 };

@@ -107,7 +107,6 @@ function Dashboard() {
     color: "white",
     fontSize: 36,
   };
-  console.log(profitData);
 
   const map = new Map([
     [

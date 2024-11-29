@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import {
@@ -11,6 +11,7 @@ import {
   ShoppingBag as ShoppingBagIcon,
   Inventory as InventoryIcon,
   Receipt as  ReceiptIcon,
+  Refresh as RefreshIcon,
   Logout,
 } from "@mui/icons-material";
 import { AppProvider, DashboardLayout} from "@toolpad/core";
@@ -20,9 +21,13 @@ import Cookies from "js-cookie";
 import { Outlet, useNavigate } from "react-router-dom";
 // import ReceiptIcon from "@mui/icons-material/Receipt";
 import logo from "../../../assets/images/logo.png";
-import colors from "../../../constants/color";
+// import colors from "../../../constants/color";
 import { useAppDispatch, useAppSelector } from "../../../redux/hook";
 import { logout } from "../../../redux/auth/authSlice";
+import { getSentNotificationsService } from "../../../services/notification.service";
+import { IconButton, Stack } from "@mui/material";
+import Notification from "../../../components/Notification";
+import { connectToSocket } from "../../../config/socket";
 const NAVIGATION: Navigation = [
   {
     segment: "",
@@ -106,14 +111,14 @@ const demoTheme = createTheme({
         },
       },
     },
-    dark: {
-      palette: {
-        background: {
-          default: colors.dark,
-          paper: colors.dark,
-        },
-      },
-    },
+    // dark: {
+    //   palette: {
+    //     background: {
+    //       default: colors.dark,
+    //       paper: colors.dark,
+    //     },
+    //   },
+    // },
   },
   breakpoints: {
     values: {
@@ -142,6 +147,8 @@ export default function Sidebar() {
   const auth = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [nofitications, setNotifications] = useState([]);
+  const [refresh, setRefresh] = useState(false);
   const [session, setSession] = useState<Session | null>({
     user: {
       name: auth.usename,
@@ -189,6 +196,47 @@ export default function Sidebar() {
     };
   }, [pathname]);
 
+  const getNotifications = async () => {
+    try {
+      const response = await getSentNotificationsService();
+      if (response.message !== "success") {
+        throw new Error(response.message);
+      }
+      setNotifications(response.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    // const socket = new SockJS("http://localhost:8080/ws");
+    // const client: Client = Stomp.over(socket);
+
+    // client.connect({}, () => {
+    //   client.subscribe(
+    //     "/topic/messages",
+    //     (message: any) => {
+    //       const chatMessage = JSON.parse(message.body);
+    //       setMessages((prevMessages: any) => {
+    //         if (
+    //           !prevMessages.find(
+    //             (msg: { id: any }) => msg.id === chatMessage.id
+    //           )
+    //         ) {
+    //           return [...prevMessages, chatMessage];
+    //         }
+    //         return prevMessages;
+    //       });
+    //     },
+    //     (err: string) => {
+    //       console.log("Connection error: " + err);
+    //     }
+    //   );
+    // });
+    getNotifications();
+    connectToSocket(setNotifications);
+  }, [refresh]);
+
   return (
     // preview-start
     <AppProvider
@@ -202,7 +250,16 @@ export default function Sidebar() {
         title: "",
       }}
     >
-      <DashboardLayout
+      <DashboardLayout slots={{
+          toolbarActions: () => (
+            <Stack flexDirection={"row"}>
+              <IconButton sx={{mb:1}} onClick={() => setRefresh((prev) => !prev)}>
+                <RefreshIcon />
+              </IconButton>
+              <Notification data={nofitications} />
+            </Stack>
+          ),
+        }}
       >
         <Box
           component={"main"}

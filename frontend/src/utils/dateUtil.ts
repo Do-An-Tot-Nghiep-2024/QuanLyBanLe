@@ -79,6 +79,11 @@ const formatDateResponse = (date: Date) => {
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
+const formatDateInput = (date: string) => {
+  const newDate = new Date(date);
+  // format date to yyyy-mm-dd
+  return `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, "0")}-${String(newDate.getDate()).padStart(2, "0")}`;
+};
 
 export {
   convertDate,
@@ -86,4 +91,5 @@ export {
   formatDateTime,
   generateDate,
   generateDateDuringWeek,
+  formatDateInput
 };
