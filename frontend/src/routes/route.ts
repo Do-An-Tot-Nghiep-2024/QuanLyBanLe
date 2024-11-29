@@ -101,7 +101,7 @@ interface RouteConfig {
   component: React.LazyExoticComponent<React.FC>;
 }
 const employeeRoutes: RouteConfig[] = [
-  { path: "/", component: DashboardEmployee },
+  { path: "", component: DashboardEmployee },
   { path: "/staff/orders/create-order", component: OrderTabs },
   { path: "/staff/orders", component: OrderEmployeePage },
   { path: "/staff/orders/:orderId", component: OrderDetail },

@@ -51,7 +51,6 @@ export default function ListNotification({ data }: Props) {
                   >
                     {notification.createdAt}
                   </Typography>
-                  {" — I'll be in your neighborhood doing errands this…"}
                 </React.Fragment>
               }
             />

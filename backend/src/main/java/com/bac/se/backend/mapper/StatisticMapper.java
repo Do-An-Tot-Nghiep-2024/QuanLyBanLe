@@ -7,7 +7,6 @@ import com.bac.se.backend.payload.response.statistic.product.TopFiveHighestGross
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 @Service
 public class StatisticMapper {
@@ -36,13 +35,13 @@ public class StatisticMapper {
 
     public OrderDateResponse<BigDecimal> mapObjectToTotalSalesResponse(Object[] object) {
         return new OrderDateResponse<>(
-                (Date) object[0],
+                object[0].toString(),
                 BigDecimal.valueOf(Double.parseDouble(object[1].toString()))
         );
     }
     public OrderDateResponse<Integer> mapObjectToTotalOrdersResponse(Object[] object) {
         return new OrderDateResponse<>(
-                (Date) object[0],
+                 object[0].toString(),
                 Integer.parseInt(object[1].toString())
         );
     }
