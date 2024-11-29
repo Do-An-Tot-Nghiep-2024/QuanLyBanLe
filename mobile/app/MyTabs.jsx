@@ -25,7 +25,7 @@ export default function MyTabs() {
       headerTitleStyle: {
         fontWeight: 'bold', 
       },
-      title: 'Retail Shop',
+      title: 'Windy Shop',
       headerRight: () => (
         <Pressable
           onPress={() => {
@@ -40,7 +40,7 @@ export default function MyTabs() {
     }
     }>
       <Tab.Screen name="promotion" component={Promotion} options={{
-        headerTitle: 'Retail Shop',
+        headerTitle: 'Windy Shop',
         tabBarLabel: ({ focused }) => (
           <Text style={{ fontWeight: 'bold', fontSize: 13, color: focused ? colors.primaryColor : 'gray' }}>
             Khuyến mãi
@@ -49,7 +49,7 @@ export default function MyTabs() {
         tabBarIcon: ({ }) => <MaterialCommunityIcons name="package" size={24} color={colors.primaryColor} />
       }} />
       <Tab.Screen name="category" component={Category} options={{
-        headerTitle: 'Retail Shop',
+        headerTitle: 'Windy Shop',
         title: 'Danh mục',
         tabBarLabel: ({ focused }) => (
           <Text style={{ fontWeight: 'bold', fontSize: 13, color: focused ? colors.primaryColor : 'gray' }}>
@@ -60,7 +60,7 @@ export default function MyTabs() {
       }} />
 
       <Tab.Screen name="cart" component={Cart} options={{
-        headerTitle: 'Retail Shop',
+        headerTitle: 'Windy Shop',
         title: 'Giỏ hàng',
         tabBarLabel: ({ focused }) => (
           <Text style={{ fontWeight: 'bold', fontSize: 13, color: focused ? colors.primaryColor : 'gray' }}>

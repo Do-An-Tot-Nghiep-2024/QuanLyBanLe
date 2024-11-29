@@ -87,6 +87,26 @@ export default function OrderDetailPage() {
   // Columns for the table
   const columns = ["Tên sản phẩm", "Số lượng", "Đơn giá", "Thành tiền"];
 
+  const translateStatus = (status: string) => {
+    const statusMapping: { [key: string]: string } = {
+        PENDING: "Đang chờ nhận hàng",
+        CANCELLED: "Đã hủy",
+        COMPLETED: "Hoàn thành",
+        // Add more statuses if necessary
+    };
+
+    return statusMapping[status] || "Không xác định"; // Default if the status doesn't match
+};
+
+const translatePaymentType = (paymentType: string) => {
+    const paymentMapping: { [key: string]: string } = {
+        CASH: "Tiền mặt",
+        E_WALLET: "Chuyển khoản",
+        // Add more payment methods if necessary
+    };
+
+    return paymentMapping[paymentType] || "Không xác định"; // Default if the payment type doesn't match
+};
   return (
     <Container sx={{ pt: 5, mt: 2 }}>
       <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
@@ -103,13 +123,13 @@ export default function OrderDetailPage() {
         <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
           <Typography fontWeight="bold">Trạng thái đơn hàng: </Typography>
           <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
-            {data?.orderStatus}
+            {translateStatus(String(data?.orderStatus))}
           </Typography>
         </Stack>
         <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
           <Typography fontWeight="bold">Phương thức thanh toán: </Typography>
           <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
-            {data?.paymentType}
+            {translatePaymentType(String(data?.paymentType))}
           </Typography>
         </Stack>
         <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
@@ -178,11 +198,11 @@ export default function OrderDetailPage() {
           const state = data;
           if(auth.role === "EMPLOYEE"){
             navigate("/staff/print/order-invoice", {
-              state: state, // Pass the order data to the print page
+              state: state, 
             });
           }else{
             navigate("/print/order-invoice", {
-              state: state, // Pass the order data to the print page
+              state: state, 
             });
           }
         

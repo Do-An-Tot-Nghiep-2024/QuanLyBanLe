@@ -100,7 +100,7 @@ export default function Product({ route, navigation }) {
                         <Text style={styles.description}>{product.unit}</Text>
 
                         <Text style={styles.label}>Giá:</Text>
-                        <Text style={styles.price}> {product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                        <Text style={styles.price}>{product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                         </Text>
                     </View>
                 </ScrollView>
