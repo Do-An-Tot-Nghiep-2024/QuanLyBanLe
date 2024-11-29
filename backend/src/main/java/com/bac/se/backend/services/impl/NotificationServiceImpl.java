@@ -1,6 +1,7 @@
 package com.bac.se.backend.services.impl;
 
 import com.bac.se.backend.enums.NotificationStatus;
+import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.models.Notification;
 import com.bac.se.backend.payload.response.notification.NotificationResponse;
 import com.bac.se.backend.repositories.NotificationRepository;
@@ -41,5 +42,15 @@ public class NotificationServiceImpl implements NotificationService {
                 PageRequest.of(0,5, Sort.Direction.DESC,"id"));
         return notificationsByStatus.stream().map(notification -> new NotificationResponse(notification.getId(),
                 notification.getContent(), notification.getSentAt())).toList();
+    }
+
+    @Override
+    public String readNotification(Long id) {
+        Notification notification = notificationRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tinmfm thấy thông báo"));
+        notification.setStatus(NotificationStatus.READ);
+        notificationRepository.save(notification);
+        return "Read notification success";
     }
 }

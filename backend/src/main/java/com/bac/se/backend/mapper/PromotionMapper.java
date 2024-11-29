@@ -17,7 +17,8 @@ public class PromotionMapper {
                 (Date) obj[4],
                 Integer.parseInt(obj[5].toString()),
                 Double.parseDouble(obj[6].toString()),
-                Double.parseDouble(obj[7].toString())
+                Double.parseDouble(obj[7].toString()),
+                (Boolean) obj[8]
         );
     }
 

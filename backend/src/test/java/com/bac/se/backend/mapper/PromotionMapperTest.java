@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PromotionMapperTest {
 
@@ -16,7 +15,7 @@ class PromotionMapperTest {
         Object[] mockObj = new Object[]{"1", "Khuyen mai giam gia", "Khuyen mai",
                 new Date(System.currentTimeMillis()),
                 new Date(System.currentTimeMillis()),
-                10, 100.00, 0.05};
+                10, 100.00, 0.05,true};
         var response = promotionMapper.mapToPromotionResponse(mockObj);
         assertNotNull(response);
         assertEquals(1, response.id());
@@ -27,6 +26,7 @@ class PromotionMapperTest {
         assertEquals(10, response.orderLimit());
         assertEquals(100.00, response.minOrderValue());
         assertEquals(0.05, response.percentage());
+        assertTrue(response.isActive());
     }
 
     @Test

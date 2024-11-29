@@ -111,7 +111,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
 
     @Query(value = "SELECT  " +
-            "   SUM(oi.amount - (oi.quantity * pp.original_price) - o.total_discount) AS total_profit " +
+            "   SUM(oi.amount) - o.total_discount - SUM(oi.quantity * pp.original_price) as profit " +
             "FROM  " +
             "    t_order_item oi " +
             "INNER JOIN  " +

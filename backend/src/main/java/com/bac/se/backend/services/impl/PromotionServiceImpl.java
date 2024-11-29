@@ -6,6 +6,7 @@ import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.mapper.PromotionMapper;
 import com.bac.se.backend.models.Promotion;
 import com.bac.se.backend.payload.request.promotion.PromotionRequest;
+import com.bac.se.backend.payload.request.promotion.PromotionUpdateRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.promotion.LatestPromotionResponse;
 import com.bac.se.backend.payload.response.promotion.PromotionResponse;
@@ -39,7 +40,8 @@ public class PromotionServiceImpl implements PromotionService {
                 promotion.getEndDate(),
                 promotion.getOrderLimit(),
                 promotion.getMinOrderValue(),
-                promotion.getPercentage()
+                promotion.getPercentage(),
+                promotion.isActive()
         );
     }
 
@@ -56,11 +58,11 @@ public class PromotionServiceImpl implements PromotionService {
     @Override
     public LatestPromotionResponse getLatestPromotion() {
         var latestPromotion = promotionRepository.getLatestPromotion(PageLimit.ONLY.getPageable());
-        if(latestPromotion.isEmpty()){
+        if (latestPromotion.isEmpty()) {
             throw new ResourceNotFoundException("Không tìm thấy chương trình khuyến mãi");
         }
         LatestPromotionResponse latestPromotionResponse = promotionMapper.mapToLatestPromotionResponse(latestPromotion.get(0));
-        if(latestPromotionResponse.endDate().before(new Date()) || latestPromotionResponse.orderLimit() <= 0){
+        if (latestPromotionResponse.endDate().before(new Date()) || latestPromotionResponse.orderLimit() <= 0) {
             throw new ResourceNotFoundException("Chương trình khuyến mãi không khả dụng");
         }
         return latestPromotionResponse;
@@ -95,8 +97,8 @@ public class PromotionServiceImpl implements PromotionService {
 
     @Override
     @Transactional
-    public PromotionResponse updatePromotion(Long id, PromotionRequest request) throws BadRequestUserException {
-        validatePromotion(request);
+    public PromotionResponse updatePromotion(Long id, PromotionUpdateRequest request) throws BadRequestUserException {
+        validateUpdatePromotion(request);
         var promotion = promotionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chương trình khuyến mãi"));
         promotion.setName(request.name());
         promotion.setDescription(request.description());
@@ -104,9 +106,10 @@ public class PromotionServiceImpl implements PromotionService {
         promotion.setEndDate(request.endDate());
         promotion.setOrderLimit(request.orderLimit());
         promotion.setMinOrderValue(request.minOrderValue());
-        promotion.setPercentage(request.discountPercent());
+        promotion.setPercentage(request.discountPercent() / 100);
+        promotion.setActive(request.isActive());
         promotionRepository.save(promotion);
-       return createPromotionResponse(promotion);
+        return createPromotionResponse(promotion);
     }
 
     @Override
@@ -144,5 +147,30 @@ public class PromotionServiceImpl implements PromotionService {
         if (request.discountPercent() <= 0 || request.discountPercent() > 100) {
             throw new BadRequestUserException("Phần trăm giá phải lớn hơn 0 và nhỏ hơn 100");
         }
+    }
+
+    void validateUpdatePromotion(PromotionUpdateRequest request) throws BadRequestUserException {
+        if (request.name().isEmpty() ||
+                request.description().isEmpty() ||
+                request.startDate() == null ||
+                request.endDate() == null ||
+                request.orderLimit() == null ||
+                request.minOrderValue() == null ||
+                request.discountPercent() == null) {
+            throw new BadRequestUserException("Vui lòng nhập đẩy đủ thông tin");
+        }
+        if (request.orderLimit() <= 0) {
+            throw new BadRequestUserException("Số lượng sản phẩm tối đa phải lớn hơn 0");
+        }
+        if (request.minOrderValue() <= 0) {
+            throw new BadRequestUserException("Giá tối thiểu phải lớn hơn 0");
+        }
+        if (request.discountPercent() <= 0 || request.discountPercent() > 100) {
+            throw new BadRequestUserException("Phần trăm giá phải lớn hơn 0 và nhỏ hơn 100");
+        }
+        if (request.endDate().before(request.startDate())) {
+            throw new BadRequestUserException("Ngày kết thúc phải sau ngày bắt đầu");
+        }
+
     }
 }

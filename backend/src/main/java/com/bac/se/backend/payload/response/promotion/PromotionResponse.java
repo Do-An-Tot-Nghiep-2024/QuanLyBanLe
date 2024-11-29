@@ -10,6 +10,7 @@ public record PromotionResponse(
         Date endDate,
         int orderLimit,
         double minOrderValue,
-        double percentage
+        double percentage,
+        boolean isActive
 ) {
 }

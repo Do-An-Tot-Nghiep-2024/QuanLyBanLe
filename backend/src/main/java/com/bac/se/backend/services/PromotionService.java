@@ -2,6 +2,7 @@ package com.bac.se.backend.services;
 
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.payload.request.promotion.PromotionRequest;
+import com.bac.se.backend.payload.request.promotion.PromotionUpdateRequest;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.promotion.LatestPromotionResponse;
 import com.bac.se.backend.payload.response.promotion.PromotionResponse;
@@ -16,7 +17,7 @@ public interface PromotionService {
 
     void deletePromotion(Long id);
 
-    PromotionResponse updatePromotion(Long id, PromotionRequest request) throws BadRequestUserException;
+    PromotionResponse updatePromotion(Long id, PromotionUpdateRequest request) throws BadRequestUserException;
 
     PromotionResponse getPromotionById(Long id);
 
