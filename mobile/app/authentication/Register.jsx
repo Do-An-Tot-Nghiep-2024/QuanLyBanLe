@@ -13,11 +13,11 @@ import { RegisterService } from "../services/auth.service";
 
 const Register = () => {
     const navigation = useNavigation();
-    const [name, setName] = useState("tuong lan vu");
-    const [phone, setPhone] = useState("0465397895");
-    const [password, setPassword] = useState("123456");
-    const [email, setEmail] = useState("tuong@gmail.com");
-    const [confirmPassword, setConfirmPassword] = useState("123456");
+    const [name, setName] = useState("");
+    const [phone, setPhone] = useState("");
+    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [nameError, setNameError] = useState("");
     const [phoneError, setPhoneError] = useState("");
     const [emailError, setEmailError] = useState("");

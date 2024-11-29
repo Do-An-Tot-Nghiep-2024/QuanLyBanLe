@@ -32,7 +32,7 @@ export default function App() {
       headerTitleStyle: {
         fontWeight: 'bold', 
       },
-      title: 'Retail Shop',
+      title: 'Windy Shop',
     }
 
     }>
