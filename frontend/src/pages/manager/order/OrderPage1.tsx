@@ -54,7 +54,6 @@ const OrderPage: React.FC = () => {
   const [deleteItem, setDeleteItem] = useState(0);
   // const [totalDiscount, setTotalDiscount] = useState(0);
   const [total, setTotal] = useState(0);
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -108,6 +107,14 @@ const OrderPage: React.FC = () => {
       )
     );
     handleUpdateTotal(orderItems);
+    // const currTotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    // if(!isNaN(total)){
+    //   console.log(total);
+      
+    //   setCustomerChange(customerPayment - total - getPromotionCurrent());
+    // }
+    
+    // setCustomerChange(customerPayment - total - getPromotionCurrent());
   };
 
   const isShipmentSelected = () => {
@@ -260,8 +267,7 @@ const OrderPage: React.FC = () => {
     if (isCustomerPaymentValid(customerPayment)) {
       setCustomerPayment(customerPayment);
       const totalRequired = total - getPromotionCurrent();
-      console.log(totalRequired);
-
+      // console.log(totalRequired);
       setCustomerChange(customerPayment - totalRequired);
     }
   };
@@ -308,21 +314,20 @@ const OrderPage: React.FC = () => {
   };
 
   const handleDeleteOrderItem = () => {
+    let total = 0;
     setOrderItems((prevOrderItems) =>
-      prevOrderItems.filter((item) => item.product.id !== deleteItem)
+      prevOrderItems.filter((item) => {
+        if(item.product.id !== deleteItem){
+          total += item.price * item.quantity;
+          return item;
+        }
+        // item.product.id !== deleteItem;
+      })
     );
+
     // update in localStorage
     localStorage.setItem("orderItems", JSON.stringify(orderItems));
-    // localStorage.removeItem("orderItems");
-    console.log("item delete is", deleteItem);
-
-    console.log(orderItems);
-    const total = orderItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-    console.log(total);
-    setCustomerChange(customerChange - total);
+    setCustomerChange(customerPayment - total - getPromotionCurrent());
     setConfirmOpen(false);
     handleUpdateTotal(orderItems);
   };
@@ -516,8 +521,6 @@ const OrderPage: React.FC = () => {
             alignItems="flex-end"
             width="100%"
           >
-            
-
             <Typography sx={{ mb: 2, fontWeight: "bold" }}>
               Tổng tiền hàng: {formatCurrency(total as number)}
             </Typography>
