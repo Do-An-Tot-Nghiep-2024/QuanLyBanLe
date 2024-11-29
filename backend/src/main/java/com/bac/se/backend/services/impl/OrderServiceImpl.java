@@ -1,5 +1,6 @@
 package com.bac.se.backend.services.impl;
 
+import com.bac.se.backend.enums.NotificationStatus;
 import com.bac.se.backend.enums.OrderStatus;
 import com.bac.se.backend.enums.PageLimit;
 import com.bac.se.backend.enums.PaymentType;
@@ -61,6 +62,7 @@ public class OrderServiceImpl implements OrderService {
     private final PromotionService promotionService;
     private final PromotionRepository promotionRepository;
     private final AccountService accountService;
+    private final NotificationRepository notificationRepository;
 
 
     double roundPrice(double price) {
@@ -74,14 +76,19 @@ public class OrderServiceImpl implements OrderService {
         if (availableQuantityStock.isEmpty()) {
             throw new BadRequestUserException("Không tìm thấy lô hàng sản phẩm");
         }
-
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
         StockResponse stockResponse = stockMapper.mapObjectToStockResponse(availableQuantityStock.get(0));
         if (stockResponse.quantity() - stockResponse.soldQuantity() < quantity) {
             log.info("quantity is {}", stockResponse.quantity() - stockResponse.soldQuantity());
             throw new BadRequestUserException("Số lượng sản phẩm không đủ");
         }
         if (stockResponse.quantity() - stockResponse.notifyQuantity() <= stockResponse.notifyQuantity()) {
-            log.info("notifyQuantity is {}", stockResponse.notifyQuantity());
+            Notification notification = Notification.builder()
+                    .sentAt(new Date())
+                    .status(NotificationStatus.SENT)
+                    .content(product.getName() + "sắp hết vui lòng nhập thêm!")
+                    .build();
+            notificationRepository.save(notification);
         }
         Stock stock = stockRepository.findById(stockResponse.id()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy số lượng sản phẩm"));
         stock.setSoldQuantity(stock.getSoldQuantity() + quantity);

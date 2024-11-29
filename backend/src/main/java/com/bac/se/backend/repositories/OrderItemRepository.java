@@ -35,7 +35,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
     @Query(value = "SELECT  " +
             "     DATE_FORMAT(o.created_at,'%d-%m-%Y') AS createdAt, " +
             "    ROUND(SUM(oi.amount),3) AS total, " +
-            "    ROUND(SUM(oi.amount - (oi.quantity * pp.original_price) - o.total_discount),3) AS total_profit " +
+            "    ROUND(SUM(oi.amount) - o.total_discount - SUM(oi.quantity * pp.original_price),3) AS total_profit " +
             "FROM " +
             "    t_order o " +
             "        INNER JOIN " +

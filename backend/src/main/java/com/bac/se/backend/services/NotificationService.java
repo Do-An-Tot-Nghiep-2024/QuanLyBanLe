@@ -11,4 +11,6 @@ public interface NotificationService {
 
     List<NotificationResponse> getSentNotifications();
 
+    String readNotification(Long id);
+
 }

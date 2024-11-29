@@ -3,6 +3,7 @@ package com.bac.se.backend.controllers;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.payload.request.promotion.PromotionRequest;
+import com.bac.se.backend.payload.request.promotion.PromotionUpdateRequest;
 import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.promotion.LatestPromotionResponse;
@@ -99,7 +100,7 @@ public class PromotionController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ApiResponse<PromotionResponse>> updatePromotion(
-            @RequestBody PromotionRequest promotionRequest,
+            @RequestBody PromotionUpdateRequest promotionRequest,
             @PathVariable("id") Long id
     ) {
         try {
