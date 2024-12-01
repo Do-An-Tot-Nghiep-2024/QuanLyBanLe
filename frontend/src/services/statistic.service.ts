@@ -1,6 +1,4 @@
 import api from "../config/axios";
-import { generateDateDuringWeek } from "../utils/dateUtil";
-
 const getSalesStatisticsByProductService = async () => {
   try {
     const response: any = await api.get("/statistic/product");
@@ -85,33 +83,10 @@ const getSalesBySupplierService = async () => {
   }
 };
 
-const getSalesAndProfitService = async ({
-  fromDateRequest,
-  toDateRequest,
-}: {
-  fromDateRequest: string;
-  toDateRequest: string;
-}) => {
+const getSalesAndProfitByDateService = async (toDate: string) => {
   try {
-    const { fromDate, toDate } = generateDateDuringWeek();
-    let from = fromDate;
-    let to = toDate;
-    if (
-      fromDateRequest !== undefined &&
-      fromDateRequest !== null &&
-      fromDateRequest !== ""
-    ) {
-      from = fromDateRequest;
-    }
-    if (
-      toDateRequest !== undefined &&
-      toDateRequest !== null &&
-      toDateRequest !== ""
-    ) {
-      to = toDateRequest;
-    }
     const response: any = await api.get(
-      `/statistic/sale-and-profit?fromDate=${from}&toDate=${to}`
+      `/statistic/sale-and-profit-in-week?toDate=${toDate}`
     );
     const { message, data } = response;
     return {
@@ -126,6 +101,41 @@ const getSalesAndProfitService = async ({
   }
 };
 
+const getSalesAndProfitByMonthService = async (month: number) => {
+  try {
+    const response: any = await api.get(
+      `/statistic/sale-and-profit-by-month?month=${month}`
+    );
+    const { message, data } = response;
+    return {
+      message: message,
+      data: message !== "success" ? [] : data,
+    };
+  } catch (error: any) {
+    return {
+      message: error.response.data.message,
+      data: [],
+    };
+  }
+};
+
+
+const getStockByProductService = async (month: number) => {
+  try {
+    const respose: any = await api.get(`/statistic/stock-by-product?month=${month}`);
+    console.log(respose);
+    const { message, data } = respose;
+    return {
+      message,
+      data: message !== "success" ? [] : data,
+    };
+  } catch (error: any) {
+    return {
+      message: error.reponse.data.message,
+      data: [],
+    };
+  }
+};
 const getTopFiveHighestGrossingService = async ({
   fromDate,
   toDate,
@@ -185,7 +195,9 @@ export {
   getSalesStatisticsByEmployeeService,
   getStatisticsProductPriceService,
   getSalesBySupplierService,
-  getSalesAndProfitService,
+  getSalesAndProfitByDateService,
   getTopFiveHighestGrossingService,
   getBestSellingProductService,
+  getSalesAndProfitByMonthService,
+  getStockByProductService,
 };

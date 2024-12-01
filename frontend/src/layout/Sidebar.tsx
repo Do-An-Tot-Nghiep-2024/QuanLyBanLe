@@ -22,6 +22,7 @@ import {
   MapsUgc as MapsUgcIcon,
   AttachMoney as AttachMoneyIcon,
   Refresh as RefreshIcon,
+  Grain as GrainIcon,
   Logout,
 } from "@mui/icons-material";
 import RedeemIcon from "@mui/icons-material/Redeem";
@@ -83,7 +84,7 @@ const NAVIGATION: Navigation = [
     icon: <StoreIcon />,
     children: [
       {
-        segment: "/",
+        segment: "",
         title: "Quản lí sản phẩm",
         icon: <GiteIcon />,
       },
@@ -118,21 +119,6 @@ const NAVIGATION: Navigation = [
     ],
   },
   {
-    segment: "suppliers",
-    title: "Nhà cung cấp",
-    icon: <NoteAddOutlined />,
-  },
-  {
-    segment: "employees",
-    title: "Nhân viên",
-    icon: <BadgeOutlinedIcon />,
-  },
-  {
-    segment: "customers",
-    title: "Khách hàng",
-    icon: <PeopleAltOutlinedIcon />,
-  },
-  {
     segment: "reports",
     title: "Báo cáo",
     icon: <BarChartIcon />,
@@ -147,8 +133,29 @@ const NAVIGATION: Navigation = [
         title: "Theo doanh thu",
         icon: <AttachMoneyIcon />,
       },
+      {
+        segment:"stock",
+        title: "Theo số lượng",
+        icon: <GrainIcon />,
+      }
     ],
   },
+  {
+    segment: "suppliers",
+    title: "Nhà cung cấp",
+    icon: <NoteAddOutlined />,
+  },
+  {
+    segment: "employees",
+    title: "Nhân viên",
+    icon: <BadgeOutlinedIcon />,
+  },
+  {
+    segment: "customers",
+    title: "Khách hàng",
+    icon: <PeopleAltOutlinedIcon />,
+  },
+
   // {
   //   segment: "settings",
   //   title: "Cài đặt",
@@ -322,7 +329,10 @@ export default function Sidebar() {
         slots={{
           toolbarActions: () => (
             <Stack flexDirection={"row"}>
-              <IconButton sx={{mb:1}} onClick={() => setRefresh((prev) => !prev)}>
+              <IconButton
+                sx={{ mb: 1 }}
+                onClick={() => setRefresh((prev) => !prev)}
+              >
                 <RefreshIcon />
               </IconButton>
               <Notification data={nofitications} />

@@ -16,6 +16,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import ProductChart from "../../../components/ProductChart";
 import { generateDateDuringWeek } from "../../../utils/dateUtil";
+import QueryResponse from "../../../types/common/queryResponse";
 
 type DateRequest = {
   fromDate: string;
@@ -75,37 +76,45 @@ export default function ProductReport() {
     }
   };
 
-  const { isLoading, isError, error, data, isFetching } = useQuery({
-    queryKey: ["bestselling", fromDate, toDate,productType],
-    queryFn: () => getBestSellingProduct({ request: { fromDate, toDate } }),
-    refetchOnWindowFocus: false,
-  });
-  const {
-    isLoading: topLoading,
-    isError: topError,
-    error: topErrorMessage,
-    data: topData,
-    isFetching: topFetching,
-  } = useQuery({
-    queryKey: ["topFive", fromDate, toDate,productType],
-    queryFn: () => getTopFiveHighestGrossing({ request: { fromDate, toDate } }),
-    refetchOnWindowFocus: false,
-  });
-  if (isLoading || isFetching) {
-    return <div>Loading...</div>;
+  const reponse: QueryResponse = {
+    data: null,
+    isLoading: false,
+    isFetching: false,
+    isError: false,
+    error: null,
+  };
+  if (productType === "BEST_SELLING") {
+    const { isLoading, isError, error, data, isFetching } = useQuery({
+      queryKey: ["bestselling", fromDate, toDate, productType],
+      queryFn: () => getBestSellingProduct({ request: { fromDate, toDate } }),
+      refetchOnWindowFocus: false,
+    });
+    reponse.data = data;
+    reponse.isLoading = isLoading;
+    reponse.isFetching = isFetching;
+    reponse.isError = isError;
+    reponse.error = error;
   }
-  if (isError) {
-    return <div>Error: {error.message}</div>;
+  if (productType === "TOP_FIVE") {
+    const { isLoading, isError, error, data, isFetching } = useQuery({
+      queryKey: ["topFive", fromDate, toDate, productType],
+      queryFn: () =>
+        getTopFiveHighestGrossing({ request: { fromDate, toDate } }),
+      refetchOnWindowFocus: false,
+    });
+    reponse.data = data;
+    reponse.isLoading = isLoading;
+    reponse.isFetching = isFetching;
+    reponse.isError = isError;
+    reponse.error = error;
   }
-  if (topLoading || topFetching) {
-    return <div>Loading...</div>;
-  }
-  if (topError) {
-    return <div>Error: {topErrorMessage.message}</div>;
-  }
-  console.log(topData);
-  console.log(data);
 
+  if (reponse.isLoading || reponse.isFetching) {
+    return <div>Loading...</div>;
+  }
+  if (reponse.isError) {
+    return <div>Error: {reponse.error.message}</div>;
+  }
   return (
     <Container sx={{ mt: 5 }}>
       <Box sx={{ display: "flex", flexDirection: "row", gap: 2, mb: 15 }}>
@@ -115,13 +124,13 @@ export default function ProductReport() {
             labelId="demo-simple-select-label"
             id="demo-simple-select"
             value={productType}
-            // label=""
+            label="Loại thống kê"
             onChange={handleChange}
           >
-            <MenuItem value={"BEST_SELLING"}>
-              Sản phẩm bán chạy
+            <MenuItem value={"BEST_SELLING"}>Sản phẩm bán chạy</MenuItem>
+            <MenuItem value={"TOP_FIVE"}>
+              Top 5 sản phẩm có doanh thu cao nhất
             </MenuItem>
-            <MenuItem value={"TOP_FIVE"}>Top 5 sản phẩm có doanh thu cao nhất</MenuItem>
           </Select>
         </FormControl>
         <TextField
@@ -159,11 +168,11 @@ export default function ProductReport() {
             justifyItems: "center",
           }}
         >
-          <ProductChart data={data} dataKey="quantity" />
+          <ProductChart data={reponse.data} dataKey="quantity" />
         </Box>
       )}
       {productType === "TOP_FIVE" && (
-        <ProductChart data={topData} dataKey="total" />
+        <ProductChart data={reponse.data} dataKey="total" />
       )}
     </Container>
   );
