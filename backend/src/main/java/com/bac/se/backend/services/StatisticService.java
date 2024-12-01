@@ -6,6 +6,8 @@ import com.bac.se.backend.payload.response.statistic.SaleAndProfitResponse;
 import com.bac.se.backend.payload.response.statistic.StatisticResponse;
 import com.bac.se.backend.payload.response.statistic.product.BestSellingProductResponse;
 import com.bac.se.backend.payload.response.statistic.product.TopFiveHighestGrossingProductResponse;
+import com.bac.se.backend.payload.response.statistic.sale.SaleAndProfitByMonth;
+import com.bac.se.backend.payload.response.statistic.stock.ProductStockResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.math.BigDecimal;
@@ -34,8 +36,9 @@ public interface StatisticService {
     BigDecimal getCurrentNetTotalProfit();
 
     // statistics by date
+
     // sale and profit
-    List<SaleAndProfitResponse> getSalesAndProfitByDate(String fromDate, String toDate) throws ParseException;
+    List<SaleAndProfitResponse> getSalesAndProfitInWeek(String toDate) throws ParseException;
 
     // best selling product
     List<BestSellingProductResponse> statisticsBestSellingProduct(String fromDate, String toDate) throws ParseException;
@@ -45,6 +48,12 @@ public interface StatisticService {
 
     // statistics by supplier
     List<StatisticResponse> statisticsBySupplier();
+
+    //  sales and profit by month
+    List<SaleAndProfitByMonth> getSalesAndProfitByMonth(Integer month);
+
+
+    List<ProductStockResponse> getStockByProduct(Integer month);
 
 
 }

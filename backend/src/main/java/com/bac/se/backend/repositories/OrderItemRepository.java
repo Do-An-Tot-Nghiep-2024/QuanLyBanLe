@@ -31,22 +31,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
             "group by o.employee_id", nativeQuery = true)
     List<Object[]> salesStatisticsByEmployee();
 
-    // Thống kê doanh số và lợi nhuận theo thời gian cho quản lí
-    @Query(value = "SELECT  " +
-            "     DATE_FORMAT(o.created_at,'%d-%m-%Y') AS createdAt, " +
-            "    ROUND(SUM(oi.amount),3) AS total, " +
-            "    ROUND(SUM(oi.amount) - o.total_discount - SUM(oi.quantity * pp.original_price),3) AS total_profit " +
-            "FROM " +
-            "    t_order o " +
-            "        INNER JOIN " +
-            "    t_order_item oi ON oi.order_id = o.order_id " +
-            "        INNER JOIN " +
-            "    t_product_price pp ON pp.product_price_id = oi.product_price_id " +
-            "WHERE " +
-            "    o.created_at BETWEEN :fromDate AND :toDate " +
-            "AND o.order_status = 'COMPLETED' " +
-            "GROUP BY createdAt",nativeQuery = true)
-    List<Object[]> getSalesAndProfitByDate(Date fromDate, Date toDate);
+
 
     // Top five highest grossing product
     @Query(value = "SELECT p.name, ROUND(SUM(oi.amount),2) as total FROM t_order o  " +
@@ -64,6 +49,95 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
             "LEFT JOIN t_order_item oi ON oi.product_id = p.product_id " +
             "GROUP BY s.supplier_id",nativeQuery = true)
     List<Object[]> getSalesBySupplier();
+
+    @Query(value = "SELECT  " +
+            "    CEIL(DAY(o.created_at) / 7) AS week_of_month, " +
+            "    ROUND(SUM(oi.amount),3) AS tong_doanh_thu, " +
+            "    ROUND(SUM(oi.amount) - o.total_discount - SUM(oi.quantity * pp.original_price),3) as loi_nhuan " +
+            "FROM " +
+            "    t_order_item oi " +
+            "        INNER JOIN " +
+            "    t_order o ON o.order_id = oi.order_id " +
+            "        INNER JOIN " +
+            "    t_product_price pp ON pp.product_price_id = oi.product_price_id " +
+            "WHERE  " +
+            "  o.order_status = 'COMPLETED' AND MONTH(o.created_at) = ?1 AND YEAR(o.created_at) = ?2 " +
+            "GROUP BY  " +
+            "    week_of_month " +
+            "ORDER BY  " +
+            "    week_of_month",nativeQuery = true)
+    List<Object[]> getSalesAndProfitByMonth(Integer month,Integer year);
+
+    // Thống kê tổng doanh thu và lợi nhuận theo tuần
+    @Query(value = "SELECT " +
+            "    date_format(o.created_at,'%d-%m-%Y') AS week_of_month, " +
+            "    ROUND(SUM(oi.amount),3) AS tong_doanh_thu, " +
+            "    ROUND(SUM(oi.amount) - o.total_discount - SUM(oi.quantity * pp.original_price),3) as loi_nhuan " +
+            "FROM " +
+            "    t_order o " +
+            "        INNER JOIN " +
+            "    t_order_item oi ON o.order_id = oi.order_id " +
+            "        INNER JOIN " +
+            "    t_product_price pp ON pp.product_price_id = oi.product_price_id " +
+            "WHERE  " +
+            "   o.order_status = 'COMPLETED' AND o.created_at >= :fromDate AND o.created_at <= :toDate " +
+            "GROUP BY  " +
+            "    week_of_month",nativeQuery = true)
+    List<Object[]> getSalesAndProfitByDate(Date fromDate,Date toDate);
+
+
+    // Thống kê doanh thu và lợi nhuận hiện tại
+    @Query(value = "SELECT  " +
+            "     DATE_FORMAT(o.created_at,'%d-%m-%Y') AS createdAt, " +
+            "    ROUND(SUM(oi.amount),3) AS total, " +
+            "    ROUND(SUM(oi.amount) - o.total_discount - SUM(oi.quantity * pp.original_price),3) AS total_profit " +
+            "FROM " +
+            "    t_order o " +
+            "        INNER JOIN " +
+            "    t_order_item oi ON oi.order_id = o.order_id " +
+            "        INNER JOIN " +
+            "    t_product_price pp ON pp.product_price_id = oi.product_price_id " +
+            "WHERE " +
+            "    o.created_at = CURDATE() " +
+            "AND o.order_status = 'COMPLETED' " +
+            "GROUP BY createdAt",nativeQuery = true)
+    List<Object[]> getCurrentTotalSalesAndProfit( Pageable pageable);
+
+    // get stock by product by month
+
+    @Query(value = "SELECT  " +
+            "    oi.product_id,p.name, SUM(oi.quantity) AS sold_quantity " +
+            "FROM " +
+            "    t_order o " +
+            "        INNER JOIN " +
+            "    t_order_item oi ON oi.order_id = o.order_id " +
+            "        INNER JOIN " +
+            "    t_shipment_item si ON si.shipment_id = oi.shipment_id " +
+            "        INNER JOIN " +
+            "    t_stock s ON s.stock_id = si.stock_id " +
+            "        INNER JOIN " +
+            "    t_product p ON p.product_id = oi.product_id " +
+            "WHERE " +
+            "    MONTH(o.created_at) = ?1 " +
+            "GROUP BY oi.product_id",nativeQuery = true)
+    List<Object[]> getSoldQuantityProductByMonth(Integer month);
+
+
+
+
+    @Query(value = "SELECT si.product_id,SUM(s.quantity - s.sold_quantity) FROM t_shipment_item si " +
+            "INNER JOIN t_stock s ON si.stock_id = s.stock_id " +
+            "GROUP BY si.product_id",nativeQuery = true)
+    List<Object[]> getAvailableQuantityProduct();
+
+    @Query(value = "SELECT si.product_id,SUM(s.quantity) FROM t_shipment_item si  " +
+            "LEFT JOIN t_shipment ship ON ship.shipment_id = si.shipment_id  " +
+            "LEFT JOIN t_stock s ON s.stock_id = si.stock_id  " +
+            "WHERE MONTH(ship.created_at) = ?1  " +
+            "GROUP BY si.product_id",nativeQuery = true)
+    List<Object[]> getImportQuantityProductByMonth(Integer month);
+
+
 
     // Order Service
     @Query(value = "SELECT p.name,oi.quantity,pp.price,oi.amount FROM t_order_item oi " +
