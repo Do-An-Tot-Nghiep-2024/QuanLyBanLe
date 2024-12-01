@@ -1,5 +1,5 @@
-import { Box, } from "@mui/material";
-import { lazy } from "react";
+import { Box, Card, CardContent, Paper, Typography } from "@mui/material";
+import { lazy, useState } from "react";
 // import PersonIcon from "@mui/icons-material/Person";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -11,21 +11,30 @@ import AnalyticsPaper from "../../components/AnalyticsPaper";
 import colors from "../../constants/color";
 import LocalAtmIcon from "@mui/icons-material/LocalAtm";
 import {
-  getSalesAndProfitService,
+  getSalesAndProfitByDateService,
   getSalesBySupplierService,
 } from "../../services/statistic.service";
+import { convertDateInput } from "../../utils/dateUtil";
+import SnackbarMessage from "../../components/SnackbarMessage";
 const DataChart = lazy(() => import("../../components/DataChart"));
 const PieChartCard = lazy(() => import("../../components/RadarChart"));
 function Dashboard() {
+  const [message, setMessage] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const updateErrorMessage = (message: string) => {
+    setMessage(message);
+    setSnackbarOpen(true);
+    return;
+  };
   const getDashboard = async () => {
     try {
       const response: any = await getDashboardService();
       if (response.message !== "success") {
-        throw new Error("Error fetching dashboard");
+        updateErrorMessage(response.message);
       }
       return response.data;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      updateErrorMessage(error.message);
     }
   };
 
@@ -43,16 +52,15 @@ function Dashboard() {
 
   const getSalesAndProfit = async () => {
     try {
-      const response = await getSalesAndProfitService({
-        fromDateRequest: "",
-        toDateRequest: "",
-      });
+      const toDate = convertDateInput(new Date());
+      console.log(toDate);
+      const response = await getSalesAndProfitByDateService(toDate);
       if (response.message !== "success") {
-        throw new Error("Error fetching dashboard");
+        updateErrorMessage(response.message);
       }
       return response.data;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      updateErrorMessage(error.message);
     }
   };
 
@@ -103,6 +111,7 @@ function Dashboard() {
   if (profitError) {
     return <div>Error: {profitErrorMessage.message}</div>;
   }
+
   const style = {
     color: "white",
     fontSize: 36,
@@ -172,25 +181,25 @@ function Dashboard() {
           );
         })}
       </Grid>
-      <Grid container mt={5}>
-        <Grid size={{ lg: 5, sm: 12, xs: 12 }}>
+      <Grid container mt={5} spacing={2}>
+        <Grid size={{ lg: 5, sm: 12, xs: 12, md: 4 }}>
           <PieChartCard data={supplierData} />
         </Grid>
-        <Grid size={{ lg: 6, sm: 12, xs: 12 }}>
-          {/* <Card component={Paper}>
+        <Grid size={{ lg: 7, sm: 12, xs: 12, md: 7 }}>
+          <Card component={Paper} sx={{mr:2}}>
             <CardContent>
-              <Box
-                width={"100%"}
-                alignItems={"center"}
-                justifyContent={"center"}
-                display={"flex"}
-              > */}
-                <DataChart data={profitData} />
-              {/* </Box>
+              <Typography fontWeight={"bold"}>Biểu đồ doanh thu theo tuần</Typography>
+              <DataChart data={profitData} />
             </CardContent>
-          </Card> */}
+          </Card>
         </Grid>
       </Grid>
+      <SnackbarMessage
+        isError={true}
+        alertMessage={message}
+        setSnackbarOpen={setSnackbarOpen}
+        snackbarOpen={snackbarOpen}
+      />
     </Box>
   );
 }

@@ -10,6 +10,13 @@ const convertDate = (date: Date) => {
   return [day, month, year].join("-");
 };
 
+const convertDateInput = (date: Date) => {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
 const formatDate = (date: Date) => {
   return new Date(date).toLocaleDateString("vi-VN", {
     day: "numeric",
@@ -91,5 +98,6 @@ export {
   formatDateTime,
   generateDate,
   generateDateDuringWeek,
-  formatDateInput
+  formatDateInput,
+  convertDateInput
 };

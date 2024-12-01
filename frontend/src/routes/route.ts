@@ -73,6 +73,7 @@ const InventoryDetailPage = lazy(
 
 const DashboardEmployee = lazy(() => import("../pages/staff/home/Dashboard"));
 
+
 const CustomerPage = lazy(
   () => import("../pages/manager/customer/CustomerPage")
 );
@@ -95,6 +96,9 @@ const ProductReport = lazy(
 );
 
 const ProfitReport = lazy(() => import("../pages/manager/report/ProfitReport"));
+
+
+const StockReport = lazy(() => import("../pages/manager/report/StockReport"));
 
 interface RouteConfig {
   path: string;
@@ -154,6 +158,7 @@ const managerRoutes: RouteConfig[] = [
   // report
   { path: "/reports/product", component: ProductReport },
   { path: "/reports/profit", component: ProfitReport },
+  { path: "/reports/stock", component: StockReport },
 ];
 
 export { employeeRoutes, managerRoutes };
