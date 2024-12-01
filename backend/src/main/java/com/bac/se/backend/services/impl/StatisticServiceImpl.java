@@ -4,6 +4,7 @@ import com.bac.se.backend.enums.PageLimit;
 import com.bac.se.backend.mapper.ProductMapper;
 import com.bac.se.backend.mapper.ProductPriceMapper;
 import com.bac.se.backend.mapper.StatisticMapper;
+import com.bac.se.backend.mapper.StockMapper;
 import com.bac.se.backend.payload.request.DateRequest;
 import com.bac.se.backend.payload.response.common.OrderDateResponse;
 import com.bac.se.backend.payload.response.product.StatisticPriceProductResponse;
@@ -11,6 +12,11 @@ import com.bac.se.backend.payload.response.statistic.SaleAndProfitResponse;
 import com.bac.se.backend.payload.response.statistic.StatisticResponse;
 import com.bac.se.backend.payload.response.statistic.product.BestSellingProductResponse;
 import com.bac.se.backend.payload.response.statistic.product.TopFiveHighestGrossingProductResponse;
+import com.bac.se.backend.payload.response.statistic.sale.SaleAndProfitByMonth;
+import com.bac.se.backend.payload.response.statistic.stock.AvailableQuantity;
+import com.bac.se.backend.payload.response.statistic.stock.ImportQuantity;
+import com.bac.se.backend.payload.response.statistic.stock.ProductStockResponse;
+import com.bac.se.backend.payload.response.statistic.stock.SoldQuantity;
 import com.bac.se.backend.repositories.OrderItemRepository;
 import com.bac.se.backend.repositories.OrderRepository;
 import com.bac.se.backend.repositories.ProductPriceRepository;
@@ -27,7 +33,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +50,7 @@ public class StatisticServiceImpl implements StatisticService {
     private final OrderRepository orderRepository;
     private final JwtParse jwtParse;
     private final StatisticMapper statisticMapper;
+    private final StockMapper stockMapper;
 
 
     @Override
@@ -117,6 +125,81 @@ public class StatisticServiceImpl implements StatisticService {
                 .toList();
     }
 
+    @Override
+    public List<SaleAndProfitByMonth> getSalesAndProfitByMonth(Integer month) {
+        int currMonth = LocalDate.now().getMonthValue();
+        int currYear = LocalDate.now().getYear();
+        int size = 5;
+        if(month != null ){
+            if(month <= 12 && month >= 1){
+                currMonth = month;
+            }
+        }
+        if(currMonth == 2){
+            size = 4;
+        }
+        Map<Integer,SaleAndProfitByMonth> map = new HashMap<>();
+        for(int i = 0; i < size; i++){
+            map.put(i+1,new SaleAndProfitByMonth("Tuần " + (i+1),BigDecimal.ZERO,BigDecimal.ZERO));
+        }
+        var salesAndProfitByMonth = orderItemRepository.getSalesAndProfitByMonth(currMonth,currYear)
+                .stream().map(statisticMapper::mapObjectToSaleAndProfitByMonth).toList();
+        for(SaleAndProfitByMonth saleAndProfitByMonth : salesAndProfitByMonth){
+            SaleAndProfitByMonth res = map.get(Integer.parseInt(saleAndProfitByMonth.getWeek()));
+            res.setWeek("Tuần " + saleAndProfitByMonth.getWeek());
+            res.setTotalSales(saleAndProfitByMonth.getTotalSales());
+            res.setTotalProfit(saleAndProfitByMonth.getTotalProfit());
+        }
+
+        return map.values().stream().toList();
+    }
+
+
+    @Override
+    public List<ProductStockResponse> getStockByProduct(Integer month) {
+        var soldQuantityProductByMonth = orderItemRepository.getSoldQuantityProductByMonth(month);
+        var availableQuantityProduct = orderItemRepository.getAvailableQuantityProduct();
+        var importQuantityProductByMonth = orderItemRepository.getImportQuantityProductByMonth(month);
+        List<SoldQuantity> soldQuantityList = new ArrayList<>();
+        List<AvailableQuantity> availableQuantityProductByMonthList = new ArrayList<>();
+        List<ImportQuantity> importQuantityList = new ArrayList<>();
+        Map<Long,ProductStockResponse> map = new HashMap<>();
+        if(!soldQuantityProductByMonth.isEmpty()){
+            soldQuantityList = soldQuantityProductByMonth
+                    .stream()
+                    .map(stockMapper::mapToSoldQuantity)
+                    .toList();
+        }
+        for (SoldQuantity soldQuantity : soldQuantityList) {
+            log.info("soldQuantity {}", soldQuantity);
+        }
+        if(!availableQuantityProduct.isEmpty()){
+            availableQuantityProductByMonthList = availableQuantityProduct
+                    .stream()
+                    .map(stockMapper::mapToAvailableQuantity)
+                    .toList();
+        }
+        if(!importQuantityProductByMonth.isEmpty()){
+            importQuantityList = importQuantityProductByMonth
+                    .stream()
+                    .map(stockMapper::mapToImportQuantity)
+                    .toList();
+        }
+        for(SoldQuantity soldQuantity : soldQuantityList){
+            map.put(soldQuantity.id(),new ProductStockResponse(soldQuantity.name(),soldQuantity.quantity(),0,0));
+        }
+        for(AvailableQuantity availableQuantity : availableQuantityProductByMonthList){
+            if(map.containsKey(availableQuantity.id())){
+                map.get(availableQuantity.id()).setAvailableQuantity(availableQuantity.quantity());
+            }
+        }
+        for(ImportQuantity importQuantity : importQuantityList){
+            if(map.containsKey(importQuantity.id())){
+                map.get(importQuantity.id()).setImportQuantity(importQuantity.quantity());
+            }
+        }
+        return map.values().stream().filter(Objects::nonNull).toList();
+    }
 
 
     @Override
@@ -151,10 +234,19 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public List<SaleAndProfitResponse> getSalesAndProfitByDate(String fromDate, String toDate) throws ParseException {
-        DateRequest dateRequest = dateConvert.convertCurrentDateRequest(fromDate, toDate);
+    public List<SaleAndProfitResponse> getSalesAndProfitInWeek(String toDate) throws ParseException {
+        var dateRequest = dateConvert.generateDateInWeek(toDate);
+        log.info("fromDate {}", dateRequest.fromDate());
+        var responseMap = dateConvert.generateDateInWeekMap(toDate);
+
         var salesAndProfit = orderItemRepository.getSalesAndProfitByDate(dateRequest.fromDate(),dateRequest.toDate());
-        return salesAndProfit.stream().map(statisticMapper::mapObjectToSaleAndProfitResponse).toList();
+        var salesList =  salesAndProfit.stream().map(statisticMapper::mapObjectToSaleAndProfitResponse).toList();
+        for(SaleAndProfitResponse profitResponse : salesList){
+            responseMap.replace(profitResponse.getDate(),profitResponse);
+        }
+        return responseMap.values().stream().toList();
     }
+
+
 
 }

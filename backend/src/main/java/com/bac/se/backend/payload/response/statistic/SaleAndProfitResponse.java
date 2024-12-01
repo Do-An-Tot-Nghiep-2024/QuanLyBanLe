@@ -1,10 +1,16 @@
 package com.bac.se.backend.payload.response.statistic;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 
-public record SaleAndProfitResponse(
-        String date,
-        BigDecimal totalSales,
-        BigDecimal totalProfit
-) {
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class SaleAndProfitResponse {
+    String date;
+    BigDecimal totalSales;
+    BigDecimal totalProfit;
 }

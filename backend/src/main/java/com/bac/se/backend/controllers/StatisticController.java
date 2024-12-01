@@ -7,6 +7,8 @@ import com.bac.se.backend.payload.response.statistic.SaleAndProfitResponse;
 import com.bac.se.backend.payload.response.statistic.StatisticResponse;
 import com.bac.se.backend.payload.response.statistic.product.BestSellingProductResponse;
 import com.bac.se.backend.payload.response.statistic.product.TopFiveHighestGrossingProductResponse;
+import com.bac.se.backend.payload.response.statistic.sale.SaleAndProfitByMonth;
+import com.bac.se.backend.payload.response.statistic.stock.ProductStockResponse;
 import com.bac.se.backend.services.StatisticService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -72,22 +74,36 @@ public class StatisticController {
         }
     }
 
-    // Get sale and profit by date
-    @GetMapping("/sale-and-profit")
+    // Get sale and profit by month
+    @GetMapping("/sale-and-profit-by-month")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<List<SaleAndProfitResponse>>> getStatisticSaleAndProfit(
-            @RequestParam(required = false) String fromDate,
-            @RequestParam(required = false) String toDate
+    public ResponseEntity<ApiResponse<List<SaleAndProfitByMonth>>> getStatisticSaleAndProfit(
+            @RequestParam(required = false) Integer month
     ) {
         try {
             return ResponseEntity.ok(new ApiResponse<>("success",
-                    statisticService.getSalesAndProfitByDate(fromDate, toDate)));
-        } catch (ParseException e) {
-            return ResponseEntity.status(400).body(new ApiResponse<>("Invalid date format. Please use 'yyyy-MM-dd'.", null));
+                    statisticService.getSalesAndProfitByMonth(month)));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
         }
     }
+
+    @GetMapping("/sale-and-profit-in-week")
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public ResponseEntity<ApiResponse<List<SaleAndProfitResponse>>> getStatisticSaleAndProfit(
+            @RequestParam(required = false) String toDate
+    ) {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>("success",
+                    statisticService.getSalesAndProfitInWeek(toDate)));
+        }catch (ParseException e) {
+            return ResponseEntity.status(400).body(new ApiResponse<>("Invalid date format. Please use 'yyyy-MM-dd'.", null));
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
 
     // Get top five highest grossing product
     @GetMapping("/top-five-highest-grossing-product")
@@ -127,7 +143,7 @@ public class StatisticController {
                                                                                                @RequestParam(required = false) String toDate) {
         try {
             return ResponseEntity.ok(new ApiResponse<>("success",
-                    statisticService.getTotalSalesByEmp(request,fromDate,toDate)));
+                    statisticService.getTotalSalesByEmp(request, fromDate, toDate)));
         } catch (ParseException e) {
             return ResponseEntity.status(400).body(new ApiResponse<>("Invalid date format. Please use 'yyyy-MM-dd'.", null));
         } catch (Exception e) {
@@ -139,13 +155,26 @@ public class StatisticController {
     @GetMapping("/employee/total-orders")
     @PreAuthorize("hasAnyAuthority('MANAGER', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<List<OrderDateResponse<Integer>>>> getTotalOrdersByEmp(HttpServletRequest request,
-                                                                                               @RequestParam(required = false) String fromDate,
-                                                                                               @RequestParam(required = false) String toDate) {
+                                                                                             @RequestParam(required = false) String fromDate,
+                                                                                             @RequestParam(required = false) String toDate) {
         try {
             return ResponseEntity.ok(new ApiResponse<>("success",
-                    statisticService.getCurrentTotalOrdersOfEmployee(request,fromDate,toDate)));
+                    statisticService.getCurrentTotalOrdersOfEmployee(request, fromDate, toDate)));
         } catch (ParseException e) {
             return ResponseEntity.status(400).body(new ApiResponse<>("Invalid date format. Please use 'yyyy-MM-dd'.", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    // Get stock by product
+    @GetMapping("/stock-by-product")
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public ResponseEntity<ApiResponse<List<ProductStockResponse>>> getStockByProduct(
+            @RequestParam(required = false) Integer month) {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>("success",
+                    statisticService.getStockByProduct(month)));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
         }

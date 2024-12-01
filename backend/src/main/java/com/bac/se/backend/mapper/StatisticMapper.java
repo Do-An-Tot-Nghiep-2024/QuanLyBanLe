@@ -4,6 +4,7 @@ import com.bac.se.backend.payload.response.common.OrderDateResponse;
 import com.bac.se.backend.payload.response.statistic.SaleAndProfitResponse;
 import com.bac.se.backend.payload.response.statistic.StatisticResponse;
 import com.bac.se.backend.payload.response.statistic.product.TopFiveHighestGrossingProductResponse;
+import com.bac.se.backend.payload.response.statistic.sale.SaleAndProfitByMonth;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -43,6 +44,14 @@ public class StatisticMapper {
         return new OrderDateResponse<>(
                  object[0].toString(),
                 Integer.parseInt(object[1].toString())
+        );
+    }
+
+    public SaleAndProfitByMonth mapObjectToSaleAndProfitByMonth(Object[] object) {
+        return new SaleAndProfitByMonth(
+                object[0].toString(),
+                BigDecimal.valueOf(Double.parseDouble(object[1].toString())),
+                BigDecimal.valueOf(Double.parseDouble(object[2].toString()))
         );
     }
 }

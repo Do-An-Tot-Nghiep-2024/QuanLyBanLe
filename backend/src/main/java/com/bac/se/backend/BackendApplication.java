@@ -14,20 +14,4 @@ public class BackendApplication {
         log.info("Program is running");
     }
 
-
-//    @Autowired
-//    NotificationRepository notificationRepository;
-//
-//    @Bean
-//    CommandLineRunner commandLineRunner(){
-//        return args -> {
-//            Notification notification = Notification.builder()
-//                    .content("New notification")
-//                    .status(NotificationStatus.SENT)
-//                    .sentAt(new Date())
-//                    .build();
-//            notificationRepository.save(notification);
-//        };
-//    }
-
 }
