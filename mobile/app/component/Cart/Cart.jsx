@@ -9,7 +9,7 @@ import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 import { useFocusEffect } from "@react-navigation/native";
 
 export default function Cart({ navigation }) {
-    const [cartItems, setCartItems] = useState([]); 
+    const [cartItems, setCartItems] = useState([]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -28,17 +28,17 @@ export default function Cart({ navigation }) {
     const loadCartItems = async () => {
         const storedCart = await getCart();
         if (storedCart) {
-            setCartItems(storedCart); 
+            setCartItems(storedCart);
         } else {
-            setCartItems([]); 
+            setCartItems([]);
         }
     };
-  
 
-  
+
+
     const renderItem = ({ item }) => {
         console.log("item", item);
-        
+
         return (
             <View style={styles.itemContainer}>
                 <Image source={{ uri: item.image }} style={styles.image} />
@@ -46,7 +46,7 @@ export default function Cart({ navigation }) {
                     <Pressable style={styles.details} onPress={() => navigation.navigate('component/Product/DetailProduct', { productId: item.id })}>
                         <Text numberOfLines={2} style={styles.name}>{item.name}</Text>
                         <Text style={styles.price}>
-                        {item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                            {item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
 
                         </Text>
                     </Pressable>
@@ -80,7 +80,7 @@ export default function Cart({ navigation }) {
                 {
                     text: "Hủy",
                     style: "cancel",
-                    
+
                 },
                 {
                     text: "Xác nhận",
@@ -99,25 +99,25 @@ export default function Cart({ navigation }) {
         );
     };
 
-    const handleAddToCart = async (product) => {        
+    const handleAddToCart = async (product) => {
         try {
             await addToCart(product);
             loadCartItems();
         } catch (error) {
             console.log("error", error);
-            
+
         }
 
     }
-    
+
     const handleDescreaseQuantity = async (productId) => {
         try {
             await descreaseQuantity(productId);
             loadCartItems();
         } catch (error) {
             console.log("error", error);
-            
-            
+
+
         }
     }
 
@@ -126,34 +126,36 @@ export default function Cart({ navigation }) {
         loadCartItems()
     }, []));
 
-
- 
     return (
         <View style={styles.container}>
             {cartItems.length > 0 ? (
-                <View>
+                <View style={{flex: 1}}>
                     <FlatList
-                    data={cartItems} 
-                    keyExtractor={item => item?.id?.toString()}
-                    renderItem={renderItem}
-                />
-                <TouchableHighlight underlayColor={"grey"} style={styles.checkoutButton} onPress={() => { navigation.navigate('component/Cart/DetailPayment') }}>
-                <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 10,
-                }}>
-                    <MaterialCommunityIcons name='cash' size={26} color={"white"} />
-                    <Text style={styles.checkoutText}>Thanh toán</Text>
+                    decelerationRate={"normal"}
+                        data={cartItems}
+                        keyExtractor={item => item?.id?.toString()}
+                        renderItem={renderItem}
+                    />
+
+                    <View style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 10,
+                    }}>
+                        <Pressable underlayColor={"grey"} style={styles.checkoutButton} onPress={() => { navigation.navigate('component/Cart/DetailPayment') }}>
+
+                            <MaterialCommunityIcons name='cash' size={26} color={"white"} />
+                            <Text style={styles.checkoutText}>Thanh toán</Text>
+                        </Pressable>
+
+                    </View>
                 </View>
-            </TouchableHighlight>
-            </View>
-                
+
             ) : (
                 <Text style={styles.noCartText}>Chưa có sản phẩm nào</Text>
             )}
-           
+
         </View>
     );
 }
@@ -164,6 +166,7 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: 'white',
     },
+
     itemContainer: {
         flexDirection: 'row',
         borderWidth: 1,
@@ -182,18 +185,18 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         gap: 1
-        
+
     },
     details: {
         flex: 1,
         gap: 10
-        
+
     },
     name: {
         fontSize: 16,
         fontWeight: 'bold',
         textAlign: 'left',
-        
+
     },
     price: {
         fontSize: 14,
@@ -217,7 +220,7 @@ const styles = StyleSheet.create({
         height: 30,
         backgroundColor: 'white',
         textAlignVertical: 'center',
-        
+
     },
     checkoutButton: {
         backgroundColor: colors.accentColor,
@@ -229,6 +232,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         gap: 10,
+        flex: 1
     },
     checkoutText: {
         color: 'white',
@@ -240,5 +244,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 18,
         fontWeight: 'bold',
-    }
+    },
+
 });

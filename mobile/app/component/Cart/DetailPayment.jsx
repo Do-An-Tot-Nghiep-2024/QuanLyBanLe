@@ -15,7 +15,7 @@ const PaymentDetail = ({ navigation }) => {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(true);
   const [promotion, setPromotion] = useState(null);
-  const [isEditing, setIsEditing] = useState(false); 
+  const [isEditing, setIsEditing] = useState(false);
   const [originalName, setOriginalName] = useState('');
   const [originalPhone, setOriginalPhone] = useState('');
 
@@ -95,7 +95,7 @@ const PaymentDetail = ({ navigation }) => {
     };
 
     console.log(order);
-    
+
     return order;
   };
 
@@ -104,9 +104,9 @@ const PaymentDetail = ({ navigation }) => {
     console.log("ORDERS: " + JSON.stringify(order));
     const response = await createOrderService(order);
     console.log("RESPONSE PAGE: " + response);
-    
+
     if (response) {
-        await removeCart();
+      await removeCart();
       navigation.navigate('component/Order/OrderList');
     }
   };
@@ -124,67 +124,48 @@ const PaymentDetail = ({ navigation }) => {
     setIsEditing(false);
   };
 
-  
+
   const handleCancel = () => {
     setIsEditing(false);
     setName(originalName);
     setPhone(originalPhone);
   };
 
+  const tomorrowDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const day = String(tomorrow.getDate()).padStart(2, '0');
+    const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const year = tomorrow.getFullYear();
+
+    const formattedDate = `${day}/${month}/${year}`;
+    return formattedDate;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.userInfo}>
-                  <Text style={styles.header}>Thông tin khách hàng</Text>
-                  {isEditing ? (
-                      <>
-                          <TextInput
-                              style={styles.input}
-                              value={name}
-                              onChangeText={setName}
-                          />
-                          <TextInput
-                              style={styles.input}
-                              value={phone}
-                              onChangeText={setPhone}
-                              keyboardType="phone-pad"
-                          />
-                          <View style={{ flexDirection: 'row', marginTop: 10, width: '100%' }}>
-                          <Pressable style={styles.button} onPress={() => handleSave()}>
-                              <Text style={styles.buttonText}>Lưu</Text>
-                          </Pressable>
-                          <Pressable style={styles.button} onPress={() => handleCancel()}>
-                              <Text style={styles.buttonText}>Hủy</Text>
-                          </Pressable>
+        <Text style={styles.header}>Thông tin khách hàng</Text>
+        <View style={styles.infoContainer}>
+          <View>
+            <Text style={{ fontSize: 16 }}>Họ và tên: {name}</Text>
+            <Text style={{ fontSize: 16 }}>Số điện thoại: {phone}</Text>
+          </View>
 
-                          </View>
-                        
-                      </>
-                  ) : (
-                      <View style={styles.infoContainer}>
-                          <View>
-                              <Text style={{ fontSize: 16}}>Họ và tên: {name}</Text>
-                              <Text style={{fontSize: 16}}>Số điện thoại: {phone}</Text>
-                          </View>
-                          <Pressable onPress={() => setIsEditing(!isEditing)}>
-                              <MaterialCommunityIcons
-                                  name={isEditing ? 'check' : 'pencil'}
-                                  size={20}
-                                  color={colors.primaryColor}
-                                  style={styles.icon}
-                              />
-                          </Pressable>
-                      </View>
-                  )}
-              </View>
+        </View>
+
+      </View>
 
       <Divider style={styles.divider} />
-      <Text style={[styles.header, {marginTop: 10, padding: 10}]}>Thông tin đơn hàng</Text>
+      <Text style={[styles.header, { marginTop: 10, padding: 10 }]}>Thông tin đơn hàng</Text>
 
       <FlatList
         data={cartItems}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <View style={styles.productItem}>
+               <Text style={styles.productPrice}>{index + 1}|</Text> 
             <Text style={styles.productName}>{item.name}</Text>
             <Text style={styles.productPrice}>
               {`${item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} x ${item.quantity}`}
@@ -194,9 +175,10 @@ const PaymentDetail = ({ navigation }) => {
       />
 
       <View style={styles.paymentContainer}>
-        <Text style={styles.paymentHeader}>Phương thức nhận hàng:</Text>
-        <Text style={styles.paymentText}>Vui lòng nhận hàng trước: 20h ngày {new Date().toLocaleDateString()}</Text>
-        <Text>Địa chỉ: 12 Nguyễn Văn Bảo, phường 4, quận Gò Vấp, TP. HCM</Text>
+        <Text style={styles.paymentText}>Phương thức nhận hàng: Tự đến lấy hàng</Text>
+        <Text style={styles.paymentText}>Phương thức thanh toán: Tiền mặt</Text>
+        <Text style={styles.paymentHeader}>Lưu ý: Đơn hàng sẽ bị hủy nếu không đến lấy trước 20h ngày {tomorrowDate()} </Text>
+        <Text>Địa chỉ: Windy Store, 12 Nguyễn Văn Bảo, phường 4, quận Gò Vấp, TP. HCM</Text>
       </View>
 
       <View style={styles.totalContainer}>
@@ -207,14 +189,15 @@ const PaymentDetail = ({ navigation }) => {
           </Text>
         </View>
 
-        {totalDiscount > 0 && (
-          <View style={{ flexDirection: 'row' }}>
-            <Text style={styles.totalText}>Giảm giá: </Text>
-            <Text style={styles.totalPrice}>
-              - {totalDiscount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-            </Text>
-          </View>
-        )}
+        <View style={{ flexDirection: 'row' }}>
+          <Text style={styles.totalText}>Giảm giá: </Text>
+          <Text style={styles.totalPrice}>
+            {totalDiscount === 0
+              ? '0 VNĐ'
+              : `- ${totalDiscount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}
+          </Text>
+        </View>
+
 
         <View style={{ flexDirection: 'row' }}>
           <Text style={styles.totalText}>Thành tiền: </Text>
@@ -248,25 +231,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-},
-userInfo: {
+  },
+  userInfo: {
     padding: 10,
     backgroundColor: '#fff',
-},
-infoContainer: {
+  },
+  infoContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
     marginTop: 10,
-},
-input: {
+  },
+  input: {
     borderWidth: 1,
     borderColor: 'gray',
     borderRadius: 4,
     padding: 8,
     marginVertical: 5,
     fontSize: 16,
-},
+  },
   buttonContainer: {
     flexDirection: 'row',
     marginTop: 10,
@@ -306,6 +289,7 @@ input: {
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+    gap: 5
   },
   productName: {
     fontSize: 16,
@@ -335,11 +319,13 @@ input: {
   paymentContainer: {
     padding: 10,
     gap: 10,
+    borderWidth: 1,
+    borderColor: 'gray'
   },
   paymentHeader: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: colors.accentColor,
+    color: 'red',
   },
   paymentText: {
     fontSize: 14,

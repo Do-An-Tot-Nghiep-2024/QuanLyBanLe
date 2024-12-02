@@ -7,36 +7,37 @@ import Cart from './component/Cart/Cart';
 import { Pressable, Text } from 'react-native';
 import { removeItem } from './AsyncStorage';
 import { useNavigation } from 'expo-router';
+import Setting from './component/Setting/Setting';
 const Tab = createBottomTabNavigator();
 const { MaterialCommunityIcons } = require('@expo/vector-icons');
 
-const logout = async (navigation) => {
-  await removeItem('accessToken');
-  navigation.navigate('authentication/Login');
-}
+// const logout = async (navigation) => {
+//   await removeItem('accessToken');
+//   navigation.navigate('authentication/Login');
+// }
 export default function MyTabs() {
   const navigation = useNavigation();
   return (
     <Tab.Navigator screenOptions={{
       headerStyle: {
-        backgroundColor: colors.primaryColor, 
+        backgroundColor: colors.primaryColor,
       },
-      headerTintColor: '#fff', 
+      headerTintColor: '#fff',
       headerTitleStyle: {
-        fontWeight: 'bold', 
+        fontWeight: 'bold',
       },
       title: 'Windy Shop',
-      headerRight: () => (
-        <Pressable
-          onPress={() => {
-            logout(navigation)
-          }}
-        >
-          <MaterialCommunityIcons name='logout-variant'style={{
-            marginRight: 10
-          }} color={"white"} size={25} />
-        </Pressable>
-      ),
+      // headerRight: () => (
+      //   <Pressable
+      //     onPress={() => {
+      //       logout(navigation)
+      //     }}
+      //   >
+      //     <MaterialCommunityIcons name='logout-variant' style={{
+      //       marginRight: 10
+      //     }} color={"white"} size={25} />
+      //   </Pressable>
+      // ),
     }
     }>
       <Tab.Screen name="promotion" component={Promotion} options={{
@@ -69,6 +70,18 @@ export default function MyTabs() {
         ),
         tabBarIcon: ({ }) => <MaterialCommunityIcons name="cart" size={24} color={colors.primaryColor} />,
       }} />
+
+      <Tab.Screen name="setting" component={Setting} options={{
+        headerTitle: 'Windy Shop',
+        title: 'Cài đặt',
+        tabBarLabel: ({ focused }) => (
+          <Text style={{ fontWeight: 'bold', fontSize: 13, color: focused ? colors.primaryColor : 'gray' }}>
+            Cài đặt
+          </Text>
+        ),
+        tabBarIcon: ({ }) => <MaterialCommunityIcons name="cart" size={24} color={colors.primaryColor} />,
+      }} />
+
 
     </Tab.Navigator>
   );

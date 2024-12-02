@@ -18,11 +18,11 @@ export default function Category({ navigation }) {
     const [categories, setCategories] = useState([]);
     
     const categoryImages = {
-        "Bánh ngọt": require('../../../assets/images/banh_bao@2.jpg'),          
-        "Đồ tươi":require('../../../assets/images/trung-ga-hop-10.jpg'),       
-        "Đồ tươi sống":require('../../../assets/images/sua_tuoi.jpg'),  
-        "Đồ tươi sống 23":require('../../../assets/images/mi_tom.jpg'), 
-        "Nước giải khát 9900": require('../../../assets/images/24-lon-nuoc-tang-luc.jpg'), 
+        "Bánh kẹo": require('../../../assets/images/banh_bao@2.jpg'),          
+        "Dầu ăn, gia vị":require('../../../assets/images/nuoc-tuong-chinsu.jpg'),       
+        "Hóa phẩm, vệ sinh":require('../../../assets/images/sua_tuoi.jpg'),  
+        "Gạo, mì":require('../../../assets/images/mi_tom.jpg'), 
+        "Đồ uống": require('../../../assets/images/24-lon-nuoc-tang-luc.jpg'), 
         "default": require('../../../assets/images/default.png'), 
       };
     useFocusEffect(

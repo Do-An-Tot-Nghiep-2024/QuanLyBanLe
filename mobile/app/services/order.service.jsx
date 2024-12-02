@@ -6,7 +6,7 @@ const createOrderService = async (order) => {
     const accessToken = await getItem("accessToken")
     
     let cleanedToken = accessToken.replace(/"/g, "");       
-    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/orders`, {
+    const response = await fetch(`http://${IpAddress.ipAddress}/api/v1/orders`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -26,7 +26,7 @@ const createOrderService = async (order) => {
        showToastWithGravityAndOffset("Đặt hàng thành công");
        return true;
     } else {
-        showToastWithGravityAndOffset("Có lỗi xảy ra, vui lòng thử lại");
+        showToastWithGravityAndOffset(data?.message);
         return false;
     }
 }
@@ -35,7 +35,7 @@ const getAllOrdersService = async () => {
     const accessToken = await getItem("accessToken")
     
     let cleanedToken = accessToken.replace(/"/g, "");       
-    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/orders/customer`, {
+    const response = await fetch(`http://${IpAddress.ipAddress}/api/v1/orders/customer`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ const getOrderDetailService = async (orderId) => {
     const accessToken = await getItem("accessToken")
     
     let cleanedToken = accessToken.replace(/"/g, "");       
-    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/orders/customer-detail/${orderId}`, {
+    const response = await fetch(`http://${IpAddress.ipAddress}/api/v1/orders/customer-detail/${orderId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

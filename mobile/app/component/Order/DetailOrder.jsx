@@ -31,10 +31,7 @@ const OrderDetail = ({ route, navigation }) => {
 
         fetchOrderItems();
     },[])
-    // Get the time difference in hours from 'createdAt'
-    // const timeDifferenceInHours = getTimeDifferenceInHours(data.createdAt);
-
-    // Helper function to render each order item in a table row format
+   
     const renderOrderItem = ({ item }) => (
         <View style={styles.tableRow}>
             <Text style={styles.tableCell}>{item.name}</Text>
@@ -47,42 +44,24 @@ const OrderDetail = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            {/* Display Employee Info */}
-            {/* <Text style={styles.header}>Thông tin nhân viên</Text>
-            <Text style={styles.infoText}>Tên: {data.employeeName}</Text>
-            <Text style={styles.infoText}>Điện thoại: {data.employeePhone}</Text> */}
-
-            {/* Display warning if the time difference is greater than 24 hours */}
-            {/* {timeDifferenceInHours > 24 && (
-                <View style={styles.warningContainer}>
-                    <Text style={styles.warningText}>
-                        Cảnh báo: Đơn hàng này đã quá 24 giờ mà khách chưa đến lấy hàng.
-                    </Text>
-                </View>
-            )} */}
-
-            {/* Table Header */}
             <Text style={styles.header}>Chi tiết đơn hàng</Text>
+            <View style={styles.totalContainer}>
+                <Text style={styles.totalText}>
+                    Tổng tiền: {detailOrder?.total?.toLocaleString()} VND
+                </Text>
+            </View>
             <View style={styles.tableHeader}>
                 <Text style={[styles.tableHeaderCell, styles.tableCell]}>Tên món</Text>
                 <Text style={[styles.tableHeaderCell, styles.tableCell]}>Số lượng</Text>
                 <Text style={[styles.tableHeaderCell, styles.tableCell]}>Giá</Text>
                 <Text style={[styles.tableHeaderCell, styles.tableCell]}>Thành tiền</Text>
             </View>
-
-            {/* Display Order Items as Table Rows */}
             <FlatList
+            decelerationRate={"normal"}
                 data={detailOrder.orderItems}
                 renderItem={renderOrderItem}
                 keyExtractor={(item, index) => index.toString()}
             />
-
-            {/* Display Total */}
-            <View style={styles.totalContainer}>
-                <Text style={styles.totalText}>
-                    Tổng tiền: {detailOrder?.total?.toLocaleString()} VND
-                </Text>
-            </View>
         </View>
     );
 };
@@ -91,6 +70,7 @@ const styles = StyleSheet.create({
     container: {
         padding: 16,
         backgroundColor: "#fff",
+        flex: 1
     },
     header: {
         fontSize: 20,
@@ -129,12 +109,13 @@ const styles = StyleSheet.create({
         marginTop: 20,
         padding: 10,
         backgroundColor: "#f5f5f5",
-        borderRadius: 5,
+        borderRadius: 5
     },
     totalText: {
         fontSize: 18,
         fontWeight: "bold",
-        textAlign: 'right'
+        textAlign: 'right',
+       
 
     },
     warningContainer: {

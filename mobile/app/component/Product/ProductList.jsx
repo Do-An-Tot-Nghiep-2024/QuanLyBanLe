@@ -27,7 +27,7 @@ const ProductList = ({ route, navigation }) => {
   return (
     <FlatList
       data={products}
-      keyExtractor={item => item?.productId?.toString()}
+      keyExtractor={item => item?.id?.toString()}
       numColumns={2}
       renderItem={({ item }) => (
         <TouchableHighlight
@@ -43,7 +43,7 @@ const ProductList = ({ route, navigation }) => {
             <Image
               source={{ uri: item.image }}
               style={styles.image}
-              onError={() => console.log('Image failed to load')} 
+              onError={() => console.log('Image failed to load')} // Debugging line
             />
             <View style={styles.details}>
               <Text style={styles.name}>{item.name}</Text>
