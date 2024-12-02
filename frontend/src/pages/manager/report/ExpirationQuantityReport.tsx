@@ -18,6 +18,7 @@ import { useState } from "react";
 import { getExpirationQuantityReportService } from "../../../services/statistic.service";
 import { useQuery } from "@tanstack/react-query";
 import SnackbarMessage from "../../../components/SnackbarMessage";
+import colors from "../../../constants/color";
 
 type Response = {
   name: string;
@@ -113,7 +114,7 @@ export default function ExpirationQuantityReport() {
         {isError && <div>Error: {error.message}</div>}
         <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="small">
           <TableHead>
-            <TableRow sx={{ backgroundColor: "gray" }}>
+            <TableRow sx={{ backgroundColor: colors.secondaryColor }}>
               {columns.map((column, index) => (
                 <TableCell
                   key={index}

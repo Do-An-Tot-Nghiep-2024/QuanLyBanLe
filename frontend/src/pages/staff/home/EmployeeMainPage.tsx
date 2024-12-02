@@ -6,11 +6,12 @@ import {
   ShoppingCart as ShoppingCartIcon,
   Store as StoreIcon,
   Inventory as InventoryIcon,
-  Receipt as  ReceiptIcon,
+  Receipt as ReceiptIcon,
   Refresh as RefreshIcon,
+  AccessTime as AccessTimeIcon,
   Logout,
 } from "@mui/icons-material";
-import { AppProvider, DashboardLayout} from "@toolpad/core";
+import { AppProvider, DashboardLayout } from "@toolpad/core";
 import type { Router, Navigation, Session } from "@toolpad/core";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import Cookies from "js-cookie";
@@ -31,7 +32,6 @@ const NAVIGATION: Navigation = [
     icon: <DashboardIcon />,
   },
   {
-    
     segment: "staff/orders",
     title: "Đơn hàng",
     icon: <ShoppingCartIcon />,
@@ -45,6 +45,11 @@ const NAVIGATION: Navigation = [
         segment: "",
         title: "Quản lí đơn hàng",
         icon: <ReceiptIcon />,
+      },
+      {
+        segment: "expiration-quantity",
+        title: "Quản lý sản phẩm hết hạn",
+        icon: <AccessTimeIcon />,
       },
     ],
   },
@@ -162,9 +167,8 @@ export default function Sidebar() {
           clearToken();
         } else {
           console.log(path);
-            setPathname(String(path));
-            navigate(path);
-          
+          setPathname(String(path));
+          navigate(path);
         }
       },
     };
@@ -224,14 +228,20 @@ export default function Sidebar() {
         title: "",
       }}
     >
-      <DashboardLayout slots={{
+      <DashboardLayout
+        slots={{
           toolbarActions: () => (
             <Stack flexDirection={"row"}>
-              <IconButton sx={{mb:1}} onClick={() => setRefresh((prev) => !prev)}>
+              <IconButton
+                sx={{ mb: 1 }}
+                onClick={() => setRefresh((prev) => !prev)}
+              >
                 <RefreshIcon />
               </IconButton>
               <Notification data={nofitications} />
-              <Typography fontSize={16} pt={1} fontWeight={"bold"}>NHÂN VIÊN</Typography>
+              <Typography fontSize={16} pt={1} fontWeight={"bold"}>
+                NHÂN VIÊN
+              </Typography>
             </Stack>
           ),
         }}
@@ -243,7 +253,7 @@ export default function Sidebar() {
             flexDirection: "column",
             alignItems: "center",
             height: "100vh",
-            pt:3
+            pt: 3,
           }}
         >
           <Outlet />

@@ -85,7 +85,7 @@ export default function StockReport() {
       </Box>
       <Container sx={{pt:2}}>
         <Typography align="center" fontWeight={"bold"}>
-          Biểu đồ nhập và bán của sản phẩm theo tháng
+          Biểu đồ nhập và bán của sản phẩm trong tháng {month}
         </Typography>
         <BarChartVertical data={data} />
       </Container>

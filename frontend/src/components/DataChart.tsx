@@ -21,7 +21,7 @@ type DateMonth = {
   week: string;
   totalSales: number;
   totalProfit: number;
-}
+};
 
 type Props = {
   data: DataWeek[] | DateMonth[];
@@ -55,7 +55,7 @@ type Props = {
 //     </g>
 //   );
 // };
-const DataFormater = (number:number) => {
+const DataFormater = (number: number) => {
   if (number > 1000000000) {
     return (number / 1000000000).toString() + "Tỉ";
   } else if (number > 1000000) {
@@ -74,13 +74,26 @@ const isWeek = (data: any[]) => {
 export default function DataChart({ data }: Props) {
   return (
     <Box display="flex" sx={{ px: 2 }}>
-      <ResponsiveContainer width="100%" height={250} >
-        <ComposedChart data={data} margin={{left:20}}>
+      <ResponsiveContainer width="100%" height={300}>
+        <ComposedChart data={data} margin={{ left: 20 }}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey={isWeek(data) ? "week" : "date"} label={{ value: isWeek(data) ? "Tuần " : "Ngày", offset: -5 }} height={100} />
-          <YAxis  tickFormatter={DataFormater} label={{ value: "Tổng tiền (VNĐ)", angle: -90, position: "insideLeft", dy: 40 }} />
+          <XAxis
+            dataKey={isWeek(data) ? "week" : "date"}
+            label={{ value: isWeek(data) ? "Tuần " : "Ngày", offset: -5 }}
+            height={100}
+          />
+          <YAxis
+            tickFormatter={DataFormater}
+            label={{
+              value: "Tổng tiền (VNĐ)",
+              angle: -90,
+              position: "insideLeft",
+              dy: 35,
+              dx:-15
+            }}
+          />
           <Tooltip formatter={(value) => formatMoney(value as number)} />
-          <Legend iconType="circle" align="center" verticalAlign="top" />
+          <Legend iconType="circle" align="center" verticalAlign="bottom" />
           <Bar dataKey="totalSales" fill="#89A8B2" name="Doanh thu" />
           <Bar dataKey="totalProfit" fill="#9ABF80" name="Lợi nhuận" />
         </ComposedChart>

@@ -30,6 +30,8 @@ import {
   convertDateInput,
   generateDateDuringWeek,
 } from "../../../utils/dateUtil";
+import dayjs, { Dayjs } from "dayjs";
+import DateInput from "../../../components/DateInput";
 const OrderList: React.FC = () => {
   const navigate = useNavigate();
   const { fromDate: before, toDate: after } = generateDateDuringWeek();
@@ -49,6 +51,14 @@ const OrderList: React.FC = () => {
   const [orderBy, setOrderBy] = useState<string>("orderId");
   const [order, setOrder] = useState<"asc" | "desc">("desc");
 
+  const handleChangeStartDate = (value: Dayjs | null) => {
+    setStartDate(value?.format("YYYY-MM-DD") ?? "");
+  };
+
+  const handleChangeEndDate = (value: Dayjs | null) => {
+    setEndDate(value?.format("YYYY-MM-DD") ?? "");
+  };
+
   const columns: Array<{
     label: string;
     field?: keyof OrderSchema;
@@ -62,7 +72,7 @@ const OrderList: React.FC = () => {
     { label: "Ngày Tạo", field: "createdAt", width: "15%" },
     { label: "Phương Thức Thanh Toán", field: "paymentType", width: "15%" },
     { label: "Tổng Cộng", field: "total", width: "20%" },
-    { label: "Số Điện Thoại Khách Hàng", field: "customerPhone", width: "10%" },
+    { label: "SĐT Khách Hàng", field: "customerPhone", width: "10%" },
   ];
 
   const tableCellStyles = {
@@ -218,8 +228,7 @@ const OrderList: React.FC = () => {
       >
         <Box display="flex" justifyContent="flex-end" gap={2}>
           {/* Start Date */}
-          <TextField
-            
+          {/* <TextField
             type="date"
             label="Ngày bắt đầu"
             variant="outlined"
@@ -227,9 +236,14 @@ const OrderList: React.FC = () => {
             onChange={(e) => setStartDate(e.target.value)}
             InputLabelProps={{ shrink: true }}
             sx={{ width: 150 }}
+          /> */}
+          <DateInput
+            date={dayjs(startDate)}
+            onChange={handleChangeStartDate}
+            lable="Ngày bắt đầu"
           />
           {/* End Date */}
-          <TextField
+          {/* <TextField
             type="date"
             label="Ngày kết thúc"
             variant="outlined"
@@ -237,6 +251,11 @@ const OrderList: React.FC = () => {
             onChange={(e) => setEndDate(e.target.value)}
             InputLabelProps={{ shrink: true }}
             sx={{ width: 150 }}
+          /> */}
+          <DateInput
+            date={dayjs(endDate)}
+            onChange={handleChangeEndDate}
+            lable="Ngày kết thúc"
           />
         </Box>
 
@@ -311,7 +330,7 @@ const OrderList: React.FC = () => {
           </Typography>
         ) : (
           <>
-            <Table>
+            <Table size="small">
               <TableHead sx={{ backgroundColor: colors.secondaryColor }}>
                 <TableRow>
                   {columns.map((column, index) => (
