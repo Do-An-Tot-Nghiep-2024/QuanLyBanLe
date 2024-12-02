@@ -17,9 +17,10 @@ export default function SnackbarMessage({alertMessage, setSnackbarOpen, snackbar
       anchorOrigin={{ vertical: "top", horizontal: "right" }}
     >
       <Alert
+
         onClose={() => setSnackbarOpen(false)}
         severity={isError ? "error" : "success"}
-        sx={{ width: "100%" }}
+        sx={{ width: "100%",fontSize:16 }}
       >
         {alertMessage}
       </Alert>

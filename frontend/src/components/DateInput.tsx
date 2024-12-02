@@ -12,12 +12,14 @@ type Props = {
 export default function DateInput({ date, onChange, lable }: Props) {
   return (
     <LocalizationProvider
+     
       dateAdapter={AdapterDayjs}
       localeText={
         viVN.components.MuiLocalizationProvider.defaultProps.localeText
       }
     >
       <DatePicker
+        
         label={lable}
         onChange={onChange}
         value={date}

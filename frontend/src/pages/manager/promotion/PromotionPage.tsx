@@ -37,7 +37,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import colors from "../../../constants/color";
 import EditIcon from "@mui/icons-material/Edit";
-import { formatDateInput } from "../../../utils/dateUtil";
+import { convertDate, formatDateInput } from "../../../utils/dateUtil";
 import { formatMoney } from "../../../utils/formatMoney";
 const PromotionPage: React.FC = () => {
   const navigate = useNavigate();
@@ -86,6 +86,7 @@ const PromotionPage: React.FC = () => {
   >({
     queryKey: ["promotions"],
     queryFn: fetchPromotions,
+    refetchOnWindowFocus: false,
   });
 
   const handleClose = () => {
@@ -105,19 +106,19 @@ const PromotionPage: React.FC = () => {
   //   }
   // }, [data]);
 
-  const getPromotionStatus = (startDate: string, endDate: string): string => {
-    const now = new Date();
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+  // const getPromotionStatus = (startDate: string, endDate: string): string => {
+  //   const now = new Date();
+  //   const start = new Date(startDate);
+  //   const end = new Date(endDate);
 
-    if (now < start) {
-      return "Sắp diễn ra";
-    } else if (now >= start && now <= end) {
-      return "Đang diễn ra";
-    } else {
-      return "Đã hết hạn";
-    }
-  };
+  //   if (now < start) {
+  //     return "Sắp diễn ra";
+  //   } else if (now >= start && now <= end) {
+  //     return "Đang diễn ra";
+  //   } else {
+  //     return "Đã hết hạn";
+  //   }
+  // };
 
   // Sorting logic
   // useEffect(() => {
@@ -154,7 +155,7 @@ const PromotionPage: React.FC = () => {
       endDate: promotion.endDate,
       orderLimit: promotion.orderLimit,
       minOrderValue: promotion.minOrderValue,
-      discountPercent: promotion.percentage,
+      discountPercent: promotion.percentage * 100,
       isActive: promotion.isActive as boolean,
     });
   };
@@ -162,7 +163,7 @@ const PromotionPage: React.FC = () => {
     return <div>Error is : {error.message}</div>;
   }
   return (
-    <Box pt={4} width={"90%"}>
+    <Box pt={4} width={"95%"}>
       {message ? <Alert severity="error">{message}</Alert> : null}
       <Typography
         variant="h5"
@@ -203,7 +204,7 @@ const PromotionPage: React.FC = () => {
                   "Ngày bắt đầu",
                   "Ngày kết thúc",
                   "Giới hạn đơn hàng",
-                  "Trạng thái",
+                  // "Trạng thái",
                   "Giá trị tố thiểu ",
                   "Phần trăm giảm giá",
                 ].map((header, index) => {
@@ -257,18 +258,18 @@ const PromotionPage: React.FC = () => {
                   <TableCell align="center">{promotion.name}</TableCell>
                   <TableCell align="center">{promotion.description}</TableCell>
                   <TableCell align="center">
-                    {new Date(promotion.startDate).toLocaleDateString("vi-VN")}
+                    {convertDate(new Date(promotion.startDate))}
                   </TableCell>
                   <TableCell align="center">
-                    {new Date(promotion.endDate).toLocaleDateString("vi-VN")}
+                    {convertDate(new Date(promotion.endDate))}
                   </TableCell>
                   {/* <TableCell align="center">
                     {promotion.typePromotion}
                   </TableCell> */}
                   <TableCell align="center">{promotion.orderLimit}</TableCell>
-                  <TableCell align="center">
+                  {/* <TableCell align="center">
                     {getPromotionStatus(promotion.startDate, promotion.endDate)}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell>{formatMoney(promotion.minOrderValue)}</TableCell>
                   <TableCell align="center">
                     {promotion.percentage * 100}%
@@ -329,11 +330,11 @@ const PromotionPage: React.FC = () => {
               ></TextField>
 
               <TextField
-                label="Tỉ lệ"
+                label="Tỉ lệ % giảm giá"
                 variant="standard"
-                value={selectPromotion.discountPercent * 100 + "%"}
-                placeholder="Giá trị đơn hàng tối thiểu"
-                name="minOrderValue"
+                value={Number(selectPromotion.discountPercent) }
+                placeholder="Tỉ lệ giảm giá"
+                name="discountPercent"
                 onChange={handleChangeInput}
               ></TextField>
 

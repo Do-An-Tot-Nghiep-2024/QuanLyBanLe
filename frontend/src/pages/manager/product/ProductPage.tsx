@@ -267,6 +267,8 @@ export default function ProductPage() {
                 onClick={() => {
                   setCategory(category.name);
                   setSelectedCategory(category.name);
+                  setPage(0);
+                  
                 }}
                 key={category.id}
                 label={category.name}

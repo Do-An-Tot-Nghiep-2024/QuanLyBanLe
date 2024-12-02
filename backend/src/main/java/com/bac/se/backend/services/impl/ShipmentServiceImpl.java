@@ -106,7 +106,6 @@ public class ShipmentServiceImpl implements ShipmentService {
             Stock stock = Stock.builder()
                     .notifyQuantity(defaultQuantityNotify)
                     .quantity(productItem.quantity())
-                    .failedQuantity(0)
                     .soldQuantity(0)
                     .build();
             // Cập nhật số lượng sản phâm trong lô hàng

@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
 
   // Column definition: flexBasis ensures consistent width for all columns
   tableCol: {
-    width: "100%",
+    // width: "100%",
     borderBottomWidth: 1,
     borderColor: "#000",
     borderBottomStyle: "dashed",
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
 
   // Table cell font size
   tableCell: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "bold",
   },
 });
@@ -50,40 +50,36 @@ const PDFTable = ({ data }: { data: OrderItemResponse[] }) => (
   <View style={styles.tableContainer}>
     {/* Table Header */}
     <View style={styles.tableRow}>
-      <View style={[styles.tableCol, { width: "50%" }]}>
-        <Text style={styles.tableCell}>STT</Text>
+      <View style={[styles.tableCol, { flex: 3 }]}>
+        <Text style={[styles.tableCell, {}]}>Mặt hàng</Text>
       </View>
-      <View style={[styles.tableCol, { textAlign: "left" }]}>
-        <Text style={styles.tableCell}>Tên sản phẩm</Text>
+      <View style={[styles.tableCol, { flex: 0.5 }]}>
+        <Text style={[styles.tableCell, {}]}>Đơn giá</Text>
       </View>
-      <View style={[styles.tableCol, { textAlign: "center" }]}>
-        <Text style={styles.tableCell}>Số lượng</Text>
+      <View style={[styles.tableCol, { flex: 0.5 }]}>
+        <Text style={[styles.tableCell, { textAlign: "center" }]}>SL</Text>
       </View>
-      <View style={styles.tableCol}>
-        <Text style={styles.tableCell}>Đơn giá</Text>
-      </View>
-      <View style={styles.tableCol}>
-        <Text style={styles.tableCell}>Thành tiền</Text>
+      <View style={[styles.tableCol, { flex: 0.5 }]}>
+        <Text style={[styles.tableCell, {}]}>T.Tiền</Text>
       </View>
     </View>
 
     {/* Table Rows */}
     {data?.map((item, index) => (
       <View key={index} style={styles.tableRow}>
-        <View style={[styles.tableCol, { width: "50%" }]}>
-          <Text>{index + 1}</Text>
-        </View>
-        <View style={styles.tableCol}>
+        <View style={[styles.tableCol, { flex: 3 }]}>
           <Text>{item?.name}</Text>
         </View>
-        <View style={styles.tableCol}>
+
+        <View style={[styles.tableCol, { flex: 0.5 }]}>
+          <Text>{Number(item.price).toLocaleString("de-DE")}</Text>
+        </View>
+
+        <View style={[styles.tableCol, { flex: 0.5 }]}>
           <Text style={{ textAlign: "center" }}>{item?.quantity}</Text>
         </View>
 
-        <View style={styles.tableCol}>
-          <Text>{Number(item.price).toLocaleString("de-DE")}</Text>
-        </View>
-        <View style={styles.tableCol}>
+        <View style={[styles.tableCol, { flex: 0.5 }]}>
           <Text>{Number(item.amount).toLocaleString("de-DE")}</Text>
         </View>
       </View>

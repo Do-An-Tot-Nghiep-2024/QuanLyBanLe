@@ -80,13 +80,13 @@ public class OrderServiceImpl implements OrderService {
         StockResponse stockResponse = stockMapper.mapObjectToStockResponse(availableQuantityStock.get(0));
         if (stockResponse.quantity() - stockResponse.soldQuantity() < quantity) {
             log.info("quantity is {}", stockResponse.quantity() - stockResponse.soldQuantity());
-            throw new BadRequestUserException("Số lượng " + product.getName() + "không đủ");
+            throw new BadRequestUserException("Số lượng " + product.getName() + " không đủ");
         }
         if (stockResponse.quantity() - stockResponse.soldQuantity() <= stockResponse.notifyQuantity()) {
             Notification notification = Notification.builder()
                     .sentAt(new Date())
                     .status(NotificationStatus.SENT)
-                    .content(product.getName() + "sắp hết vui lòng nhập thêm!")
+                    .content(product.getName() + " sắp hết vui lòng nhập thêm!")
                     .build();
             notificationRepository.save(notification);
         }
@@ -217,7 +217,7 @@ public class OrderServiceImpl implements OrderService {
             orderItemRepository.save(orderItem);
             total = total.add(BigDecimal.valueOf(amount));
         }
-        if(orderRequest.customerPayment() < total.doubleValue()){
+        if(orderRequest.customerPayment() < total.doubleValue() - orderSave.getTotalDiscount().doubleValue()){
             throw new BadRequestUserException("Số tiền khách hàng đưa không đủ");
         }
         double roundTotal = (double) Math.round(total.doubleValue() * 100) / 100;

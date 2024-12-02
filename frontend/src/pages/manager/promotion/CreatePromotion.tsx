@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Box,
   Button,
   TextField,
   Typography,
@@ -10,10 +9,13 @@ import {
   Container,
   Stack,
 } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import { createPromotionService } from "../../../services/promotion.service";
 import { useNavigate } from "react-router-dom";
 
 import PromotionRequest from "../../../types/promotion/promotionRequest";
+import dayjs, { Dayjs } from "dayjs";
+import DateInput from "../../../components/DateInput";
 
 const CreatePromotion: React.FC = () => {
   const navigate = useNavigate();
@@ -39,6 +41,15 @@ const CreatePromotion: React.FC = () => {
     setPromotion({ ...promotion, [e.target.name]: e.target.value });
   };
 
+  const handleChangeStartDate = (value: Dayjs | null) => {
+    setPromotion({
+      ...promotion,
+      startDate: value?.format("YYYY-MM-DD") ?? "",
+    });
+  };
+  const handleChangeEndDate = (value: Dayjs | null) => {
+    setPromotion({ ...promotion, endDate: value?.format("YYYY-MM-DD") ?? "" });
+  };
   const validateForm = (data: PromotionRequest) => {
     const {
       name,
@@ -70,17 +81,22 @@ const CreatePromotion: React.FC = () => {
         message: "Ngày bắt đầu phải nhỏ hơn ngày kết thúc",
       };
     }
-    if(orderLimit < 1 || minOrderValue < 1 || discountPercent < 1){
+    if(endDate < new Date().toISOString()){
+      return {
+        status: false,
+        message: "Ngày kết thúc phải lớn hơn ngày hiện tại",
+      };
+    }
+    if (orderLimit < 1 || minOrderValue < 1 || discountPercent < 1) {
       return {
         status: false,
         message: "Giá trị số lượng phải lớn hơn 0",
-      }
+      };
     }
     return {
       status: true,
       message: "",
     };
-    
   };
 
   const onSubmit = async (data: PromotionRequest) => {
@@ -172,29 +188,23 @@ const CreatePromotion: React.FC = () => {
         sx={{ mb: 2 }}
       />
 
-      <Box display="flex" flexDirection="row" gap="15px">
-        <TextField
-          fullWidth
-          type="date"
-          label="Ngày bắt đầu"
-          name="startDate"
-          sx={{ mb: 2 }}
-          InputLabelProps={{ shrink: true }}
-          value={promotion.startDate}
-          onChange={handleChangeInput}
-        />
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ sm: 12, md: 6, lg: 4 }}>
+          <DateInput
+            date={dayjs(promotion.startDate)}
+            onChange={handleChangeStartDate}
+            lable="Ngày bắt đầu"
+          />
+        </Grid>
 
-        <TextField
-          fullWidth
-          type="date"
-          label="Ngày kết thúc"
-          name="endDate"
-          sx={{ mb: 2 }}
-          InputLabelProps={{ shrink: true }}
-          value={promotion.endDate}
-          onChange={handleChangeInput}
-        />
-      </Box>
+        <Grid size={{ sm: 12, md: 6, lg: 4 }}>
+          <DateInput
+            date={dayjs(promotion.endDate)}
+            onChange={handleChangeEndDate}
+            lable="Ngày kết thúc"
+          />
+        </Grid>
+      </Grid>
 
       <TextField
         fullWidth

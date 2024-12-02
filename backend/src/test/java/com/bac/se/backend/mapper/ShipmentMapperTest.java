@@ -14,7 +14,7 @@ class ShipmentMapperTest {
     void mapToShipmentItemResponse() {
         Object[] mockObj = new Object[]{"1", "Supplier", "Banh bao",
                 new Date(System.currentTimeMillis()),
-                new Date(System.currentTimeMillis()), 1, 2, 3, "cai"};
+                new Date(System.currentTimeMillis()), 1, 3, "cai"};
         var response = shipmentMapper.mapToShipmentItemResponse(mockObj);
         assertNotNull(response);
         assertEquals(1, response.shipmentId());
@@ -23,7 +23,6 @@ class ShipmentMapperTest {
         assertEquals(mockObj[3], response.mxp());
         assertEquals(mockObj[4], response.exp());
         assertEquals(1, response.soldQuantity());
-        assertEquals(2, response.failedQuantity());
         assertEquals(3, response.availableQuantity());
         assertEquals("cai", response.unit());
 

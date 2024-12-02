@@ -25,7 +25,7 @@ Font.register({
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
-    backgroundColor: "#DCDCE1",
+    backgroundColor: "#fff",
   },
   tableContainer: {
     flexDirection: "row",
@@ -51,9 +51,9 @@ const styles = StyleSheet.create({
   },
   header: {
     textAlign: "center",
-    fontSize: 30,
+    fontSize: 25,
     fontWeight: "bold",
-    marginTop: 60,
+    marginVertical: 15,
   },
   top: {
     flexDirection: "column",
@@ -90,17 +90,26 @@ const styles = StyleSheet.create({
   image: {
     marginLeft: "auto",
     marginRight: "auto",
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     borderRadius: "50%",
-    marginTop: 25,
+    marginTop: 10,
   },
   payment: {
+    display: "flex",
     flexDirection: "row",
     justifyContent: "space-between", // Distributes space evenly with alignment
-    alignItems: "center", // Ensures vertical alignment
-    padding: 10,
+    paddingHorizontal: 35,
+    paddingVertical: 4,
     fontSize: 20,
+    fontWeight: "bold",
+  },
+  head: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between", // Distributes space evenly with alignment
+    paddingHorizontal: 35,
+    paddingTop: 10,
   },
   textLeft: {
     flex: 1,
@@ -137,22 +146,30 @@ const InvoiceDoc = ({
   <Document title="Hóa đơn" style={styles.body}>
     <Page size="A4" style={styles.page}>
       <Image style={styles.image} src={logo} />
-      <View>
+      <View style={{ display: "flex", padding: "none" }}>
         <Text style={styles.header}>{title}</Text>
-        <View style={[styles.orderId, { marginTop: 10 }]}>
-          <Text style={{ fontWeight: 100 }}>Mã hóa đơn: </Text>
-          <Text style={{ fontWeight: "bold" }}>{orderId}</Text>
-        </View>
-        <View style={styles.top}>
+        <View style={styles.head}>
           <View style={styles.info}>
-            <Text style={styles.textTitle}>Nhân viên: </Text>
-            <Text>{employee}</Text>
-          </View>
-
-          <View style={[styles.info, { marginBottom: 20 }]}>
             <Text style={styles.textTitle}>Ngày tạo: </Text>
             <Text>{formatDateTime(createdAt)}</Text>
           </View>
+          <View style={styles.info}>
+            <Text>Mã hóa đơn: </Text>
+            <Text style={{ fontWeight: "bold" }}>{orderId}</Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={{
+          display: "flex",
+          alignItems: "flex-end",
+          paddingHorizontal: 35,
+          paddingVertical: 10,
+        }}
+      >
+        <View style={styles.info}>
+          <Text style={styles.textTitle}>Nhân viên: </Text>
+          <Text>{employee}</Text>
         </View>
       </View>
       <View>
@@ -160,22 +177,27 @@ const InvoiceDoc = ({
         <PDFTable data={data} />
 
         {/* Display total amount and payment information */}
-        {discount > 0 && (
+        {/* {discount > 0 && (
           <Text style={styles.total}>Khuyến mãi: {formatMoney(discount)}</Text>
-        )}
+        )} */}
         <View style={styles.payment}>
-          <Text style={styles.textLeft}>Tổng tiền:</Text>
-          <Text style={styles.textRight}> {formatMoney(total)}</Text>
+          <Text>{"Tổng tiền phải thanh toán".toUpperCase()}</Text>
+          <Text> {formatMoney(total)}</Text>
         </View>
 
-        <View style={[styles.payment, { fontSize: 15 }]}>
-          <Text style={styles.textLeft}>Tiền khách thanh toán:</Text>
-          <Text style={styles.textRight}>{formatMoney(customerPayment)}</Text>
+        <View style={styles.payment}>
+          <Text>{"Tổng tiền đã giảm".toUpperCase()}</Text>
+          <Text> {formatMoney(discount > 0 ? discount : 0)}</Text>
         </View>
 
-        <View style={[styles.payment, { fontSize: 15 }]}>
-          <Text style={styles.textLeft}>Tiền thối lại:</Text>
-          <Text style={styles.textRight}>{formatMoney(change)}</Text>
+        <View style={styles.payment}>
+          <Text>{"Tiền khách trả".toUpperCase()}</Text>
+          <Text>{formatMoney(customerPayment)}</Text>
+        </View>
+
+        <View style={styles.payment}>
+          <Text>{"Tiền trả lại".toUpperCase()}</Text>
+          <Text>{formatMoney(change)}</Text>
         </View>
 
         <Text
@@ -208,8 +230,8 @@ export default function PrintOrder() {
   } = location.state || {}; // Get data from location state
   const auth = useAppSelector((state) => state.auth);
   // // Calculate the total from order items
-  const title = "HÓA ĐƠN THANH TOÁN";
-  const change = customerPayment - total - totalDiscount;
+  const title = "HÓA ĐƠN BÁN HÀNG";
+  const change = customerPayment - (total - totalDiscount);
   const productsItems = location.state?.orderItemResponses as any[];
   // // increment quantity and price if product duplicate name
   const items = Object.values(
@@ -274,7 +296,7 @@ export default function PrintOrder() {
         <InvoiceDoc
           data={items}
           title={title}
-          total={total}
+          total={total - totalDiscount}
           discount={totalDiscount}
           customerPayment={customerPayment}
           change={change}
