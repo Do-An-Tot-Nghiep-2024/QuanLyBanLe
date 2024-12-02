@@ -6,7 +6,7 @@ import { showToastWithGravityAndOffset } from "../ToastAndroid";
 
 
 const LoginService = async (username, password, navigation) => {    
-    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/auth/login`, {
+    const response = await fetch(`http://${IpAddress.ipAddress}/api/v1/auth/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -20,6 +20,7 @@ const LoginService = async (username, password, navigation) => {
         const accessToken = data.data.accessToken;
            
         await setItem("accessToken", accessToken);
+        await setItem("email", username)
        showToastWithGravityAndOffset("Đăng nhập thành công");
         navigation.navigate('MyTabs');
     } else {
@@ -30,7 +31,7 @@ const LoginService = async (username, password, navigation) => {
 }
 
 const RegisterService = async (name, email, phone, password, navigation) => {
-    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/auth/register`, {
+    const response = await fetch(`http://${IpAddress.ipAddress}/api/v1/auth/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -46,7 +47,8 @@ const RegisterService = async (name, email, phone, password, navigation) => {
     if (response.status === 200) {
        showToastWithGravityAndOffset("Đăng ký thành công");
        const accessToken = data.data.accessToken;
-       await setItem("accessToken", accessToken);   
+       await setItem("accessToken", accessToken);  
+       await setItem("email", email) 
        navigation.navigate('MyTabs');
 
     } else {
@@ -56,7 +58,7 @@ const RegisterService = async (name, email, phone, password, navigation) => {
 }
 
     const getAccount = async (accessToken) => {
-        const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/auth/account`, {
+        const response = await fetch(`http://${IpAddress.ipAddress}/api/v1/auth/account`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -78,7 +80,7 @@ const RegisterService = async (name, email, phone, password, navigation) => {
     }
 
     const getInformationDetailService = async (accessToken) => {
-        const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/customers/detail`, {
+        const response = await fetch(`http://${IpAddress.ipAddress}/api/v1/customers/detail`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -92,5 +94,26 @@ const RegisterService = async (name, email, phone, password, navigation) => {
         return false;
     }
 
+    const changePasswordService = async (cleanToken, confirmPassword, password, newPassword) => {
+        const response = await fetch(`http://${IpAddress.ipAddress}/api/v1/auth/change-password`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${cleanToken}`
+            },
+            body: JSON.stringify({ password, newPassword, confirmPassword }),
+        });
 
-export {LoginService, RegisterService, getAccount, getInformationDetailService}
+        const data = await response.json();
+        console.log("RESPONSE" + response);
+        console.log(data);
+        
+        
+        if (response.status === 200) {
+            return true;
+        }
+        return false;
+    }
+
+
+export {LoginService, RegisterService, getAccount, getInformationDetailService, changePasswordService}

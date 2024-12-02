@@ -32,6 +32,16 @@ const OrderList = ({ navigation }) => {
         return statusMapping[status] || "Không xác định"; 
     };
 
+    const translatePaymentType = (paymentType) => {
+        const paymentMapping = {
+          CASH: "Tiền mặt",  
+          E_WALLET: "Chuyển khoản", 
+        
+        };
+
+        return paymentMapping[paymentType] || "Không xác định"; 
+      };
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);  
     
@@ -49,7 +59,7 @@ const OrderList = ({ navigation }) => {
             <Text style={styles.orderId}>Đơn hàng ID: {item.orderIdid}</Text>
             <Text style={styles.customerName}>Khách hàng: {item.customerPhone}</Text>
             <Text style={styles.total}>Tổng tiền: {item.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Text>
-            <Text style={styles.paymentMethod}>Phương thức thanh toán: {item.paymentType}</Text>
+            <Text style={styles.paymentMethod}>Phương thức thanh toán: {translatePaymentType(item.paymentType)}</Text>
             <Text style={styles.pickupDate}>Ngày đặt hàng: {formatDate(item.createdAt)}</Text>
             <View style={styles.statusContainer}>
             <Text style={styles.status}>

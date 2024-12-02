@@ -40,25 +40,27 @@ const Login = () => {
 
     // Correct the async behavior of getAccountLogin function
     const getAccountLogin = async () => {
+        setEmail("");
+        setPassword("");
         console.log("login again");
+        setShowNewPassword(false);  
         
         const token = await getItem("accessToken"); 
         // Await token retrieval
         if (token) {
             let cleanedToken = token.replace(/"/g, "");      
-            const response = await getAccount(cleanedToken); // Await account information
+            const response = await getAccount(cleanedToken);
             if (response) {
-                navigation.navigate("MyTabs"); // Navigate to MyTabs if account exists
+                navigation.navigate("MyTabs"); 
             }
         } else {
             console.log("No token found, please login first.");
         }
     };
 
-    // Call getAccountLogin whenever the login screen is focused
     useFocusEffect(
         useCallback(() => {
-            getAccountLogin(); // Trigger the account check on focus
+            getAccountLogin();
         }, [])
     );
 

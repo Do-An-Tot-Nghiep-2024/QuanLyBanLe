@@ -5,7 +5,7 @@ const getProductsByCategoryService = async (id) =>{
     const accessToken = await getItem("accessToken")
 
     let cleanedToken = accessToken.replace(/"/g, "");       
-    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/products/mobile/category/${id}`, {
+    const response = await fetch(`http://${IpAddress.ipAddress}/api/v1/products/mobile/category/${id}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -21,7 +21,7 @@ const getProductsByIdService = async (id) =>{
     const accessToken = await getItem("accessToken")
 
     let cleanedToken = accessToken.replace(/"/g, "");       
-    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/products/${id}`, {
+    const response = await fetch(`http://${IpAddress.ipAddress}/api/v1/products/${id}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

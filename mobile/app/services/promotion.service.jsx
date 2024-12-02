@@ -7,7 +7,7 @@ const getLatestPromotionService = async () => {
     let cleanedToken = accessToken.replace(/"/g, "");   
     console.log("Token" + cleanedToken);
     
-    const response = await fetch(`http://${IpAddress.ipAddress}:8080/api/v1/promotions/latest`, {
+    const response = await fetch(`http://${IpAddress.ipAddress}/api/v1/promotions/latest`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
