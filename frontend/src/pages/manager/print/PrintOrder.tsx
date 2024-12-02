@@ -101,8 +101,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between", // Distributes space evenly with alignment
     paddingHorizontal: 35,
     paddingVertical: 4,
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 15,
+    fontWeight: 1000,
   },
   head: {
     display: "flex",
@@ -203,9 +203,10 @@ const InvoiceDoc = ({
         <Text
           style={{
             marginTop: 10,
-            fontSize: 14,
+            fontSize: 10,
             marginRight: 100,
-            textAlign: "center",
+            paddingLeft:40
+            // textAlign: "center",
           }}
         >
           {`( Giá trên đã bao gồm thuế GTGT )`}

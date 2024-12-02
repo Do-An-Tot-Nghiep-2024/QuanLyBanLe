@@ -22,7 +22,7 @@ export default function PieChartCard({data}: Props) {
         </Typography>
         <Box alignItems={"center"} justifyContent={"center"} display={"flex"}>
           
-          <RadarChart outerRadius={120} width={730} height={250} data={data}>
+          <RadarChart outerRadius={120} width={730} height={300} data={data}>
             <PolarGrid />
             <PolarAngleAxis dataKey="name" />
             <PolarRadiusAxis angle={50} />

@@ -68,7 +68,7 @@ export default function BarChartVertical({ data }: Props) {
           />
           <YAxis />
           {/* <CartesianGrid strokeDasharray="3 3" /> */}
-          <Legend align="center" verticalAlign="top" iconSize={12} />
+          <Legend align="center" verticalAlign="bottom" iconSize={12} />
           <Tooltip />
           <Area
             name="Số lượng đã bán"
@@ -88,7 +88,7 @@ export default function BarChartVertical({ data }: Props) {
             fill="url(#colorPv)"
           />
           <Area
-            name="Số lượng còn sẵn"
+            name="Số lượng còn lại"
             type="monotone"
             dataKey="availableQuantity"
             stroke="#ff7300"

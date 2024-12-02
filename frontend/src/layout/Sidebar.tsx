@@ -69,13 +69,18 @@ const NAVIGATION: Navigation = [
     children: [
       {
         segment: "import-invoices",
-        title: "Quản lí đơn nhập hàng",
+        title: "Quản lí phiếu nhập hàng",
         icon: <ReceiptIcon />,
       },
       {
         segment: "",
         title: "Quản lí lô hàng",
         icon: <WarehouseIcon />,
+      },
+      {
+        segment: "expiration-quantity",
+        title: "Quản lý sản phẩm hết hạn",
+        icon: <AccessTimeIcon />,
       },
     ],
   },
@@ -136,13 +141,8 @@ const NAVIGATION: Navigation = [
       },
       {
         segment: "stock",
-        title: "Theo số lượng",
+        title: "Theo số lượng nhập và bán",
         icon: <GrainIcon />,
-      },
-      {
-        segment: "expiration-quantity",
-        title: "Sản phẩm hết hạn",
-        icon: <AccessTimeIcon />,
       },
     ],
   },

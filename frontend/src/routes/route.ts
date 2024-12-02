@@ -113,6 +113,7 @@ const employeeRoutes: RouteConfig[] = [
   { path: "/staff/orders/:orderId", component: OrderDetail },
   { path: "/staff/print/order-invoice", component: PrintOrder },
   { path: "/staff/inventory", component: ShipmentPage },
+  { path: "/staff/inventory/expiration-quantity", component: ExpirationQuantityReport },
   { path: "/staff/products", component: ProductPage },
   { path: "/logout", component: Logout },
 ];
@@ -129,6 +130,7 @@ const managerRoutes: RouteConfig[] = [
   { path: "/inventory/:id", component: InventoryDetailPage },
   { path: "/inventory", component: ShipmentPage },
   { path: "/inventory/create-inventory", component: CreateInventoryOrder },
+  { path: "/inventory/expiration-quantity", component: ExpirationQuantityReport },
   // { path: "/print/import-invoice", component: PrintImportInvoice },
   // product
   { path: "/products", component: ProductPage },
@@ -161,7 +163,6 @@ const managerRoutes: RouteConfig[] = [
   { path: "/reports/product", component: ProductReport },
   { path: "/reports/profit", component: ProfitReport },
   { path: "/reports/stock", component: StockReport },
-  { path: "/reports/expiration-quantity", component: ExpirationQuantityReport },
 ];
 
 export { employeeRoutes, managerRoutes };
