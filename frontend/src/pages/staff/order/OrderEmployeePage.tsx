@@ -391,25 +391,7 @@ export default function OrderEmployeePage() {
               
               </Typography>
             </Box> */}
-            <FormControl sx={{ minWidth: 150 }} fullWidth>
-              <InputLabel id="demo-simple-select-payment">
-                Thanh toán
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-payment"
-                id="demo-simple-select"
-                label="Thanh toán"
-                name="paymentType"
-                value={request.paymentType || ""}
-                onChange={handleChange}
-              >
-                <MenuItem value="" selected>
-                  <em>Tất cả</em>
-                </MenuItem>
-                <MenuItem value={"CASH"}>Tiền mặt</MenuItem>
-                <MenuItem value={"E_WALLET"}>Chuyển khoản</MenuItem>
-              </Select>
-            </FormControl>
+           
           </Box>
         </Box>
       </Stack>

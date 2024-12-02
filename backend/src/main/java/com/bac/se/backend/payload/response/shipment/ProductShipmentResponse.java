@@ -9,7 +9,6 @@ public record ProductShipmentResponse(
         Date mxp,
         Date exp,
         int soldQuantity,
-        int failedQuantity,
         int availableQuantity,
         String unit
 ) {

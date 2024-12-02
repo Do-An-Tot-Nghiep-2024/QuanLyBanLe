@@ -25,12 +25,23 @@ import ResponsePagination from "../../../types/responsePagination";
 import { OrderSchema } from "../../../types/orderSchema";
 import colors from "../../../constants/color";
 import { useNavigate } from "react-router-dom";
-import { convertDate } from "../../../utils/dateUtil";
+import {
+  convertDate,
+  convertDateInput,
+  generateDateDuringWeek,
+} from "../../../utils/dateUtil";
 const OrderList: React.FC = () => {
   const navigate = useNavigate();
+  const { fromDate: before, toDate: after } = generateDateDuringWeek();
+  const current = new Date(after);
+  current.setDate(current.getDate() - 1);
+
+  const toDateFromat = convertDateInput(current);
+  console.log(toDateFromat);
+
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>(before);
+  const [endDate, setEndDate] = useState<string>(toDateFromat);
   const [selectedStatuses, setSelectedStatuses] = useState<string>();
   const [selectedPayments, setSelectedPayments] = useState<string>();
   const [page, setPage] = useState<number>(0);
@@ -65,22 +76,21 @@ const OrderList: React.FC = () => {
 
     if (startDate && new Date(startDate) > currentDate) {
       alert("Không thể chọn ngày bắt đầu ở tương lai.");
-      setStartDate("");
-      return;
+      setStartDate(before);
+      return false;
     }
 
     if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
       alert("Ngày kết thúc phải sau ngày bắt đầu.");
-      setEndDate("");
-      return;
+      setEndDate(toDateFromat);
+      return false;
     }
 
     if (endDate && new Date(endDate) > currentDate) {
       alert("Không thể chọn ngày kết thúc ở tương lai.");
-      setEndDate("");
-      return;
+      setEndDate(toDateFromat);
+      return false;
     }
-
     return true;
   };
 
@@ -130,6 +140,7 @@ const OrderList: React.FC = () => {
       order,
     ],
     queryFn: fetchOrders,
+    refetchOnWindowFocus: false,
   });
 
   const handleRowClick = (order: OrderSchema) => {
@@ -208,6 +219,7 @@ const OrderList: React.FC = () => {
         <Box display="flex" justifyContent="flex-end" gap={2}>
           {/* Start Date */}
           <TextField
+            
             type="date"
             label="Ngày bắt đầu"
             variant="outlined"
@@ -276,7 +288,6 @@ const OrderList: React.FC = () => {
                 <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
               </Select>
             </FormControl>
-           
           </Box>
         </Box>
       </Stack>

@@ -4,11 +4,7 @@ import Box from "@mui/material/Box";
 import {
   Dashboard as DashboardIcon,
   ShoppingCart as ShoppingCartIcon,
-  BarChart as BarChartIcon,
-  DateRange as DateRangeIcon,
   Store as StoreIcon,
-  RecentActors as RecentActorsIcon,
-  ShoppingBag as ShoppingBagIcon,
   Inventory as InventoryIcon,
   Receipt as  ReceiptIcon,
   Refresh as RefreshIcon,
@@ -25,7 +21,7 @@ import logo from "../../../assets/images/logo.png";
 import { useAppDispatch, useAppSelector } from "../../../redux/hook";
 import { logout } from "../../../redux/auth/authSlice";
 import { getSentNotificationsService } from "../../../services/notification.service";
-import { IconButton, Stack } from "@mui/material";
+import { IconButton, Stack, Typography } from "@mui/material";
 import Notification from "../../../components/Notification";
 import { connectToSocket } from "../../../config/socket";
 const NAVIGATION: Navigation = [
@@ -68,28 +64,6 @@ const NAVIGATION: Navigation = [
     segment: "staff/products",
     title: "Sản phẩm",
     icon: <StoreIcon />,
-  },
-  {
-    segment: "reports",
-    title: "Báo cáo",
-    icon: <BarChartIcon />,
-    children: [
-      {
-        segment: "product",
-        title: "Theo sản phẩm",
-        icon: <ShoppingBagIcon />,
-      },
-      {
-        segment: "employee",
-        title: "Theo nhân viên",
-        icon: <RecentActorsIcon />,
-      },
-      {
-        segment: "date",
-        title: "Theo thời gian",
-        icon: <DateRangeIcon />,
-      },
-    ],
   },
   {
     segment: "logout",
@@ -257,6 +231,7 @@ export default function Sidebar() {
                 <RefreshIcon />
               </IconButton>
               <Notification data={nofitications} />
+              <Typography fontSize={16} pt={1} fontWeight={"bold"}>NHÂN VIÊN</Typography>
             </Stack>
           ),
         }}

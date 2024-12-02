@@ -17,7 +17,7 @@ public interface ShipmentItemRepository extends JpaRepository<ShipmentItem, Ship
 
     @Query(value = "SELECT si.shipment_id AS shipmentId, sup.name AS supplier, p.name AS product, " +
             "si.mxp, si.exp," +
-            "s.sold_quantity AS soldQuantity, s.failed_quantity AS failedQuantity, " +
+            "s.sold_quantity AS soldQuantity, " +
             "(s.quantity - s.sold_quantity) AS availableQuantity, u.name AS unit " +
             "FROM t_shipment_item si " +
             "INNER JOIN t_product p ON p.product_id = si.product_id " +

@@ -33,6 +33,8 @@ import { getLatestPromotionService } from "../../../services/promotion.service";
 import colors from "../../../constants/color";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../../redux/hook";
+import { formatMoneyThousand } from "../../../utils/formatMoney";
+import SnackbarMessage from "../../../components/SnackbarMessage";
 
 interface OrderItem {
   product: GetProductSchema;
@@ -57,11 +59,18 @@ const OrderPage: React.FC = () => {
   const [deleteItem, setDeleteItem] = useState(0);
   // const [totalDiscount, setTotalDiscount] = useState(0);
   const [total, setTotal] = useState(0);
+  const [message, setMessage] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(amount);
+  };
+
+  const formatStringThousand = (amount: string) => {
+    // format 1.000 -> 1000
+    return amount.replace(/\./g, "");
   };
 
   const handleUpdateTotal = (orderItems: OrderItem[]) => {
@@ -70,7 +79,34 @@ const OrderPage: React.FC = () => {
     );
   };
 
+  const handleGetLatestPromotion = async () => {
+    const response = await getLatestPromotionService();
+    if (response.message !== "success") {
+      setLatestPromotion(undefined);
+    }
+
+    setLatestPromotion(response.data as GetPromotion);
+  };
+
+  useEffect(() => {
+    handleGetLatestPromotion();
+  }, [total]);
+
+  const handleDeleteClose = () => {
+    setConfirmOpen(false);
+  };
+
+  const getPromotionCurrent = () => {
+    if (latestPromotion !== undefined && latestPromotion !== null) {
+      if (total >= latestPromotion?.minOrderValue) {
+        return total * latestPromotion?.percentage;
+      }
+    }
+    return 0;
+  };
+
   const handleAddToOrder = (product: GetProductSchema) => {
+    console.log(product);
     const missingShipment = orderItems.some((item) => !item.selectedShipment);
 
     if (missingShipment) {
@@ -79,17 +115,36 @@ const OrderPage: React.FC = () => {
       );
       return;
     }
+    let totalOrder = 0;
+    setOrderItems((prev) => {
+      // Create the updated list of items
+      const updatedItems = [
+        ...prev,
+        {
+          product,
+          quantity: 1,
+          price: Number(product.price),
+          selectedShipment: "",
+        },
+      ];
 
-    setOrderItems((prev) => [
-      ...prev,
-      {
-        product,
-        quantity: 1,
-        price: Number(product.price),
-        selectedShipment: "",
-      },
-    ]);
+      // Calculate the total directly in this function
+      totalOrder = updatedItems.reduce(
+        (sum, item) => sum + item.quantity * item.price,
+        0
+      );
+
+      // console.log("Total Order:", total); // Log the total order
+      return updatedItems; // Return the updated list
+    });
+
     handleUpdateTotal(orderItems);
+    console.log("Tien khach tra", customerPayment);
+    if (customerPayment === 0) {
+      setCustomerChange(0);
+    } else {
+      setCustomerChange(customerPayment - totalOrder - getPromotionCurrent());
+    }
   };
 
   const handleUpdateQuantity = (product: OrderItem, quantity: number) => {
@@ -101,15 +156,36 @@ const OrderPage: React.FC = () => {
       alert("Số lượng sản phẩm cho mỗi đơn hàng phải ít hơn 100 và lớn hơn 0");
       return;
     }
-    setOrderItems((prev) =>
-      prev.map((item) =>
-        item.product.id === product.product.id &&
-        item.selectedShipment === product.selectedShipment
-          ? { ...item, quantity }
-          : item
-      )
-    );
+    let totalOrder = 0;
+    setOrderItems((prev) => {
+      const updatedItems = prev.map((item) => {
+        // Check if the item matches the product and shipment
+        if (
+          item.product.id === product.product.id &&
+          item.selectedShipment === product.selectedShipment
+        ) {
+          // Update the quantity
+          const updatedItem = { ...item, quantity };
+          // Add to the total order
+          totalOrder += updatedItem.quantity * updatedItem.price;
+          return updatedItem;
+        } else {
+          // Add the current item's total to the totalOrder
+          totalOrder += item.quantity * item.price;
+          return item;
+        }
+      });
+      return updatedItems; // Return the updated state
+    });
+
     handleUpdateTotal(orderItems);
+    console.log("Tien khach khach tra tai update quantity", customerPayment);
+
+    if (customerPayment === 0) {
+      setCustomerChange(0);
+    } else {
+      setCustomerChange(customerPayment - totalOrder - getPromotionCurrent());
+    }
     // const currTotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     // if(!isNaN(total)){
     //   console.log(total);
@@ -130,27 +206,22 @@ const OrderPage: React.FC = () => {
       0
     );
     if (orderItems.length === 0) {
-      alert("Chưa thêm sản phẩm nào");
+      setMessage("Vui lòng chọn sản phẩm trước khi tạo đơn hàng");
+      setSnackbarOpen(true);
       return;
     }
     if (!isShipmentSelected()) {
-      alert("Vui lòng chọn mã lô hàng cho tất cả sản phẩm");
+      setMessage("Vui lòng chọn mã lô hàng cho tất cả sản phẩm");
+      setSnackbarOpen(true);
       return;
     }
 
-    if (
-      customerPayment === 0 ||
-      customerPayment < totalPayment - getPromotionCurrent() ||
-      !isCustomerPaymentValid(customerPayment)
-    ) {
-      alert("Vui lòng nhập số tiền hợp lệ");
-      return;
-    }
-
+  
     const formattedOrderItems = orderItems
       .map((item) => {
         if (item.quantity === 0 || !item.quantity) {
-          alert("Số lượng sản phẩm không hợp lệ");
+          setMessage("Số lượng sản phẩm không hợp lệ");
+          setSnackbarOpen(true);
           return null; // Return null for invalid items
         }
         return {
@@ -172,6 +243,16 @@ const OrderPage: React.FC = () => {
           totalDiscount = Number(totalPayment * latestPromotion?.percentage);
         }
       }
+      if (
+        customerPayment === 0 ||
+        customerPayment < totalPayment - totalDiscount ||
+        !isCustomerPaymentValid(customerPayment)
+      ) {
+        setMessage("Số tiền khách trả không đủ");
+        setSnackbarOpen(true);
+        return;
+      }
+  
       console.log(totalDiscount);
       const response = await createOrderService(
         formattedOrderItems,
@@ -181,7 +262,7 @@ const OrderPage: React.FC = () => {
       // console.log("Order created:", response);
       if (response.message === "success") {
         const data = response.data as { orderId: number };
-        if (auth.role === "ADMIN") {
+        if (auth.role === "MANAGER") {
           navigate(`/orders/${data.orderId}`);
         } else {
           navigate(`/staff/orders/${data.orderId}`);
@@ -191,12 +272,15 @@ const OrderPage: React.FC = () => {
         setCustomerPayment(0);
         localStorage.removeItem("orderItems");
       } else {
-        alert(response.message);
+        setMessage(response.message);
+        setSnackbarOpen(true);
         return;
       }
     } catch (error) {
       console.error("Error creating order:", error);
-      alert("Có lỗi khi tạo order");
+      setMessage("Có lỗi khi tạo order");
+      setSnackbarOpen(true);
+      return;
     }
   };
 
@@ -256,7 +340,7 @@ const OrderPage: React.FC = () => {
         })
       );
     }
-    console.log("Updated order items:", orderItems);
+    // console.log("Updated order items:", orderItems);
   };
 
   const isCustomerPaymentValid = (payment: number) => {
@@ -264,19 +348,26 @@ const OrderPage: React.FC = () => {
     return regex.test(String(payment));
   };
 
-  const updateCustomerPayment = (customerPayment: number) => {
-    if (customerPayment === 0) {
+  const updateCustomerPayment = (customerPayment: string) => {
+    const paymentCustomer = Number(formatStringThousand(customerPayment));
+
+    // console.log(pay);
+    if (isNaN(paymentCustomer)) {
       setCustomerPayment(0);
       setCustomerChange(0);
       return;
     }
 
-    if (isCustomerPaymentValid(customerPayment)) {
-      setCustomerPayment(customerPayment);
-      const totalRequired = total - getPromotionCurrent();
-      // console.log(totalRequired);
-      setCustomerChange(customerPayment - totalRequired);
+    if (paymentCustomer === 0) {
+      setCustomerPayment(0);
+      setCustomerChange(0);
+      return;
     }
+
+    // if (isCustomerPaymentValid(pay)) {
+    setCustomerPayment(paymentCustomer);
+    const totalRequired = total - getPromotionCurrent();
+    setCustomerChange(paymentCustomer - totalRequired);
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -289,36 +380,10 @@ const OrderPage: React.FC = () => {
     }
   }, [searchTerm, refetch]);
 
-  const handleGetLatestPromotion = async () => {
-    const response = await getLatestPromotionService();
-    if (response.message !== "success") {
-      setLatestPromotion(undefined);
-    }
-
-    setLatestPromotion(response.data as GetPromotion);
-  };
-
   const totalPayment = orderItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-
-  useEffect(() => {
-    handleGetLatestPromotion();
-  }, [total]);
-
-  const handleDeleteClose = () => {
-    setConfirmOpen(false);
-  };
-
-  const getPromotionCurrent = () => {
-    if (latestPromotion !== undefined && latestPromotion !== null) {
-      if (total >= latestPromotion?.minOrderValue) {
-        return total * latestPromotion?.percentage;
-      }
-    }
-    return 0;
-  };
 
   const handleDeleteOrderItem = () => {
     let total = 0;
@@ -334,7 +399,11 @@ const OrderPage: React.FC = () => {
 
     // update in localStorage
     localStorage.setItem("orderItems", JSON.stringify(orderItems));
-    setCustomerChange(customerPayment - total - getPromotionCurrent());
+    if (customerPayment == 0) {
+      setCustomerChange(0);
+    } else {
+      setCustomerChange(customerPayment - total - getPromotionCurrent());
+    }
     setConfirmOpen(false);
     handleUpdateTotal(orderItems);
   };
@@ -424,7 +493,7 @@ const OrderPage: React.FC = () => {
           </Typography>
 
           <TableContainer>
-            <Table sx={{ minWidth: 650 }}>
+            <Table sx={{ minWidth: 650 }} size="small">
               <TableHead>
                 <TableRow
                   sx={{ backgroundColor: "#f5f5f5", textAlign: "center" }}
@@ -452,9 +521,11 @@ const OrderPage: React.FC = () => {
               <TableBody>
                 {orderItems.map((item, index) => (
                   <TableRow
+                    hover
                     key={`${item.product.id}-${item.selectedShipment}`}
                     sx={{
                       backgroundColor: index % 2 === 0 ? "#fff" : "#f9f9f9",
+                      height: 80,
                     }}
                   >
                     <TableCell sx={{ textAlign: "left", padding: "16px 8px" }}>
@@ -484,10 +555,11 @@ const OrderPage: React.FC = () => {
                     >
                       <TextField
                         type="number"
+                        defaultValue={1}
                         value={item.quantity}
-                        onChange={(e) =>
-                          handleUpdateQuantity(item, parseInt(e.target.value))
-                        }
+                        onChange={(e) => {
+                          handleUpdateQuantity(item, parseInt(e.target.value));
+                        }}
                         sx={{ width: "50%" }}
                         inputProps={{ style: { textAlign: "center" } }}
                       />
@@ -528,10 +600,6 @@ const OrderPage: React.FC = () => {
             alignItems="flex-end"
             width="100%"
           >
-            <Typography sx={{ mb: 2, fontWeight: "bold" }}>
-              Tổng tiền hàng: {formatCurrency(total as number)}
-            </Typography>
-
             <Box>
               {latestPromotion != null && latestPromotion != undefined ? (
                 totalPayment >= latestPromotion?.minOrderValue ? (
@@ -555,17 +623,40 @@ const OrderPage: React.FC = () => {
                 )
               ) : null}
             </Box>
-
-            <TextField
-              label="Tiền khách hàng đưa"
-              variant="outlined"
-              type="number"
-              value={customerPayment}
-              onChange={(e) => {
-                updateCustomerPayment(Number(e.target.value));
-              }}
-              sx={{ mb: 2, width: "30%" }}
-            />
+            <Stack
+              width={"100%"}
+              display={"flex"}
+              flexDirection={"row"}
+              justifyContent={"space-between"}
+              pb={2}
+            >
+              <Box>
+                <Typography sx={{ fontWeight: "bold", fontSize: 23 }}>
+                  Tổng tiền hàng: {isNaN(total) ? 0 : formatCurrency(total as number)}
+                </Typography>
+                <Typography
+                  sx={{ fontStyle: "normal", fontWeight: "bold", fontSize: 23 }}
+                >
+                  Số tiền khách cần trả:{" "}
+                  {isNaN(total) ? 0 : formatCurrency(total - getPromotionCurrent())}
+                </Typography>
+              </Box>
+              <TextField
+                label="Tiền khách trả"
+                variant="outlined"
+                type="text"
+                sx={{ fontSize: 18 }}
+                value={
+                  orderItems.length < 0
+                    ? formatMoneyThousand(0)
+                    : formatMoneyThousand(customerPayment)
+                }
+                onChange={(e) => {
+                  updateCustomerPayment(e.target.value);
+                }}
+                // sx={{ mb: 2, width: "30%" }}
+              />
+            </Stack>
 
             {latestPromotion != null &&
             latestPromotion != undefined &&
@@ -586,11 +677,7 @@ const OrderPage: React.FC = () => {
               </Typography>
             )}
 
-            <Typography sx={{ mb: 2, fontStyle: "italic" }}>
-              Số tiền khách cần trả:{" "}
-              {formatCurrency(total - getPromotionCurrent())}
-            </Typography>
-            <Typography sx={{ mb: 2, fontStyle: "italic" }}>
+            <Typography sx={{ fontStyle: "italic", fontSize: 20 }}>
               Tiền thừa: {formatCurrency(customerChange)}
             </Typography>
 
@@ -605,6 +692,14 @@ const OrderPage: React.FC = () => {
           </Box>
         </Paper>
       </Box>
+      {/* error message */}
+      <SnackbarMessage
+        isError={true}
+        alertMessage={message}
+        setSnackbarOpen={setSnackbarOpen}
+        snackbarOpen={snackbarOpen}
+      />
+
       <Modal
         open={deleteConfirmOpen}
         onClose={handleDeleteClose}

@@ -37,7 +37,7 @@ import logo from "../assets/images/logo.png";
 import Notification from "../components/Notification";
 import { connectToSocket } from "../config/socket";
 import { getSentNotificationsService } from "../services/notification.service";
-import { IconButton, Stack } from "@mui/material";
+import { IconButton, Stack, Typography } from "@mui/material";
 
 const NAVIGATION: Navigation = [
   {
@@ -342,6 +342,7 @@ export default function Sidebar() {
                 <RefreshIcon />
               </IconButton>
               <Notification data={nofitications} />
+              <Typography fontSize={16} pt={1} fontWeight={"bold"}>QUẢN LÝ</Typography>
             </Stack>
           ),
         }}

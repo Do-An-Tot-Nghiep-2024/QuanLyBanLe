@@ -17,8 +17,7 @@ public class ShipmentMapper {
                 (Date) object[4],
                 Integer.parseInt(object[5].toString()),
                 Integer.parseInt(object[6].toString()),
-                Integer.parseInt(object[7].toString()),
-                object[8].toString()
+                object[7].toString()
         );
     }
 }
