@@ -25,6 +25,7 @@ import ResponsePagination from "../../../types/responsePagination";
 import { OrderSchema } from "../../../types/orderSchema";
 import colors from "../../../constants/color";
 import { useNavigate } from "react-router-dom";
+import { convertDate } from "../../../utils/dateUtil";
 const OrderList: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -44,14 +45,14 @@ const OrderList: React.FC = () => {
     maxWidth?: string;
     minWidth?: string;
   }> = [
-      { label: "Mã Đơn Hàng", field: "orderId", width: "10%" },
-      { label: "Nhân Viên", field: "employee", width: "25%" },
-      { label: "Trạng Thái", field: "orderStatus", width: "15%" },
-      { label: "Ngày Tạo", field: "createdAt", width: "15%" },
-      { label: "Phương Thức Thanh Toán", field: "paymentType", width: "15%" },
-      { label: "Tổng Cộng", field: "total", width: "20%" },
-      { label: "Số Điện Thoại Khách Hàng", field: "customerPhone", width: "10%" },
-    ];
+    { label: "Mã Đơn Hàng", field: "orderId", width: "10%" },
+    { label: "Nhân Viên", field: "employee", width: "25%" },
+    { label: "Trạng Thái", field: "orderStatus", width: "15%" },
+    { label: "Ngày Tạo", field: "createdAt", width: "15%" },
+    { label: "Phương Thức Thanh Toán", field: "paymentType", width: "15%" },
+    { label: "Tổng Cộng", field: "total", width: "20%" },
+    { label: "Số Điện Thoại Khách Hàng", field: "customerPhone", width: "10%" },
+  ];
 
   const tableCellStyles = {
     padding: "8px",
@@ -63,38 +64,38 @@ const OrderList: React.FC = () => {
     const currentDate = new Date();
 
     if (startDate && new Date(startDate) > currentDate) {
-        alert('Không thể chọn ngày bắt đầu ở tương lai.');
-        setStartDate('')
-        return;
+      alert("Không thể chọn ngày bắt đầu ở tương lai.");
+      setStartDate("");
+      return;
     }
 
     if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
-        alert('Ngày kết thúc phải sau ngày bắt đầu.');
-        setEndDate('')
-        return;
+      alert("Ngày kết thúc phải sau ngày bắt đầu.");
+      setEndDate("");
+      return;
     }
 
     if (endDate && new Date(endDate) > currentDate) {
-        alert('Không thể chọn ngày kết thúc ở tương lai.');
-        setEndDate('')
-        return;
+      alert("Không thể chọn ngày kết thúc ở tương lai.");
+      setEndDate("");
+      return;
     }
 
     return true;
-};
+  };
 
-const fetchOrders = async () => {
+  const fetchOrders = async () => {
     if ((startDate && !endDate) || (!startDate && endDate)) {
       alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc");
-      return; 
+      return;
     }
-  
+
     if (startDate && endDate && !validateDates()) {
-      return; 
+      return;
     }
-  
+
     console.log("Fetching orders with dates:", startDate, endDate);
-  
+
     try {
       const response = await getAllOrdersService(
         page,
@@ -105,9 +106,9 @@ const fetchOrders = async () => {
         endDate,
         selectedStatuses,
         selectedPayments,
-        searchTerm,
+        searchTerm
       );
-  
+
       return response as ResponsePagination<OrderSchema>;
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -115,7 +116,7 @@ const fetchOrders = async () => {
     }
   };
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, isFetching, isError } = useQuery({
     queryKey: [
       "orders",
       page,
@@ -168,24 +169,26 @@ const fetchOrders = async () => {
   };
   const translateStatus = (status: string) => {
     const statusMapping: { [key: string]: string } = {
-      PENDING: "Đang chờ nhận hàng",  
-      CANCELLED: "Đã hủy",    
-      COMPLETED: "Hoàn thành", 
+      PENDING: "Đang chờ nhận hàng",
+      CANCELLED: "Đã hủy",
+      COMPLETED: "Hoàn thành",
       // Add more statuses if necessary
     };
-    
+
     return statusMapping[status] || "Không xác định"; // Default if the status doesn't match
   };
-  
+
   const translatePaymentType = (paymentType: string) => {
     const paymentMapping: { [key: string]: string } = {
-      CASH: "Tiền mặt",  
-      E_WALLET: "Chuyển khoản", 
+      CASH: "Tiền mặt",
+      E_WALLET: "Chuyển khoản",
       // Add more payment methods if necessary
     };
-    
+
     return paymentMapping[paymentType] || "Không xác định"; // Default if the payment type doesn't match
   };
+  console.log(data);
+
   return (
     <Box width={"90%"}>
       <Typography
@@ -273,27 +276,8 @@ const fetchOrders = async () => {
                 <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
               </Select>
             </FormControl>
-            <FormControl sx={{ minWidth: 150 }} fullWidth>
-              <InputLabel id="demo-simple-select-payment">
-                Thanh toán
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-payment"
-                id="demo-simple-select"
-                label="Thanh toán"
-                name="paymentType"
-                value={selectedPayments}
-                onChange={handleChange}
-              >
-                <MenuItem value="" selected>
-                  <em>Tất cả</em>
-                </MenuItem>
-                <MenuItem value={"CASH"}>Tiền mặt</MenuItem>
-                <MenuItem value={"E_WALLET"}>Chuyển khoản</MenuItem>
-              </Select>
-            </FormControl>
+           
           </Box>
-
         </Box>
       </Stack>
 
@@ -308,11 +292,11 @@ const fetchOrders = async () => {
           overflowY: "auto",
         }}
       >
-        {isLoading ? (
+        {isLoading || isFetching ? (
           <CircularProgress />
-        ) : error ? (
+        ) : isError ? (
           <Typography variant="body2" color="error">
-            Error loading data
+            {error.message}
           </Typography>
         ) : (
           <>
@@ -350,23 +334,32 @@ const fetchOrders = async () => {
               <TableBody>
                 {data?.responseList?.map((order) => (
                   <TableRow
+                    onDoubleClick={() => handleRowClick(order)}
                     key={order.orderId}
                     hover
-                    onClick={() => handleRowClick(order)}
+                    // onClick={() => handleRowClick(order)}
                   >
                     {columns.map((column, index) => (
-                      <TableCell key={index} align="center" sx={tableCellStyles}>
+                      <TableCell
+                        key={index}
+                        align="center"
+                        sx={tableCellStyles}
+                      >
                         {column.field
                           ? column.field === "total"
                             ? `${order.total.toLocaleString()} VND`
                             : column.field === "createdAt"
-                              ? new Date(order.createdAt).toLocaleDateString("vi-VN")
+                              ? convertDate(new Date(order.createdAt))
                               : column.field === "customerPhone"
                                 ? order.customerPhone
                                 : column.field === "orderStatus"
-                                  ? translateStatus(order[column.field] as string)  // Use the translateStatus function
+                                  ? translateStatus(
+                                      order[column.field] as string
+                                    ) // Use the translateStatus function
                                   : column.field === "paymentType"
-                                    ? translatePaymentType(order[column.field] as string) // Use the translatePaymentType function
+                                    ? translatePaymentType(
+                                        order[column.field] as string
+                                      ) // Use the translatePaymentType function
                                     : order[column.field]
                           : null}
                       </TableCell>

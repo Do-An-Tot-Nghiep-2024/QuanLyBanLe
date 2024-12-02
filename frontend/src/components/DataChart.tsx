@@ -74,11 +74,11 @@ const isWeek = (data: any[]) => {
 export default function DataChart({ data }: Props) {
   return (
     <Box display="flex" sx={{ px: 2 }}>
-      <ResponsiveContainer width="100%" height={250}>
-        <ComposedChart data={data}>
+      <ResponsiveContainer width="100%" height={250} >
+        <ComposedChart data={data} margin={{left:20}}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey={isWeek(data) ? "week" : "date"} />
-          <YAxis tickFormatter={DataFormater} />
+          <XAxis dataKey={isWeek(data) ? "week" : "date"} label={{ value: isWeek(data) ? "Tuần " : "Ngày", offset: -5 }} height={100} />
+          <YAxis  tickFormatter={DataFormater} label={{ value: "Tổng tiền (VNĐ)", angle: -90, position: "insideLeft", dy: 40 }} />
           <Tooltip formatter={(value) => formatMoney(value as number)} />
           <Legend iconType="circle" align="center" verticalAlign="top" />
           <Bar dataKey="totalSales" fill="#89A8B2" name="Doanh thu" />

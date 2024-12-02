@@ -7,8 +7,9 @@ import {
   SelectChangeEvent,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
-import {useState } from "react";
+import { useState } from "react";
 import { getStockByProductService } from "../../../services/statistic.service";
 import { useQuery } from "@tanstack/react-query";
 import BarChartVertical from "../../../components/BarChartVertical";
@@ -82,7 +83,10 @@ export default function StockReport() {
           ></TextField>
         </Stack>
       </Box>
-      <Container>
+      <Container sx={{pt:2}}>
+        <Typography align="center" fontWeight={"bold"}>
+          Biểu đồ nhập và bán của sản phẩm theo tháng
+        </Typography>
         <BarChartVertical data={data} />
       </Container>
       <SnackbarMessage

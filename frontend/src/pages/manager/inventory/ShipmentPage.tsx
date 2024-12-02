@@ -83,12 +83,6 @@ const headCells: readonly HeadCell[] = [
     label: "Đã bán",
   },
   {
-    id: "failedQuantity",
-    numeric: true,
-    disablePadding: false,
-    label: "Lỗi",
-  },
-  {
     id: "availableQuantity",
     numeric: true,
     disablePadding: false,
@@ -121,10 +115,10 @@ function EnhancedTableHead(props: EnhancedTableProps) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            // align={headCell.numeric ? "center" : "left"}
-            align="center"
+            align={headCell.numeric ? "center" : "left"}
+            // align="center"
             sx={{ fontSize: 14, fontWeight: "bold" }}
-            width={headCell.numeric ? "15%" : "20%"}
+            width={headCell.id === "product" ? "60%" : "10%"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel
@@ -244,7 +238,7 @@ export default function EnhancedTable() {
     ) as ProductShipment[];
 
   return (
-    <Box sx={{ width: "80%", pt: 4 }}>
+    <Box sx={{ width: "100%", pt: 4,px:4 }}>
       <Typography
         variant="h6"
         sx={{ mb: 2, fontSize: 24, fontWeight: "bold", textAlign: "center" }}
@@ -302,16 +296,19 @@ export default function EnhancedTable() {
                   >
                     <TableCell
                       padding="none"
+                      width={30}
                       sx={{ fontSize: 16, paddingLeft: 2 }}
                     >
                       {"MLH-" + row.shipmentId}
                     </TableCell>
-                    <TableCell padding="none" sx={{ fontSize: 16 }}>
+                    <TableCell padding="none" width={30} sx={{ fontSize: 16 }}>
                       {row.supplier}
                     </TableCell>
                     <TableCell
+                      
                       align="left"
-                      padding="checkbox"
+                      padding="none"
+                      width={120}
                       sx={{ fontSize: 16 }}
                     >
                       {row.product}
@@ -332,9 +329,6 @@ export default function EnhancedTable() {
                     </TableCell>
                     <TableCell align="left" sx={{ fontSize: 16 }}>
                       {row.soldQuantity}
-                    </TableCell>
-                    <TableCell align="left" sx={{ fontSize: 16 }}>
-                      {row.failedQuantity}
                     </TableCell>
                     <TableCell align="left" sx={{ fontSize: 16 }}>
                       {row.availableQuantity}

@@ -20,6 +20,7 @@ import {
   IconButton,
   Avatar,
   Modal,
+  Stack,
 } from "@mui/material";
 import { getAllProductsByNameService } from "../../../services/product.service";
 import { GetProductSchema } from "../../../types/getProductSchema";
@@ -112,10 +113,10 @@ const OrderPage: React.FC = () => {
     // const currTotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     // if(!isNaN(total)){
     //   console.log(total);
-      
+
     //   setCustomerChange(customerPayment - total - getPromotionCurrent());
     // }
-    
+
     // setCustomerChange(customerPayment - total - getPromotionCurrent());
   };
 
@@ -180,10 +181,9 @@ const OrderPage: React.FC = () => {
       // console.log("Order created:", response);
       if (response.message === "success") {
         const data = response.data as { orderId: number };
-        if(auth.role === "ADMIN"){
+        if (auth.role === "ADMIN") {
           navigate(`/orders/${data.orderId}`);
-
-        }else{
+        } else {
           navigate(`/staff/orders/${data.orderId}`);
         }
         setOrderItems([]);
@@ -324,7 +324,7 @@ const OrderPage: React.FC = () => {
     let total = 0;
     setOrderItems((prevOrderItems) =>
       prevOrderItems.filter((item) => {
-        if(item.product.id !== deleteItem){
+        if (item.product.id !== deleteItem) {
           total += item.price * item.quantity;
           return item;
         }
@@ -628,26 +628,31 @@ const OrderPage: React.FC = () => {
           }}
         >
           <h3 id="delete-category-modal">Xác nhận xóa</h3>
-          <Typography>Bạn có chắc chắn muốn xóa sản phẩm này không?</Typography>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: "40px",
-              width: "100%",
-              justifyContent: "center",
+          <Typography
+            sx={{
+              fontSize: "16px",
             }}
           >
-            <Button onClick={handleDeleteClose} sx={styles.closeButton}>
+            Bạn có chắc chắn muốn xóa sản phẩm này không?
+          </Typography>
+          <Stack direction="row" gap={2} spacing={2} pb={2}>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleDeleteClose}
+              sx={{ fontWeight: "bold" }}
+            >
               Hủy
             </Button>
             <Button
+              variant="contained"
+              color="success"
               onClick={() => handleDeleteOrderItem()}
-              sx={styles.addButton}
+              sx={{ fontWeight: "bold" }}
             >
               Xóa
             </Button>
-          </div>
+          </Stack>
         </div>
       </Modal>
     </Box>

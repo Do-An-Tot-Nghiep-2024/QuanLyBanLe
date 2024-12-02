@@ -13,10 +13,7 @@ import com.bac.se.backend.payload.response.statistic.StatisticResponse;
 import com.bac.se.backend.payload.response.statistic.product.BestSellingProductResponse;
 import com.bac.se.backend.payload.response.statistic.product.TopFiveHighestGrossingProductResponse;
 import com.bac.se.backend.payload.response.statistic.sale.SaleAndProfitByMonth;
-import com.bac.se.backend.payload.response.statistic.stock.AvailableQuantity;
-import com.bac.se.backend.payload.response.statistic.stock.ImportQuantity;
-import com.bac.se.backend.payload.response.statistic.stock.ProductStockResponse;
-import com.bac.se.backend.payload.response.statistic.stock.SoldQuantity;
+import com.bac.se.backend.payload.response.statistic.stock.*;
 import com.bac.se.backend.repositories.OrderItemRepository;
 import com.bac.se.backend.repositories.OrderRepository;
 import com.bac.se.backend.repositories.ProductPriceRepository;
@@ -199,6 +196,18 @@ public class StatisticServiceImpl implements StatisticService {
             }
         }
         return map.values().stream().filter(Objects::nonNull).toList();
+    }
+
+    @Override
+    public List<ExpirationQuantity> getExpirationQuantity(Integer month, Integer year) {
+        var expirationQuantityProductByMonthAndYear = orderItemRepository.getExpirationQuantityProductByMonthAndYear(month, year);
+        if(!expirationQuantityProductByMonthAndYear.isEmpty()){
+            return expirationQuantityProductByMonthAndYear
+                    .stream()
+                    .map(stockMapper::mapToExpirationQuantity)
+                    .toList();
+        }
+        return List.of();
     }
 
 

@@ -69,7 +69,7 @@ public class OrderServiceImpl implements OrderService {
         return (double) Math.round(price * 100) / 100;
     }
 
-    @Transactional
+    @Transactional(rollbackOn = BadRequestUserException.class)
     void minusStock(Long shipmenId, Long productId, int quantity) throws BadRequestUserException {
         var availableQuantityStock = stockRepository.getAvailableQuantityStock(shipmenId, productId, PageLimit.ONLY.getPageable());
         log.info("availableQuantityStock {}", availableQuantityStock);
@@ -80,7 +80,7 @@ public class OrderServiceImpl implements OrderService {
         StockResponse stockResponse = stockMapper.mapObjectToStockResponse(availableQuantityStock.get(0));
         if (stockResponse.quantity() - stockResponse.soldQuantity() < quantity) {
             log.info("quantity is {}", stockResponse.quantity() - stockResponse.soldQuantity());
-            throw new BadRequestUserException("Số lượng sản phẩm không đủ");
+            throw new BadRequestUserException("Số lượng " + product.getName() + "không đủ");
         }
         if (stockResponse.quantity() - stockResponse.soldQuantity() <= stockResponse.notifyQuantity()) {
             Notification notification = Notification.builder()
@@ -98,8 +98,14 @@ public class OrderServiceImpl implements OrderService {
 
     // create order with request are shipment id and product id for each item
     @Override
-    @Transactional
+    @Transactional(rollbackOn = BadRequestUserException.class)
     public CreateOrderResponse createOrder(OrderRequest orderRequest, HttpServletRequest request) throws BadRequestUserException {
+        if(orderRequest.customerPayment() <= 0){
+            throw new BadRequestUserException("Số tiền khách hàng không được để trống");
+        }
+        if(orderRequest.orderItems().isEmpty()){
+            throw new BadRequestUserException("Không có sản phẩm nào được mua");
+        }
         AccountResponse accountResponse = accountService.getAccountResponse(request);
         Customer customer = null;   
         Employee employee = null;
@@ -210,6 +216,9 @@ public class OrderServiceImpl implements OrderService {
                     .amount(BigDecimal.valueOf(amount)).build();
             orderItemRepository.save(orderItem);
             total = total.add(BigDecimal.valueOf(amount));
+        }
+        if(orderRequest.customerPayment() < total.doubleValue()){
+            throw new BadRequestUserException("Số tiền khách hàng đưa không đủ");
         }
         double roundTotal = (double) Math.round(total.doubleValue() * 100) / 100;
         double change = orderRequest.customerPayment() - roundTotal - orderSave.getTotalDiscount().doubleValue();

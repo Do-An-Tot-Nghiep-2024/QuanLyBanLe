@@ -8,6 +8,7 @@ import com.bac.se.backend.payload.response.statistic.StatisticResponse;
 import com.bac.se.backend.payload.response.statistic.product.BestSellingProductResponse;
 import com.bac.se.backend.payload.response.statistic.product.TopFiveHighestGrossingProductResponse;
 import com.bac.se.backend.payload.response.statistic.sale.SaleAndProfitByMonth;
+import com.bac.se.backend.payload.response.statistic.stock.ExpirationQuantity;
 import com.bac.se.backend.payload.response.statistic.stock.ProductStockResponse;
 import com.bac.se.backend.services.StatisticService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -175,6 +176,19 @@ public class StatisticController {
         try {
             return ResponseEntity.ok(new ApiResponse<>("success",
                     statisticService.getStockByProduct(month)));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/expiration-quantity")
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public ResponseEntity<ApiResponse<List<ExpirationQuantity>>> getSaleAndProfit(
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year) {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>("success",
+                    statisticService.getExpirationQuantity(month,year)));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ApiResponse<>(e.getMessage(), null));
         }

@@ -61,7 +61,7 @@ export default function InventoryDetailPage() {
   return (
     <Container sx={{ mt: 2 }}>
       <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
-        Chi tiết hóa đơn nhập hàng
+        Chi tiết phiếu nhập hàng
       </Typography>
       <Box>
         <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
