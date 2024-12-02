@@ -23,6 +23,7 @@ import {
   AttachMoney as AttachMoneyIcon,
   Refresh as RefreshIcon,
   Grain as GrainIcon,
+  AccessTime as AccessTimeIcon,
   Logout,
 } from "@mui/icons-material";
 import RedeemIcon from "@mui/icons-material/Redeem";
@@ -134,10 +135,15 @@ const NAVIGATION: Navigation = [
         icon: <AttachMoneyIcon />,
       },
       {
-        segment:"stock",
+        segment: "stock",
         title: "Theo số lượng",
         icon: <GrainIcon />,
-      }
+      },
+      {
+        segment: "expiration-quantity",
+        title: "Sản phẩm hết hạn",
+        icon: <AccessTimeIcon />,
+      },
     ],
   },
   {

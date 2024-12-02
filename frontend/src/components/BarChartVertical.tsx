@@ -52,18 +52,18 @@ export default function BarChartVertical({ data }: Props) {
               <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
             </linearGradient>
 
-            <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#82ca9c" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#82ca9c" stopOpacity={0} />
+            <linearGradient id="colorAvb" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#ff7300" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#ff7300" stopOpacity={0} />
             </linearGradient>
           </defs>
           <XAxis
             dataKey="name"
             tick={{ fontSize:12}}
-            tickLine={false}
             angle={-50}
             tickFormatter={formatName}
             textAnchor="end"
+            tickLine={false}
             height={110}
           />
           <YAxis />
@@ -93,7 +93,7 @@ export default function BarChartVertical({ data }: Props) {
             dataKey="availableQuantity"
             stroke="#ff7300"
             fillOpacity={1}
-            fill="url(#colorPv)"
+            fill="url(#colorAvb)"
           />
         </AreaChart>
       </ResponsiveContainer>

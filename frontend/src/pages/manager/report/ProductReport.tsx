@@ -6,7 +6,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
-  TextField,
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
 import {
@@ -17,37 +17,36 @@ import { useQuery } from "@tanstack/react-query";
 import ProductChart from "../../../components/ProductChart";
 import { generateDateDuringWeek } from "../../../utils/dateUtil";
 import QueryResponse from "../../../types/common/queryResponse";
-
-type DateRequest = {
-  fromDate: string;
-  toDate: string;
-};
+import DateInput from "../../../components/DateInput";
+import dayjs, { Dayjs } from "dayjs";
 
 export default function ProductReport() {
   const { fromDate: before, toDate: after } = generateDateDuringWeek();
-  const [fromDate, setFromDate] = useState(before);
-  const [toDate, setToDate] = useState(after);
+  const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs(before));
+  const [toDate, setToDate] = useState<Dayjs | null>(dayjs(after));
   const [productType, setProductType] = useState("BEST_SELLING");
 
   const handleChange = (event: SelectChangeEvent) => {
     setProductType(event.target.value);
   };
-  const handleChangeFromDate = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFromDate(event.target.value);
+  // const handleChangeFromDate = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setFromDate(event.target.value);
+  // };
+  const handleChangeFromDate = (value: Dayjs | null) => {
+    setFromDate(value);
   };
-  const handleChangeToDate = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setToDate(event.target.value);
+  const handleChangeToDate = (value: Dayjs | null) => {
+    setToDate(value);
   };
 
-  const getTopFiveHighestGrossing = async ({
-    request,
-  }: {
-    request: DateRequest;
-  }) => {
+  const getTopFiveHighestGrossing = async (
+    fromDate: Dayjs | null,
+    toDate: Dayjs | null
+  ) => {
     try {
       const response = await getTopFiveHighestGrossingService({
-        fromDate: request.fromDate,
-        toDate: request.toDate,
+        fromDate: fromDate?.format("YYYY-MM-DD") ?? "",
+        toDate: toDate?.format("YYYY-MM-DD") ?? "",
       });
       if (response.message !== "success") {
         throw new Error("Error fetching dashboard");
@@ -57,15 +56,14 @@ export default function ProductReport() {
       console.log(error);
     }
   };
-  const getBestSellingProduct = async ({
-    request,
-  }: {
-    request: DateRequest;
-  }) => {
+  const getBestSellingProduct = async (
+    fromDate: Dayjs | null,
+    toDate: Dayjs | null
+  ) => {
     try {
       const response = await getBestSellingProductService({
-        fromDate: request.fromDate,
-        toDate: request.toDate,
+        fromDate: fromDate?.format("YYYY-MM-DD") ?? "",
+        toDate: toDate?.format("YYYY-MM-DD") ?? "",
       });
       if (response.message !== "success") {
         throw new Error("Error fetching dashboard");
@@ -86,7 +84,7 @@ export default function ProductReport() {
   if (productType === "BEST_SELLING") {
     const { isLoading, isError, error, data, isFetching } = useQuery({
       queryKey: ["bestselling", fromDate, toDate, productType],
-      queryFn: () => getBestSellingProduct({ request: { fromDate, toDate } }),
+      queryFn: () => getBestSellingProduct(fromDate, toDate),
       refetchOnWindowFocus: false,
     });
     reponse.data = data;
@@ -98,8 +96,7 @@ export default function ProductReport() {
   if (productType === "TOP_FIVE") {
     const { isLoading, isError, error, data, isFetching } = useQuery({
       queryKey: ["topFive", fromDate, toDate, productType],
-      queryFn: () =>
-        getTopFiveHighestGrossing({ request: { fromDate, toDate } }),
+      queryFn: () => getTopFiveHighestGrossing(fromDate, toDate),
       refetchOnWindowFocus: false,
     });
     reponse.data = data;
@@ -117,7 +114,7 @@ export default function ProductReport() {
   }
   return (
     <Container sx={{ mt: 5 }}>
-      <Box sx={{ display: "flex", flexDirection: "row", gap: 2, mb: 15 }}>
+      <Box sx={{ display: "flex", flexDirection: "row", gap: 2, mb: 10 }}>
         <FormControl sx={{ minWidth: 300 }}>
           <InputLabel id="demo-simple-select-label">Loại thống kê</InputLabel>
           <Select
@@ -133,46 +130,42 @@ export default function ProductReport() {
             </MenuItem>
           </Select>
         </FormControl>
-        <TextField
-          label="Ngày bắt đầu"
-          sx={{ minWidth: 300 }}
-          slotProps={{
-            inputLabel: {
-              shrink: true,
-            },
-          }}
-          value={fromDate}
+       
+        <DateInput
+          date={fromDate}
           onChange={handleChangeFromDate}
-          type="date"
+          lable="Ngày bắt đầu"
         />
-        <TextField
-          label="Ngày kết thúc"
-          value={toDate}
+        <DateInput
+          date={toDate}
           onChange={handleChangeToDate}
-          sx={{ minWidth: 300 }}
-          slotProps={{
-            inputLabel: {
-              shrink: true,
-            },
-          }}
-          type="date"
+          lable="Ngày kết thúc"
         />
       </Box>
       {productType === "BEST_SELLING" && (
         <Box
           sx={{
-            mt: 20,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             justifyItems: "center",
+            flexDirection: "column",
           }}
         >
+          <Typography align="center" fontWeight="bold">
+            Biểu đồ sản phẩm bán chạy theo thời gian
+          </Typography>
+
           <ProductChart data={reponse.data} dataKey="quantity" />
         </Box>
       )}
       {productType === "TOP_FIVE" && (
-        <ProductChart data={reponse.data} dataKey="total" />
+        <Box>
+          <Typography align="center" fontWeight="bold">
+            Biểu đồ top 5 sản phẩm có doanh thu cao nhất (K: Nghìn, M: Triệu, B: Tỉ)
+          </Typography>
+          <ProductChart data={reponse.data} dataKey="total" />
+        </Box>
       )}
     </Container>
   );

@@ -119,10 +119,11 @@ const getSalesAndProfitByMonthService = async (month: number) => {
   }
 };
 
-
 const getStockByProductService = async (month: number) => {
   try {
-    const respose: any = await api.get(`/statistic/stock-by-product?month=${month}`);
+    const respose: any = await api.get(
+      `/statistic/stock-by-product?month=${month}`
+    );
     console.log(respose);
     const { message, data } = respose;
     return {
@@ -190,6 +191,27 @@ const getBestSellingProductService = async ({
   }
 };
 
+const getExpirationQuantityReportService = async (
+  month: number,
+  year: number
+) => {
+  try {
+    const response: any = await api.get(
+      `/statistic/expiration-quantity?month=${month}&year=${year}`
+    );
+    const { message, data } = response;
+    return {
+      message: message,
+      data: message !== "success" ? [] : data,
+    };
+  } catch (error: any) {
+    return {
+      message: error.response.data.message,
+      data: [],
+    };
+  }
+};
+
 export {
   getSalesStatisticsByProductService,
   getSalesStatisticsByEmployeeService,
@@ -200,4 +222,5 @@ export {
   getBestSellingProductService,
   getSalesAndProfitByMonthService,
   getStockByProductService,
+  getExpirationQuantityReportService,
 };

@@ -9,6 +9,7 @@ import {
   YAxis,
 } from "recharts";
 import { formatMoney, formatMoneyThousand } from "../utils/formatMoney";
+import DataFormater from "../utils/formatDataChart";
 
 type Data = {
   name: string;
@@ -22,16 +23,24 @@ type Props = {
 
 export default function ProductChart({ data, dataKey }: Props) {
   return (
-    <ComposedChart width={1000} height={250} data={data}>
-      <XAxis dataKey="name" />
-      <YAxis dataKey={dataKey} />
+    <ComposedChart width={1000} height={350} data={data} margin={{left:45}}>
+      <XAxis
+        dataKey="name"
+        angle={-20}
+        textAnchor="end"
+        tickLine={false}
+        height={140}
+        fontSize={11}
+        width={50}
+      />
+      <YAxis dataKey={dataKey} tickFormatter={DataFormater} />
       <Tooltip
         formatter={(value) => {
           if (dataKey === "total") return formatMoney(value as number);
           return formatMoneyThousand(value as number);
         }}
       />
-      <Legend />
+      <Legend align="center" verticalAlign="top" iconSize={12} />
       <CartesianGrid stroke="#f5f5f5" />
       {/* <Area type="monotone" dataKey="amt" fill="#8884d8" stroke="#8884d8" /> */}
       <Bar

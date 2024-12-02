@@ -110,12 +110,12 @@ export default function ProductPage() {
     refetchOnWindowFocus: false,
   });
 
-  if (isLoadingCategories || isLoading) {
-    return <div>Loading...</div>;
-  }
-  if (isErrorCategories) {
-    return <div>Error: {errorCategories.message}</div>;
-  }
+  // if (isLoadingCategories || isLoading) {
+  //   return <div>Loading...</div>;
+  // }
+  // if (isErrorCategories) {
+  //   return <div>Error: {errorCategories.message}</div>;
+  // }
 
   const fitImage = (image: string) => {
     const split = image.split("/");
@@ -127,7 +127,7 @@ export default function ProductPage() {
         rs += split[i] + "/";
       }
     }
-    
+
     return rs.substring(0, rs.length - 1);
   };
 
@@ -208,7 +208,6 @@ export default function ProductPage() {
     setNewPrice(rawInput);
   };
 
-  
   // console.log(page);
   return (
     <Box sx={{ width: "90%", height: "100%", py: 4 }}>
@@ -277,6 +276,16 @@ export default function ProductPage() {
         </Tabs>
 
         <Grid container spacing={2}>
+          {isLoadingCategories && (
+            <Grid size="auto" display="flex" justifyContent="center">
+              <CircularProgress />
+            </Grid>
+          )}
+          {isErrorCategories && (
+            <Grid size="auto" display="flex" justifyContent="center">
+              <Typography variant="h6">Error: {errorCategories.message}</Typography>
+            </Grid>
+          )}
           {isLoading ? (
             <Grid size="auto" display="flex" justifyContent="center">
               <CircularProgress />

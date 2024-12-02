@@ -7,6 +7,7 @@ import com.bac.se.backend.payload.response.statistic.StatisticResponse;
 import com.bac.se.backend.payload.response.statistic.product.BestSellingProductResponse;
 import com.bac.se.backend.payload.response.statistic.product.TopFiveHighestGrossingProductResponse;
 import com.bac.se.backend.payload.response.statistic.sale.SaleAndProfitByMonth;
+import com.bac.se.backend.payload.response.statistic.stock.ExpirationQuantity;
 import com.bac.se.backend.payload.response.statistic.stock.ProductStockResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -54,6 +55,8 @@ public interface StatisticService {
 
 
     List<ProductStockResponse> getStockByProduct(Integer month);
+
+    List<ExpirationQuantity> getExpirationQuantity(Integer month,Integer year);
 
 
 }

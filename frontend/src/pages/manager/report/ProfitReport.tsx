@@ -197,7 +197,7 @@ export default function ProfitReport() {
       </Stack>
       <Container sx={{ width: "90%", height: "80%" }}>
         <Typography variant="h6" sx={{ mt: 5 }} align="center">
-          Biểu đồ doanh thu theo thời gian
+          Biểu đồ doanh thu theo {type === "month" ? "tháng" : "năm"} (K: Nghìn, M: Triệu, B: Tỉ)
         </Typography>
         <DataChart data={responseData.data} />
       </Container>

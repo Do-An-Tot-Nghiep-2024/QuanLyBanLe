@@ -86,25 +86,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
     List<Object[]> getSalesAndProfitByDate(Date fromDate,Date toDate);
 
 
-    // Thống kê doanh thu và lợi nhuận hiện tại
-    @Query(value = "SELECT  " +
-            "     DATE_FORMAT(o.created_at,'%d-%m-%Y') AS createdAt, " +
-            "    ROUND(SUM(oi.amount),3) AS total, " +
-            "    ROUND(SUM(oi.amount) - o.total_discount - SUM(oi.quantity * pp.original_price),3) AS total_profit " +
-            "FROM " +
-            "    t_order o " +
-            "        INNER JOIN " +
-            "    t_order_item oi ON oi.order_id = o.order_id " +
-            "        INNER JOIN " +
-            "    t_product_price pp ON pp.product_price_id = oi.product_price_id " +
-            "WHERE " +
-            "    o.created_at = CURDATE() " +
-            "AND o.order_status = 'COMPLETED' " +
-            "GROUP BY createdAt",nativeQuery = true)
-    List<Object[]> getCurrentTotalSalesAndProfit( Pageable pageable);
 
     // get stock by product by month
-
     @Query(value = "SELECT  " +
             "    oi.product_id,p.name, SUM(oi.quantity) AS sold_quantity " +
             "FROM " +
@@ -122,6 +105,24 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
             "GROUP BY oi.product_id",nativeQuery = true)
     List<Object[]> getSoldQuantityProductByMonth(Integer month);
 
+    @Query(value = "SELECT  " +
+            "    p.name, " +
+            "    DATE_FORMAT(si.exp, '%d-%m-%Y') AS expired_day, " +
+            "    si.shipment_id, " +
+            "    SUM(s.quantity - s.sold_quantity) AS avb " +
+            "FROM " +
+            "    t_shipment_item si " +
+            "        INNER JOIN " +
+            "    t_product p ON si.product_id = p.product_id " +
+            "        INNER JOIN " +
+            "    t_stock s ON s.stock_id = si.stock_id " +
+            "WHERE " +
+            "    MONTH(si.exp) = :month " +
+            "        AND YEAR(si.exp) = :year " +
+            "GROUP BY si.shipment_id ORDER BY expired_day",nativeQuery = true)
+    List<Object[]> getExpirationQuantityProductByMonthAndYear(
+            @Param("month") Integer month,
+            @Param("year") Integer year);
 
 
 
