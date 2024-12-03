@@ -264,7 +264,7 @@ class EmployeeServiceTest {
         // Act
         employeeService.deleteEmployee(employeeId);
         // Assert
-        assertEquals(EmployeeStatus.ABSENT, employee.getStatus());
+        assertEquals(EmployeeStatus.RESIGN, employee.getStatus());
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(employeeRepository, times(1)).save(employee);
     }
