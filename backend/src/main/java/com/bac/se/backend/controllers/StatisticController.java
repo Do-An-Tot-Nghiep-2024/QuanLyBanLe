@@ -182,7 +182,7 @@ public class StatisticController {
     }
 
     @GetMapping("/expiration-quantity")
-    @PreAuthorize("hasAnyAuthority('EMPLOYEE','ADMIN')")
+    @PreAuthorize("hasAnyAuthority('EMPLOYEE','MANAGER')")
     public ResponseEntity<ApiResponse<List<ExpirationQuantity>>> getSaleAndProfit(
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year) {
