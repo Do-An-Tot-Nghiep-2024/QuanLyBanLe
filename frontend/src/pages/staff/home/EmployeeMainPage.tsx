@@ -46,11 +46,6 @@ const NAVIGATION: Navigation = [
         title: "Quản lí đơn hàng",
         icon: <ReceiptIcon />,
       },
-      {
-        segment: "expiration-quantity",
-        title: "Quản lý sản phẩm hết hạn",
-        icon: <AccessTimeIcon />,
-      },
     ],
   },
   {
@@ -62,6 +57,11 @@ const NAVIGATION: Navigation = [
         segment: "",
         title: "Quản lí lô hàng",
         icon: <WarehouseIcon />,
+      },
+      {
+        segment: "expiration-quantity",
+        title: "Quản lý sản phẩm hết hạn",
+        icon: <AccessTimeIcon />,
       },
     ],
   },
