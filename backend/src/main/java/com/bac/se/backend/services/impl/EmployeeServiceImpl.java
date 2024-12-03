@@ -85,7 +85,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void deleteEmployee(Long id) {
         Employee employeeNotFound = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
-        employeeNotFound.setStatus(EmployeeStatus.ABSENT);
+        employeeNotFound.setStatus(EmployeeStatus.RESIGN);
         employeeRepository.save(employeeNotFound);
     }
 
