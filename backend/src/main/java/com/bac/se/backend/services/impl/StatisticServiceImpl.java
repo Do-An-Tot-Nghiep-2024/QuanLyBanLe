@@ -189,6 +189,7 @@ public class StatisticServiceImpl implements StatisticService {
             if(map.containsKey(availableQuantity.id())){
                 map.get(availableQuantity.id()).setAvailableQuantity(availableQuantity.quantity());
             }
+            log.info("avb {}", availableQuantity);
         }
         for(ImportQuantity importQuantity : importQuantityList){
             if(map.containsKey(importQuantity.id())){

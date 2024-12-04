@@ -109,7 +109,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
             "    p.name, " +
             "    DATE_FORMAT(si.exp, '%d-%m-%Y') AS expired_day, " +
             "    si.shipment_id, " +
-            "    SUM(s.quantity - s.sold_quantity) AS avb " +
+            "    (s.quantity - s.sold_quantity) AS avb " +
             "FROM " +
             "    t_shipment_item si " +
             "        INNER JOIN " +
