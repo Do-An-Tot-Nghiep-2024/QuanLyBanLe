@@ -14,6 +14,11 @@ import {
   TextField,
   TablePagination,
   Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -25,13 +30,23 @@ import ResponsePagination from "../../../types/responsePagination";
 import { OrderSchema } from "../../../types/orderSchema";
 import colors from "../../../constants/color";
 import { useNavigate } from "react-router-dom";
+import dayjs, { Dayjs } from "dayjs";
+import {
+  convertDateInput,
+  generateDateDuringWeek,
+} from "../../../utils/dateUtil";
+import DateInput from "../../../components/DateInput";
 
 const OrderOnlineList: React.FC = () => {
   const navigate = useNavigate();
+  const { fromDate: before, toDate: after } = generateDateDuringWeek();
+  const current = new Date(after);
+  current.setDate(current.getDate() - 1);
+  const toDateFromat = convertDateInput(current);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
-  const [selectedStatuses] = useState<string[]>(["PENDING"]);
+  const [startDate, setStartDate] = useState<string>(before);
+  const [endDate, setEndDate] = useState<string>(toDateFromat);
+  const [status, setStaus] = useState("PENDING");
   const [selectedPayments] = useState<string[]>(["CASH"]);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
@@ -71,13 +86,13 @@ const OrderOnlineList: React.FC = () => {
 
     if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
       alert("Ngày kết thúc phải sau ngày bắt đầu.");
-      setEndDate("");
+      setEndDate(toDateFromat);
       return;
     }
 
     if (endDate && new Date(endDate) > currentDate) {
       alert("Không thể chọn ngày kết thúc ở tương lai.");
-      setEndDate("");
+      setEndDate(toDateFromat);
       return;
     }
 
@@ -104,7 +119,7 @@ const OrderOnlineList: React.FC = () => {
         order,
         startDate,
         endDate,
-        selectedStatuses[0],
+        status,
         selectedPayments[0],
         searchTerm
       );
@@ -123,7 +138,7 @@ const OrderOnlineList: React.FC = () => {
       rowsPerPage,
       startDate,
       endDate,
-      selectedStatuses,
+      status,
       searchTerm,
       orderBy,
       order,
@@ -135,6 +150,9 @@ const OrderOnlineList: React.FC = () => {
     navigate(`/orders/${order.orderId}`);
   };
 
+  const handleChangeStatus = (event: SelectChangeEvent) => {
+    setStaus(event.target.value);
+  };
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
@@ -162,6 +180,12 @@ const OrderOnlineList: React.FC = () => {
     const diffInTime = currentDate.getTime() - createdDate.getTime();
     const diffInDays = diffInTime / (1000 * 3600 * 24);
     return diffInDays > 1;
+  };
+  const handleChangeStartDate = (value: Dayjs | null) => {
+    setStartDate(value?.format("YYYY-MM-DD") ?? "");
+  };
+  const handleChangeEndDate = (value: Dayjs | null) => {
+    setEndDate(value?.format("YYYY-MM-DD") ?? "");
   };
 
   const handleOrderAction = async (
@@ -204,7 +228,7 @@ const OrderOnlineList: React.FC = () => {
         component="h2"
         style={{ margin: "16px", textAlign: "center" }}
       >
-        Danh sách đơn hàng
+        Danh sách đơn hàng đến lấy
       </Typography>
 
       <Stack
@@ -214,23 +238,15 @@ const OrderOnlineList: React.FC = () => {
         sx={{ marginBottom: "16px" }}
       >
         <Box display="flex" justifyContent="flex-end" gap={2}>
-          <TextField
-            type="date"
-            label="Ngày bắt đầu"
-            variant="outlined"
-            value={startDate} // Format the date for display in 'yyyy-mm-dd'
-            onChange={(e) => setStartDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            sx={{ width: 150 }}
+          <DateInput
+            date={dayjs(startDate)}
+            onChange={handleChangeStartDate}
+            lable="Ngày bắt đầu"
           />
-          <TextField
-            type="date"
-            label="Ngày kết thúc"
-            variant="outlined"
-            value={endDate} // Format the date for display in 'yyyy-mm-dd'
-            onChange={(e) => setEndDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            sx={{ width: 150 }}
+          <DateInput
+            date={dayjs(endDate)}
+            onChange={handleChangeEndDate}
+            lable="Ngày kết thúc"
           />
         </Box>
 
@@ -244,56 +260,40 @@ const OrderOnlineList: React.FC = () => {
             alignItems: "center",
           }}
         >
-          {/* Search Field (Aligned Left) */}
-          <TextField
-            type="text"
-            label="Tìm kiếm theo số điện thoại"
-            variant="outlined"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{ width: 350 }}
-          />
-
           <Box
             sx={{
-              gap: 1,
               display: "flex",
+              gap: 1,
               flexDirection: "row",
-              justifyContent: "flex-end",
-              alignItems: "center",
+              width: "100%", // Ensure the Box takes the full width
             }}
           >
-            <Box
-              sx={{
-                borderRadius: 10,
-                padding: 1.5,
-                marginRight: 2,
-                backgroundColor: colors.primaryColor,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <Typography color="white" variant="body2">
-                Trạng Thái:{" "}
-                {selectedStatuses.length > 0
-                  ? selectedStatuses.join(", ")
-                  : "Tất cả"}
-              </Typography>
-            </Box>
-
-            {/* Payment Method Display */}
-            <Box
-              sx={{
-                borderRadius: 10,
-                padding: 1.5,
-                backgroundColor: colors.primaryColor,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <Typography variant="body2" color="white">
-                Phương Thức Thanh Toán: Tất cả
-              </Typography>
+            <Box sx={{ marginLeft: "auto", display: "flex", gap: 1 }}>
+              <TextField
+                fullWidth
+                type="text"
+                label="Tìm kiếm theo số điện thoại"
+                variant="outlined"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                sx={{ minWidth: 350 }}
+              />
+              <FormControl sx={{ minWidth: 120 }} fullWidth>
+                <InputLabel id="demo-simple-select-status">
+                  Trạng thái
+                </InputLabel>
+                <Select
+                  labelId="demo-simple-select-status"
+                  id="demo-simple-select"
+                  name="status"
+                  label="Trạng thái"
+                  value={status}
+                  onChange={handleChangeStatus}
+                >
+                  <MenuItem value={"PENDING"}>Đang đợi</MenuItem>
+                  <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
           </Box>
         </Box>
