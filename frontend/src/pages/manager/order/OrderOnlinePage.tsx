@@ -232,71 +232,44 @@ const OrderOnlineList: React.FC = () => {
       </Typography>
 
       <Stack
-        direction="column"
+        direction="row"
         justifyContent="space-between"
-        spacing={3}
-        sx={{ marginBottom: "16px" }}
+        spacing={2}
+        sx={{ marginBottom: 3 }}
       >
-        <Box display="flex" justifyContent="flex-end" gap={2}>
-          <DateInput
-            date={dayjs(startDate)}
-            onChange={handleChangeStartDate}
-            lable="Ngày bắt đầu"
-          />
-          <DateInput
-            date={dayjs(endDate)}
-            onChange={handleChangeEndDate}
-            lable="Ngày kết thúc"
-          />
-        </Box>
+        <DateInput
+          date={dayjs(startDate)}
+          onChange={handleChangeStartDate}
+          lable="Ngày bắt đầu"
+        />
+        <DateInput
+          date={dayjs(endDate)}
+          onChange={handleChangeEndDate}
+          lable="Ngày kết thúc"
+        />
 
-        <Box
-          sx={{
-            gap: 2,
-            display: "flex",
-            flexDirection: "row",
-            mb: 2,
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              gap: 1,
-              flexDirection: "row",
-              width: "100%", // Ensure the Box takes the full width
-            }}
+        <TextField
+          type="text"
+          label="Tìm kiếm theo số điện thoại"
+          variant="outlined"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{ minWidth: 270 }}
+        />
+        <FormControl sx={{ minWidth: 120 }} >
+          <InputLabel id="demo-simple-select-status">Trạng thái</InputLabel>
+          <Select
+            labelId="demo-simple-select-status"
+            id="demo-simple-select"
+            name="status"
+            label="Trạng thái"
+            value={status}
+            onChange={handleChangeStatus}
           >
-            <Box sx={{ marginLeft: "auto", display: "flex", gap: 1 }}>
-              <TextField
-                fullWidth
-                type="text"
-                label="Tìm kiếm theo số điện thoại"
-                variant="outlined"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                sx={{ minWidth: 350 }}
-              />
-              <FormControl sx={{ minWidth: 120 }} fullWidth>
-                <InputLabel id="demo-simple-select-status">
-                  Trạng thái
-                </InputLabel>
-                <Select
-                  labelId="demo-simple-select-status"
-                  id="demo-simple-select"
-                  name="status"
-                  label="Trạng thái"
-                  value={status}
-                  onChange={handleChangeStatus}
-                >
-                  <MenuItem value={"PENDING"}>Đang đợi</MenuItem>
-                  <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-        </Box>
+            <MenuItem value={"PENDING"}>Đang đợi</MenuItem>
+            <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
+          </Select>
+        </FormControl>
       </Stack>
 
       {/* Orders Table */}

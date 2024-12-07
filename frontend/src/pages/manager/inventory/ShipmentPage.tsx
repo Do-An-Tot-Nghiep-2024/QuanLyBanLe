@@ -222,23 +222,23 @@ export default function EnhancedTable() {
 
   const visibleRows = data
     ?.filter((row: ProductShipment) => {
-      const matchesShiment =
-        shiment === "" ||
-        row.shipmentId.toString().toLowerCase().includes(shiment.toLowerCase());
-      const matchesProduct =
-        product === "" ||
-        row.product.toString().toLowerCase().includes(product.toLowerCase());
+      const matchesShiment = row.shipmentId
+        .toString()
+        .toLowerCase()
+        .includes(shiment.toLowerCase());
+      const matchesProduct = row.product.toLocaleLowerCase().indexOf(product.toLowerCase()) >= 0; 
       return matchesShiment && matchesProduct;
     })
 
-    ?.sort(getComparator(order, orderBy))
+    ?.sort(getComparator(order, orderBy)) 
     .slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
     ) as ProductShipment[];
-
+    console.log(visibleRows);
+    
   return (
-    <Box sx={{ width: "100%", pt: 4,px:4 }}>
+    <Box sx={{ width: "100%", pt: 4, px: 4 }}>
       <Typography
         variant="h6"
         sx={{ mb: 2, fontSize: 24, fontWeight: "bold", textAlign: "center" }}
@@ -305,7 +305,6 @@ export default function EnhancedTable() {
                       {row.supplier}
                     </TableCell>
                     <TableCell
-                      
                       align="left"
                       padding="none"
                       width={120}

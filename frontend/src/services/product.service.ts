@@ -288,11 +288,9 @@ const updateProductPriceService = async (productId: number, price: number) => {
       message,
       data: message === "success" ? data : null,
     };
-  } catch (error) {
-    console.error("Error fetching products:", error);
-
+  } catch (error:any) {
     return {
-      message: String(error),
+      message: error.response?.data?.message,
       data: null,
     };
   }

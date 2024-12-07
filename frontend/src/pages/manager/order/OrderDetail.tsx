@@ -25,6 +25,7 @@ interface OrderItem {
   quantity: number;
   price: number;
   amount: number;
+  shipment: number;
 }
 
 interface OrderDetailResponse {
@@ -43,7 +44,7 @@ interface OrderDetailResponse {
 export default function OrderDetailPage() {
   const { orderId } = useParams();
 
-  const auth = useAppSelector(state => state.auth);
+  const auth = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const orderNumber = Number(orderId);
 
@@ -71,6 +72,7 @@ export default function OrderDetailPage() {
   const { isLoading, isError, error, data, isFetching } = useQuery({
     queryKey: ["order", orderId],
     queryFn: () => getOrderDetail(orderNumber),
+    refetchOnWindowFocus: false,
   });
 
   if (isLoading || isFetching) {
@@ -85,28 +87,44 @@ export default function OrderDetailPage() {
   }
 
   // Columns for the table
-  const columns = ["Tên sản phẩm", "Số lượng", "Đơn giá", "Thành tiền"];
+  const columns = [
+    "Tên sản phẩm",
+    "Lô hàng",
+    "Số lượng",
+    "Đơn giá",
+    "Thành tiền",
+  ];
 
   const translateStatus = (status: string) => {
     const statusMapping: { [key: string]: string } = {
-        PENDING: "Đang chờ nhận hàng",
-        CANCELLED: "Đã hủy",
-        COMPLETED: "Hoàn thành",
-        // Add more statuses if necessary
+      PENDING: "Đang chờ nhận hàng",
+      CANCELLED: "Đã hủy",
+      COMPLETED: "Hoàn thành",
+      // Add more statuses if necessary
     };
 
     return statusMapping[status] || "Không xác định"; // Default if the status doesn't match
-};
+  };
 
-const translatePaymentType = (paymentType: string) => {
+  const translatePaymentType = (paymentType: string) => {
     const paymentMapping: { [key: string]: string } = {
-        CASH: "Tiền mặt",
-        E_WALLET: "Chuyển khoản",
-        // Add more payment methods if necessary
+      CASH: "Tiền mặt",
+      E_WALLET: "Chuyển khoản",
+      // Add more payment methods if necessary
     };
 
     return paymentMapping[paymentType] || "Không xác định"; // Default if the payment type doesn't match
-};
+  };
+  const res = {
+    status: data?.orderStatus ?? "",
+    paymentType: data?.paymentType ?? "",
+    total: data?.total ?? 0,
+    customerPayment: data?.customerPayment ?? 0,
+    createdAt: data?.createdAt ?? "",
+    employee: data?.employee ?? "",
+    orderId: data?.orderId ?? 0,
+    totalDiscount: data?.totalDiscount ?? 0,
+  };
   return (
     <Container sx={{ pt: 5, mt: 2 }}>
       <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
@@ -114,34 +132,61 @@ const translatePaymentType = (paymentType: string) => {
       </Typography>
 
       <Box>
+        <Stack flexDirection={"row"} gap={3}>
+          <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
+            <Typography fontWeight="bold">Nhân viên: </Typography>
+            <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
+              {data?.employee}
+            </Typography>
+          </Stack>
+          <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
+            <Typography fontWeight="bold">Trạng thái đơn hàng: </Typography>
+            <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
+              {translateStatus(String(data?.orderStatus))}
+            </Typography>
+          </Stack>
+        </Stack>
+
+        <Stack flexDirection={"row"} gap={3}>
+          <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
+            <Typography fontWeight="bold">Phương thức thanh toán: </Typography>
+            <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
+              {translatePaymentType(String(data?.paymentType))}
+            </Typography>
+          </Stack>
+          <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
+            <Typography fontWeight="bold">Ngày tạo đơn hàng: </Typography>
+            <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
+              {formatDateTime(data?.createdAt as string)}
+            </Typography>
+          </Stack>
+        </Stack>
         <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
-          <Typography fontWeight="bold">Nhân viên: </Typography>
-          <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
-            {data?.employee}
+          <Typography fontWeight="bold">Tổng tiền: </Typography>
+          <Typography sx={{ fontSize: 15, fontWeight: "bold" }}>
+            {formatMoney(Number(data?.total))}
           </Typography>
         </Stack>
         <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
-          <Typography fontWeight="bold">Trạng thái đơn hàng: </Typography>
-          <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
-            {translateStatus(String(data?.orderStatus))}
+          <Typography fontWeight="bold">Giảm giá: </Typography>
+          <Typography sx={{ fontSize: 15, fontWeight: "bold" }}>
+            {formatMoney(Number(data?.totalDiscount))}
           </Typography>
         </Stack>
+
         <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
-          <Typography fontWeight="bold">Phương thức thanh toán: </Typography>
-          <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
-            {translatePaymentType(String(data?.paymentType))}
-          </Typography>
-        </Stack>
-        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
-          <Typography fontWeight="bold">Ngày tạo đơn hàng: </Typography>
-          <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
-            {formatDateTime(data?.createdAt as string)}
-          </Typography>
-        </Stack>
-        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
-          <Typography fontWeight="bold">Khách hàng thanh toán: </Typography>
-          <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
+          <Typography fontWeight="bold">Tiền khách đưa: </Typography>
+          <Typography sx={{ fontSize: 16, fontWeight: "bold" }}>
             {formatMoney(Number(data?.customerPayment))}
+          </Typography>
+        </Stack>
+
+        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
+          <Typography fontWeight="bold">Tiền thồi: </Typography>
+          <Typography sx={{ fontSize: 16, fontWeight: "bold" }}>
+            {formatMoney(
+              Number(res.customerPayment - (res.total - res.totalDiscount))
+            )}
           </Typography>
         </Stack>
       </Box>
@@ -166,6 +211,7 @@ const translatePaymentType = (paymentType: string) => {
             {data?.orderItemResponses.map((item, index) => (
               <TableRow key={index}>
                 <TableCell align="left">{item.name}</TableCell>
+                <TableCell align="center">{item.shipment}</TableCell>
                 <TableCell align="center">{item.quantity}</TableCell>
                 <TableCell align="center">{formatMoney(item.price)}</TableCell>
                 <TableCell align="center">{formatMoney(item.amount)}</TableCell>
@@ -176,36 +222,20 @@ const translatePaymentType = (paymentType: string) => {
       </TableContainer>
 
       {/* Total and Discount Section */}
-      <Box sx={{ mt: 4 }}>
-        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
-          <Typography fontWeight="bold">Tổng tiền: </Typography>
-          <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
-            {formatMoney(Number(data?.total))}
-          </Typography>
-        </Stack>
-
-        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
-          <Typography fontWeight="bold">Giảm giá: </Typography>
-          <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
-            {formatMoney(Number(data?.totalDiscount))}
-          </Typography>
-        </Stack>
-      </Box>
 
       {/* Button to print the invoice or order details */}
       <Button
         onClick={() => {
           const state = data;
-          if(auth.role === "EMPLOYEE"){
+          if (auth.role === "EMPLOYEE") {
             navigate("/staff/print/order-invoice", {
-              state: state, 
+              state: state,
             });
-          }else{
+          } else {
             navigate("/print/order-invoice", {
-              state: state, 
+              state: state,
             });
           }
-        
         }}
         variant="contained"
         startIcon={<PictureAsPdfIcon />}

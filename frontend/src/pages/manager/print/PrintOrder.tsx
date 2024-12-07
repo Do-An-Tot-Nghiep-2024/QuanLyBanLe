@@ -10,16 +10,31 @@ import {
 } from "@react-pdf/renderer";
 import { useLocation, useNavigate } from "react-router-dom";
 import PDFTable from "../../../components/PDFTable";
-import source from "../../../assets/fonts/Roboto-Regular.ttf";
-import { formatMoney } from "../../../utils/formatMoney";
+import bold from "../../../assets/fonts/Roboto-Bold.ttf";
+import regular from "../../../assets/fonts/Roboto-Regular.ttf";
+import medium from "../../../assets/fonts/Roboto-Medium.ttf";
+import { formatMoney, formatMoneyThousand } from "../../../utils/formatMoney";
 import logo from "../../../assets/images/logo.png";
 import { Box, Button } from "@mui/material";
 import { formatDateTime } from "../../../utils/dateUtil";
 import { useAppSelector } from "../../../redux/hook";
-// Register the custom font
+
 Font.register({
   family: "Roboto",
-  src: source,
+  fonts: [
+    {
+      src: bold,
+      fontWeight: "bold",
+    },
+    {
+      src: regular,
+      fontWeight: "normal",
+    },
+    {
+      src: medium,
+      fontWeight: "medium",
+    },
+  ],
 });
 
 const styles = StyleSheet.create({
@@ -52,7 +67,7 @@ const styles = StyleSheet.create({
   header: {
     textAlign: "center",
     fontSize: 25,
-    fontWeight: "bold",
+    fontWeight: 500,
     marginVertical: 15,
   },
   top: {
@@ -85,7 +100,7 @@ const styles = StyleSheet.create({
   },
   info: {
     flexDirection: "row",
-    fontSize: 14,
+    fontSize: 15,
   },
   image: {
     marginLeft: "auto",
@@ -101,8 +116,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between", // Distributes space evenly with alignment
     paddingHorizontal: 35,
     paddingVertical: 4,
-    fontSize: 15,
-    fontWeight: 1000,
+    fontSize: 16,
+    fontWeight: "medium",
   },
   head: {
     display: "flex",
@@ -132,6 +147,8 @@ const InvoiceDoc = ({
   employee,
   title,
   discount,
+  percentage,
+  minOrderValue,
 }: {
   data: any[];
   total: number;
@@ -142,6 +159,8 @@ const InvoiceDoc = ({
   employee: string;
   title: string;
   discount: number;
+  percentage: number;
+  minOrderValue: number;
 }) => (
   <Document title="Hóa đơn" style={styles.body}>
     <Page size="A4" style={styles.page}>
@@ -150,12 +169,12 @@ const InvoiceDoc = ({
         <Text style={styles.header}>{title}</Text>
         <View style={styles.head}>
           <View style={styles.info}>
-            <Text style={styles.textTitle}>Ngày tạo: </Text>
+            <Text>Ngày tạo: </Text>
             <Text>{formatDateTime(createdAt)}</Text>
           </View>
           <View style={styles.info}>
             <Text>Mã hóa đơn: </Text>
-            <Text style={{ fontWeight: "bold" }}>{orderId}</Text>
+            <Text>{orderId}</Text>
           </View>
         </View>
       </View>
@@ -168,7 +187,7 @@ const InvoiceDoc = ({
         }}
       >
         <View style={styles.info}>
-          <Text style={styles.textTitle}>Nhân viên: </Text>
+          <Text>Nhân viên: </Text>
           <Text>{employee}</Text>
         </View>
       </View>
@@ -176,22 +195,23 @@ const InvoiceDoc = ({
         {/* Render the order items in a table */}
         <PDFTable data={data} />
 
-        {/* Display total amount and payment information */}
-        {/* {discount > 0 && (
-          <Text style={styles.total}>Khuyến mãi: {formatMoney(discount)}</Text>
-        )} */}
         <View style={styles.payment}>
-          <Text>{"Tổng tiền phải thanh toán".toUpperCase()}</Text>
+          <Text>{"Tổng tiền hàng".toUpperCase()}</Text>
           <Text> {formatMoney(total)}</Text>
         </View>
 
         <View style={styles.payment}>
           <Text>{"Tổng tiền đã giảm".toUpperCase()}</Text>
-          <Text> {formatMoney(discount > 0 ? discount : 0)}</Text>
+          <Text> {formatMoney(discount > 0 ? -discount : -0)}</Text>
         </View>
 
         <View style={styles.payment}>
-          <Text>{"Tiền khách trả".toUpperCase()}</Text>
+          <Text>{"Tổng tiền phải thanh toán".toUpperCase()}</Text>
+          <Text> {formatMoney(total - discount)}</Text>
+        </View>
+
+        <View style={styles.payment}>
+          <Text>{"Tiền khách đưa".toUpperCase()}</Text>
           <Text>{formatMoney(customerPayment)}</Text>
         </View>
 
@@ -203,14 +223,25 @@ const InvoiceDoc = ({
         <Text
           style={{
             marginTop: 10,
-            fontSize: 10,
-            marginRight: 100,
-            paddingLeft:40
-            // textAlign: "center",
+            fontSize: 12,
+            textAlign: "center",
           }}
         >
           {`( Giá trên đã bao gồm thuế GTGT )`}
         </Text>
+        {discount > 0 && percentage !== 0 && minOrderValue > 0 && (
+          <Text
+            style={{
+              color: "red",
+              textAlign: "center",
+              marginTop: 10,
+              fontSize: 14,
+            }}
+          >
+            ! Hóa đơn được giảm {percentage * 100} % khi đơn hàng{" "}
+            {formatMoneyThousand(minOrderValue)} VND
+          </Text>
+        )}
       </View>
     </Page>
   </Document>
@@ -228,6 +259,8 @@ export default function PrintOrder() {
     createdAt,
     employee,
     totalDiscount,
+    percentage,
+    minOrderValue,
   } = location.state || {}; // Get data from location state
   const auth = useAppSelector((state) => state.auth);
   // // Calculate the total from order items
@@ -297,13 +330,15 @@ export default function PrintOrder() {
         <InvoiceDoc
           data={items}
           title={title}
-          total={total - totalDiscount}
+          total={total}
           discount={totalDiscount}
           customerPayment={customerPayment}
           change={change}
           orderId={orderId}
           createdAt={createdAt}
           employee={employee}
+          percentage={percentage}
+          minOrderValue={minOrderValue}
         />
       </PDFViewer>
     </Box>

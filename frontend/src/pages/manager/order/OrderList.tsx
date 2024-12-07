@@ -33,6 +33,7 @@ import {
 import dayjs, { Dayjs } from "dayjs";
 import DateInput from "../../../components/DateInput";
 import { useAppSelector } from "../../../redux/hook";
+import { formatMoneyThousand } from "../../../utils/formatMoney";
 const OrderList: React.FC = () => {
   const auth = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -227,95 +228,50 @@ const OrderList: React.FC = () => {
       </Typography>
 
       <Stack
-        direction="column"
+        direction="row"
         justifyContent="space-between"
-        spacing={3}
-        sx={{ marginBottom: "16px" }}
+        spacing={2}
+        sx={{ marginBottom: 3 }}
       >
-        <Box display="flex" justifyContent="flex-end" gap={2}>
-          {/* Start Date */}
-          {/* <TextField
-            type="date"
-            label="Ngày bắt đầu"
-            variant="outlined"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            sx={{ width: 150 }}
-          /> */}
-          <DateInput
-            date={dayjs(startDate)}
-            onChange={handleChangeStartDate}
-            lable="Ngày bắt đầu"
-          />
-          {/* End Date */}
-          {/* <TextField
-            type="date"
-            label="Ngày kết thúc"
-            variant="outlined"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            sx={{ width: 150 }}
-          /> */}
-          <DateInput
-            date={dayjs(endDate)}
-            onChange={handleChangeEndDate}
-            lable="Ngày kết thúc"
-          />
-        </Box>
+        <DateInput
+          date={dayjs(startDate)}
+          onChange={handleChangeStartDate}
+          lable="Ngày bắt đầu"
+        />
 
-        <Box
-          sx={{
-            gap: 2,
-            display: "flex",
-            flexDirection: "row",
-            mb: 2,
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              gap: 1,
-              flexDirection: "row",
-              width: "100%", // Ensure the Box takes the full width
-            }}
+        <DateInput
+          date={dayjs(endDate)}
+          onChange={handleChangeEndDate}
+          lable="Ngày kết thúc"
+        />
+
+        <TextField
+          
+          type="text"
+          label="Tìm kiếm theo số điện thoại"
+          variant="outlined"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{ minWidth: 250 }}
+        />
+        <FormControl sx={{ minWidth: 120 }} >
+          <InputLabel id="demo-simple-select-status">Trạng thái</InputLabel>
+          <Select
+            labelId="demo-simple-select-status"
+            id="demo-simple-select"
+            name="status"
+            label="Trạng thái"
+            value={selectedStatuses}
+            onChange={handleChange}
           >
-            <Box sx={{ marginLeft: "auto", display: "flex", gap: 1 }}>
-              <TextField
-                fullWidth
-                type="text"
-                label="Tìm kiếm theo số điện thoại"
-                variant="outlined"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                sx={{ minWidth: 350 }}
-              />
-              <FormControl sx={{ minWidth: 120 }} fullWidth>
-                <InputLabel id="demo-simple-select-status">
-                  Trạng thái
-                </InputLabel>
-                <Select
-                  labelId="demo-simple-select-status"
-                  id="demo-simple-select"
-                  name="status"
-                  label="Trạng thái"
-                  value={selectedStatuses}
-                  onChange={handleChange}
-                >
-                  <MenuItem value="" selected>
-                    <em>Tất cả</em>
-                  </MenuItem>
-                  <MenuItem value={"PENDING"}>Đang đợi</MenuItem>
-                  <MenuItem value={"COMPLETED"}>Hoàn thành</MenuItem>
-                  <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-        </Box>
+            <MenuItem value="" selected>
+              <em>Tất cả</em>
+            </MenuItem>
+            <MenuItem value={"PENDING"}>Đang đợi</MenuItem>
+            <MenuItem value={"COMPLETED"}>Hoàn thành</MenuItem>
+            <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
+          </Select>
+        </FormControl>
       </Stack>
 
       {/* Orders Table */}
@@ -384,7 +340,7 @@ const OrderList: React.FC = () => {
                       >
                         {column.field
                           ? column.field === "total"
-                            ? `${order.total.toLocaleString()} VND`
+                            ? `${formatMoneyThousand(order.total)} VND`
                             : column.field === "createdAt"
                               ? convertDate(new Date(order.createdAt))
                               : column.field === "customerPhone"

@@ -201,11 +201,11 @@ public class OrderServiceImpl implements OrderService {
                 // increment quantity if product duplicate name
                 double finalAmount = price * map.get(productId);
                 orderItemResponses.replaceAll(response -> Objects.equals(response.name(), product.getName()) ?
-                        new ProductOrderItemResponse(response.name(), response.quantity() + orderItemRequest.quantity(), price, finalAmount)
+                        new ProductOrderItemResponse(response.name(), response.quantity() + orderItemRequest.quantity(), price, finalAmount,shipmentId)
                         : response);
             } else {
                 map.put(productId, orderItemRequest.quantity());
-                orderItemResponses.add(new ProductOrderItemResponse(product.getName(), orderItemRequest.quantity(), price, amount));
+                orderItemResponses.add(new ProductOrderItemResponse(product.getName(), orderItemRequest.quantity(), price, amount,shipmentId));
             }
             OrderItem orderItem = OrderItem.builder()
                     .order(orderSave)
@@ -318,25 +318,34 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void updateOrderStatus(Long orderId) throws BadRequestUserException {
+    public void completeOrder(Long orderId,HttpServletRequest request) throws BadRequestUserException {
+        String email = jwtParse.decodeTokenWithRequest(request);
+        Employee employee = employeeRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên"));
         var order = orderRepository.findById(orderId).orElseThrow(
                 () -> new ResourceNotFoundException("Không tìm thấy hóa đơn")
         );
         if(!order.getOrderStatus().equals(OrderStatus.PENDING)){
             throw new BadRequestUserException("Đơn hàng đã được hoàn thành");
         }
+        order.setEmployee(employee);
         order.setOrderStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
     }
 
     @Override
-    public String cancelOrder(Long orderId) throws BadRequestUserException {
+    public String cancelOrder(Long orderId,HttpServletRequest request) throws BadRequestUserException {
+        String email = jwtParse.decodeTokenWithRequest(request);
+        Employee employee = employeeRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên"));
+
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn"));
         if(!order.getOrderStatus().equals(OrderStatus.PENDING)){
             throw new BadRequestUserException("Đơn hàng không ở trạng thái chờ không thể hủy");
         }
         order.setOrderStatus(OrderStatus.CANCELLED);
+        order.setEmployee(employee);
         orderRepository.save(order);
         // get all order item
         List<StockOrderResponse> stockOrderResponses = orderItemRepository.getStockByOrder(orderId)

@@ -56,13 +56,13 @@ export default function ProductPage() {
   // const [productToUpdate, setProductToUpdate] =
   //   useState<GetProductSchema | null>(null);
   const [newPrice, setNewPrice] = useState("");
-
+  const [fail, setFail] = useState(false);
   const search = useDebounce(searchName, 500);
 
   const handleError = (message: string) => {
     setAlertMessage(message);
     setAlertOpen(true);
-    return;
+    setFail(true);
   };
 
   const fetchProducts = async (
@@ -74,13 +74,15 @@ export default function ProductPage() {
       const response = await getAllProductsService(name, category, page);
       if (response.message !== "success") {
         handleError(response.message);
+        return;
       }
       return response.data;
     } catch (error: any) {
       handleError(error.message as string);
+      return;
     }
   };
-  const { data, isLoading, isError, error, refetch } = useQuery({
+  const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
     queryKey: ["products", page, category, search],
     queryFn: () => fetchProducts(search, category, page),
     refetchOnWindowFocus: false,
@@ -92,10 +94,12 @@ export default function ProductPage() {
       const response = await getCategoriesService();
       if (response.message !== "success") {
         handleError(response.message);
+        return;
       }
       return response.data as CategoryResponse[];
     } catch (error: any) {
       handleError(error.message as string);
+      return;
     }
   };
 
@@ -139,11 +143,8 @@ export default function ProductPage() {
       setAlertOpen(true);
       refetch();
     } catch (error) {
-      console.error(error);
-      setAlertMessage("Xóa sản phẩm thất bại");
-    } finally {
-      setConfirmOpen(false);
-      setTimeout(() => setAlertMessage(""), 3000);
+      handleError("Xóa sản phẩm thất bại");
+      return;
     }
   };
 
@@ -171,30 +172,43 @@ export default function ProductPage() {
   };
 
   const handleUpdatePrice = async () => {
-    if (!selectProduct || !newPrice) return;
+    if (!selectProduct || !newPrice){
+      handleError("Giá cập nhật không được để trống!");
+      return;
+    };
+    if (selectProduct.originalPrice === 0) {
+      handleError("Sản phẩm chưa được nhập không thể cập nhật giá!");
+      return;
+    }
+    const price = Number(newPrice);
+    console.log(price);
+    
+    if (price < 0) {
+      handleError("Số tiền phải lớn hơn 0!");
+      return;
+    }
     try {
       const response = await updateProductPriceService(
         Number(selectProduct.id),
-        Number(newPrice)
+        price
       );
       // console.log(response);
       if (response.message === "success") {
-        setAlertMessage("Cập nhật giá thành công");
+        setAlertMessage("Cập nhật giá thành công!");
         setAlertOpen(true);
+        setFail(false);
         refetch();
         handleClosePriceModal();
         return;
       }
       // Make API call to update product price here (e.g., updateProductPriceService(updatedProduct))
-      setAlertMessage("Cập nhật giá thất bại");
-      setAlertOpen(true);
-      refetch();
+      handleError(response.message);
       handleClosePriceModal();
+      return;
     } catch (error) {
-      setAlertMessage("Cập nhật giá thất bại");
-      setAlertOpen(true);
-    } finally {
-      setTimeout(() => setAlertMessage(""), 3000);
+      handleError("Cập nhật giá thất bại");
+      handleClosePriceModal();
+      return;
     }
   };
 
@@ -268,7 +282,6 @@ export default function ProductPage() {
                   setCategory(category.name);
                   setSelectedCategory(category.name);
                   setPage(0);
-                  
                 }}
                 key={category.id}
                 label={category.name}
@@ -279,19 +292,35 @@ export default function ProductPage() {
 
         <Grid container spacing={2}>
           {isLoadingCategories && (
-            <Grid size="auto" display="flex" justifyContent="center">
+            <Grid
+              size="auto"
+              display="flex"
+              justifyContent="center"
+              alignItems={"center"}
+            >
               <CircularProgress />
             </Grid>
           )}
           {isErrorCategories && (
-            <Grid size="auto" display="flex" justifyContent="center">
-              <Typography variant="h6">Error: {errorCategories.message}</Typography>
+            <Grid
+              size="auto"
+              display="flex"
+              justifyContent="center"
+              alignItems={"center"}
+            >
+              <Typography variant="h6">
+                Error: {errorCategories.message}
+              </Typography>
             </Grid>
           )}
-          {isLoading ? (
-            <Grid size="auto" display="flex" justifyContent="center">
-              <CircularProgress />
-            </Grid>
+          {isLoading || isFetching ? (
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent={"center"}
+            >
+              <CircularProgress size={40} />
+            </Stack>
           ) : isError ? (
             <Grid size="auto" display="flex" justifyContent="center">
               <Typography variant="h6">Error: {error.message}</Typography>
@@ -437,7 +466,9 @@ export default function ProductPage() {
       {/* Price Update Modal */}
       <Modal sx={{}} open={openPriceModal} onClose={handleClosePriceModal}>
         <Box sx={styles.modalContent}>
-          <Typography variant="h6">Cập nhật giá sản phẩm</Typography>
+          <Typography variant="h6" sx={{ pt: 5 }}>
+            Cập nhật giá sản phẩm
+          </Typography>
           <Typography>
             Giá nhập: {Number(selectProduct?.originalPrice)} VND
           </Typography>
@@ -478,7 +509,7 @@ export default function ProductPage() {
       >
         <Alert
           onClose={() => setAlertOpen(false)}
-          severity="success"
+          severity={fail ? "error" : "success"}
           sx={{ width: "100%" }}
         >
           {alertMessage}
