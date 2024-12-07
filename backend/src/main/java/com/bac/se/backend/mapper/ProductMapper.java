@@ -71,7 +71,8 @@ public class ProductMapper {
                 object[0].toString(),
                 Integer.parseInt(object[1].toString()),
                 Double.parseDouble(object[2].toString()),
-                Double.parseDouble(object[3].toString())
-        );
+                Double.parseDouble(object[3].toString()),
+                Long.parseLong(object[4].toString()));
     }
+
 }

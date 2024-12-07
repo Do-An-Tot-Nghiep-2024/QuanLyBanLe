@@ -438,13 +438,11 @@ const OrderPage: React.FC = () => {
         </Box>
         <List
           sx={{
-            maxHeight: "70vh",
-            overflowY: "auto",
-            borderRadius: 2,
             mt: 1,
             backgroundColor: "white",
             display: "flex",
             flexDirection: "column",
+            alignItems:"flex-start",
             gap: 1,
           }}
         >
@@ -458,8 +456,6 @@ const OrderPage: React.FC = () => {
                 borderRadius: 5,
                 boxShadow: 4,
                 borderColor: "#FBFBFB",
-                height: 80,
-                mx: 3,
               }}
             >
               <Avatar src={String(product.image)} style={{ marginRight: 16 }} />
@@ -472,7 +468,7 @@ const OrderPage: React.FC = () => {
               <Tooltip title="Thêm sản phẩm" arrow>
                 <IconButton
                   onClick={() => handleAddToOrder(product)}
-                  size="large"
+                  size="medium"
                   color="success"
                 >
                   <AddBoxIcon />
@@ -631,21 +627,22 @@ const OrderPage: React.FC = () => {
               pb={2}
             >
               <Box>
-                <Typography sx={{ fontWeight: "bold", fontSize: 23 }}>
+                <Typography sx={{ fontWeight: "bold", fontSize: 21 }}>
                   Tổng tiền hàng: {isNaN(total) ? 0 : formatCurrency(total as number)}
                 </Typography>
                 <Typography
-                  sx={{ fontStyle: "normal", fontWeight: "bold", fontSize: 23 }}
+                  sx={{ fontStyle: "normal", fontWeight: "bold", fontSize: 21 }}
                 >
                   Số tiền khách cần trả:{" "}
                   {isNaN(total) ? 0 : formatCurrency(total - getPromotionCurrent())}
                 </Typography>
               </Box>
               <TextField
-                label="Tiền khách trả"
+
+                label="Tiền khách đưa"
                 variant="outlined"
                 type="text"
-                sx={{ fontSize: 18 }}
+                sx={{ fontSize: 24 }}
                 value={
                   orderItems.length < 0
                     ? formatMoneyThousand(0)

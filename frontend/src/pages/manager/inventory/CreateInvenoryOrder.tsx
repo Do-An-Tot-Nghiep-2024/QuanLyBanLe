@@ -27,6 +27,8 @@ import { getProductsBySupplierService } from "../../../services/product.service"
 import { createInventoryOrderService } from "../../../services/inventory.service";
 import { getSuppliersService } from "../../../services/supplier.service";
 import AddBoxIcon from "@mui/icons-material/AddBox";
+import dayjs, { Dayjs } from "dayjs";
+import DateInput from "../../../components/DateInput";
 
 interface OrderItem {
   product: GetProductBySupplier;
@@ -60,6 +62,7 @@ const CreateInventoryOrder: React.FC = () => {
   const [selectedSupplier, setSelectedSupplier] = useState<number | "">(1);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [fail, setFail] = useState(true);
 
   const handleAddToOrder = (product: GetProductBySupplier) => {
     setOrderItems((prev) => {
@@ -85,21 +88,41 @@ const CreateInventoryOrder: React.FC = () => {
     );
   };
 
-  const handleUpdateProductionDate = (productId: number, date: string) => {
+  // const handleUpdateProductionDate = (productId: number, date: string) => {
+  //   setOrderItems((prev) =>
+  //     prev.map((item) =>
+  //       item.product.id === productId ? { ...item, mxp: new Date(date) } : item
+  //     )
+  //   );
+  // };
+
+  const handleUpdateMXPProduct = (productId: number, date: Dayjs | null) => {
     setOrderItems((prev) =>
       prev.map((item) =>
-        item.product.id === productId ? { ...item, mxp: new Date(date) } : item
+        item.product.id === productId
+          ? { ...item, mxp: new Date(date?.format("YYYY-MM-DD") ?? "") }
+          : item
       )
     );
   };
 
-  const handleUpdateExpirationDate = (productId: number, date: string) => {
+  const handleUpdateExpProduct = (productId: number, date: Dayjs | null) => {
     setOrderItems((prev) =>
       prev.map((item) =>
-        item.product.id === productId ? { ...item, exp: new Date(date) } : item
+        item.product.id === productId
+          ? { ...item, exp: new Date(date?.format("YYYY-MM-DD") ?? "") }
+          : item
       )
     );
   };
+
+  // const handleUpdateExpirationDate = (productId: number, date: string) => {
+  //   setOrderItems((prev) =>
+  //     prev.map((item) =>
+  //       item.product.id === productId ? { ...item, exp: new Date(date) } : item
+  //     )
+  //   );
+  // };
 
   const handleUpdatePrice = (productId: number, price: number) => {
     setOrderItems((prev) =>
@@ -126,26 +149,39 @@ const CreateInventoryOrder: React.FC = () => {
 
   const handleCreateBill = async () => {
     if (orderItems.length === 0) {
-      alert("Chưa thêm sản phẩm vào phiếu nhập hàng");
+      setFail(true);
+      setAlertMessage("Chưa thêm sản phẩm vào phiếu nhập hàng");
+      setSnackbarOpen(true);
       return;
     }
 
     const formattedOrderItems = orderItems
       .map((item) => {
         const quantityStr = String(item.quantity);
-        const priceStr = String(item.price);
         const quantityRegex = /^(?:[1-9][0-9]?|100)$/;
-        const price = parseFloat(priceStr);
+        const price = Number(item.price);
+        console.log(price);
 
+        if (isNaN(price)) {
+          setFail(true);
+          setAlertMessage("Vui lòng nhập giá nhập!");
+          setSnackbarOpen(true);
+          return;
+        }
         // Validate quantity
         if (!quantityRegex.test(quantityStr)) {
-          alert("Số lượng phải từ 1 đến 100");
+          setAlertMessage("Số lượng phải từ 1 đến 100");
+          setFail(true);
+          setSnackbarOpen(true);
           return;
         }
 
         // Validate price range
         if (price < 200 || price > 10000000) {
-          alert("Giá phải từ 200 đến 10.000.000");
+          // alert("Giá phải từ 200 đến 10.000.000");
+          setAlertMessage("Giá phải từ 200 đến 10.000.000");
+          setFail(true);
+          setSnackbarOpen(true);
           return;
         }
 
@@ -159,7 +195,9 @@ const CreateInventoryOrder: React.FC = () => {
         const expDate = new Date(item.exp);
 
         if (expDate <= mxpDate) {
-          alert("Ngày hết hạn phải sau ngày sản xuất");
+          setAlertMessage("Ngày hết hạn phải sau ngày sản xuất");
+          setFail(true);
+          setSnackbarOpen(true);
           return;
         }
 
@@ -177,8 +215,9 @@ const CreateInventoryOrder: React.FC = () => {
         };
       })
       .filter((item) => item !== null);
-
-    if (formattedOrderItems.length === 0) {
+    console.log(formattedOrderItems);
+    
+    if (formattedOrderItems.length === 0 || formattedOrderItems[0] === undefined) {
       return;
     }
 
@@ -190,13 +229,15 @@ const CreateInventoryOrder: React.FC = () => {
       if (response.message === "success") {
         setOrderItems([]);
         setAlertMessage("Tạo phiếu nhập hàng thành công!");
+        setFail(false);
         setSnackbarOpen(true);
       } else {
+        setFail(true);
         setAlertMessage("Đã xảy ra lỗi khi tạo phiếu nhập hàng.");
         setSnackbarOpen(true);
       }
     } catch (error) {
-      console.error("Error creating order:", error);
+      setFail(true);
       setAlertMessage("Đã xảy ra lỗi khi tạo phiếu nhập hàng.");
       setSnackbarOpen(true);
     }
@@ -379,33 +420,21 @@ const CreateInventoryOrder: React.FC = () => {
                     {item.unit}
                   </TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
-                    <TextField
-                      type="date"
-                      value={
-                        item.mxp ? item.mxp.toISOString().split("T")[0] : ""
+                    <DateInput
+                      date={dayjs(item.mxp)}
+                      onChange={(date) =>
+                        handleUpdateMXPProduct(item.product.id, date)
                       }
-                      onChange={(e) =>
-                        handleUpdateProductionDate(
-                          item.product.id,
-                          e.target.value
-                        )
-                      }
-                      sx={{ width: "90%" }}
+                      lable=""
                     />
                   </TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
-                    <TextField
-                      type="date"
-                      value={
-                        item.exp ? item.exp.toISOString().split("T")[0] : ""
+                    <DateInput
+                      date={dayjs(item.exp)}
+                      onChange={(date) =>
+                        handleUpdateExpProduct(item.product.id, date)
                       }
-                      onChange={(e) =>
-                        handleUpdateExpirationDate(
-                          item.product.id,
-                          e.target.value
-                        )
-                      }
-                      sx={{ width: "90%" }}
+                      lable=""
                     />
                   </TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
@@ -457,7 +486,7 @@ const CreateInventoryOrder: React.FC = () => {
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
-          severity="success"
+          severity={fail ? "error" : "success"}
           sx={{ width: "100%" }}
         >
           {alertMessage}

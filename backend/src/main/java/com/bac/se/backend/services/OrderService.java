@@ -34,9 +34,9 @@ public interface OrderService {
 
     OrderItemResponse getOrderById(Long orderId);
 
-    void updateOrderStatus(Long orderId) throws BadRequestUserException;
+    void completeOrder(Long orderId,HttpServletRequest request) throws BadRequestUserException;
 
-    String cancelOrder(Long orderId) throws BadRequestUserException;
+    String cancelOrder(Long orderId,HttpServletRequest request) throws BadRequestUserException;
 
 
 }

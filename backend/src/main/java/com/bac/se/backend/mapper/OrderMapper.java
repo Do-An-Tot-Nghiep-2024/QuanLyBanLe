@@ -51,6 +51,8 @@ public class OrderMapper {
                 Double.parseDouble(orderItem[6].toString()), // customer payment
                 (Date) orderItem[7], // date
                 orderItem[8] == null ? "" : orderItem[8].toString(),
+                orderItem[9] == null ? 0 : Double.parseDouble(orderItem[9].toString()), // percentage
+                orderItem[10] == null ? 0 : Double.parseDouble(orderItem[10].toString()), // min order value
                 new ArrayList<>()
         );
     }

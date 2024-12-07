@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   // Table cell font size
   tableCell: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "medium",
   },
 });
 
@@ -53,7 +53,7 @@ const PDFTable = ({ data }: { data: OrderItemResponse[] }) => (
       <View style={[styles.tableCol, { flex: 3 }]}>
         <Text style={[styles.tableCell, {}]}>Mặt hàng</Text>
       </View>
-      <View style={[styles.tableCol, { flex: 0.5 }]}>
+      <View style={[styles.tableCol, { flex: 1 }]}>
         <Text style={[styles.tableCell, {}]}>Đơn giá</Text>
       </View>
       <View style={[styles.tableCol, { flex: 0.5 }]}>
@@ -71,7 +71,7 @@ const PDFTable = ({ data }: { data: OrderItemResponse[] }) => (
           <Text>{item?.name}</Text>
         </View>
 
-        <View style={[styles.tableCol, { flex: 0.5 }]}>
+        <View style={[styles.tableCol, { flex: 1 }]}>
           <Text>{Number(item.price).toLocaleString("de-DE")}</Text>
         </View>
 

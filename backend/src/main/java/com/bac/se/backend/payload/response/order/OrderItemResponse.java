@@ -13,6 +13,8 @@ public record OrderItemResponse(
         double customerPayment,
         Date createdAt,
         String customerPhone,
+        double percentage,
+        double minOrderValue,
         List<ProductOrderItemResponse> orderItemResponses
 ) {
 }

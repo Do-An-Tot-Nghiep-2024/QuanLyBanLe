@@ -21,7 +21,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "    o.total_discount, " +
             "    o.customer_payment, " +
             "    o.created_at, " +
-            "    COALESCE(c.phone,'') " +
+            "    COALESCE(c.phone,''), pro.percentage, pro.min_order_value " +
             "FROM " +
             "    t_order o " +
             "        INNER JOIN " +
@@ -30,6 +30,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "    t_employee e ON e.employee_id = o.employee_id " +
             "        LEFT JOIN  " +
             "    t_customer c ON c.customer_id = o.customer_id " +
+            "        LEFT JOIN " +
+            "   t_promotion pro ON pro.promotion_id = o.promotion_id " +
             "WHERE " +
             "    o.order_id = ?1 " +
             "GROUP BY oi.order_id", nativeQuery = true)

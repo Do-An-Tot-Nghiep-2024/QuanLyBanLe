@@ -145,9 +145,10 @@ public class OrderController {
 
     @PutMapping("/status/{id}")
     @PreAuthorize("hasAnyAuthority('MANAGER', 'EMPLOYEE')")
-    public ResponseEntity<ApiResponse<String>> updateOrderStatus(@PathVariable("id") Long orderId) {
+    public ResponseEntity<ApiResponse<String>> updateOrderStatus(@PathVariable("id") Long orderId,
+                                                                 HttpServletRequest request) {
         try {
-            orderService.updateOrderStatus(orderId);
+            orderService.completeOrder(orderId,request);
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, "Đơn hàng " + orderId + " đã được hoàn thành"));
         }catch (BadRequestUserException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -161,9 +162,10 @@ public class OrderController {
     // cancel order by id
     @PutMapping("/cancel/{id}")
     @PreAuthorize("hasAnyAuthority('MANAGER', 'EMPLOYEE')")
-    public ResponseEntity<ApiResponse<String>> cancelOrder(@PathVariable("id") Long orderId) {
+    public ResponseEntity<ApiResponse<String>> cancelOrder(@PathVariable("id") Long orderId,
+                                                           HttpServletRequest request) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.cancelOrder(orderId)));
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.cancelOrder(orderId,request)));
         }catch (ResourceNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(e.getMessage(), null));

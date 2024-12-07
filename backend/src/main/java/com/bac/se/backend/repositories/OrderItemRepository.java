@@ -141,7 +141,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
 
 
     // Order Service
-    @Query(value = "SELECT p.name,oi.quantity,pp.price,oi.amount FROM t_order_item oi " +
+    @Query(value = "SELECT p.name,oi.quantity,pp.price,oi.amount,oi.shipment_id FROM t_order_item oi " +
             "INNER JOIN t_product p ON p.product_id = oi.product_id " +
             "INNER JOIN t_product_price pp ON pp.product_price_id = oi.product_price_id " +
             "WHERE oi.order_id = ?1",nativeQuery = true)
