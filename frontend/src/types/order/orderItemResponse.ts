@@ -3,5 +3,6 @@ interface OrderItemResponse {
   quantity: number;
   price: number;
   amount: number;
+  discount: number;
 }
 export default OrderItemResponse;

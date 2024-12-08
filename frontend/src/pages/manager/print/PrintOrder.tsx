@@ -149,6 +149,7 @@ const InvoiceDoc = ({
   discount,
   percentage,
   minOrderValue,
+  promotion,
 }: {
   data: any[];
   total: number;
@@ -161,11 +162,12 @@ const InvoiceDoc = ({
   discount: number;
   percentage: number;
   minOrderValue: number;
+  promotion: number;
 }) => (
   <Document title="Hóa đơn" style={styles.body}>
     <Page size="A4" style={styles.page}>
       <Image style={styles.image} src={logo} />
-      <View style={{ display: "flex", padding: "none" }}>
+      <View style={{ display: "flex"}}>
         <Text style={styles.header}>{title}</Text>
         <View style={styles.head}>
           <View style={styles.info}>
@@ -193,7 +195,7 @@ const InvoiceDoc = ({
       </View>
       <View>
         {/* Render the order items in a table */}
-        <PDFTable data={data} />
+        <PDFTable data={data} totalDiscount={promotion} />
 
         <View style={styles.payment}>
           <Text>{"Tổng tiền hàng".toUpperCase()}</Text>
@@ -267,6 +269,7 @@ export default function PrintOrder() {
   const title = "HÓA ĐƠN BÁN HÀNG";
   const change = customerPayment - (total - totalDiscount);
   const productsItems = location.state?.orderItemResponses as any[];
+  let promotion = 0;
   // // increment quantity and price if product duplicate name
   const items = Object.values(
     productsItems.reduce(
@@ -284,6 +287,14 @@ export default function PrintOrder() {
       {} as Record<string, any>
     )
   );
+  // calculate promotion
+  items.forEach((item:any) => {
+    if (item.discount > 0) {
+      promotion += item.discount * item.price * item.quantity;
+    }
+  });
+  promotion = totalDiscount - promotion;
+  
   // const fetchData = {
   //   total: 2000,
   //   customerPayment: 2000,
@@ -331,6 +342,7 @@ export default function PrintOrder() {
           data={items}
           title={title}
           total={total}
+          promotion={promotion}
           discount={totalDiscount}
           customerPayment={customerPayment}
           change={change}

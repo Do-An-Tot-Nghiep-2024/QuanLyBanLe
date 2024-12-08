@@ -22,7 +22,7 @@ import logo from "../../../assets/images/logo.png";
 import { useAppDispatch, useAppSelector } from "../../../redux/hook";
 import { logout } from "../../../redux/auth/authSlice";
 import { getSentNotificationsService } from "../../../services/notification.service";
-import { IconButton, Stack, Typography } from "@mui/material";
+import { IconButton, Stack } from "@mui/material";
 import Notification from "../../../components/Notification";
 import { connectToSocket } from "../../../config/socket";
 const NAVIGATION: Navigation = [
@@ -225,7 +225,7 @@ export default function Sidebar() {
       theme={demoTheme}
       branding={{
         logo: <Logo />,
-        title: "",
+        title: `CHÀO MỪNG NHÂN VIÊN`,
       }}
     >
       <DashboardLayout
@@ -239,9 +239,7 @@ export default function Sidebar() {
                 <RefreshIcon />
               </IconButton>
               <Notification data={nofitications} />
-              <Typography fontSize={16} pt={1} fontWeight={"bold"}>
-                NHÂN VIÊN
-              </Typography>
+              
             </Stack>
           ),
         }}

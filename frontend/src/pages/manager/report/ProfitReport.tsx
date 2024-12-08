@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Container,
   FormControl,
   InputLabel,
@@ -11,35 +12,31 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-// import { getSalesAndProfitService } from "../../../services/statistic.service";
 import { useQuery } from "@tanstack/react-query";
 import DataChart from "../../../components/DataChart";
 import {
-  getSalesAndProfitByDateService,
   getSalesAndProfitByMonthService,
+  getSalesAndProfitInWeekService,
 } from "../../../services/statistic.service";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { Dayjs } from "dayjs";
-import { viVN } from "@mui/x-date-pickers/locales";
 import SnackbarMessage from "../../../components/SnackbarMessage";
-import { formatDateInput } from "../../../utils/dateUtil";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 export default function ProfitReport() {
-  
   const defaultMonth = new Date().getMonth() + 1 + "";
   const currYear = new Date().getFullYear();
   const [type, setType] = useState("month");
   const [month, setMonth] = useState(defaultMonth);
-  const [date, setDate] = useState<Dayjs | null>(null);
   const [message, setMessage] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [next, setNext] = useState(0);
+
 
   const updateErrorMessage = (message: string) => {
     setMessage(message);
     setSnackbarOpen(true);
     return;
   };
+
   const getSalesAndProfitByMonth = async (month: string) => {
     try {
       const response = await getSalesAndProfitByMonthService(Number(month));
@@ -51,14 +48,10 @@ export default function ProfitReport() {
       updateErrorMessage(error.message);
     }
   };
-  
-  const getSalesAndProfitByDate = async (date: Dayjs | null) => {
+
+  const getSalesAndProfitInWeek = async (next: number) => {
     try {
-      let toDate = date?.format("YYYY-MM-DD");
-      if (!toDate) {
-        toDate = formatDateInput(new Date().toISOString());
-      }
-      const response = await getSalesAndProfitByDateService(toDate ?? "");
+      const response = await getSalesAndProfitInWeekService(next);
       if (response.message !== "success") {
         updateErrorMessage(response.message);
       }
@@ -95,8 +88,8 @@ export default function ProfitReport() {
     responseData.error = error;
   } else {
     const { data, isLoading, isFetching, isError, error } = useQuery({
-      queryKey: ["dashboardProfit", date],
-      queryFn: () => getSalesAndProfitByDate(date),
+      queryKey: ["dashboardProfit", next],
+      queryFn: () => getSalesAndProfitInWeek(next),
       refetchOnWindowFocus: false,
     });
     responseData.data = data;
@@ -112,17 +105,24 @@ export default function ProfitReport() {
   const handleChangeMonth = (event: SelectChangeEvent) => {
     setMonth(event.target.value);
   };
-  const handleChangeDate = (value: Dayjs | null) => {
-    setDate(value);
-  };
-  if(responseData.isLoading || responseData.isFetching){
+  // const handleChangeDate = (value: Dayjs | null) => {
+  //   setDate(value);
+  // };
+  if (responseData.isLoading || responseData.isFetching) {
     return <div>Loading...</div>;
   }
-  if(responseData.isError){
+  if (responseData.isError) {
     return <div>Error: {responseData.error.message}</div>;
   }
-  console.log(month);
-  
+  console.log(next);
+
+  const handleChangeNext = (val: number) => {
+    if (next + val > 0) {
+      setNext(0);
+    } else {
+      setNext(next + val);
+    }
+  };
   return (
     <Box sx={{ width: "100%", height: "100%", marginTop: 5 }}>
       <Stack
@@ -173,31 +173,30 @@ export default function ProfitReport() {
         )}
 
         {type === "day" && (
-          <Stack>
-            <LocalizationProvider
-              dateAdapter={AdapterDayjs}
-              localeText={
-                viVN.components.MuiLocalizationProvider.defaultProps.localeText
-              }
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<ArrowBackIcon />}
+              onClick={() => handleChangeNext(-7)}
             >
-              <DatePicker
-                label="Ngày kết thúc"
-                onChange={handleChangeDate}
-                value={date}
-                format="DD/MM/YYYY"
-                views={["day", "month", "year"]}
-              />
-              <Typography color="warning" sx={{ pt: 2 }}>
-                ! Ngày bắt đầu là tuần trước của ngày kết thúc
-              </Typography>
-            </LocalizationProvider>
+              Tuần trước
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              endIcon={<ArrowForwardIcon />}
+              onClick={() => handleChangeNext(7)}
+            >
+              Tuần sau
+            </Button>
           </Stack>
         )}
-
       </Stack>
       <Container sx={{ width: "90%", height: "80%" }}>
         <Typography variant="h6" sx={{ mt: 5 }} align="center">
-          Biểu đồ doanh thu theo {type === "month" ? "tháng " + month : "tuần"} (K: Nghìn, M: Triệu, B: Tỉ)
+          Biểu đồ doanh thu theo {type === "month" ? "tháng " + month : "tuần"}{" "}
+          (K: Nghìn, M: Triệu, B: Tỉ)
         </Typography>
         <DataChart data={responseData.data} />
       </Container>

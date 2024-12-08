@@ -182,7 +182,7 @@ export default function OrderDetailPage() {
         </Stack>
 
         <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
-          <Typography fontWeight="bold">Tiền thồi: </Typography>
+          <Typography fontWeight="bold">Tiền trả lại: </Typography>
           <Typography sx={{ fontSize: 16, fontWeight: "bold" }}>
             {formatMoney(
               Number(res.customerPayment - (res.total - res.totalDiscount))

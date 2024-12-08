@@ -21,6 +21,7 @@ import {
   Avatar,
   Modal,
   Stack,
+  SelectChangeEvent,
 } from "@mui/material";
 import { getAllProductsByNameService } from "../../../services/product.service";
 import { GetProductSchema } from "../../../types/getProductSchema";
@@ -36,11 +37,16 @@ import { useAppSelector } from "../../../redux/hook";
 import { formatMoneyThousand } from "../../../utils/formatMoney";
 import SnackbarMessage from "../../../components/SnackbarMessage";
 
+interface Shipment {
+  id: number;
+  discount: number;
+}
+
 interface OrderItem {
   product: GetProductSchema;
   quantity: number;
   price: number;
-  selectedShipment?: string;
+  selectedShipment?: Shipment;
 }
 
 const OrderPage: React.FC = () => {
@@ -59,8 +65,10 @@ const OrderPage: React.FC = () => {
   const [deleteItem, setDeleteItem] = useState(0);
   // const [totalDiscount, setTotalDiscount] = useState(0);
   const [total, setTotal] = useState(0);
+  const [discount, setDiscount] = useState(0);
   const [message, setMessage] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -72,29 +80,40 @@ const OrderPage: React.FC = () => {
     // format 1.000 -> 1000
     return amount.replace(/\./g, "");
   };
-
-  const handleUpdateTotal = (orderItems: OrderItem[]) => {
-    setTotal(
-      orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    );
-  };
-
+  /**
+   *
+   *  Fetching data
+   */
   const handleGetLatestPromotion = async () => {
-    const response = await getLatestPromotionService();
-    if (response.message !== "success") {
-      setLatestPromotion(undefined);
+    try {
+      const response = await getLatestPromotionService();
+      if (response.message !== "success") {
+        setLatestPromotion(undefined);
+      }
+      setLatestPromotion(response.data as GetPromotion);
+    } catch (error) {
+      setMessage("Có lỗi khi tải thông tin khuyến mãi");
+      setSnackbarOpen(true);
+      return;
     }
-
-    setLatestPromotion(response.data as GetPromotion);
   };
-
+  const fetchProducts = async () => {
+    const response = await getAllProductsByNameService(searchTerm);
+    if (!response) {
+      throw new Error("Error fetching products");
+    }
+    
+    return response as unknown as GetProductSchema[];
+  };
+  
+  const { data, refetch } = useQuery({
+    queryKey: ["products", searchTerm],
+    queryFn: fetchProducts,
+  });
+  
   useEffect(() => {
     handleGetLatestPromotion();
-  }, [total]);
-
-  const handleDeleteClose = () => {
-    setConfirmOpen(false);
-  };
+  }, []);
 
   const getPromotionCurrent = () => {
     if (latestPromotion !== undefined && latestPromotion !== null) {
@@ -105,9 +124,49 @@ const OrderPage: React.FC = () => {
     return 0;
   };
 
-  const handleAddToOrder = (product: GetProductSchema) => {
-    console.log("Add product to order");
+  useEffect(() => {
+    localStorage.setItem("queueOrderItems", JSON.stringify(orderItems));
+    handleUpdateTotal(orderItems);
+    handleUpdateDiscount(orderItems);
+  }, [orderItems]);
 
+  useEffect(() => {
+    if (!searchTerm) {
+      refetch();
+    }
+  }, [searchTerm, refetch]);
+
+  const handleDeleteClose = () => {
+    setConfirmOpen(false);
+  };
+
+  const handleUpdateTotal = (orderItems: OrderItem[]) => {
+    let sum = 0;
+    orderItems.forEach((item) => {
+      const total =
+        item.price && item.quantity
+          ? (item.price - (item.selectedShipment?.discount ?? 0) * item.price) *
+            item.quantity
+          : 0;
+      sum += total;
+    });
+    setTotal(sum);
+  };
+
+  const handleUpdateDiscount = (orderItems: OrderItem[]) => {
+    let discountSum = 0;
+    orderItems.forEach((item) => {
+      if (item.selectedShipment) {
+        discountSum +=
+          item.selectedShipment.discount * item.price * item.quantity;
+      }
+    });
+    discountSum += latestPromotion?.percentage ?? 0 * total;
+    setDiscount(discountSum);
+  };
+
+  const handleAddToOrder = (product: GetProductSchema) => {
+    // console.log(product);
     const missingShipment = orderItems.some((item) => !item.selectedShipment);
 
     if (missingShipment) {
@@ -125,22 +184,23 @@ const OrderPage: React.FC = () => {
           product,
           quantity: 1,
           price: Number(product.price),
-          selectedShipment: "",
+          selectedShipment: undefined,
         },
       ];
-
       // Calculate the total directly in this function
       totalOrder = updatedItems.reduce(
         (sum, item) => sum + item.quantity * item.price,
         0
       );
+      return updatedItems; // Return the updated state
+    });
 
-      // console.log("Total Order:", total); // Log the total order
-      return updatedItems; // Return the updated list
+    orderItems.forEach((item) => {
+      console.log("item discount", item);
     });
 
     handleUpdateTotal(orderItems);
-    console.log("Tien khach tra", customerPayment);
+
     if (customerPayment === 0) {
       setCustomerChange(0);
     } else {
@@ -158,43 +218,55 @@ const OrderPage: React.FC = () => {
       return;
     }
     let totalOrder = 0;
+    // let discountSum = 0;
     setOrderItems((prev) => {
       const updatedItems = prev.map((item) => {
         // Check if the item matches the product and shipment
         if (
           item.product.id === product.product.id &&
-          item.selectedShipment === product.selectedShipment
+          item.selectedShipment?.id === product.selectedShipment?.id
         ) {
           // Update the quantity
           const updatedItem = { ...item, quantity };
+
           // Add to the total order
-          totalOrder += updatedItem.quantity * updatedItem.price;
+          const total =
+            updatedItem.price && updatedItem.quantity
+              ? (updatedItem.price -
+                  (updatedItem.selectedShipment?.discount ?? 0) *
+                    updatedItem.price) *
+                updatedItem.quantity
+              : 0;
+          // const discount = updatedItem.selectedShipment?.discount ?? 0 * updatedItem.price * updatedItem.quantity;
+          // discountSum += discount;
+          totalOrder += total;
           return updatedItem;
         } else {
           // Add the current item's total to the totalOrder
-          totalOrder += item.quantity * item.price;
+          const total =
+            item.price && item.quantity
+              ? (item.price -
+                  (item.selectedShipment?.discount ?? 0) * item.price) *
+                item.quantity
+              : 0;
+          // const discount = item.selectedShipment?.discount ?? 0 * item.price * item.quantity;
+          // discountSum += discount;
+          totalOrder += total;
           return item;
         }
       });
       return updatedItems; // Return the updated state
     });
 
-    handleUpdateTotal(orderItems);
-    console.log("Tien khach khach tra tai update quantity", customerPayment);
-
+    // setDiscount(discountSum);
     if (customerPayment === 0) {
       setCustomerChange(0);
     } else {
-      setCustomerChange(customerPayment - totalOrder - getPromotionCurrent());
+      setCustomerChange(
+        customerPayment -
+          (isNaN(totalOrder) ? 0 : totalOrder - getPromotionCurrent())
+      );
     }
-    // const currTotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    // if(!isNaN(total)){
-    //   console.log(total);
-
-    //   setCustomerChange(customerPayment - total - getPromotionCurrent());
-    // }
-
-    // setCustomerChange(customerPayment - total - getPromotionCurrent());
   };
 
   const isShipmentSelected = () => {
@@ -202,10 +274,10 @@ const OrderPage: React.FC = () => {
   };
 
   const handleCreateBill = async () => {
-    const totalPayment = orderItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    // const totalPayment = orderItems.reduce(
+    //   (sum, item) => sum + item.price * item.quantity,
+    //   0
+    // );
     if (orderItems.length === 0) {
       setMessage("Vui lòng chọn sản phẩm trước khi tạo đơn hàng");
       setSnackbarOpen(true);
@@ -227,7 +299,7 @@ const OrderPage: React.FC = () => {
         return {
           productId: item.product.id,
           quantity: item.quantity,
-          shipmentId: item.selectedShipment,
+          shipmentId: item.selectedShipment?.id,
         };
       })
       .filter((item) => item !== null);
@@ -237,26 +309,21 @@ const OrderPage: React.FC = () => {
     }
 
     try {
-      let totalDiscount = 0;
-      if (latestPromotion) {
-        if (totalPayment >= latestPromotion?.minOrderValue) {
-          totalDiscount = Number(totalPayment * latestPromotion?.percentage);
-        }
-      }
       if (
         customerPayment === 0 ||
-        customerPayment < totalPayment - totalDiscount ||
+        customerPayment < total - (getPromotionCurrent() + discount) ||
         !isCustomerPaymentValid(customerPayment)
       ) {
         setMessage("Số tiền khách trả không đủ");
         setSnackbarOpen(true);
         return;
       }
-      console.log(totalDiscount);
+
+      // console.log(totalDiscount);
       const response = await createOrderService(
         formattedOrderItems,
         customerPayment,
-        totalDiscount
+        discount + getPromotionCurrent()
       );
       // console.log("Order created:", response);
       if (response.message === "success") {
@@ -283,55 +350,42 @@ const OrderPage: React.FC = () => {
     }
   };
 
-  const fetchProducts = async () => {
-    const response = await getAllProductsByNameService(searchTerm);
-    if (!response) {
-      throw new Error("Error fetching products");
-    }
-
-    return response as unknown as GetProductSchema[];
-  };
-
-  const { data, refetch } = useQuery({
-    queryKey: ["products", searchTerm],
-    queryFn: fetchProducts,
-  });
-
   const handleUpdateShipment = async (
     productId: number,
-    selectedShipment: string
+    selectedShipment: Shipment
   ) => {
-    console.log(selectedShipment);
     const existingItemIndex = orderItems.findIndex(
       (item) =>
         item.product.id === productId &&
-        item.selectedShipment === selectedShipment
+        item.selectedShipment?.id === selectedShipment.id
     );
     if (existingItemIndex != -1) {
       console.log("existed");
       setOrderItems((prev) =>
-        prev.map((orderItem, index) =>
-          index === existingItemIndex
-            ? {
-                ...orderItem,
-                quantity: orderItem.quantity + 1,
-                selectedShipment,
-              }
-            : { ...orderItem }
-        )
+        prev
+          .map((orderItem, index) =>
+            index === existingItemIndex
+              ? {
+                  ...orderItem,
+                  quantity: orderItem.quantity + 1,
+                  selectedShipment,
+                }
+              : { ...orderItem }
+          )
+          .filter((itm) => itm.selectedShipment !== undefined)
       );
-      setOrderItems((prevItems) =>
-        prevItems.filter((itm) => itm.selectedShipment !== "")
-      );
+      // setOrderItems((prevItems) =>
+      //   prevItems.filter((itm) => itm.selectedShipment !== undefined)
+      // );
     } else {
       console.log("new item");
       setOrderItems((orderItems) =>
         orderItems.map((itm) => {
           if (
             Number(itm.product.id) === Number(productId) &&
-            itm.selectedShipment === ""
+            itm.selectedShipment === undefined
           ) {
-            console.log("duplicate");
+            // console.log("duplicate");
 
             return { ...itm, selectedShipment };
           }
@@ -339,7 +393,15 @@ const OrderPage: React.FC = () => {
         })
       );
     }
-    // console.log("Updated order items:", orderItems);
+    let discountSum = 0;
+    orderItems.forEach((item) => {
+      if (item.selectedShipment) {
+        discountSum +=
+          item.selectedShipment.discount * item.price * item.quantity;
+      }
+    });
+    setDiscount(discountSum);
+    console.log("discount value is", discount);
   };
 
   const isCustomerPaymentValid = (payment: number) => {
@@ -373,14 +435,11 @@ const OrderPage: React.FC = () => {
     setSearchTerm(event.target.value);
   };
 
-  useEffect(() => {
-    if (!searchTerm) {
-      refetch();
-    }
-  }, [searchTerm, refetch]);
-
   const totalPayment = orderItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) =>
+      sum +
+      (item.price - (item.selectedShipment?.discount ?? 0) * item.price) *
+        item.quantity,
     0
   );
 
@@ -411,10 +470,6 @@ const OrderPage: React.FC = () => {
     setConfirmOpen(true);
     setDeleteItem(id);
   };
-  useEffect(() => {
-    localStorage.setItem("queueOrderItems", JSON.stringify(orderItems));
-    handleUpdateTotal(orderItems);
-  }, [orderItems]);
 
   return (
     <Box display="flex" p={1} sx={{ height: "100%", width: "100%" }}>
@@ -427,7 +482,13 @@ const OrderPage: React.FC = () => {
               setState: handleSearchChange,
             }}
           />
-        
+          {/* <Button
+            onClick={() => handleSearchClick()}
+            color="primary"
+            variant="contained"
+          >
+            Tìm
+          </Button> */}
         </Box>
         <List
           sx={{
@@ -435,7 +496,7 @@ const OrderPage: React.FC = () => {
             backgroundColor: "white",
             display: "flex",
             flexDirection: "column",
-            alignItems:"flex-start",
+            alignItems: "flex-start",
             gap: 1,
           }}
         >
@@ -500,6 +561,9 @@ const OrderPage: React.FC = () => {
                     Giá
                   </TableCell>
                   <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
+                    Giảm giá
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
                     Thành tiền
                   </TableCell>
                   <TableCell
@@ -522,19 +586,24 @@ const OrderPage: React.FC = () => {
                     </TableCell>
                     <TableCell sx={{ textAlign: "left", padding: "16px 8px" }}>
                       <Select
-                        value={item.selectedShipment || ""}
-                        onChange={(e) =>
-                          handleUpdateShipment(
-                            Number(item.product.id),
-                            e.target.value
-                          )
-                        }
+                        value={item.selectedShipment?.id as any}
+                        onChange={(e: SelectChangeEvent) => {
+                          const id = Number(e.target.value);
+                          const selectedShipment =
+                            item.product.shipmentIds?.find(
+                              (shipment) => shipment.id === id
+                            );
+                          handleUpdateShipment(Number(item.product.id), {
+                            id: id,
+                            discount: selectedShipment?.discount || 0,
+                          });
+                        }}
                         sx={{ width: "100%", textAlign: "left" }}
                       >
-                        <MenuItem value="">Chọn mã lô hàng</MenuItem>
+                        {/* <MenuItem value="">Chọn mã lô hàng</MenuItem> */}
                         {item.product.shipmentIds?.map((shipment) => (
-                          <MenuItem key={shipment} value={shipment}>
-                            {shipment}
+                          <MenuItem key={shipment.id} value={shipment.id}>
+                            {shipment.id}
                           </MenuItem>
                         ))}
                       </Select>
@@ -544,25 +613,39 @@ const OrderPage: React.FC = () => {
                     >
                       <TextField
                         type="number"
+                        defaultValue={1}
                         value={item.quantity}
-                        onChange={(e) =>
-                          handleUpdateQuantity(item, parseInt(e.target.value))
-                        }
+                        onChange={(e) => {
+                          handleUpdateQuantity(item, parseInt(e.target.value));
+                        }}
                         sx={{ width: "50%" }}
                         inputProps={{ style: { textAlign: "center" } }}
                       />
                     </TableCell>
+
                     <TableCell
                       sx={{ textAlign: "center", padding: "16px 8px" }}
                     >
                       {formatCurrency(Number(item.price))}
+                    </TableCell>
+
+                    <TableCell
+                      sx={{ textAlign: "center", padding: "16px 8px" }}
+                    >
+                      {"-" +
+                        formatMoneyThousand(
+                          (item.selectedShipment?.discount ?? 0) * item.price
+                        )}
                     </TableCell>
                     <TableCell
                       sx={{ textAlign: "center", padding: "16px 8px" }}
                     >
                       {formatCurrency(
                         item.price && item.quantity
-                          ? item.price * item.quantity
+                          ? (item.price -
+                              (item.selectedShipment?.discount ?? 0) *
+                                item.price) *
+                              item.quantity
                           : 0
                       )}
                     </TableCell>
@@ -636,7 +719,7 @@ const OrderPage: React.FC = () => {
                 label="Tiền khách đưa"
                 variant="outlined"
                 type="text"
-                sx={{ fontSize: 20 }}
+                sx={{ fontSize: 24 }}
                 value={
                   orderItems.length < 0
                     ? formatMoneyThousand(0)
@@ -649,7 +732,11 @@ const OrderPage: React.FC = () => {
               />
             </Stack>
 
-            {latestPromotion != null &&
+            <Typography sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}>
+              Tổng tiền giảm giá khuyến mãi:{" "}
+              {isNaN(discount) ? 0 : formatCurrency(discount + getPromotionCurrent())}
+            </Typography>
+            {/* {latestPromotion != null &&
             latestPromotion != undefined &&
             totalPayment >= latestPromotion?.minOrderValue ? (
               <Typography
@@ -657,7 +744,7 @@ const OrderPage: React.FC = () => {
               >
                 Tổng tiền giảm giá khuyến mãi:{" "}
                 {formatCurrency(
-                  Number(totalPayment * latestPromotion?.percentage)
+                  Number((totalPayment * latestPromotion?.percentage) + discount)
                 )}
               </Typography>
             ) : (
@@ -666,7 +753,7 @@ const OrderPage: React.FC = () => {
               >
                 Tổng tiền giảm giá khuyến mãi: 0
               </Typography>
-            )}
+            )} */}
 
             <Typography sx={{ fontStyle: "italic", fontSize: 20 }}>
               Tiền thừa: {formatCurrency(customerChange)}
