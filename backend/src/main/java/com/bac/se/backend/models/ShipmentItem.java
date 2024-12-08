@@ -34,6 +34,8 @@ public class ShipmentItem {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date exp;
 
+    private double discount;
+
     @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JoinColumn(name = "stock_id")
     private Stock stock;

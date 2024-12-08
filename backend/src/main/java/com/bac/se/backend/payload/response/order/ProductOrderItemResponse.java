@@ -4,6 +4,7 @@ public record ProductOrderItemResponse(String name,
                                        int quantity,
                                        double price,
                                        double amount,
-                                       Long shipment) {
+                                       Long shipment,
+                                       double discount) {
 
 }

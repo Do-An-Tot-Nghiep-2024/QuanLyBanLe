@@ -49,10 +49,12 @@ public class StockMapper {
 
     public ExpirationQuantity mapToExpirationQuantity(Object[] obj) {
         return new ExpirationQuantity(
-                obj[0].toString(),
+                Long.parseLong(obj[0].toString()),
                 obj[1].toString(),
-                Long.parseLong(obj[2].toString()),
-                Integer.parseInt(obj[3].toString())
+                obj[2].toString(),
+                Long.parseLong(obj[3].toString()),
+                Integer.parseInt(obj[4].toString()),
+                Double.parseDouble(obj[5].toString())
         );
     }
 }

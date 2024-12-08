@@ -27,7 +27,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    t_category c on c.category_id = p.category_id  " +
             "INNER JOIN  " +
             "    t_unit u on p.unit_id = u.unit_id  " +
-            "LEFT JOIN   " +
+            "INNER JOIN   " +
             "    t_product_price pp ON p.product_id = pp.product_id   " +
             "                       AND pp.created_at = (  " +
             "                           SELECT MAX(sub_pp.created_at)  " +

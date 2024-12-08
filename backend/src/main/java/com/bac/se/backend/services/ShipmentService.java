@@ -27,4 +27,8 @@ public interface ShipmentService {
 
     ImportInvoiceItemResponse getItemImportInvoice(Long id);
 
+
+    String updateDiscountProductForShipment(Long shipmentId, Long productId,
+                                            double discount) throws BadRequestUserException;
+
 }

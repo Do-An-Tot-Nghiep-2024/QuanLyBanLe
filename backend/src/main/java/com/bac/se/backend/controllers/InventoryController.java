@@ -3,6 +3,7 @@ package com.bac.se.backend.controllers;
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
 import com.bac.se.backend.payload.request.ShipmentRequest;
+import com.bac.se.backend.payload.request.shipment.UpdateDiscountProductShipment;
 import com.bac.se.backend.payload.response.common.ApiResponse;
 import com.bac.se.backend.payload.response.common.PageResponse;
 import com.bac.se.backend.payload.response.invoice.ImportInvoice;
@@ -95,5 +96,22 @@ public class InventoryController {
         }
     }
 
+
+    @PutMapping("/update-discount-product")
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public  ResponseEntity<ApiResponse<String>> updateDiscountProductForShipment(
+             @RequestBody UpdateDiscountProductShipment  request) {
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS,
+                    shipmentService.updateDiscountProductForShipment(request.shipmentId(),request.productId(),request.discount())
+            ));
+        } catch (BadRequestUserException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
 
 }

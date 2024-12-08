@@ -56,23 +56,27 @@ public class ProductServiceImpl implements ProductService {
     // get all product with pagination
     @Override
     public PageResponse<ProductResponse> getProducts(
-            String productName,String category,
+            String productName, String category,
             Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Object[]> productPage = productRepository.getProducts(productName,category,pageable);
+        Page<Object[]> productPage = productRepository.getProducts(productName, category, pageable);
         List<Object[]> productList = productPage.getContent();
         List<Long> productIds = productList.stream().map(x -> Long.parseLong(x[0].toString())).toList();
-        Map<Long, List<Long>> shipmentItemMap = new HashMap<>();
+        Map<Long, List<ShipmentProductResponse>> shipmentItemMap = new HashMap<>();
         for (Long productId : productIds) {
-            List<Long> shipmentIds = shipmentItemRepository.getShipmentItemByProduct(productId).stream()
-                    .map(x -> Long.parseLong(x[0].toString())).toList();
+            List<ShipmentProductResponse> shipmentIds = shipmentItemRepository.getShipmentItemByProduct(productId).stream()
+                    .map(x -> {
+                        Long shipmentId = Long.parseLong(x[0].toString());
+                        double discount = Double.parseDouble(x[1] != null ? x[1].toString() : "0");
+                        return new ShipmentProductResponse(shipmentId, discount);
+                    }).toList();
 
             shipmentItemMap.put(productId, shipmentIds);
         }
         List<ProductResponse> productResponseList = productList.stream()
                 .map(res -> {
                     Long productId = Long.parseLong(res[0].toString());
-                    List<Long> shipmentItemIds = shipmentItemMap.getOrDefault(productId, Collections.emptyList());
+                    List<ShipmentProductResponse> shipmentItemIds = shipmentItemMap.getOrDefault(productId, Collections.emptyList());
                     return productMapper.mapObjectToProductResponse(res, shipmentItemIds);
                 }).toList();
         return new PageResponse<>(productResponseList, pageNumber,
@@ -85,10 +89,11 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_PRODUCT));
         var productPriceResponse = productPriceService.getPriceLatest(productId);
-        List<Long> shipmentIds = new ArrayList<>();
+        List<ShipmentProductResponse> shipmentIds = new ArrayList<>();
         List<Object[]> shipmentItems = shipmentItemRepository.getShipmentItemByProduct(productId);
         if (!shipmentItems.isEmpty()) {
-            shipmentIds = shipmentItems.stream().map(x -> Long.parseLong(x[0].toString())).toList();
+            shipmentIds = shipmentItems.stream().map(x -> new ShipmentProductResponse(Long.parseLong(x[0].toString()),
+                    Double.parseDouble(x[1].toString()))).toList();
         }
         return new ProductResponse(product.getId(),
                 product.getName(), product.getImage(),
@@ -187,7 +192,7 @@ public class ProductServiceImpl implements ProductService {
         if (request.price() <= 0) {
             throw new BadRequestUserException("Giá không được nhỏ hơn 0");
         }
-        if(request.price() < priceLatest.originalPrice()){
+        if (request.price() < priceLatest.originalPrice()) {
             throw new BadRequestUserException("Giá bán không được nhỏ hơn giá gốc là " + priceLatest.originalPrice());
         }
         // cập nhật giá mới trong db
@@ -216,17 +221,21 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductResponse> getProductsByCategory(Long categoryId) {
         List<Object[]> productList = productRepository.getProductsByCategory(categoryId);
         List<Long> productIds = productList.stream().map(x -> Long.parseLong(x[0].toString())).toList();
-        Map<Long, List<Long>> shipmentItemMap = new HashMap<>();
+        Map<Long, List<ShipmentProductResponse>> shipmentItemMap = new HashMap<>();
         for (Long productId : productIds) {
-            List<Long> shipmentIds = shipmentItemRepository.getShipmentItemByProduct(productId).stream()
-                    .map(x -> Long.parseLong(x[0].toString())).toList();
+            List<ShipmentProductResponse> shipmentIds = shipmentItemRepository.getShipmentItemByProduct(productId).stream()
+                    .map(x -> {
+                        Long shipmentId = Long.parseLong(x[0].toString());
+                        double discount = Double.parseDouble(x[1] != null ? x[1].toString() : "0");
+                        return new ShipmentProductResponse(shipmentId, discount);
+                    }).toList();
 
             shipmentItemMap.put(productId, shipmentIds);
         }
         return productList.stream()
                 .map(res -> {
                     Long productId = Long.parseLong(res[0].toString());
-                    List<Long> shipmentItemIds = shipmentItemMap.getOrDefault(productId, Collections.emptyList());
+                    List<ShipmentProductResponse> shipmentItemIds = shipmentItemMap.getOrDefault(productId, Collections.emptyList());
                     return productMapper.mapObjectToProductResponse(res, shipmentItemIds);
                 }).toList();
     }
@@ -278,18 +287,22 @@ public class ProductServiceImpl implements ProductService {
             return List.of();
         }
         List<Long> productIds = productList.stream().map(x -> Long.parseLong(x[0].toString())).toList();
-        Map<Long, List<Long>> shipmentItemMap = new HashMap<>();
+        Map<Long, List<ShipmentProductResponse>> shipmentItemMap = new HashMap<>();
         for (Long productId : productIds) {
-            List<Long> shipmentIds = shipmentItemRepository.getShipmentItemByProduct(productId).stream()
-                    .map(x -> Long.parseLong(x[0].toString())).toList();
+            List<ShipmentProductResponse> shipmentIds = shipmentItemRepository.getShipmentItemByProduct(productId).stream()
+                    .map(x -> {
+                        Long shipmentId = Long.parseLong(x[0].toString());
+                        double discount = Double.parseDouble(x[1] != null ? x[1].toString() : "0");
+                        return new ShipmentProductResponse(shipmentId, discount);
+                    }).toList();
 
             shipmentItemMap.put(productId, shipmentIds);
         }
         return productList.stream()
                 .map(res -> {
                     Long productId = Long.parseLong(res[0].toString());
-                    List<Long> shipmentItemIds = shipmentItemMap.getOrDefault(productId, Collections.emptyList());
-                    if(!shipmentItemIds.isEmpty()){
+                    List<ShipmentProductResponse> shipmentItemIds = shipmentItemMap.getOrDefault(productId, Collections.emptyList());
+                    if (!shipmentItemIds.isEmpty()) {
                         return productMapper.mapObjectToProductResponse(res, shipmentItemIds);
                     }
                     return null;

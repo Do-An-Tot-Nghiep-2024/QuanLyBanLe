@@ -83,7 +83,9 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
             "   o.order_status = 'COMPLETED' AND o.created_at >= :fromDate AND o.created_at <= :toDate " +
             "GROUP BY  " +
             "    week_of_month",nativeQuery = true)
-    List<Object[]> getSalesAndProfitByDate(Date fromDate,Date toDate);
+    List<Object[]> getSalesAndProfitByDate(
+           @Param("fromDate") Date fromDate,
+           @Param("toDate") Date toDate);
 
 
 
@@ -105,11 +107,11 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
             "GROUP BY oi.product_id",nativeQuery = true)
     List<Object[]> getSoldQuantityProductByMonth(Integer month);
 
-    @Query(value = "SELECT  " +
+    @Query(value = "SELECT p.product_id, " +
             "    p.name, " +
             "    DATE_FORMAT(si.exp, '%d-%m-%Y') AS expired_day, " +
             "    si.shipment_id, " +
-            "    (s.quantity - s.sold_quantity) AS avb " +
+            "    (s.quantity - s.sold_quantity) AS avb,si.discount " +
             "FROM " +
             "    t_shipment_item si " +
             "        INNER JOIN " +
@@ -141,8 +143,9 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
 
 
     // Order Service
-    @Query(value = "SELECT p.name,oi.quantity,pp.price,oi.amount,oi.shipment_id FROM t_order_item oi " +
+    @Query(value = "SELECT p.name,oi.quantity,pp.price,oi.amount,oi.shipment_id,si.discount FROM t_order_item oi " +
             "INNER JOIN t_product p ON p.product_id = oi.product_id " +
+            "INNER JOIN t_shipment_item si ON si.product_id = p.product_id AND si.shipment_id = oi.shipment_id " +
             "INNER JOIN t_product_price pp ON pp.product_price_id = oi.product_price_id " +
             "WHERE oi.order_id = ?1",nativeQuery = true)
     List<Object[]> getProductInOrderItemWeb(Long orderId);

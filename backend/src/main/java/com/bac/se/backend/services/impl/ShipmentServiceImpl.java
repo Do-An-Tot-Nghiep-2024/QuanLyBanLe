@@ -2,6 +2,7 @@ package com.bac.se.backend.services.impl;
 
 import com.bac.se.backend.exceptions.BadRequestUserException;
 import com.bac.se.backend.exceptions.ResourceNotFoundException;
+import com.bac.se.backend.keys.ShipmentItemKey;
 import com.bac.se.backend.mapper.InvoiceMapper;
 import com.bac.se.backend.mapper.ProductMapper;
 import com.bac.se.backend.mapper.ShipmentMapper;
@@ -78,6 +79,7 @@ public class ShipmentServiceImpl implements ShipmentService {
                     .mxp(productItem.mxp())
                     .shipment(shipmentSave)
                     .product(product)
+                    .discount(0)
                     .build();
             log.info("create shipment item success");
 
@@ -164,6 +166,22 @@ public class ShipmentServiceImpl implements ShipmentService {
                 productImportInvoiceResponse,
                 (Date) object[1]
         );
+    }
 
+    @Override
+    public String updateDiscountProductForShipment(Long shipmentId, Long productId, double discount) throws BadRequestUserException {
+        if(discount < 0){
+            throw new BadRequestUserException("Tỉ lệ giảm không được nhỏ hơn 0");
+        }
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+        Shipment shipment = shipmentRepository.findById(shipmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lô hàng"));
+        ShipmentItemKey key = ShipmentItemKey.builder().product(product).shipment(shipment).build();
+        var shipmentItem = shipmentItemRepository.findById(key).orElseThrow(() -> new ResourceNotFoundException("Không tìm lô của sản phẩm"));
+        double discountPercentage = discount / 100;
+        shipmentItem.setDiscount(discountPercentage);
+        shipmentItemRepository.save(shipmentItem);
+        return product.getName() + "Lô " + shipmentId + " đã được giảm " + discount + "%";
     }
 }

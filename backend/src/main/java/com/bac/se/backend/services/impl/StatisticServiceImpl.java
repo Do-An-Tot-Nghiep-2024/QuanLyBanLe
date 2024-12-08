@@ -244,10 +244,11 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public List<SaleAndProfitResponse> getSalesAndProfitInWeek(String toDate) throws ParseException {
-        var dateRequest = dateConvert.generateDateInWeek(toDate);
-        log.info("fromDate {}", dateRequest.fromDate());
-        var responseMap = dateConvert.generateDateInWeekMap(toDate);
+    public List<SaleAndProfitResponse> getSalesAndProfitInWeek(Integer next) throws ParseException {
+        var dateRequest = dateConvert.generateDayInCurrentWeek(next);
+        log.info("date  {}", dateRequest);
+
+        var responseMap = dateConvert.generateDateInWeekMap(next);
 
         var salesAndProfit = orderItemRepository.getSalesAndProfitByDate(dateRequest.fromDate(),dateRequest.toDate());
         var salesList =  salesAndProfit.stream().map(statisticMapper::mapObjectToSaleAndProfitResponse).toList();
