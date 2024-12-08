@@ -1,4 +1,5 @@
 import api from "../config/axios";
+import UpdateDiscountProduct from "../types/inventory/updateDiscountProduct";
 
 
 const createInventoryOrderService = async (
@@ -105,9 +106,26 @@ const getShipmentsService = async () => {
   }
 };
 
+const updateDiscountProductService = async (request: UpdateDiscountProduct) => {
+  try {
+      const response:any = await api.put(`/inventory/update-discount-product`, request);
+      const { message, data } = response;
+      return  {
+        message: message,
+        data: message === "success" ? data : {},
+      }
+  } catch (error:any) {
+    return {
+      message: error.response?.data?.message,
+      data: {},
+    }
+  }
+}
+
 export {
   createInventoryOrderService,
   getImportInvoicesService,
   getItemImportInvoiceService,
   getShipmentsService,
+  updateDiscountProductService,
 };

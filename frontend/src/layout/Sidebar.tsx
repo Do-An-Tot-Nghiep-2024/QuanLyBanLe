@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
+import "../assets/css/style.css";
 import {
   Dashboard as DashboardIcon,
   ShoppingCart as ShoppingCartIcon,
@@ -37,7 +38,7 @@ import logo from "../assets/images/logo.png";
 import Notification from "../components/Notification";
 import { connectToSocket } from "../config/socket";
 import { getSentNotificationsService } from "../services/notification.service";
-import { IconButton, Stack, Typography } from "@mui/material";
+import { IconButton, Stack } from "@mui/material";
 
 const NAVIGATION: Navigation = [
   {
@@ -219,7 +220,7 @@ const demoTheme = createTheme({
   },
 });
 const Logo = () => (
-  <img src={logo} alt="logo" style={{ width: "100%", borderRadius: "50%" }} />
+    <img src={logo} alt="logo" style={{ width: "100%", borderRadius: "50%" }} />
 );
 
 // function CustomThemeSwitcher() {
@@ -328,7 +329,7 @@ export default function Sidebar() {
       theme={demoTheme}
       branding={{
         logo: <Logo />,
-        title: "",
+        title:"CHÀO MỪNG QUẢN LÝ"
       }}
     >
       <DashboardLayout
@@ -342,7 +343,6 @@ export default function Sidebar() {
                 <RefreshIcon />
               </IconButton>
               <Notification data={nofitications} />
-              <Typography fontSize={16} pt={1} fontWeight={"bold"}>QUẢN LÝ</Typography>
             </Stack>
           ),
         }}

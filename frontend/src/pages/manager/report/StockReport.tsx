@@ -53,6 +53,14 @@ export default function StockReport() {
     return <div>Error: {error.message}</div>;
   }
 
+  const sortedProducts = data?.sort((a: any, b: any) => {
+    if (b.soldQuantity === a.soldQuantity) {
+      return a.availableQuantity - b.availableQuantity; // Sort by lowest availableQuantity if soldQuantity is the same
+    }
+    return b.soldQuantity - a.soldQuantity; // Sort by highest soldQuantity
+  });
+  const top3Products = sortedProducts?.slice(0, 3);
+
   return (
     <Box sx={{ width: "100%", height: "100%", marginTop: 5 }}>
       <Box>
@@ -83,10 +91,24 @@ export default function StockReport() {
           ></TextField>
         </Stack>
       </Box>
-      <Container sx={{pt:2}}>
-        <Typography align="center" fontWeight={"bold"}>
-          Biểu đồ nhập và bán của sản phẩm trong tháng {month}
-        </Typography>
+      <Container sx={{ pt: 2 }}>
+        <Stack direction={"row"} gap={2} alignContent={"center"} justifyContent={"space-evenly"}>
+          <Typography align="center" fontWeight={"bold"}>
+            Biểu đồ nhập và bán của sản phẩm trong tháng {month}
+          </Typography>
+          <Box>
+            <Typography align="left" color="primary" fontStyle={"italic"}>
+              Gợi ý sản phẩm cần nhập
+            </Typography>
+            {top3Products?.map((product: any, index: number) => (
+              <Box key={index}>
+                <Typography align="left">
+                  {product.name}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Stack>
         <BarChartVertical data={data} />
       </Container>
       <SnackbarMessage

@@ -11,7 +11,7 @@ import AnalyticsPaper from "../../components/AnalyticsPaper";
 import colors from "../../constants/color";
 import LocalAtmIcon from "@mui/icons-material/LocalAtm";
 import {
-  getSalesAndProfitByDateService,
+  getSalesAndProfitInWeekService,
   getSalesBySupplierService,
 } from "../../services/statistic.service";
 import { convertDateInput } from "../../utils/dateUtil";
@@ -54,7 +54,7 @@ function Dashboard() {
     try {
       const toDate = convertDateInput(new Date());
       console.log(toDate);
-      const response = await getSalesAndProfitByDateService(toDate);
+      const response = await getSalesAndProfitInWeekService(0);
       if (response.message !== "success") {
         updateErrorMessage(response.message);
       }

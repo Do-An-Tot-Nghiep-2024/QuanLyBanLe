@@ -83,10 +83,10 @@ const getSalesBySupplierService = async () => {
   }
 };
 
-const getSalesAndProfitByDateService = async (toDate: string) => {
+const getSalesAndProfitInWeekService = async (next: number) => {
   try {
     const response: any = await api.get(
-      `/statistic/sale-and-profit-in-week?toDate=${toDate}`
+      `/statistic/sale-and-profit-in-week?next=${next}`
     );
     const { message, data } = response;
     return {
@@ -217,7 +217,7 @@ export {
   getSalesStatisticsByEmployeeService,
   getStatisticsProductPriceService,
   getSalesBySupplierService,
-  getSalesAndProfitByDateService,
+  getSalesAndProfitInWeekService,
   getTopFiveHighestGrossingService,
   getBestSellingProductService,
   getSalesAndProfitByMonthService,

@@ -1,5 +1,6 @@
 import { Text, View, StyleSheet } from "@react-pdf/renderer";
 import OrderItemResponse from "../types/order/orderItemResponse";
+import { formatMoneyThousand } from "../utils/formatMoney";
 
 // Create styles
 const styles = StyleSheet.create({
@@ -45,7 +46,13 @@ const styles = StyleSheet.create({
 });
 
 // Create Document Component
-const PDFTable = ({ data }: { data: OrderItemResponse[] }) => (
+const PDFTable = ({
+  data,
+  totalDiscount,
+}: {
+  data: OrderItemResponse[];
+  totalDiscount: number;
+}) => (
   // <Document>
   <View style={styles.tableContainer}>
     {/* Table Header */}
@@ -81,9 +88,35 @@ const PDFTable = ({ data }: { data: OrderItemResponse[] }) => (
 
         <View style={[styles.tableCol, { flex: 0.5 }]}>
           <Text>{Number(item.amount).toLocaleString("de-DE")}</Text>
+          {item.discount > 0 && (
+            <Text>
+              {"-" +
+                Number(
+                  item.discount * item.price * item.quantity
+                ).toLocaleString("de-DE")}
+            </Text>
+          )}
         </View>
       </View>
     ))}
+    {totalDiscount > 0 && (
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          borderBottomWidth: 1,
+          borderColor: "#000",
+          borderBottomStyle: "dashed",
+          width: "100%",
+          fontSize: 14,
+          padding:5
+        }}
+      >
+        <Text>KM:</Text>
+        <Text>{"-" + formatMoneyThousand(totalDiscount)}</Text>
+      </View>
+    )}
   </View>
   // </Document>
 );
