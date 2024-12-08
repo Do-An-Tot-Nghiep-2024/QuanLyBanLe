@@ -91,12 +91,12 @@ public class StatisticController {
 
     @GetMapping("/sale-and-profit-in-week")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ApiResponse<List<SaleAndProfitResponse>>> getStatisticSaleAndProfit(
-            @RequestParam(required = false) String toDate
+    public ResponseEntity<ApiResponse<List<SaleAndProfitResponse>>> getStatisticSaleAndProfitInWeek(
+            @RequestParam(defaultValue = "0") Integer next
     ) {
         try {
             return ResponseEntity.ok(new ApiResponse<>("success",
-                    statisticService.getSalesAndProfitInWeek(toDate)));
+                    statisticService.getSalesAndProfitInWeek(next)));
         }catch (ParseException e) {
             return ResponseEntity.status(400).body(new ApiResponse<>("Invalid date format. Please use 'yyyy-MM-dd'.", null));
         }

@@ -1,10 +1,7 @@
 package com.bac.se.backend.mapper;
 
 import com.bac.se.backend.payload.response.order.ProductOrderItemResponse;
-import com.bac.se.backend.payload.response.product.ProductCategoryResponse;
-import com.bac.se.backend.payload.response.product.ProductImportInvoiceResponse;
-import com.bac.se.backend.payload.response.product.ProductMobileResponse;
-import com.bac.se.backend.payload.response.product.ProductResponse;
+import com.bac.se.backend.payload.response.product.*;
 import com.bac.se.backend.payload.response.statistic.product.BestSellingProductResponse;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +10,7 @@ import java.util.List;
 
 @Service
 public class ProductMapper {
-    public ProductResponse mapObjectToProductResponse(Object[] object, List<Long> shipmentIds) {
+    public ProductResponse mapObjectToProductResponse(Object[] object, List<ShipmentProductResponse> shipmentIds) {
         return new ProductResponse(
                 Long.parseLong(object[0].toString()), // id
                 object[1].toString(), // name
@@ -72,7 +69,9 @@ public class ProductMapper {
                 Integer.parseInt(object[1].toString()),
                 Double.parseDouble(object[2].toString()),
                 Double.parseDouble(object[3].toString()),
-                Long.parseLong(object[4].toString()));
+                Long.parseLong(object[4].toString()),
+                Double.parseDouble(object[5].toString())
+        );
     }
 
 }

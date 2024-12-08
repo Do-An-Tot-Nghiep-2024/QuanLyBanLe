@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ShipmentItemRepository extends JpaRepository<ShipmentItem, ShipmentItemKey> {
 
-    @Query(value = "select s.shipment_id from t_shipment s " +
+    @Query(value = "select s.shipment_id,si.discount from t_shipment s " +
             "inner join t_shipment_item si on si.shipment_id = s.shipment_id " +
             "inner join t_stock so on  so.stock_id = si.stock_id " +
             "where si.product_id = ?1 and (so.quantity - so.sold_quantity) > 0", nativeQuery = true)

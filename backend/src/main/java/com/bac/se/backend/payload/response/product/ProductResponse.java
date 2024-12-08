@@ -19,5 +19,5 @@ public class ProductResponse {
     private String unit;
     private double price;
     private double originalPrice;
-    private List<Long> shipmentIds;
+    private List<ShipmentProductResponse> shipmentIds;
 }

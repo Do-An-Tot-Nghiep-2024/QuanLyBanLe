@@ -39,7 +39,7 @@ public interface StatisticService {
     // statistics by date
 
     // sale and profit
-    List<SaleAndProfitResponse> getSalesAndProfitInWeek(String toDate) throws ParseException;
+    List<SaleAndProfitResponse> getSalesAndProfitInWeek(Integer next) throws ParseException;
 
     // best selling product
     List<BestSellingProductResponse> statisticsBestSellingProduct(String fromDate, String toDate) throws ParseException;

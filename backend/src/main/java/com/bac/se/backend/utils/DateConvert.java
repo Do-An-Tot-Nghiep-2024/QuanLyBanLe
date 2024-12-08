@@ -10,10 +10,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class DateConvert {
@@ -30,6 +27,13 @@ public class DateConvert {
                 .format(date);
     }
 
+    public Date formatDateYYYYMMDD(Date date) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        // Format the date to string
+        String formattedDateStr = formatter.format(date);
+        // Parse the string back to a Date object
+        return formatter.parse(formattedDateStr);
+    }
     // 6 months
     public DateRequest convertDateRequest(String fromDate, String toDate) throws ParseException {
         Date from = fromDate != null ? dateFormat.parse(fromDate) : dateFormat.parse(createDate(LocalDate.now().minusMonths(3)));
@@ -62,9 +66,35 @@ public class DateConvert {
         Date toDay = dateFormat.parse(createDate(parsedToDate.plusDays(1)));
         return new DateRequest(fromDate, toDay);
     }
-    public Map<String, SaleAndProfitResponse> generateDateInWeekMap(String toDate) throws ParseException {
+
+    public DateRequest generateDayInCurrentWeek(int next) throws ParseException {
+        Calendar calendar = Calendar.getInstance();
+
+        // Get today's date
+        Date today = calendar.getTime();
+
+        // Reset calendar to today and add 'next' days
+        calendar.setTime(today);
+        calendar.add(Calendar.DAY_OF_MONTH, next);
+        Date modifiedToDate = formatDateYYYYMMDD(calendar.getTime());
+
+        // Ensure toDate doesn't exceed the current date
+        Date toDate = today.before(modifiedToDate) ? today : modifiedToDate;
+
+        // Calculate Monday of the current week
+        int currentDay = calendar.get(Calendar.DAY_OF_WEEK); // Sunday = 1, Monday = 2, ..., Saturday = 7
+        int daysToMonday = (currentDay == Calendar.SUNDAY) ? -6 : Calendar.MONDAY - currentDay;
+        calendar.add(Calendar.DAY_OF_MONTH, daysToMonday);
+        Date fromDate = formatDateYYYYMMDD(calendar.getTime());
+
+        // Return the DateRequest object
+        return new DateRequest(fromDate, formatDateYYYYMMDD(toDate));
+    }
+
+
+    public Map<String, SaleAndProfitResponse> generateDateInWeekMap(int next) throws ParseException {
 // Get the DateRequest object with fromDate and toDate
-        DateRequest dateRequest = generateDateInWeek(toDate);
+        DateRequest dateRequest = generateDayInCurrentWeek(next);
 
         // Convert Date to LocalDate for easier manipulation
         LocalDate fromLocalDate = dateRequest.fromDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -83,9 +113,9 @@ public class DateConvert {
             )); // Add the key as the formatted date and value as null
             // Move to the next date
             fromLocalDate = fromLocalDate.plusDays(1);
-            if(fromLocalDate.equals(toLocalDate)){
-                break;
-            }
+//            if(fromLocalDate.equals(toLocalDate)){
+//                break;
+//            }
         }
 
         return dateMap;

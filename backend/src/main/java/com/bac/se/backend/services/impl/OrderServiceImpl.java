@@ -201,11 +201,11 @@ public class OrderServiceImpl implements OrderService {
                 // increment quantity if product duplicate name
                 double finalAmount = price * map.get(productId);
                 orderItemResponses.replaceAll(response -> Objects.equals(response.name(), product.getName()) ?
-                        new ProductOrderItemResponse(response.name(), response.quantity() + orderItemRequest.quantity(), price, finalAmount,shipmentId)
+                        new ProductOrderItemResponse(response.name(), response.quantity() + orderItemRequest.quantity(), price, finalAmount,shipmentId,shipmentItem.getDiscount())
                         : response);
             } else {
                 map.put(productId, orderItemRequest.quantity());
-                orderItemResponses.add(new ProductOrderItemResponse(product.getName(), orderItemRequest.quantity(), price, amount,shipmentId));
+                orderItemResponses.add(new ProductOrderItemResponse(product.getName(), orderItemRequest.quantity(), price, amount,shipmentId,shipmentItem.getDiscount()));
             }
             OrderItem orderItem = OrderItem.builder()
                     .order(orderSave)
