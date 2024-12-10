@@ -49,9 +49,13 @@ const styles = StyleSheet.create({
 const PDFTable = ({
   data,
   totalDiscount,
+  pecentage,
+  minOrderValue,
 }: {
   data: OrderItemResponse[];
   totalDiscount: number;
+  pecentage: number;
+  minOrderValue: number;
 }) => (
   // <Document>
   <View style={styles.tableContainer}>
@@ -77,7 +81,6 @@ const PDFTable = ({
         <View style={[styles.tableCol, { flex: 3 }]}>
           <Text>{item?.name}</Text>
         </View>
-
         <View style={[styles.tableCol, { flex: 1 }]}>
           <Text>{Number(item.price).toLocaleString("de-DE")}</Text>
         </View>
@@ -88,12 +91,9 @@ const PDFTable = ({
 
         <View style={[styles.tableCol, { flex: 0.5 }]}>
           <Text>{Number(item.amount).toLocaleString("de-DE")}</Text>
-          {item.discount > 0 && (
+          {item?.discount > 0 && (
             <Text>
-              {"-" +
-                Number(
-                  item.discount * item.price * item.quantity
-                ).toLocaleString("de-DE")}
+              {-formatMoneyThousand(item?.discount)}
             </Text>
           )}
         </View>
@@ -110,11 +110,14 @@ const PDFTable = ({
           borderBottomStyle: "dashed",
           width: "100%",
           fontSize: 14,
-          padding:5
+          padding: 5,
         }}
       >
-        <Text>KM:</Text>
-        <Text>{"-" + formatMoneyThousand(totalDiscount)}</Text>
+        <Text style={{ fontWeight: "bold" }}>
+          KM:{" "}
+          {`Giảm ${pecentage * 100} % cho đơn hàng ${formatMoneyThousand(minOrderValue)} VND`}
+        </Text>
+        <Text>{"- " + formatMoneyThousand(totalDiscount)}</Text>
       </View>
     )}
   </View>
