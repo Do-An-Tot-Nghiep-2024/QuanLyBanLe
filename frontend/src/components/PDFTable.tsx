@@ -93,7 +93,7 @@ const PDFTable = ({
           <Text>{Number(item.amount).toLocaleString("de-DE")}</Text>
           {item?.discount > 0 && (
             <Text>
-              {-formatMoneyThousand(item?.discount)}
+              {'-'+Number(item.discount).toLocaleString("de-DE")}
             </Text>
           )}
         </View>
