@@ -244,9 +244,9 @@ public class ProductServiceImpl implements ProductService {
     public PageResponse<ProductMobileResponse> getProductsMobile(Integer pageNumber, Integer pageSize) {
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
         var productsMobile = productRepository.getProductsMobile(pageRequest);
-        var mobileResponses = productsMobile.getContent()
+        var mobileResponses = new ArrayList<>(productsMobile.getContent()
                 .stream()
-                .map(productMapper::mapObjectToProductMobileResponse).toList();
+                .map(productMapper::mapObjectToProductMobileResponse).toList());
 
         for (ProductMobileResponse productMobileResponse : mobileResponses) {
             var maxAvailableQuantityStock = stockRepository
@@ -257,6 +257,9 @@ public class ProductServiceImpl implements ProductService {
 
             }
         }
+        log.info("mobileResponses size before {}", mobileResponses.size());
+        mobileResponses.removeIf(x -> x.getShipmentId() == null);
+        log.info("mobileResponses size after {}", mobileResponses.size());
         return new PageResponse<>(mobileResponses, pageNumber,
                 productsMobile.getTotalPages(), productsMobile.getTotalElements(), productsMobile.isLast());
     }
@@ -264,9 +267,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public PageResponse<ProductMobileResponse> getProductsMobileByCategory(Long categoryId, Integer pageNumber, Integer pageSize) {
         var productsMobile = productRepository.getProductsMobileByCategory(categoryId, PageLimit.DEFAULT.getPageable());
-        var mobileResponses = productsMobile.getContent()
+        var mobileResponses = new ArrayList<>(productsMobile.getContent()
                 .stream()
-                .map(productMapper::mapObjectToProductMobileResponse).toList();
+                .map(productMapper::mapObjectToProductMobileResponse).toList());
         for (ProductMobileResponse productMobileResponse : mobileResponses) {
             var maxAvailableQuantityStock = stockRepository
                     .getMaxAvailableQuantityStock(productMobileResponse.getProductId(),
@@ -275,6 +278,7 @@ public class ProductServiceImpl implements ProductService {
                 productMobileResponse.setShipmentId(Long.parseLong(maxAvailableQuantityStock.get(0)[0].toString()));
             }
         }
+        mobileResponses.removeIf(x -> x.getShipmentId() == null);
         return new PageResponse<>(mobileResponses, pageNumber,
                 productsMobile.getTotalPages(), productsMobile.getTotalElements(), productsMobile.isLast());
     }

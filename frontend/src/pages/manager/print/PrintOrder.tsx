@@ -13,7 +13,7 @@ import PDFTable from "../../../components/PDFTable";
 import bold from "../../../assets/fonts/Roboto-Bold.ttf";
 import regular from "../../../assets/fonts/Roboto-Regular.ttf";
 import medium from "../../../assets/fonts/Roboto-Medium.ttf";
-import { formatMoney, formatMoneyThousand } from "../../../utils/formatMoney";
+import { formatMoney } from "../../../utils/formatMoney";
 import logo from "../../../assets/images/logo.png";
 import { Box, Button } from "@mui/material";
 import { formatDateTime } from "../../../utils/dateUtil";
@@ -167,7 +167,7 @@ const InvoiceDoc = ({
   <Document title="Hóa đơn" style={styles.body}>
     <Page size="A4" style={styles.page}>
       <Image style={styles.image} src={logo} />
-      <View style={{ display: "flex"}}>
+      <View style={{ display: "flex" }}>
         <Text style={styles.header}>{title}</Text>
         <View style={styles.head}>
           <View style={styles.info}>
@@ -195,7 +195,12 @@ const InvoiceDoc = ({
       </View>
       <View>
         {/* Render the order items in a table */}
-        <PDFTable data={data} totalDiscount={promotion} />
+        <PDFTable
+          data={data}
+          pecentage={percentage}
+          minOrderValue={minOrderValue}
+          totalDiscount={promotion}
+        />
 
         <View style={styles.payment}>
           <Text>{"Tổng tiền hàng".toUpperCase()}</Text>
@@ -231,7 +236,7 @@ const InvoiceDoc = ({
         >
           {`( Giá trên đã bao gồm thuế GTGT )`}
         </Text>
-        {discount > 0 && percentage !== 0 && minOrderValue > 0 && (
+        {/* {discount > 0 && percentage !== 0 && minOrderValue > 0 && (
           <Text
             style={{
               color: "red",
@@ -243,7 +248,7 @@ const InvoiceDoc = ({
             ! Hóa đơn được giảm {percentage * 100} % khi đơn hàng{" "}
             {formatMoneyThousand(minOrderValue)} VND
           </Text>
-        )}
+        )} */}
       </View>
     </Page>
   </Document>
@@ -269,6 +274,7 @@ export default function PrintOrder() {
   const title = "HÓA ĐƠN BÁN HÀNG";
   const change = customerPayment - (total - totalDiscount);
   const productsItems = location.state?.orderItemResponses as any[];
+
   let promotion = 0;
   // // increment quantity and price if product duplicate name
   const items = Object.values(
@@ -276,25 +282,36 @@ export default function PrintOrder() {
       (acc, item) => {
         if (!acc[item.name]) {
           acc[item.name] = { ...item }; // Initialize the grouped item
+          acc[item.name].discount =
+            item.discount > 0 ? item.discount * item.price * item.quantity : 0;
         } else {
           // Increment the quantity, price, and amount
           acc[item.name].quantity += item.quantity;
-          // acc[item.name].price += item.price;
           acc[item.name].amount += item.amount;
+          acc[item.name].discount +=
+            item.discount > 0 ? item.discount * item.price * item.quantity : 0;
+        }
+        if (item.discount > 0) {
+          promotion += item.discount * item.price * item.quantity;
+          acc[item.name].discount = item.discount * item.price * item.quantity;
         }
         return acc;
       },
       {} as Record<string, any>
     )
   );
+  console.log("Items are: ", items);
+
   // calculate promotion
-  items.forEach((item:any) => {
-    if (item.discount > 0) {
-      promotion += item.discount * item.price * item.quantity;
-    }
-  });
+  // items.forEach((item: any) => {
+  //   if (item.discount > 0) {
+  //     promotion += item.discount * item.price * item.quantity;
+  //   }
+  // });
+  console.log("Promotion value ", promotion);
   promotion = totalDiscount - promotion;
-  
+  console.log("Total discount ", totalDiscount);
+
   // const fetchData = {
   //   total: 2000,
   //   customerPayment: 2000,

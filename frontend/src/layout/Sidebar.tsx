@@ -19,8 +19,6 @@ import {
   Gite as GiteIcon,
   NoteAddOutlined,
   AddShoppingCart as AddShoppingCartIcon,
-  AppRegistration as AppRegistrationIcon,
-  MapsUgc as MapsUgcIcon,
   AttachMoney as AttachMoneyIcon,
   Refresh as RefreshIcon,
   Grain as GrainIcon,
@@ -109,23 +107,6 @@ const NAVIGATION: Navigation = [
     ],
   },
   {
-    segment: "promotions",
-    title: "Khuyến mãi",
-    icon: <RedeemIcon />,
-    children: [
-      {
-        segment: "",
-        title: "Quản lí khuyến mãi",
-        icon: <AppRegistrationIcon />,
-      },
-      {
-        segment: "create-promotion",
-        title: "Tạo khuyến mãi",
-        icon: <MapsUgcIcon />,
-      },
-    ],
-  },
-  {
     segment: "reports",
     title: "Báo cáo",
     icon: <BarChartIcon />,
@@ -148,6 +129,11 @@ const NAVIGATION: Navigation = [
     ],
   },
   {
+    segment: "promotions",
+    title: "Khuyến mãi",
+    icon: <RedeemIcon />,
+  },
+  {
     segment: "suppliers",
     title: "Nhà cung cấp",
     icon: <NoteAddOutlined />,
@@ -162,12 +148,6 @@ const NAVIGATION: Navigation = [
     title: "Khách hàng",
     icon: <PeopleAltOutlinedIcon />,
   },
-
-  // {
-  //   segment: "settings",
-  //   title: "Cài đặt",
-  //   icon: <SettingsIcon />,
-  // },
   {
     segment: "logout",
     title: "Đăng xuất",
@@ -220,7 +200,7 @@ const demoTheme = createTheme({
   },
 });
 const Logo = () => (
-    <img src={logo} alt="logo" style={{ width: "100%", borderRadius: "50%" }} />
+  <img src={logo} alt="logo" style={{ width: "100%", borderRadius: "50%" }} />
 );
 
 // function CustomThemeSwitcher() {
@@ -329,7 +309,7 @@ export default function Sidebar() {
       theme={demoTheme}
       branding={{
         logo: <Logo />,
-        title:"CHÀO MỪNG QUẢN LÝ"
+        title: "CHÀO MỪNG QUẢN LÝ",
       }}
     >
       <DashboardLayout

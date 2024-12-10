@@ -107,7 +107,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "                       )      " +
             "INNER JOIN  t_unit u ON u.unit_id = p.unit_id " +
             "WHERE       " +
-            "    p.is_active = 1 " +
+            "    p.is_active = 1 AND pp.price > 0 " +
             "ORDER BY p.product_id DESC", nativeQuery = true)
     Page<Object[]> getProductsMobile(Pageable pageable);
 
@@ -129,7 +129,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "                           WHERE sub_pp.product_id = p.product_id      " +
             "                       )      " +
             "WHERE       " +
-            "    p.is_active = 1 AND p.category_id = ?1 " +
+            "    p.is_active = 1 AND p.category_id = ?1 AND pp.price > 0 " +
             "ORDER BY p.name", nativeQuery = true)
     Page<Object[]> getProductsMobileByCategory(Long categoryId,Pageable pageable);
 
@@ -155,7 +155,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "                           WHERE sub_pp.product_id = p.product_id  " +
             "                       )  " +
             "WHERE   " +
-            "    p.is_active = 1 AND p.name LIKE CONCAT(:name, '%')", nativeQuery = true)
+            "    p.is_active = 1 AND p.name LIKE CONCAT('%', :name, '%')", nativeQuery = true)
     List<Object[]> getProductsByName(@Param("name") String name,Pageable pageable);
 
 }

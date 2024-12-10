@@ -65,9 +65,9 @@ public class OrderServiceImpl implements OrderService {
     private final NotificationRepository notificationRepository;
 
 
-    double roundPrice(double price) {
-        return (double) Math.round(price * 100) / 100;
-    }
+//    double roundPrice(double price) {
+//        return (double) Math.round(price * 100) / 100;
+//    }
 
     @Transactional(rollbackOn = BadRequestUserException.class)
     void minusStock(Long shipmenId, Long productId, int quantity) throws BadRequestUserException {
@@ -122,7 +122,7 @@ public class OrderServiceImpl implements OrderService {
         }
         Map<Long, Integer> map = new HashMap<>();
         // Kiểm tra thông tin nhân viên
-//        Employee employee = employeeRepository.findByEmail(emailEmployee) // second call
+//        Employee employee = employeeRepository.findByEmail(emailEmployee)
 //                .orElse(null);
         OrderStatus orderStatus = orderRequest.isLive() ? OrderStatus.COMPLETED : OrderStatus.PENDING;
         PaymentType paymentType = orderRequest.paymentType().equals("CASH") ? PaymentType.CASH : PaymentType.E_WALLET;
@@ -186,7 +186,7 @@ public class OrderServiceImpl implements OrderService {
 
             // check if product is expired
             if (shipmentItem.getExp().before(new Date())) {
-                throw new BadRequestUserException("Sản phẩm đã hết hạn");
+                throw new BadRequestUserException(product.getName() + " đã hết hạn");
             }
 
             minusStock(orderItemRequest.shipmentId(), orderItemRequest.productId(), orderItemRequest.quantity());

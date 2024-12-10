@@ -257,15 +257,20 @@ const OrderPage: React.FC = () => {
       });
       return updatedItems; // Return the updated state
     });
-
     // setDiscount(discountSum);
     if (customerPayment === 0) {
       setCustomerChange(0);
     } else {
-      setCustomerChange(
-        customerPayment -
-          (isNaN(totalOrder) ? 0 : totalOrder - getPromotionCurrent())
-      );
+      if (latestPromotion !== undefined && latestPromotion !== null) {
+        if (totalOrder >= latestPromotion?.minOrderValue) {
+          const need = totalOrder * latestPromotion?.percentage;
+          setCustomerChange(customerPayment - (totalOrder - need));
+        } else {
+          setCustomerChange(customerPayment - totalOrder);
+        }
+      } else {
+        setCustomerChange(customerPayment - totalOrder);
+      }
     }
   };
 
@@ -354,12 +359,14 @@ const OrderPage: React.FC = () => {
     productId: number,
     selectedShipment: Shipment
   ) => {
+    console.log("Shipment change is", selectedShipment);
+
     const existingItemIndex = orderItems.findIndex(
       (item) =>
         item.product.id === productId &&
         item.selectedShipment?.id === selectedShipment.id
     );
-    if (existingItemIndex != -1) {
+    if (existingItemIndex !== -1) {
       console.log("existed");
       setOrderItems((prev) =>
         prev
@@ -374,23 +381,21 @@ const OrderPage: React.FC = () => {
           )
           .filter((itm) => itm.selectedShipment !== undefined)
       );
-      // setOrderItems((prevItems) =>
-      //   prevItems.filter((itm) => itm.selectedShipment !== undefined)
-      // );
     } else {
       console.log("new item");
       setOrderItems((orderItems) =>
-        orderItems.map((itm) => {
-          if (
-            Number(itm.product.id) === Number(productId) &&
-            itm.selectedShipment === undefined
-          ) {
-            // console.log("duplicate");
-
-            return { ...itm, selectedShipment };
-          }
-          return itm;
-        })
+        orderItems
+          .map((itm) => {
+            if (
+              Number(itm.product.id) === Number(productId) &&
+              itm.selectedShipment === undefined &&
+              selectedShipment.id !== 0
+            ) {
+              return { ...itm, selectedShipment };
+            }
+            return itm;
+          })
+          .filter((itm) => itm.selectedShipment !== undefined)
       );
     }
     let discountSum = 0;
@@ -401,7 +406,6 @@ const OrderPage: React.FC = () => {
       }
     });
     setDiscount(discountSum);
-    console.log("discount value is", discount);
   };
 
   const isCustomerPaymentValid = (payment: number) => {
@@ -575,7 +579,7 @@ const OrderPage: React.FC = () => {
                 {orderItems.map((item, index) => (
                   <TableRow
                     hover
-                    key={`${item.product.id}-${item.selectedShipment}`}
+                    key={`${item.product.id}-${item.selectedShipment?.id}`}
                     sx={{
                       backgroundColor: index % 2 === 0 ? "#fff" : "#f9f9f9",
                       height: 80,
@@ -595,7 +599,7 @@ const OrderPage: React.FC = () => {
                             );
                           handleUpdateShipment(Number(item.product.id), {
                             id: id,
-                            discount: selectedShipment?.discount || 0,
+                            discount: selectedShipment?.discount ?? 0,
                           });
                         }}
                         sx={{ width: "100%", textAlign: "left" }}
@@ -619,7 +623,13 @@ const OrderPage: React.FC = () => {
                           handleUpdateQuantity(item, parseInt(e.target.value));
                         }}
                         sx={{ width: "50%" }}
-                        inputProps={{ style: { textAlign: "center" } }}
+                        slotProps={{
+                          input: {
+                            style: {
+                              textAlign: "center",
+                            },
+                          },
+                        }}
                       />
                     </TableCell>
 
@@ -746,7 +756,7 @@ const OrderPage: React.FC = () => {
                 ? 0
                 : formatCurrency(discount + getPromotionCurrent())}
             </Typography>
-           
+
             <Typography sx={{ fontStyle: "italic", fontSize: 20 }}>
               Tiền thừa: {formatCurrency(customerChange)}
             </Typography>
