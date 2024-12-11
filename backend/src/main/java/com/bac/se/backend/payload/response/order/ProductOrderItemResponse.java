@@ -5,6 +5,6 @@ public record ProductOrderItemResponse(String name,
                                        double price,
                                        double amount,
                                        Long shipment,
-                                       double discount) {
+                                       Double discount) {
 
 }

@@ -128,9 +128,13 @@ public class OrderServiceImpl implements OrderService {
         PaymentType paymentType = orderRequest.paymentType().equals("CASH") ? PaymentType.CASH : PaymentType.E_WALLET;
         Long promotionId = 0L;
         if (orderRequest.totalDiscount() > 0) {
-            var latestPromotion = promotionService.getLatestPromotion();
-            promotionService.minusOrderLimit(latestPromotion.id());
-            promotionId = latestPromotion.id();
+           try{
+               var latestPromotion = promotionService.getLatestPromotion();
+               promotionService.minusOrderLimit(latestPromotion.id());
+               promotionId = latestPromotion.id();
+           }catch (Exception e){
+               promotionId = 0L;
+           }
         }
         Promotion promotion = promotionRepository.findById(promotionId)
                 .orElse(null);
@@ -292,14 +296,20 @@ public class OrderServiceImpl implements OrderService {
             throw new ResourceNotFoundException("Không tìm thấy hóa đơn");
         }
         var productsInOrder = orderItemRepository.getProductInOrderItemMobile(orderId);
+        log.info("products in order size {}",productsInOrder.size());
         var productList = productsInOrder.stream().map(productMapper::mapToProductOrderItemResponse).toList();
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (var product : productList) {
             totalPrice = totalPrice.add(BigDecimal.valueOf(product.amount()));
         }
         var emp = orderRepository.getEmployeeByOrderId(orderId);
+        OrderEmployeeResponse orderEmployee;
+        if(emp.isEmpty()){
+            orderEmployee = new OrderEmployeeResponse("","");
+        }else{
+            orderEmployee = orderMapper.mapObjectToEmployee(emp.get(0));
+        }
         log.info("emp is {}", emp.size());
-        OrderEmployeeResponse orderEmployee = orderMapper.mapObjectToEmployee(emp.get(0));
         return new OrderCustomerResponse(orderEmployee.name(), orderEmployee.phone(), productList, totalPrice);
     }
 

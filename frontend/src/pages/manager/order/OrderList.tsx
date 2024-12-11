@@ -233,45 +233,48 @@ const OrderList: React.FC = () => {
         spacing={2}
         sx={{ marginBottom: 3 }}
       >
-        <DateInput
-          date={dayjs(startDate)}
-          onChange={handleChangeStartDate}
-          lable="Ngày bắt đầu"
-        />
+        <Stack flexDirection={"row"} gap={1}>
+          <DateInput
+            date={dayjs(startDate)}
+            onChange={handleChangeStartDate}
+            lable="Ngày bắt đầu"
+          />
 
-        <DateInput
-          date={dayjs(endDate)}
-          onChange={handleChangeEndDate}
-          lable="Ngày kết thúc"
-        />
+          <DateInput
+            date={dayjs(endDate)}
+            onChange={handleChangeEndDate}
+            lable="Ngày kết thúc"
+          />
+        </Stack>
 
-        <TextField
-          
-          type="text"
-          label="Tìm kiếm theo số điện thoại"
-          variant="outlined"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ minWidth: 250 }}
-        />
-        <FormControl sx={{ minWidth: 120 }} >
-          <InputLabel id="demo-simple-select-status">Trạng thái</InputLabel>
-          <Select
-            labelId="demo-simple-select-status"
-            id="demo-simple-select"
-            name="status"
-            label="Trạng thái"
-            value={selectedStatuses}
-            onChange={handleChange}
-          >
-            <MenuItem value="" selected>
-              <em>Tất cả</em>
-            </MenuItem>
-            <MenuItem value={"PENDING"}>Đang đợi</MenuItem>
-            <MenuItem value={"COMPLETED"}>Hoàn thành</MenuItem>
-            <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
-          </Select>
-        </FormControl>
+        <Stack flexDirection={"row"} gap={1}>
+          <TextField
+            type="text"
+            label="Tìm kiếm theo số điện thoại"
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{ minWidth: 250 }}
+          />
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel id="demo-simple-select-status">Trạng thái</InputLabel>
+            <Select
+              labelId="demo-simple-select-status"
+              id="demo-simple-select"
+              name="status"
+              label="Trạng thái"
+              value={selectedStatuses}
+              onChange={handleChange}
+            >
+              <MenuItem value="" selected>
+                <em>Tất cả</em>
+              </MenuItem>
+              <MenuItem value={"PENDING"}>Đang đợi</MenuItem>
+              <MenuItem value={"COMPLETED"}>Hoàn thành</MenuItem>
+              <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
+            </Select>
+          </FormControl>
+        </Stack>
       </Stack>
 
       {/* Orders Table */}
