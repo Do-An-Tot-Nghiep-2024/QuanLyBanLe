@@ -82,7 +82,7 @@ const PaymentDetail = ({ navigation }) => {
   const createOrderObject = () => {
     const orderItems = cartItems.map(item => ({
       productId: item.id,
-      shipmentId: item.shipmentIds[0],
+      shipmentId: item.shipmentIds[0].id,
       quantity: item.quantity
     }));
 

@@ -16,12 +16,15 @@ const OrderDetail = ({ route, navigation }) => {
 
     useEffect(() => {   
         const fetchOrderItems = async () => {
+            console.log("ORDER ID" + orderId);
+            
             try {
                 const response = await getOrderDetailService(orderId);
+                console.log("RESPONSE" + response);
                 if (!response) {
                     return;
                 }
-                console.log(response);
+                console.log("RESPONSE" + response);
                 
                 setDetailOrder(response);
             } catch (error) {

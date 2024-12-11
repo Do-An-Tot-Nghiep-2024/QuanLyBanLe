@@ -6,7 +6,6 @@ export const colors = {
     accentColor: '#f39c12',
 };
 
-
 const styles = StyleSheet.create({
     body: {
         fontFamily: 'Arial, sans-serif',
