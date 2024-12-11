@@ -238,6 +238,7 @@ export default function OrderDetailPage() {
           }
         }}
         variant="contained"
+        disabled={data?.orderStatus !== "COMPLETED"}
         startIcon={<PictureAsPdfIcon />}
         sx={{
           display: "flex",

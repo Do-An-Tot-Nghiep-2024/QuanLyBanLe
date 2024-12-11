@@ -29,7 +29,6 @@ public class OrderController {
     static final String REQUEST_SUCCESS = "success";
 
 
-
     @GetMapping
     @PreAuthorize("hasAnyAuthority('MANAGER','EMPLOYEE')")
     public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrders(
@@ -45,7 +44,7 @@ public class OrderController {
     ) {
         try {
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrders(pageNumber, pageSize, fromDate,
-                    toDate,orderBy,order,status,paymentType,customerPhone)));
+                    toDate, orderBy, order, status, paymentType, customerPhone)));
         } catch (ParseException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse<>("Invalid date format. Please use 'yyyy-MM-dd'.", null));
@@ -91,7 +90,7 @@ public class OrderController {
     @GetMapping("/customer")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrderByCustomer(
-           HttpServletRequest request,
+            HttpServletRequest request,
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize) {
         try {
@@ -115,9 +114,9 @@ public class OrderController {
             @RequestParam(defaultValue = "") String paymentType
     ) {
         try {
-            log.info("request is {}",request);
+            log.info("request is {}", request);
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrdersByEmployee(request,
-                    pageNumber, pageSize, fromDate, toDate,status,customerPhone,paymentType)));
+                    pageNumber, pageSize, fromDate, toDate, status, customerPhone, paymentType)));
         } catch (ParseException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse<>("Invalid date format. Please use 'yyyy-MM-dd'.", null));
@@ -132,15 +131,15 @@ public class OrderController {
     @GetMapping("/customer-detail/{orderId}")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<ApiResponse<OrderCustomerResponse>> getOrderCustomerDetail(@PathVariable("orderId") Long orderId) {
-        try {
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrderDetailByCustomer(orderId)));
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(e.getMessage(), null));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(e.getMessage(), null));
-        }
+//        try {
+        return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.getOrderDetailByCustomer(orderId)));
+//        } catch (ResourceNotFoundException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(new ApiResponse<>(e.getMessage(), null));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(new ApiResponse<>(e.getMessage(), null));
+//        }
     }
 
     @PutMapping("/status/{id}")
@@ -148,32 +147,31 @@ public class OrderController {
     public ResponseEntity<ApiResponse<String>> updateOrderStatus(@PathVariable("id") Long orderId,
                                                                  HttpServletRequest request) {
         try {
-            orderService.completeOrder(orderId,request);
+            orderService.completeOrder(orderId, request);
             return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, "Đơn hàng " + orderId + " đã được hoàn thành"));
-        }catch (BadRequestUserException e){
+        } catch (BadRequestUserException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse<>(e.getMessage(), null));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }
     }
+
     // cancel order by id
     @PutMapping("/cancel/{id}")
     @PreAuthorize("hasAnyAuthority('MANAGER', 'EMPLOYEE')")
     public ResponseEntity<ApiResponse<String>> cancelOrder(@PathVariable("id") Long orderId,
                                                            HttpServletRequest request) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.cancelOrder(orderId,request)));
-        }catch (ResourceNotFoundException e){
+            return ResponseEntity.ok(new ApiResponse<>(REQUEST_SUCCESS, orderService.cancelOrder(orderId, request)));
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(e.getMessage(), null));
-        }catch (BadRequestUserException e){
+        } catch (BadRequestUserException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse<>(e.getMessage(), null));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(e.getMessage(), null));
         }

@@ -102,15 +102,16 @@ const OrderPage: React.FC = () => {
     if (!response) {
       throw new Error("Error fetching products");
     }
-    
+
     return response as unknown as GetProductSchema[];
   };
-  
+
   const { data, refetch } = useQuery({
     queryKey: ["products", searchTerm],
     queryFn: fetchProducts,
+    refetchOnWindowFocus: false,
   });
-  
+
   useEffect(() => {
     handleGetLatestPromotion();
   }, []);
@@ -257,15 +258,20 @@ const OrderPage: React.FC = () => {
       });
       return updatedItems; // Return the updated state
     });
-
     // setDiscount(discountSum);
     if (customerPayment === 0) {
       setCustomerChange(0);
     } else {
-      setCustomerChange(
-        customerPayment -
-          (isNaN(totalOrder) ? 0 : totalOrder - getPromotionCurrent())
-      );
+      if (latestPromotion !== undefined && latestPromotion !== null) {
+        if (totalOrder >= latestPromotion?.minOrderValue) {
+          const need = totalOrder * latestPromotion?.percentage;
+          setCustomerChange(customerPayment - (totalOrder - need));
+        } else {
+          setCustomerChange(customerPayment - totalOrder);
+        }
+      } else {
+        setCustomerChange(customerPayment - totalOrder);
+      }
     }
   };
 
@@ -354,12 +360,14 @@ const OrderPage: React.FC = () => {
     productId: number,
     selectedShipment: Shipment
   ) => {
+    console.log("Shipment change is", selectedShipment);
+
     const existingItemIndex = orderItems.findIndex(
       (item) =>
         item.product.id === productId &&
         item.selectedShipment?.id === selectedShipment.id
     );
-    if (existingItemIndex != -1) {
+    if (existingItemIndex !== -1) {
       console.log("existed");
       setOrderItems((prev) =>
         prev
@@ -374,23 +382,21 @@ const OrderPage: React.FC = () => {
           )
           .filter((itm) => itm.selectedShipment !== undefined)
       );
-      // setOrderItems((prevItems) =>
-      //   prevItems.filter((itm) => itm.selectedShipment !== undefined)
-      // );
     } else {
       console.log("new item");
       setOrderItems((orderItems) =>
-        orderItems.map((itm) => {
-          if (
-            Number(itm.product.id) === Number(productId) &&
-            itm.selectedShipment === undefined
-          ) {
-            // console.log("duplicate");
-
-            return { ...itm, selectedShipment };
-          }
-          return itm;
-        })
+        orderItems
+          .map((itm) => {
+            if (
+              Number(itm.product.id) === Number(productId) &&
+              itm.selectedShipment === undefined &&
+              selectedShipment.id !== 0
+            ) {
+              return { ...itm, selectedShipment };
+            }
+            return itm;
+          })
+          .filter((itm) => itm.selectedShipment !== undefined)
       );
     }
     let discountSum = 0;
@@ -401,7 +407,6 @@ const OrderPage: React.FC = () => {
       }
     });
     setDiscount(discountSum);
-    console.log("discount value is", discount);
   };
 
   const isCustomerPaymentValid = (payment: number) => {
@@ -575,7 +580,7 @@ const OrderPage: React.FC = () => {
                 {orderItems.map((item, index) => (
                   <TableRow
                     hover
-                    key={`${item.product.id}-${item.selectedShipment}`}
+                    key={`${item.product.id}-${item.selectedShipment?.id}`}
                     sx={{
                       backgroundColor: index % 2 === 0 ? "#fff" : "#f9f9f9",
                       height: 80,
@@ -595,7 +600,7 @@ const OrderPage: React.FC = () => {
                             );
                           handleUpdateShipment(Number(item.product.id), {
                             id: id,
-                            discount: selectedShipment?.discount || 0,
+                            discount: selectedShipment?.discount ?? 0,
                           });
                         }}
                         sx={{ width: "100%", textAlign: "left" }}
@@ -619,14 +624,20 @@ const OrderPage: React.FC = () => {
                           handleUpdateQuantity(item, parseInt(e.target.value));
                         }}
                         sx={{ width: "50%" }}
-                        inputProps={{ style: { textAlign: "center" } }}
+                        slotProps={{
+                          input: {
+                            style: {
+                              textAlign: "center",
+                            },
+                          },
+                        }}
                       />
                     </TableCell>
 
                     <TableCell
                       sx={{ textAlign: "center", padding: "16px 8px" }}
                     >
-                      {formatCurrency(Number(item.price))}
+                      {formatMoneyThousand(Number(item.price))}
                     </TableCell>
 
                     <TableCell
@@ -634,13 +645,18 @@ const OrderPage: React.FC = () => {
                     >
                       {"-" +
                         formatMoneyThousand(
-                          (item.selectedShipment?.discount ?? 0) * item.price
+                          (item.selectedShipment && item.price && item.quantity)
+                            ? (item.selectedShipment?.discount ?? 0) * item.price * item.quantity
+                            : 0
+                          // (item.selectedShipment?.discount ?? 0) *
+                          //   (item.price ?? 0) *
+                          //   (item.quantity ?? 0)
                         )}
                     </TableCell>
                     <TableCell
                       sx={{ textAlign: "center", padding: "16px 8px" }}
                     >
-                      {formatCurrency(
+                      {formatMoneyThousand(
                         item.price && item.quantity
                           ? (item.price -
                               (item.selectedShipment?.discount ?? 0) *
@@ -719,7 +735,15 @@ const OrderPage: React.FC = () => {
                 label="Tiền khách đưa"
                 variant="outlined"
                 type="text"
-                sx={{ fontSize: 24 }}
+                slotProps={{
+                  input: {
+                    style: {
+                      fontSize: 21,
+                      fontFamily: "Roboto",
+                      fontWeight: "bolder",
+                    },
+                  },
+                }}
                 value={
                   orderItems.length < 0
                     ? formatMoneyThousand(0)
@@ -734,26 +758,10 @@ const OrderPage: React.FC = () => {
 
             <Typography sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}>
               Tổng tiền giảm giá khuyến mãi:{" "}
-              {isNaN(discount) ? 0 : formatCurrency(discount + getPromotionCurrent())}
+              {isNaN(discount)
+                ? 0
+                : formatCurrency(discount + getPromotionCurrent())}
             </Typography>
-            {/* {latestPromotion != null &&
-            latestPromotion != undefined &&
-            totalPayment >= latestPromotion?.minOrderValue ? (
-              <Typography
-                sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}
-              >
-                Tổng tiền giảm giá khuyến mãi:{" "}
-                {formatCurrency(
-                  Number((totalPayment * latestPromotion?.percentage) + discount)
-                )}
-              </Typography>
-            ) : (
-              <Typography
-                sx={{ mb: 2, fontWeight: "bold", fontStyle: "italic" }}
-              >
-                Tổng tiền giảm giá khuyến mãi: 0
-              </Typography>
-            )} */}
 
             <Typography sx={{ fontStyle: "italic", fontSize: 20 }}>
               Tiền thừa: {formatCurrency(customerChange)}

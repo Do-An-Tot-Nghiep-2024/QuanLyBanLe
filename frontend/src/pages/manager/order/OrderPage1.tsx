@@ -109,6 +109,7 @@ const OrderPage: React.FC = () => {
   const { data, refetch } = useQuery({
     queryKey: ["products", searchTerm],
     queryFn: fetchProducts,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -644,7 +645,12 @@ const OrderPage: React.FC = () => {
                     >
                       {"-" +
                         formatMoneyThousand(
-                          (item.selectedShipment?.discount ?? 0) * item.price
+                          (item.selectedShipment && item.price && item.quantity)
+                            ? (item.selectedShipment?.discount ?? 0) * item.price * item.quantity
+                            : 0
+                          // (item.selectedShipment?.discount ?? 0) *
+                          //   (item.price ?? 0) *
+                          //   (item.quantity ?? 0)
                         )}
                     </TableCell>
                     <TableCell

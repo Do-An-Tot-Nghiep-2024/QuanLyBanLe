@@ -36,8 +36,10 @@ import {
   generateDateDuringWeek,
 } from "../../../utils/dateUtil";
 import DateInput from "../../../components/DateInput";
+import { useAppSelector } from "../../../redux/hook";
 
 const OrderOnlineList: React.FC = () => {
+  const auth = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const { fromDate: before, toDate: after } = generateDateDuringWeek();
   const current = new Date(after);
@@ -147,7 +149,12 @@ const OrderOnlineList: React.FC = () => {
   });
 
   const handleRowClick = (order: OrderSchema) => {
-    navigate(`/orders/${order.orderId}`);
+    if (auth.role === "MANAGER") {
+      navigate(`/orders/${order.orderId}`);
+    } else {
+      navigate(`/staff/orders/${order.orderId}`);
+    }
+    // navigate(`/orders/${order.orderId}`);
   };
 
   const handleChangeStatus = (event: SelectChangeEvent) => {
@@ -237,39 +244,43 @@ const OrderOnlineList: React.FC = () => {
         spacing={2}
         sx={{ marginBottom: 3 }}
       >
-        <DateInput
-          date={dayjs(startDate)}
-          onChange={handleChangeStartDate}
-          lable="Ngày bắt đầu"
-        />
-        <DateInput
-          date={dayjs(endDate)}
-          onChange={handleChangeEndDate}
-          lable="Ngày kết thúc"
-        />
+        <Stack flexDirection={"row"} gap={1}>
+          <DateInput
+            date={dayjs(startDate)}
+            onChange={handleChangeStartDate}
+            lable="Ngày bắt đầu"
+          />
+          <DateInput
+            date={dayjs(endDate)}
+            onChange={handleChangeEndDate}
+            lable="Ngày kết thúc"
+          />
+        </Stack>
 
-        <TextField
-          type="text"
-          label="Tìm kiếm theo số điện thoại"
-          variant="outlined"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ minWidth: 270 }}
-        />
-        <FormControl sx={{ minWidth: 120 }} >
-          <InputLabel id="demo-simple-select-status">Trạng thái</InputLabel>
-          <Select
-            labelId="demo-simple-select-status"
-            id="demo-simple-select"
-            name="status"
-            label="Trạng thái"
-            value={status}
-            onChange={handleChangeStatus}
-          >
-            <MenuItem value={"PENDING"}>Đang đợi</MenuItem>
-            <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
-          </Select>
-        </FormControl>
+        <Stack flexDirection={"row"} gap={1}>
+          <TextField
+            type="text"
+            label="Tìm kiếm theo số điện thoại"
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{ minWidth: 270 }}
+          />
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel id="demo-simple-select-status">Trạng thái</InputLabel>
+            <Select
+              labelId="demo-simple-select-status"
+              id="demo-simple-select"
+              name="status"
+              label="Trạng thái"
+              value={status}
+              onChange={handleChangeStatus}
+            >
+              <MenuItem value={"PENDING"}>Đang đợi</MenuItem>
+              <MenuItem value={"CANCELLED"}>Đã hủy</MenuItem>
+            </Select>
+          </FormControl>
+        </Stack>
       </Stack>
 
       {/* Orders Table */}

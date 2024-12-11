@@ -151,9 +151,10 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, OrderItemK
     List<Object[]> getProductInOrderItemWeb(Long orderId);
 
 
-    @Query(value = "SELECT p.name,SUM(oi.quantity),pp.price,SUM(oi.amount) FROM t_order_item oi " +
+    @Query(value = "SELECT p.name,SUM(oi.quantity),pp.price,SUM(oi.amount),si.shipment_id,si.discount FROM t_order_item oi " +
             "INNER JOIN t_product p ON p.product_id = oi.product_id " +
             "INNER JOIN t_product_price pp ON pp.product_price_id = oi.product_price_id " +
+            "INNER JOIN t_shipment_item si ON si.product_id = p.product_id AND si.shipment_id = oi.shipment_id " +
             "WHERE oi.order_id = ?1 GROUP BY p.name,pp.price",nativeQuery = true)
     List<Object[]> getProductInOrderItemMobile(Long orderId);
 
