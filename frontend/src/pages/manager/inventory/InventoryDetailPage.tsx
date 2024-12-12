@@ -19,6 +19,7 @@ import {
 import ShipmentItem from "../../../types/inventory/itemImportInvoice";
 import { formatMoney } from "../../../utils/formatMoney";
 import { formatDate, formatDateTime } from "../../../utils/dateUtil";
+import colors from "../../../constants/color";
 // import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
 export default function InventoryDetailPage() {
@@ -86,7 +87,7 @@ export default function InventoryDetailPage() {
 
       <TableContainer component={Paper}>
         <Table size="small" sx={{ minWidth: 650 }}>
-          <TableHead>
+          <TableHead sx={{backgroundColor: colors.secondaryColor}}>
             <TableRow>
               {columns.map((column: string) => (
                 <TableCell

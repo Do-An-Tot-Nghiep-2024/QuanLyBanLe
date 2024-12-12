@@ -204,7 +204,7 @@ export default function ExpirationQuantityReport() {
                     {row.avb}
                   </TableCell>
                   <TableCell align="center" sx={{ fontSize: 16 }}>
-                    {row.discount * 100 + " %"}
+                    {row.discount * 100 + "%"}
                   </TableCell>
                   <TableCell align="center" sx={{ fontSize: 16 }}>
                     <Tooltip title="Tạo giảm giá" onClick={() => {
@@ -243,7 +243,7 @@ export default function ExpirationQuantityReport() {
               value={updateDiscount.discount ?? 0}
               onChange={handleChangeDiscount}
               id="standard-number"
-              label="Tỉ lệ giảm giá %"
+              label="Tỉ lệ giảm giá % (Nhập từ 0 - 100)"
               variant="standard"
               slotProps={{
                 inputLabel: {

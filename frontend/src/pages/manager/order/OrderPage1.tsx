@@ -62,7 +62,10 @@ const OrderPage: React.FC = () => {
   const [customerChange, setCustomerChange] = useState(0);
   const [latestPromotion, setLatestPromotion] = useState<GetPromotion>();
   const [deleteConfirmOpen, setConfirmOpen] = useState(false);
-  const [deleteItem, setDeleteItem] = useState(0);
+  const [deleteItem, setDeleteItem] = useState<DeleteItem>({
+    productId: 0,
+    shipmentId: 0,
+  });
   // const [totalDiscount, setTotalDiscount] = useState(0);
   const [total, setTotal] = useState(0);
   const [discount, setDiscount] = useState(0);
@@ -452,11 +455,28 @@ const OrderPage: React.FC = () => {
     let total = 0;
     setOrderItems((prevOrderItems) =>
       prevOrderItems.filter((item) => {
-        if (item.product.id !== deleteItem) {
-          total += item.price * item.quantity;
-          return item;
-        }
+        // if (item.product.id !== deleteItem.productId && item.selectedShipment?.id !== deleteItem.shipmentId) {
+        //   console.log("delete item",item);
+        //   total += item.price * item.quantity;
+        //   return item;
+        // }
         // item.product.id !== deleteItem;
+        console.log(item.selectedShipment);
+
+        const shouldRemove =
+          (item.product.id === deleteItem.productId &&
+            item.selectedShipment?.id === deleteItem.shipmentId) ||
+          (item.product.id === deleteItem.productId &&
+            !item.selectedShipment);
+
+        if (!shouldRemove) {
+          // Log the items that are retained
+          console.log("Retaining item", item);
+          total += item.price * item.quantity;
+        }
+
+        // Return false to remove or true to retain
+        return !shouldRemove;
       })
     );
 
@@ -471,9 +491,13 @@ const OrderPage: React.FC = () => {
     handleUpdateTotal(orderItems);
   };
 
-  const handleOpenDelete = (id: number) => {
+  type DeleteItem = {
+    productId: number;
+    shipmentId: number;
+  };
+  const handleOpenDelete = (item: DeleteItem) => {
     setConfirmOpen(true);
-    setDeleteItem(id);
+    setDeleteItem(item);
   };
 
   return (
@@ -592,6 +616,7 @@ const OrderPage: React.FC = () => {
                     <TableCell sx={{ textAlign: "left", padding: "16px 8px" }}>
                       <Select
                         value={item.selectedShipment?.id as any}
+                        // disabled={item.selectedShipment == null}
                         onChange={(e: SelectChangeEvent) => {
                           const id = Number(e.target.value);
                           const selectedShipment =
@@ -645,8 +670,10 @@ const OrderPage: React.FC = () => {
                     >
                       {"-" +
                         formatMoneyThousand(
-                          (item.selectedShipment && item.price && item.quantity)
-                            ? (item.selectedShipment?.discount ?? 0) * item.price * item.quantity
+                          item.selectedShipment && item.price && item.quantity
+                            ? (item.selectedShipment?.discount ?? 0) *
+                                item.price *
+                                item.quantity
                             : 0
                           // (item.selectedShipment?.discount ?? 0) *
                           //   (item.price ?? 0) *
@@ -668,7 +695,12 @@ const OrderPage: React.FC = () => {
                     <TableCell>
                       <Button
                         onClick={() =>
-                          handleOpenDelete(Number(item.product.id))
+                          handleOpenDelete({
+                            productId: Number(item.product.id),
+                            shipmentId: !item.selectedShipment
+                              ? 0
+                              : Number(item.selectedShipment?.id),
+                          })
                         }
                         sx={{ color: "red" }}
                       >

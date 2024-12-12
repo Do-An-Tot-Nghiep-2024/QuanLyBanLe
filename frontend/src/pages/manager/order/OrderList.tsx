@@ -56,10 +56,12 @@ const OrderList: React.FC = () => {
 
   const handleChangeStartDate = (value: Dayjs | null) => {
     setStartDate(value?.format("YYYY-MM-DD") ?? "");
+    setPage(0);
   };
 
   const handleChangeEndDate = (value: Dayjs | null) => {
     setEndDate(value?.format("YYYY-MM-DD") ?? "");
+    setPage(0);
   };
 
   const columns: Array<{
