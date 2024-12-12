@@ -18,6 +18,7 @@ import {
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { formatMoney } from "../../../utils/formatMoney"; // Assuming you have this utility for formatting money
 import { useAppSelector } from "../../../redux/hook";
+import colors from "../../../constants/color";
 
 // Define the type for order items
 interface OrderItem {
@@ -194,7 +195,7 @@ export default function OrderDetailPage() {
       {/* Display order items in a table */}
       <TableContainer component={Paper}>
         <Table size="small" sx={{ minWidth: 650 }}>
-          <TableHead sx={{}}>
+          <TableHead sx={{backgroundColor: colors.secondaryColor}}>
             <TableRow>
               {columns.map((column) => (
                 <TableCell
