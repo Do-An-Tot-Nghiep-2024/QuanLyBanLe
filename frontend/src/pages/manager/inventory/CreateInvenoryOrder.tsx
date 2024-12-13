@@ -29,7 +29,7 @@ import { getSuppliersService } from "../../../services/supplier.service";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import dayjs, { Dayjs } from "dayjs";
 import DateInput from "../../../components/DateInput";
-
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 interface OrderItem {
   product: GetProductBySupplier;
   quantity: number;
@@ -216,8 +216,11 @@ const CreateInventoryOrder: React.FC = () => {
       })
       .filter((item) => item !== null);
     console.log(formattedOrderItems);
-    
-    if (formattedOrderItems.length === 0 || formattedOrderItems[0] === undefined) {
+
+    if (
+      formattedOrderItems.length === 0 ||
+      formattedOrderItems[0] === undefined
+    ) {
       return;
     }
 
@@ -268,6 +271,10 @@ const CreateInventoryOrder: React.FC = () => {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase();
+  };
+
+  const handleDeleteItem = (item: OrderItem) => {
+    setOrderItems(orderItems.filter((i) => i.product !== item.product));
   };
 
   const filteredProducts = Array.isArray(products)
@@ -394,6 +401,7 @@ const CreateInventoryOrder: React.FC = () => {
                 <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
                   Thành tiền
                 </TableCell>
+                <TableCell></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -457,6 +465,14 @@ const CreateInventoryOrder: React.FC = () => {
                         ? item.price * item.quantity
                         : 0
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <IconButton
+                      color="error"
+                      onClick={() => handleDeleteItem(item)}
+                    >
+                      <DeleteForeverIcon />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))}
