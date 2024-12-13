@@ -30,6 +30,7 @@ import colors from "../../../constants/color";
 import DiscountIcon from "@mui/icons-material/Discount";
 import { updateDiscountProductService } from "../../../services/inventory.service";
 import UpdateDiscountProduct from "../../../types/inventory/updateDiscountProduct";
+import { useAppSelector } from "../../../redux/hook";
 type Response = {
   product: number;
   name: string;
@@ -47,13 +48,13 @@ export default function ExpirationQuantityReport() {
   const [year, setYear] = useState(date.getFullYear() + "");
   const [message, setMessage] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const[fail, setFail] = useState(true);
-  const [updateDiscount, setUpdateDiscount] =
-    useState<UpdateDiscountProduct>({
-      productId: 0,
-      shipmentId: 0,
-      discount: 0,
-    });
+  const [fail, setFail] = useState(true);
+  const auth = useAppSelector((state) => state.auth);
+  const [updateDiscount, setUpdateDiscount] = useState<UpdateDiscountProduct>({
+    productId: 0,
+    shipmentId: 0,
+    discount: 0,
+  });
 
   const updateErrorMessage = (message: string) => {
     setMessage(message);
@@ -73,14 +74,14 @@ export default function ExpirationQuantityReport() {
     const rawInput = event.target.value;
     const number = Number(rawInput);
     if (isNaN(number)) {
-      setUpdateDiscount({...updateDiscount, discount: 0});
+      setUpdateDiscount({ ...updateDiscount, discount: 0 });
       return;
     }
     if (number < 0 || number > 100) {
-      setUpdateDiscount({...updateDiscount, discount: 0});
+      setUpdateDiscount({ ...updateDiscount, discount: 0 });
       return;
     }
-    setUpdateDiscount({...updateDiscount, discount: number});
+    setUpdateDiscount({ ...updateDiscount, discount: number });
   };
   const columns: string[] = [
     "Tên sản phẩm",
@@ -105,7 +106,7 @@ export default function ExpirationQuantityReport() {
         updateErrorMessage(response.message);
         return;
       }
-      
+
       return response.data as Response[];
     } catch (error: any) {
       updateErrorMessage(error.message);
@@ -113,7 +114,7 @@ export default function ExpirationQuantityReport() {
     }
   };
 
-  const { data, isLoading, isFetching, isError, error,refetch } = useQuery({
+  const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
     queryKey: ["dashboardExpirationQuantity", month, year],
     queryFn: () => getExpirationQuantity(month, year),
     refetchOnWindowFocus: false,
@@ -128,7 +129,7 @@ export default function ExpirationQuantityReport() {
       }
       setSnackbarOpen(true);
       setFail(false);
-      setMessage("Tạo giảm giá thành công")
+      setMessage("Tạo giảm giá thành công");
       refetch();
       setOpen(false);
       return response.data;
@@ -175,15 +176,25 @@ export default function ExpirationQuantityReport() {
         <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="small">
           <TableHead>
             <TableRow sx={{ backgroundColor: colors.secondaryColor }}>
-              {columns.map((column, index) => (
-                <TableCell
-                  key={index}
-                  align={column === "Tên sản phẩm" ? "left" : "center"}
-                  sx={{ fontSize: 16, fontWeight: "bold" }}
-                >
-                  {column}
-                </TableCell>
-              ))}
+              {auth.role === "MANAGER"
+                ? columns.map((column, index) => (
+                    <TableCell
+                      key={index}
+                      align={column === "Tên sản phẩm" ? "left" : "center"}
+                      sx={{ fontSize: 16, fontWeight: "bold" }}
+                    >
+                      {column}
+                    </TableCell>
+                  ))
+                : columns.slice(0, columns.length - 1).map((column, index) => (
+                    <TableCell
+                      key={index}
+                      align={column === "Tên sản phẩm" ? "left" : "center"}
+                      sx={{ fontSize: 16, fontWeight: "bold" }}
+                    >
+                      {column}
+                    </TableCell>
+                  ))}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -206,20 +217,25 @@ export default function ExpirationQuantityReport() {
                   <TableCell align="center" sx={{ fontSize: 16 }}>
                     {row.discount * 100 + "%"}
                   </TableCell>
-                  <TableCell align="center" sx={{ fontSize: 16 }}>
-                    <Tooltip title="Tạo giảm giá" onClick={() => {
-                      setOpen(true);
-                      setUpdateDiscount({
-                        productId: row.product,
-                        shipmentId: row.shipment,
-                        discount: 0,
-                      });
-                    }}>
-                      <IconButton color="error" size="small">
-                        <DiscountIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
+                  {auth.role === "MANAGER" && (
+                    <TableCell align="center" sx={{ fontSize: 16 }}>
+                      <Tooltip
+                        title="Tạo giảm giá"
+                        onClick={() => {
+                          setOpen(true);
+                          setUpdateDiscount({
+                            productId: row.product,
+                            shipmentId: row.shipment,
+                            discount: 0,
+                          });
+                        }}
+                      >
+                        <IconButton color="error" size="small">
+                          <DiscountIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
           </TableBody>
@@ -257,11 +273,7 @@ export default function ExpirationQuantityReport() {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Đóng</Button>
-            <Button
-              onClick={() =>
-                handleUpateDiscount(updateDiscount)
-              }
-            >
+            <Button onClick={() => handleUpateDiscount(updateDiscount)}>
               Xác nhận
             </Button>
           </DialogActions>

@@ -37,6 +37,7 @@ import {
 } from "../../../utils/dateUtil";
 import DateInput from "../../../components/DateInput";
 import { useAppSelector } from "../../../redux/hook";
+import { formatMoneyThousand } from "../../../utils/formatMoney";
 
 const OrderOnlineList: React.FC = () => {
   const auth = useAppSelector((state) => state.auth);
@@ -52,7 +53,7 @@ const OrderOnlineList: React.FC = () => {
   const [selectedPayments] = useState<string[]>(["CASH"]);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
-  const [orderBy, setOrderBy] = useState<string>("total");
+  const [orderBy, setOrderBy] = useState<string>("orderId");
   const [order, setOrder] = useState<"asc" | "desc">("desc");
 
   const columns: Array<{
@@ -358,7 +359,7 @@ const OrderOnlineList: React.FC = () => {
                       >
                         {column.field
                           ? column.field === "total"
-                            ? `${order.total.toLocaleString()} VND`
+                            ? `${formatMoneyThousand(order.total)} VNĐ`
                             : column.field === "createdAt"
                               ? new Date(order.createdAt).toLocaleDateString(
                                   "vi-VN"
@@ -387,18 +388,7 @@ const OrderOnlineList: React.FC = () => {
                                 flexDirection: "column",
                               }}
                             >
-                              <Button
-                                variant="contained"
-                                color="success"
-                                sx={{ marginRight: 1 }}
-                                onClick={(event) => {
-                                  event.stopPropagation(); // Prevent row click
-                                  handleOrderAction("status", order.orderId); // Directly call handleOrderAction
-                                }}
-                              >
-                                Hoàn Thành
-                              </Button>
-                              {isOlderThanOneDay(order.createdAt) && (
+                              {isOlderThanOneDay(order.createdAt) ? (
                                 <Button
                                   variant="contained"
                                   color="error"
@@ -409,6 +399,18 @@ const OrderOnlineList: React.FC = () => {
                                   }}
                                 >
                                   Hủy Đơn
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="contained"
+                                  color="success"
+                                  sx={{ marginRight: 1 }}
+                                  onClick={(event) => {
+                                    event.stopPropagation(); // Prevent row click
+                                    handleOrderAction("status", order.orderId); // Directly call handleOrderAction
+                                  }}
+                                >
+                                  Hoàn Thành
                                 </Button>
                               )}
                             </Box>

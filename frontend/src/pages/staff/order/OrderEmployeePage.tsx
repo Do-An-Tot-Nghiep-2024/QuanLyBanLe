@@ -33,6 +33,7 @@ import {
 import dayjs, { Dayjs } from "dayjs";
 import DateInput from "../../../components/DateInput";
 import { useAppSelector } from "../../../redux/hook";
+import { formatMoneyThousand } from "../../../utils/formatMoney";
 export default function OrderEmployeePage() {
   const navigate = useNavigate();
   const { fromDate: before, toDate: after } = generateDateDuringWeek();
@@ -341,7 +342,7 @@ export default function OrderEmployeePage() {
                       >
                         {column.field
                           ? column.field === "total"
-                            ? `${order.total.toLocaleString()} VND`
+                            ? `${formatMoneyThousand(order.total)} VNĐ`
                             : column.field === "createdAt"
                               ? convertDate(new Date(order.createdAt))
                               : column.field === "customerPhone"
