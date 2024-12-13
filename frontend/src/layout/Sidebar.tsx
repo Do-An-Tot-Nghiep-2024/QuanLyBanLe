@@ -108,7 +108,7 @@ const NAVIGATION: Navigation = [
   },
   {
     segment: "reports",
-    title: "Báo cáo",
+    title: "Báo cáo, thống kê",
     icon: <BarChartIcon />,
     children: [
       {
