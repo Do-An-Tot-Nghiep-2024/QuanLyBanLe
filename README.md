@@ -31,5 +31,3 @@ không chỉ giúp tăng cường hiệu quả vận hành mà còn cải thiệ
 ```javascript
   docker-compose up
 ```
-
-### Các giao diện của ứng dụng
