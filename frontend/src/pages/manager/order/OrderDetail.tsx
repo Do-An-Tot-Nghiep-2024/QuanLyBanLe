@@ -127,7 +127,7 @@ export default function OrderDetailPage() {
     totalDiscount: data?.totalDiscount ?? 0,
   };
   return (
-    <Container sx={{ pt: 5, mt: 2 }}>
+    <Container sx={{ pt: 5, mt: 2}}>
       <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
         Chi tiết đơn hàng #{data?.orderId}
       </Typography>
@@ -135,54 +135,54 @@ export default function OrderDetailPage() {
       <Box>
         <Stack flexDirection={"row"} gap={3}>
           <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
-            <Typography fontWeight="bold">Nhân viên: </Typography>
-            <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
+            <Typography fontWeight="bold" fontSize={16}>Nhân viên: </Typography>
+            <Typography sx={{ fontSize: 16, fontWeight: "500" }}>
               {data?.employee}
             </Typography>
           </Stack>
-          <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
+          <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 16 }}>
             <Typography fontWeight="bold">Trạng thái đơn hàng: </Typography>
-            <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
+            <Typography sx={{ fontSize: 16, fontWeight: "500" }}>
               {translateStatus(String(data?.orderStatus))}
             </Typography>
           </Stack>
         </Stack>
 
         <Stack flexDirection={"row"} gap={3}>
-          <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
+          <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 16 }}>
             <Typography fontWeight="bold">Phương thức thanh toán: </Typography>
-            <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
+            <Typography sx={{ fontSize: 16, fontWeight: "500" }}>
               {translatePaymentType(String(data?.paymentType))}
             </Typography>
           </Stack>
-          <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
+          <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 16 }}>
             <Typography fontWeight="bold">Ngày tạo đơn hàng: </Typography>
-            <Typography sx={{ fontSize: 15, fontWeight: "500" }}>
+            <Typography sx={{ fontSize: 16, fontWeight: "500" }}>
               {formatDateTime(data?.createdAt as string)}
             </Typography>
           </Stack>
         </Stack>
-        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
+        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 16 }}>
           <Typography fontWeight="bold">Tổng tiền: </Typography>
-          <Typography sx={{ fontSize: 15, fontWeight: "bold" }}>
+          <Typography sx={{ fontSize: 16, fontWeight: "bold" }}>
             {formatMoney(Number(data?.total))}
           </Typography>
         </Stack>
-        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
+        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 16 }}>
           <Typography fontWeight="bold">Giảm giá: </Typography>
-          <Typography sx={{ fontSize: 15, fontWeight: "bold" }}>
+          <Typography sx={{ fontSize: 16, fontWeight: "bold" }}>
             {formatMoney(Number(data?.totalDiscount))}
           </Typography>
         </Stack>
 
-        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
+        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 16 }}>
           <Typography fontWeight="bold">Tiền khách đưa: </Typography>
           <Typography sx={{ fontSize: 16, fontWeight: "bold" }}>
             {formatMoney(Number(data?.customerPayment))}
           </Typography>
         </Stack>
 
-        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 14 }}>
+        <Stack direction="row" spacing={2} sx={{ mb: 2, fontSize: 16 }}>
           <Typography fontWeight="bold">Tiền trả lại: </Typography>
           <Typography sx={{ fontSize: 16, fontWeight: "bold" }}>
             {formatMoney(
