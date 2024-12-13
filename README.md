@@ -25,3 +25,11 @@ không chỉ giúp tăng cường hiệu quả vận hành mà còn cải thiệ
 ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
 ![SonarQube](https://img.shields.io/badge/SonarQube-black?style=for-the-badge&logo=sonarqube&logoColor=4E9BCD)
 ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
+
+### Cách run ứng dụng
+
+```javascript
+  docker-compose up
+```
+
+### Các giao diện của ứng dụng
