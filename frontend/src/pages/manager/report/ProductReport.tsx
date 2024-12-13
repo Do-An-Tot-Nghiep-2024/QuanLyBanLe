@@ -19,12 +19,15 @@ import { generateDateDuringWeek } from "../../../utils/dateUtil";
 import QueryResponse from "../../../types/common/queryResponse";
 import DateInput from "../../../components/DateInput";
 import dayjs, { Dayjs } from "dayjs";
+import SnackbarMessage from "../../../components/SnackbarMessage";
 
 export default function ProductReport() {
   const { fromDate: before, toDate: after } = generateDateDuringWeek();
   const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs(before));
   const [toDate, setToDate] = useState<Dayjs | null>(dayjs(after));
   const [productType, setProductType] = useState("BEST_SELLING");
+  const [message, setMessage] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const handleChange = (event: SelectChangeEvent) => {
     setProductType(event.target.value);
@@ -39,12 +42,48 @@ export default function ProductReport() {
     setToDate(value);
   };
 
-  
+  const setCurrentToDate = (toDate: Dayjs | null) => {
+    console.log("toDate", toDate);
+    if (toDate?.isSame(dayjs(after))) {
+      return dayjs(after).set("date", dayjs(after).get("date") - 1);
+    }
+    return toDate;
+  };
+
+  const validateDate = (fromDate: Dayjs | null, toDate: Dayjs | null) => {
+    if (toDate?.isBefore(fromDate)) {
+      setMessage("Ngày kết thúc phải lớn hơn ngày bắt đầu");
+      // setFromDate(dayjs(before));
+      // setToDate(dayjs(after));
+      setSnackbarOpen(true);
+      return false;
+    }
+    if (fromDate?.isAfter(dayjs())) {
+      setMessage("Ngày bắt đầu phải nhỏ hơn ngày kết thúc");
+      // setFromDate(dayjs(before));
+      setSnackbarOpen(true);
+      return false;
+    }
+    if (toDate?.isAfter(dayjs())) {
+      setToDate(dayjs(after));
+      return true;
+    }
+    return true;
+  };
+
   const getTopFiveHighestGrossing = async (
     fromDate: Dayjs | null,
     toDate: Dayjs | null
   ) => {
     try {
+      if (!validateDate(fromDate, toDate)) {
+        return null;
+      }
+      if (!fromDate || !toDate) {
+        return null;
+      }
+      fromDate = fromDate?.set("date", fromDate?.get("date") - 1);
+      toDate = toDate?.set("date", toDate?.get("date") + 1);
       const response = await getTopFiveHighestGrossingService({
         fromDate: fromDate?.format("YYYY-MM-DD") ?? "",
         toDate: toDate?.format("YYYY-MM-DD") ?? "",
@@ -62,6 +101,14 @@ export default function ProductReport() {
     toDate: Dayjs | null
   ) => {
     try {
+      if (!validateDate(fromDate, toDate)) {
+        return null;
+      }
+      if (!fromDate || !toDate) {
+        return null;
+      }
+      fromDate = fromDate?.set("date", fromDate?.get("date") - 1);
+      toDate = toDate?.set("date", toDate?.get("date") + 1);
       const response = await getBestSellingProductService({
         fromDate: fromDate?.format("YYYY-MM-DD") ?? "",
         toDate: toDate?.format("YYYY-MM-DD") ?? "",
@@ -131,14 +178,14 @@ export default function ProductReport() {
             </MenuItem>
           </Select>
         </FormControl>
-       
+
         <DateInput
           date={fromDate}
           onChange={handleChangeFromDate}
           lable="Ngày bắt đầu"
         />
         <DateInput
-          date={toDate}
+          date={setCurrentToDate(toDate)}
           onChange={handleChangeToDate}
           lable="Ngày kết thúc"
         />
@@ -163,11 +210,18 @@ export default function ProductReport() {
       {productType === "TOP_FIVE" && (
         <Box>
           <Typography align="center" fontWeight="bold">
-            Biểu đồ top 5 sản phẩm có doanh thu cao nhất (K: Nghìn, M: Triệu, B: Tỉ)
+            Biểu đồ top 5 sản phẩm có doanh thu cao nhất (K: Nghìn, M: Triệu, B:
+            Tỉ)
           </Typography>
           <ProductChart data={reponse.data} dataKey="total" />
         </Box>
       )}
+      <SnackbarMessage
+        isError={true}
+        alertMessage={message}
+        setSnackbarOpen={setSnackbarOpen}
+        snackbarOpen={snackbarOpen}
+      />
     </Container>
   );
 }
