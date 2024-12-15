@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { formatMoneyThousand } from "../../../utils/formatMoney";
 import ImportInvoice from "../../../types/inventory/importInvoice";
 import colors from "../../../constants/color";
+import { convertDate } from "../../../utils/dateUtil";
 export default function InventoryPage() {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -42,7 +43,7 @@ export default function InventoryPage() {
   const { isLoading, isError, error, data, isFetching } = useQuery({
     queryKey: ["inventory/stock", pageNumber, pageSize],
     queryFn: () => getImportInvoices(pageNumber, pageSize),
-    refetchOnWindowFocus:false
+    refetchOnWindowFocus: false,
   });
 
   if (isFetching || isLoading) {
@@ -74,23 +75,24 @@ export default function InventoryPage() {
     "Chi tiết",
   ];
 
-  function addDayToDate(createdAt:string) {
-    // Parse the dd/mm/yyyy format
-    const [day, month, year] = createdAt.split('/').map(Number);
+  // function addDayToDate(createdAt: string) {
+  //   // Parse the dd/mm/yyyy format
+  //   const [day, month, year] = createdAt.split("/").map(Number);
 
-    // Create a new Date object
-    const date = new Date(year, month - 1, day);
+  //   // Create a new Date object
+  //   const date = new Date(year, month - 1, day);
 
-    // Add 1 day
-    date.setDate(date.getDate() + 1);
+  //   // Add 1 day
+  //   date.setDate(date.getDate() + 1);
 
-    // Format back to dd/mm/yyyy
-    const newDay = String(date.getDate()).padStart(2, '0');
-    const newMonth = String(date.getMonth() + 1).padStart(2, '0');
-    const newYear = date.getFullYear();
+  //   // Format back to dd/mm/yyyy
+  //   const newDay = String(date.getDate()).padStart(2, "0");
+  //   const newMonth = String(date.getMonth() + 1).padStart(2, "0");
+  //   const newYear = date.getFullYear();
+  //   console.log("new date", newDay);
 
-    return `${newDay}/${newMonth}/${newYear}`;
-}
+  //   return `${newDay}/${newMonth}/${newYear}`;
+  // }
   return (
     <Box
       sx={{
@@ -144,7 +146,9 @@ export default function InventoryPage() {
                 <TableRow hover key={row.numberInvoice}>
                   <TableCell align={"center"}>{row.numberInvoice}</TableCell>
                   <TableCell align={"center"}>{row.name}</TableCell>
-                  <TableCell align={"center"}>{addDayToDate(row.createdAt as string)}</TableCell>
+                  <TableCell align={"center"}>
+                    {convertDate(row.createdAt)}
+                  </TableCell>
                   <TableCell align={"center"}>
                     {formatMoneyThousand(row.total)}
                   </TableCell>
