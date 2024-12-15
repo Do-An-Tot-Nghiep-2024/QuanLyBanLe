@@ -14,7 +14,7 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
     @Query(value = "SELECT " +
             "    s.shipment_id, " +
             "    sup.name, " +
-            "    DATE_FORMAT(s.created_at, '%d/%m/%Y'), " +
+            "    s.created_at, " +
             "    SUM(si.quantity * pp.original_price) AS total_price " +
             "FROM  " +
             "    t_shipment s " +

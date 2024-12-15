@@ -1,7 +1,7 @@
 interface ImportInvoice{
   numberInvoice: string;
   name: string;
-  createdAt: String;
+  createdAt: Date;
   total: number;
 }
 export default ImportInvoice;
