@@ -22,6 +22,7 @@ import SnackbarMessage from "../../../components/SnackbarMessage";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import currentDate from "../../../constants/day";
+import filterRessponse from "../../../utils/filterResponse";
 export default function ProfitReport() {
   const defaultMonth = currentDate.getMonth() + 1 + "";
   const currYear = currentDate.getFullYear();
@@ -31,6 +32,11 @@ export default function ProfitReport() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [next, setNext] = useState(0);
 
+  // const convertDateFromString = (date: string) => {
+  //   const [day, month, year] = date.split("-").map(Number);
+  //   const res = new Date(year, month - 1, day);
+  //   return res;
+  // };
 
   const updateErrorMessage = (message: string) => {
     setMessage(message);
@@ -93,7 +99,8 @@ export default function ProfitReport() {
       queryFn: () => getSalesAndProfitInWeek(next),
       refetchOnWindowFocus: false,
     });
-    responseData.data = data;
+    
+    responseData.data = filterRessponse(data);
     responseData.isLoading = isLoading;
     responseData.isFetching = isFetching;
     responseData.isError = isError;

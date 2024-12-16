@@ -17,6 +17,7 @@ import {
 import { convertDateInput } from "../../utils/dateUtil";
 import SnackbarMessage from "../../components/SnackbarMessage";
 import currentDate from "../../constants/day";
+import filterRessponse from "../../utils/filterResponse";
 const DataChart = lazy(() => import("../../components/DataChart"));
 const PieChartCard = lazy(() => import("../../components/RadarChart"));
 function Dashboard() {
@@ -190,7 +191,7 @@ function Dashboard() {
           <Card component={Paper} sx={{mr:2}}>
             <CardContent>
               <Typography fontWeight={"bold"}>Biểu đồ doanh thu theo tuần</Typography>
-              <DataChart data={profitData} />
+              <DataChart data={filterRessponse(profitData)} />
             </CardContent>
           </Card>
         </Grid>
