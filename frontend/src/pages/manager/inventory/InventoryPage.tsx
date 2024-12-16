@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { formatMoneyThousand } from "../../../utils/formatMoney";
 import ImportInvoice from "../../../types/inventory/importInvoice";
 import colors from "../../../constants/color";
-import { convertDate } from "../../../utils/dateUtil";
+// import { convertDate } from "../../../utils/dateUtil";
 export default function InventoryPage() {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -70,7 +70,7 @@ export default function InventoryPage() {
   const columns = [
     "Mã hóa đơn",
     "Tên nhà cung cấp",
-    "Ngày tạo",
+    // "Ngày tạo",
     "Tổng tiền",
     "Chi tiết",
   ];
@@ -128,9 +128,9 @@ export default function InventoryPage() {
                 <TableRow hover key={row.numberInvoice}>
                   <TableCell align={"center"}>{row.numberInvoice}</TableCell>
                   <TableCell align={"center"}>{row.name}</TableCell>
-                  <TableCell align={"center"}>
+                  {/* <TableCell align={"center"}>
                     {convertDate(row.createdAt)}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell align={"center"}>
                     {formatMoneyThousand(row.total)}
                   </TableCell>
