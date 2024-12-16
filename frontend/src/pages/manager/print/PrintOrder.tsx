@@ -312,29 +312,7 @@ export default function PrintOrder() {
   promotion = totalDiscount - promotion;
   console.log("Total discount ", totalDiscount);
 
-  // const fetchData = {
-  //   total: 2000,
-  //   customerPayment: 2000,
-  //   orderId: 1,
-  //   createdAt: new Date(),
-  //   employee: "Nguyen",
-  //   totalDiscount: 0,
-  //   change: 0,
-  //   items: [
-  //     {
-  //       name: "Banh bao",
-  //       quantity: 2,
-  //       price: 24000,
-  //       amount: 48000,
-  //     },
-  //     {
-  //       name: "Banh mi",
-  //       quantity: 1,
-  //       price: 24000,
-  //       amount: 24000,
-  //     },
-  //   ],
-  // };
+
 
   return (
     <Box width={"90%"}>

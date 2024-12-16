@@ -16,6 +16,7 @@ import {
 } from "../../services/statistic.service";
 import { convertDateInput } from "../../utils/dateUtil";
 import SnackbarMessage from "../../components/SnackbarMessage";
+import currentDate from "../../constants/day";
 const DataChart = lazy(() => import("../../components/DataChart"));
 const PieChartCard = lazy(() => import("../../components/RadarChart"));
 function Dashboard() {
@@ -52,7 +53,7 @@ function Dashboard() {
 
   const getSalesAndProfit = async () => {
     try {
-      const toDate = convertDateInput(new Date());
+      const toDate = convertDateInput(currentDate);
       console.log(toDate);
       const response = await getSalesAndProfitInWeekService(0);
       if (response.message !== "success") {

@@ -1,3 +1,5 @@
+import currentDate from "../constants/day";
+
 const convertDate = (date: Date) => {
   var d = new Date(date),
     month = "" + (d.getMonth() + 1),
@@ -64,7 +66,7 @@ const generateDate = () => {
   };
 };
 const generateDateDuringWeek = () => {
-  const today = new Date();
+  const today = currentDate;
 
   // Calculate `fromDate` (current date minus 7 days)
   const fromDate = new Date(today);

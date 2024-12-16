@@ -21,9 +21,10 @@ import {
 import SnackbarMessage from "../../../components/SnackbarMessage";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import currentDate from "../../../constants/day";
 export default function ProfitReport() {
-  const defaultMonth = new Date().getMonth() + 1 + "";
-  const currYear = new Date().getFullYear();
+  const defaultMonth = currentDate.getMonth() + 1 + "";
+  const currYear = currentDate.getFullYear();
   const [type, setType] = useState("month");
   const [month, setMonth] = useState(defaultMonth);
   const [message, setMessage] = useState("");
