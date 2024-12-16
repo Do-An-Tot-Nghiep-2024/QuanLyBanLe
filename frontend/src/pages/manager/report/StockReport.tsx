@@ -14,11 +14,12 @@ import { getStockByProductService } from "../../../services/statistic.service";
 import { useQuery } from "@tanstack/react-query";
 import BarChartVertical from "../../../components/BarChartVertical";
 import SnackbarMessage from "../../../components/SnackbarMessage";
+import currentDate from "../../../constants/day";
 
 export default function StockReport() {
   const [message, setMessage] = useState("");
-  const currMonth = new Date().getMonth() + 1 + "";
-  const currYear = new Date().getFullYear();
+  const currMonth = currentDate.getMonth() + 1 + "";
+  const currYear = currentDate.getFullYear();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [month, setMonth] = useState(currMonth);
   const handleChangeMonth = (event: SelectChangeEvent) => {

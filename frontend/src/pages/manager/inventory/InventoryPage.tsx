@@ -75,24 +75,6 @@ export default function InventoryPage() {
     "Chi tiết",
   ];
 
-  // function addDayToDate(createdAt: string) {
-  //   // Parse the dd/mm/yyyy format
-  //   const [day, month, year] = createdAt.split("/").map(Number);
-
-  //   // Create a new Date object
-  //   const date = new Date(year, month - 1, day);
-
-  //   // Add 1 day
-  //   date.setDate(date.getDate() + 1);
-
-  //   // Format back to dd/mm/yyyy
-  //   const newDay = String(date.getDate()).padStart(2, "0");
-  //   const newMonth = String(date.getMonth() + 1).padStart(2, "0");
-  //   const newYear = date.getFullYear();
-  //   console.log("new date", newDay);
-
-  //   return `${newDay}/${newMonth}/${newYear}`;
-  // }
   return (
     <Box
       sx={{
