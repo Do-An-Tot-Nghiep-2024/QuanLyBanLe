@@ -220,23 +220,32 @@ export default function EnhancedTable() {
         )
       : 0;
 
+  const temp = data?.filter((row: ProductShipment) => {
+    const matchesShiment = row.shipmentId
+      .toString()
+      .toLowerCase()
+      .includes(shiment.toLowerCase());
+    const matchesProduct =
+      row.product.toLocaleLowerCase().indexOf(product.toLowerCase()) >= 0;
+    return matchesShiment && matchesProduct;
+  });
   const visibleRows = data
     ?.filter((row: ProductShipment) => {
       const matchesShiment = row.shipmentId
         .toString()
         .toLowerCase()
         .includes(shiment.toLowerCase());
-      const matchesProduct = row.product.toLocaleLowerCase().indexOf(product.toLowerCase()) >= 0; 
+      const matchesProduct =
+        row.product.toLocaleLowerCase().indexOf(product.toLowerCase()) >= 0;
       return matchesShiment && matchesProduct;
     })
-
-    ?.sort(getComparator(order, orderBy)) 
+    ?.sort(getComparator(order, orderBy))
     .slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
     ) as ProductShipment[];
-    console.log(visibleRows);
-    
+  console.log(visibleRows);
+
   return (
     <Box sx={{ width: "100%", pt: 4, px: 4 }}>
       <Typography
@@ -346,7 +355,12 @@ export default function EnhancedTable() {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={data !== undefined ? data.length : 0}
+          count={
+            data !== undefined && !product && !shiment
+              ? data.length
+              : temp !== undefined
+              ? temp.length : 0
+          }
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
