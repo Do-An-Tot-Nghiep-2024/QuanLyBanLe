@@ -37,7 +37,6 @@ import Notification from "../components/Notification";
 import { connectToSocket } from "../config/socket";
 import { getSentNotificationsService } from "../services/notification.service";
 import { IconButton, Stack } from "@mui/material";
-import currentDate from "../constants/day";
 
 const NAVIGATION: Navigation = [
   {
@@ -310,7 +309,7 @@ export default function Sidebar() {
       theme={demoTheme}
       branding={{
         logo: <Logo />,
-        title: `CHÀO MỪNG QUẢN LÝ  ${currentDate} `,
+        title: `CHÀO MỪNG QUẢN LÝ`,
       }}
     >
       <DashboardLayout
