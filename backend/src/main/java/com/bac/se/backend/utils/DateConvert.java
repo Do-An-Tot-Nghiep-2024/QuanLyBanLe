@@ -77,7 +77,7 @@ public class DateConvert {
         // Reset calendar to today and add 'next' days
         calendar.setTime(today);
         calendar.add(Calendar.DAY_OF_MONTH, next);
-        Date modifiedToDate = formatDateYYYYMMDD(calendar.getTime(),"23:59:59");
+        Date modifiedToDate = formatDateYYYYMMDD(calendar.getTime(),"22:30:59");
 
         // Ensure toDate doesn't exceed the current date
         Date toDate = today.before(modifiedToDate) ? today : modifiedToDate;
@@ -89,7 +89,7 @@ public class DateConvert {
         Date fromDate = formatDateYYYYMMDD(calendar.getTime(),"00:00:00");
 
         // Return the DateRequest object
-        return new DateRequest(fromDate, formatDateYYYYMMDD(toDate,"23:59:59"));
+        return new DateRequest(fromDate, formatDateYYYYMMDD(toDate,"22:30:59"));
     }
 
 
