@@ -2,6 +2,7 @@ package com.bac.se.backend.utils;
 
 import com.bac.se.backend.payload.request.DateRequest;
 import com.bac.se.backend.payload.response.statistic.SaleAndProfitResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+@Slf4j
 @Service
 public class DateConvert {
 
@@ -70,10 +72,9 @@ public class DateConvert {
 
     public DateRequest generateDayInCurrentWeek(int next) throws ParseException {
         Calendar calendar = Calendar.getInstance();
-
+        calendar.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         // Get today's date
         Date today = calendar.getTime();
-
         // Reset calendar to today and add 'next' days
         calendar.setTime(today);
         calendar.add(Calendar.DAY_OF_MONTH, next);
