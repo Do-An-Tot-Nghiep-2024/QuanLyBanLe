@@ -27,12 +27,13 @@ public class DateConvert {
                 .format(date);
     }
 
-    public Date formatDateYYYYMMDD(Date date) throws ParseException {
+    public Date formatDateYYYYMMDD(Date date,String hour) throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         // Format the date to string
         String formattedDateStr = formatter.format(date);
+        String replace = formattedDateStr.substring(0,11).concat(hour);
         // Parse the string back to a Date object
-        return formatter.parse(formattedDateStr);
+        return formatter.parse(replace);
     }
     // 6 months
     public DateRequest convertDateRequest(String fromDate, String toDate) throws ParseException {
@@ -76,7 +77,7 @@ public class DateConvert {
         // Reset calendar to today and add 'next' days
         calendar.setTime(today);
         calendar.add(Calendar.DAY_OF_MONTH, next);
-        Date modifiedToDate = formatDateYYYYMMDD(calendar.getTime());
+        Date modifiedToDate = formatDateYYYYMMDD(calendar.getTime(),"23:59:59");
 
         // Ensure toDate doesn't exceed the current date
         Date toDate = today.before(modifiedToDate) ? today : modifiedToDate;
@@ -85,10 +86,10 @@ public class DateConvert {
         int currentDay = calendar.get(Calendar.DAY_OF_WEEK); // Sunday = 1, Monday = 2, ..., Saturday = 7
         int daysToMonday = (currentDay == Calendar.SUNDAY) ? -6 : Calendar.MONDAY - currentDay;
         calendar.add(Calendar.DAY_OF_MONTH, daysToMonday);
-        Date fromDate = formatDateYYYYMMDD(calendar.getTime());
+        Date fromDate = formatDateYYYYMMDD(calendar.getTime(),"00:00:00");
 
         // Return the DateRequest object
-        return new DateRequest(fromDate, formatDateYYYYMMDD(toDate));
+        return new DateRequest(fromDate, formatDateYYYYMMDD(toDate,"23:59:59"));
     }
 
 
@@ -97,8 +98,8 @@ public class DateConvert {
         DateRequest dateRequest = generateDayInCurrentWeek(next);
 
         // Convert Date to LocalDate for easier manipulation
-        LocalDate fromLocalDate = dateRequest.fromDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate toLocalDate = dateRequest.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate fromLocalDate = dateRequest.fromDate().toInstant().atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDate();
+        LocalDate toLocalDate = dateRequest.toDate().toInstant().atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDate();
 
         // Initialize the map
         Map<String, SaleAndProfitResponse> dateMap = new LinkedHashMap<>();
