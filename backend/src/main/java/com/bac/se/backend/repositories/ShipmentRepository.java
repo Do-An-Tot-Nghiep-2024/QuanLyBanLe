@@ -28,7 +28,7 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
             "    pp.created_at = (SELECT MAX(pp2.created_at) " +
             "                     FROM t_product_price pp2 " +
             "                     WHERE pp2.product_id = pp.product_id) " +
-            "AND s.created_at between :fromDate and :toDate " +
+            "AND s.created_at >= :fromDate and s.created_at <= :toDate " +
             "GROUP BY " +
             "    s.shipment_id " +
             "ORDER BY " +
