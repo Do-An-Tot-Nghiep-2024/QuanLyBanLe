@@ -58,6 +58,7 @@ const getAllOrdersService = async (
     const newToDate = new Date(toDate);
     newToDate.setDate(newToDate.getDate() + 1);
     const updatedToDate = newToDate.toISOString().split('T')[0];
+    console.log("today is ",updatedToDate);
     queryParams += `&toDate=${updatedToDate}`;
   } if (status) queryParams += `&status=${status}`;
   if (paymentType) queryParams += `&paymentType=${paymentType}`;
@@ -66,6 +67,8 @@ const getAllOrdersService = async (
   // Send the request with the constructed query parameters
 
   const response = await api.get(`/orders${queryParams}`);
+  console.log(response);
+  
 
   if (response && response.data) {
     return response.data as ResponsePagination<OrderSchema>;

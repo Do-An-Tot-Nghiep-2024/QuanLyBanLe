@@ -34,6 +34,7 @@ import dayjs, { Dayjs } from "dayjs";
 import DateInput from "../../../components/DateInput";
 import { useAppSelector } from "../../../redux/hook";
 import { formatMoneyThousand } from "../../../utils/formatMoney";
+import currentDate from "../../../constants/day";
 const OrderList: React.FC = () => {
   const auth = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -47,8 +48,8 @@ const OrderList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [startDate, setStartDate] = useState<string>(before);
   const [endDate, setEndDate] = useState<string>(toDateFromat);
-  const [selectedStatuses, setSelectedStatuses] = useState<string>();
-  const [selectedPayments, setSelectedPayments] = useState<string>();
+  const [selectedStatuses, setSelectedStatuses] = useState<string>("");
+  const [selectedPayments, setSelectedPayments] = useState<string>("");
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [orderBy, setOrderBy] = useState<string>("orderId");
@@ -86,8 +87,16 @@ const OrderList: React.FC = () => {
     overflow: "hidden",
   };
 
+  const compareDate = (date1: Date, date2: Date) => {
+    return (
+      date1.getFullYear() > date2.getFullYear() &&
+      date1.getMonth() > date2.getMonth() &&
+      date1.getDate() > date2.getDate()
+    );
+  };
+
   const validateDates = () => {
-    const currentDate = new Date();
+    // const currentDate = new Date();
 
     if (startDate && new Date(startDate) > currentDate) {
       alert("Không thể chọn ngày bắt đầu ở tương lai.");
@@ -101,10 +110,13 @@ const OrderList: React.FC = () => {
       return false;
     }
 
-    if (endDate && new Date(endDate) > currentDate) {
+    console.log("end date is ", endDate);
+    console.log("current date is ", currentDate);
+
+    if (endDate && compareDate(new Date(endDate), currentDate)) {
       alert("Không thể chọn ngày kết thúc ở tương lai.");
       setEndDate(toDateFromat);
-      return false;
+      // return false;
     }
     return true;
   };
@@ -217,7 +229,7 @@ const OrderList: React.FC = () => {
 
     return paymentMapping[paymentType] || "Không xác định"; // Default if the payment type doesn't match
   };
-  console.log(data);
+  // console.log(data);
 
   return (
     <Box width={"90%"}>
