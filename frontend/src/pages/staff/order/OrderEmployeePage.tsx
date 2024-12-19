@@ -174,7 +174,7 @@ const OrderEmployeePage: React.FC = () => {
     if (auth.role === "MANAGER") {
       navigate(`/orders/${order.orderId}`);
     } else {
-      navigate(`/orders/${order.orderId}`);
+      navigate(`/staff/orders/${order.orderId}`);
     }
   };
 
