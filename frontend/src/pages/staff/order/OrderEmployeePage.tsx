@@ -34,20 +34,22 @@ import dayjs, { Dayjs } from "dayjs";
 import DateInput from "../../../components/DateInput";
 import { useAppSelector } from "../../../redux/hook";
 import { formatMoneyThousand } from "../../../utils/formatMoney";
-export default function OrderEmployeePage() {
+import currentDate from "../../../constants/day";
+const OrderEmployeePage: React.FC = () => {
+  const auth = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const { fromDate: before, toDate: after } = generateDateDuringWeek();
   const current = new Date(after);
   current.setDate(current.getDate() - 1);
+
   const toDateFromat = convertDateInput(current);
-  const auth = useAppSelector((state) => state.auth);
   console.log(toDateFromat);
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [startDate, setStartDate] = useState<string>(before);
   const [endDate, setEndDate] = useState<string>(toDateFromat);
-  const [selectedStatuses, setSelectedStatuses] = useState<string>();
-  const [selectedPayments, setSelectedPayments] = useState<string>();
+  const [selectedStatuses, setSelectedStatuses] = useState<string>("");
+  const [selectedPayments, setSelectedPayments] = useState<string>("");
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [orderBy, setOrderBy] = useState<string>("orderId");
@@ -55,10 +57,12 @@ export default function OrderEmployeePage() {
 
   const handleChangeStartDate = (value: Dayjs | null) => {
     setStartDate(value?.format("YYYY-MM-DD") ?? "");
+    setPage(0);
   };
 
   const handleChangeEndDate = (value: Dayjs | null) => {
     setEndDate(value?.format("YYYY-MM-DD") ?? "");
+    setPage(0);
   };
 
   const columns: Array<{
@@ -83,8 +87,16 @@ export default function OrderEmployeePage() {
     overflow: "hidden",
   };
 
+  const compareDate = (date1: Date, date2: Date) => {
+    return (
+      date1.getFullYear() > date2.getFullYear() ||
+      date1.getMonth() > date2.getMonth() ||
+      date1.getDate() > date2.getDate()
+    );
+  };
+
   const validateDates = () => {
-    const currentDate = new Date();
+    // const currentDate = new Date();
 
     if (startDate && new Date(startDate) > currentDate) {
       alert("Không thể chọn ngày bắt đầu ở tương lai.");
@@ -98,10 +110,13 @@ export default function OrderEmployeePage() {
       return false;
     }
 
-    if (endDate && new Date(endDate) > currentDate) {
+    console.log("end date is ", endDate);
+    console.log("current date is ", currentDate);
+
+    if (endDate && compareDate(new Date(endDate), currentDate)) {
       alert("Không thể chọn ngày kết thúc ở tương lai.");
       setEndDate(toDateFromat);
-      return false;
+      // return false;
     }
     return true;
   };
@@ -159,7 +174,7 @@ export default function OrderEmployeePage() {
     if (auth.role === "MANAGER") {
       navigate(`/orders/${order.orderId}`);
     } else {
-      navigate(`/staff/orders/${order.orderId}`);
+      navigate(`/orders/${order.orderId}`);
     }
   };
 
@@ -214,7 +229,7 @@ export default function OrderEmployeePage() {
 
     return paymentMapping[paymentType] || "Không xác định"; // Default if the payment type doesn't match
   };
-  console.log(data);
+  // console.log(data);
 
   return (
     <Box width={"90%"}>
@@ -229,7 +244,7 @@ export default function OrderEmployeePage() {
       <Stack
         direction="row"
         justifyContent="space-between"
-        spacing={3}
+        spacing={2}
         sx={{ marginBottom: 3 }}
       >
         <Stack flexDirection={"row"} gap={1}>
@@ -342,7 +357,7 @@ export default function OrderEmployeePage() {
                       >
                         {column.field
                           ? column.field === "total"
-                            ? `${formatMoneyThousand(order.total)} VNĐ`
+                            ? `${formatMoneyThousand(order.total)} VND`
                             : column.field === "createdAt"
                               ? convertDate(new Date(order.createdAt))
                               : column.field === "customerPhone"
@@ -379,4 +394,6 @@ export default function OrderEmployeePage() {
       </TableContainer>
     </Box>
   );
-}
+};
+
+export default OrderEmployeePage;

@@ -38,6 +38,7 @@ import {
 import DateInput from "../../../components/DateInput";
 import { useAppSelector } from "../../../redux/hook";
 import { formatMoneyThousand } from "../../../utils/formatMoney";
+import currentDate from "../../../constants/day";
 
 const OrderOnlineList: React.FC = () => {
   const auth = useAppSelector((state) => state.auth);
@@ -78,8 +79,20 @@ const OrderOnlineList: React.FC = () => {
     overflow: "hidden",
   };
 
+  const compareDate = (date1: Date, date2: Date) => {
+    console.table({"year 1": date1.getFullYear(), "month 1": date1.getMonth(), "date 1": date1.getDate()});
+    console.table({"year 2": date2.getFullYear(), "month 2": date2.getMonth(), "date 2": date2.getDate()});
+    // console.log("date1 is ", date1);
+    // console.log("date2 is ", date2);
+    
+    return (
+      date1.getFullYear() > date2.getFullYear() ||
+      date1.getMonth() > date2.getMonth() ||
+      date1.getDate() > date2.getDate()
+    );
+  };
   const validateDates = () => {
-    const currentDate = new Date();
+    // const currentDate = new Date();
 
     if (startDate && new Date(startDate) > currentDate) {
       alert("Không thể chọn ngày bắt đầu ở tương lai.");
@@ -93,10 +106,10 @@ const OrderOnlineList: React.FC = () => {
       return;
     }
 
-    if (endDate && new Date(endDate) > currentDate) {
+    if (endDate && compareDate(new Date(endDate), currentDate)) {
       alert("Không thể chọn ngày kết thúc ở tương lai.");
       setEndDate(toDateFromat);
-      return;
+      // return;
     }
 
     return true;
