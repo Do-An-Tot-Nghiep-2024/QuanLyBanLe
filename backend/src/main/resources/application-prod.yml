@@ -3,7 +3,7 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://database-1.cvwqmag8002v.ap-southeast-1.rds.amazonaws.com:3306/retail-store?createDatabaseIfNotExist=true
+    url: 
     username: admin
     password: admin_091979818
   jpa:
@@ -28,5 +28,5 @@ application:
     url-client: http://localhost:5173
   cloudinary:
     cloud-name: dujylxkra
-    api-key: 228233235289595
+    api-key: 
     api-secret: h7yBSJ0KOHB1Cglz7eCbwig5QXU
